@@ -1,0 +1,14 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+tapioca-sdk
+package-lock.json
+
+#Hardhat files
+cache
+artifacts
+
+#Others
+.DS_Store
