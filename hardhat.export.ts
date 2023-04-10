@@ -91,13 +91,8 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     typechain: {
         outDir: './typechain',
     },
-    gasReporter: {
-        enabled: false,
-    },
-    dodoc: {
-        include: ['TapiocaWrapper', 'TapiocaOFT'],
-        exclude: ['TapiocaOFTMock'],
-    },
+    gasReporter: {},
+    dodoc: {},
     mocha: {
         timeout: 4000000,
     },
