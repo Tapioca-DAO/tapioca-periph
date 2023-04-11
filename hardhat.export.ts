@@ -42,7 +42,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
+    SDK: { project: 'tapioca-periphery' }, //TODO: replace with SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery
     solidity: {
         compilers: [
             {
