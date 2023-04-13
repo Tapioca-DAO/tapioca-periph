@@ -42,7 +42,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: 'tapioca-periphery' }, //TODO: replace with SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery
+    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
     solidity: {
         compilers: [
             {
@@ -63,17 +63,15 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
+            allowUnlimitedContractSize: true,
             hardfork: 'merge',
             gas: 10_000_000,
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [
-                          {
-                              privateKey: process.env.PRIVATE_KEY,
-                              balance: '1000000000000000000000000',
-                          },
-                      ]
-                    : [],
+            accounts: {
+                mnemonic:
+                    'test test test test test test test test test test test junk',
+                count: 10,
+                accountsBalance: '1000000000000000000000',
+            },
         },
         ...supportedChains,
     },

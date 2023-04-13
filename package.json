@@ -40,6 +40,8 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-utils": "^5.2.5",
     "ethers": "^5.7.0",
     "hardhat": "^2.13.0",
     "hardhat-contract-sizer": "^2.5.1",
