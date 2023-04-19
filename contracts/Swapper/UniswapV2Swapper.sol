@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/ICurvePool.sol";
+import "./interfaces/IUniswapV2Factory.sol";
+import "./interfaces/IUniswapV2Router02.sol";
 import "./BaseSwapper.sol";
 
 /*
@@ -16,61 +16,75 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
       _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
        _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
-
 */
 
-/// @title Curve pool swapper
-contract CurveSwapper is ISwapper, BaseSwapper {
+contract UniswapV2Swapper is ISwapper, BaseSwapper {
     using SafeERC20 for IERC20;
 
     /// *** VARS ***
     /// ***  ***
-    ICurvePool public curvePool;
+    IUniswapV2Router02 public immutable swapRouter;
+    IUniswapV2Factory public immutable factory;
     IYieldBox public immutable yieldBox;
 
-    /// *** ERRORS ***
-    /// ***  ***
-    error Undefined();
-    error NotImplemented();
-
     constructor(
-        ICurvePool _curvePool,
+        address _router,
+        address _factory,
         IYieldBox _yieldBox
-    ) validAddress(address(_curvePool)) validAddress(address(_yieldBox)) {
-        curvePool = _curvePool;
+    )
+        validAddress(_router)
+        validAddress(_factory)
+        validAddress(address(_yieldBox))
+    {
+        swapRouter = IUniswapV2Router02(_router);
+        factory = IUniswapV2Factory(_factory);
         yieldBox = _yieldBox;
     }
 
     /// *** VIEW METHODS ***
     /// ***  ***
-    function getDefaultSwapData() public pure override returns (bytes memory) {
-        revert Undefined();
+    function getDefaultSwapData() public view override returns (bytes memory) {
+        return abi.encode(block.timestamp + 1 hours);
     }
 
     function getOutputAmount(
         SwapData calldata swapData,
-        bytes calldata dexOptions
+        bytes calldata
     ) external view override returns (uint256 amountOut) {
-        uint256[] memory tokenIndexes = abi.decode(dexOptions, (uint256[]));
-
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
+        address[] memory path = _createPath(tokenIn, tokenOut);
         (uint256 amountIn, ) = _getAmounts(
             swapData.amountData,
             swapData.tokensData.tokenInId,
             swapData.tokensData.tokenOutId,
             yieldBox
         );
-        amountOut = curvePool.get_dy(
-            int128(int256(tokenIndexes[0])),
-            int128(int256(tokenIndexes[1])),
-            amountIn
-        );
+
+        uint256[] memory amounts = swapRouter.getAmountsOut(amountIn, path);
+        amountOut = amounts[1];
     }
 
     function getInputAmount(
-        SwapData calldata,
+        SwapData calldata swapData,
         bytes calldata
-    ) external pure returns (uint256) {
-        revert NotImplemented();
+    ) external view override returns (uint256 amountIn) {
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
+        address[] memory path = _createPath(tokenIn, tokenOut);
+        (, uint256 amountOut) = _getAmounts(
+            swapData.amountData,
+            swapData.tokensData.tokenInId,
+            swapData.tokensData.tokenOutId,
+            yieldBox
+        );
+
+        uint256[] memory amounts = swapRouter.getAmountsIn(amountOut, path);
+        amountIn = amounts[0];
     }
 
     /// *** PUBLIC METHODS ***
@@ -80,11 +94,20 @@ contract CurveSwapper is ISwapper, BaseSwapper {
         uint256 amountOutMin,
         address to,
         bytes memory data
-    ) external override returns (uint256 amountOut, uint256 shareOut) {
-        // Get Curve tokens' indexes & addresses
-        uint256[] memory tokenIndexes = abi.decode(data, (uint256[]));
-        address tokenIn = curvePool.coins(tokenIndexes[0]);
-        address tokenOut = curvePool.coins(tokenIndexes[1]);
+    )
+        external
+        override
+        nonReentrant
+        returns (uint256 amountOut, uint256 shareOut)
+    {
+        // Get tokens' addresses
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
+
+        // Create swap path for UniswapV2Router02 operations
+        address[] memory path = _createPath(tokenIn, tokenOut);
 
         // Get tokens' amounts
         (uint256 amountIn, ) = _getAmounts(
@@ -104,15 +127,24 @@ contract CurveSwapper is ISwapper, BaseSwapper {
             swapData.amountData.shareIn
         );
 
-        // Swap & compute output
-        amountOut = _swapTokensForTokens(
-            int128(int256(tokenIndexes[0])),
-            int128(int256(tokenIndexes[1])),
+        // Perform the swap operation
+        _safeApprove(tokenIn, address(swapRouter), amountIn);
+        if (data.length == 0) {
+            data = getDefaultSwapData();
+        }
+        uint256 deadline = abi.decode(data, (uint256));
+        uint256[] memory amounts = swapRouter.swapExactTokensForTokens(
             amountIn,
-            amountOutMin
+            amountOutMin,
+            path,
+            swapData.yieldBoxData.depositToYb ? address(this) : to,
+            deadline
         );
+
+        // Compute outputs
+        amountOut = amounts[1];
         if (swapData.yieldBoxData.depositToYb) {
-            _safeApprove(tokenOut, address(yieldBox), amountOut);
+            _safeApprove(path[path.length - 1], address(yieldBox), amountOut);
             (, shareOut) = yieldBox.depositAsset(
                 swapData.tokensData.tokenOutId,
                 address(this),
@@ -120,33 +152,6 @@ contract CurveSwapper is ISwapper, BaseSwapper {
                 amountOut,
                 0
             );
-        } else {
-            IERC20(tokenOut).safeTransfer(to, amountOut);
         }
-    }
-
-    /// *** PRIVATE METHODS ***
-    /// ***  ***
-    function _swapTokensForTokens(
-        int128 i,
-        int128 j,
-        uint256 amountIn,
-        uint256 amountOutMin
-    ) private returns (uint256) {
-        address tokenIn = curvePool.coins(uint256(uint128(i)));
-        address tokenOut = curvePool.coins(uint256(uint128(j)));
-
-        uint256 outputAmount = curvePool.get_dy(i, j, amountIn);
-        require(outputAmount >= amountOutMin, "insufficient-amount-out");
-
-        uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
-
-        _safeApprove(tokenIn, address(curvePool), amountIn);
-        curvePool.exchange(i, j, amountIn, amountOutMin);
-
-        uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
-        require(balanceAfter > balanceBefore, "swap failed");
-
-        return balanceAfter - balanceBefore;
     }
 }

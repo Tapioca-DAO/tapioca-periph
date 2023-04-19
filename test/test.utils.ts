@@ -1,6 +1,6 @@
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
-import hre, { ethers } from 'hardhat';
+import hre, { ethers, network } from 'hardhat';
 import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/contracts/singularity/Singularity.sol/Singularity.json';
 
 import {
@@ -40,8 +40,7 @@ import {
 } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import {
     CurveSwapper__factory,
-    MultiSwapper,
-    MultiSwapper__factory,
+    UniswapV2Swapper__factory,
 } from '../typechain';
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
@@ -49,6 +48,13 @@ const verifyEtherscanQueue: { address: string; args: any[] }[] = [];
 
 async function resetVM() {
     await ethers.provider.send('hardhat_reset', []);
+}
+
+export async function impersonateAccount(address: string) {
+    return network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [address],
+    });
 }
 
 export function BN(n: BigNumberish) {
@@ -332,28 +338,29 @@ async function registerUniswapV2(deployer: any, staging?: boolean) {
 
 async function registerMultiSwapper(
     deployer: any,
-    bar: Penrose,
+    yieldBox: YieldBox,
     __uniFactoryAddress: string,
-    __uniFactoryPairCodeHash: string,
+    __uniRouterAddress: string,
     staging?: boolean,
 ) {
-    const MultiSwapper = new MultiSwapper__factory(deployer);
+    const MultiSwapper = new UniswapV2Swapper__factory(deployer);
     const multiSwapper = await MultiSwapper.deploy(
+        __uniRouterAddress,
         __uniFactoryAddress,
-        bar.address,
-        __uniFactoryPairCodeHash,
+        yieldBox.address,
     );
     log(
-        `Deployed MultiSwapper ${multiSwapper.address} with args [${__uniFactoryAddress}, ${bar.address}, ${__uniFactoryPairCodeHash}]`,
+        `Deployed MultiSwapper ${multiSwapper.address} with args [${__uniFactoryAddress}, ${yieldBox.address}]`,
         staging,
     );
 
-    await (await bar.setSwapper(multiSwapper.address, true)).wait();
+    //todo: set swapper
+    //await (await bar.setSwapper(multiSwapper.address, true)).wait();
     log('Swapper was set on Penrose', staging);
 
     await verifyEtherscan(
         multiSwapper.address,
-        [__uniFactoryAddress, bar.address, __uniFactoryPairCodeHash],
+        [ethers.constants.AddressZero, __uniFactoryAddress, yieldBox.address],
         staging,
     );
 
@@ -879,9 +886,9 @@ async function createWethUsd0Singularity(
 const log = (message: string, staging?: boolean) =>
     staging && console.log(message);
 export async function register(staging?: boolean) {
-    if (!staging) {
-        await resetVM();
-    }
+    // if (!staging) {
+    //     await resetVM();
+    // }
 
     const deployer = (await ethers.getSigners())[0];
     const eoas = await ethers.getSigners();
@@ -979,9 +986,9 @@ export async function register(staging?: boolean) {
     log('Registering MultiSwapper', staging);
     const { multiSwapper } = await registerMultiSwapper(
         deployer,
-        bar,
+        yieldBox,
         __uniFactory.address,
-        await __uniFactory.pairCodeHash(),
+        __uniRouter.address,
         staging,
     );
     log(`Deployed MultiSwapper ${multiSwapper.address}`, staging);
@@ -1310,4 +1317,136 @@ export async function register(staging?: boolean) {
     };
 
     return { ...initialSetup, ...utilFuncs, verifyEtherscanQueue };
+}
+
+
+export async function registerFork() {
+    let binanceWallet;
+    await impersonateAccount(process.env.BINANCE_WALLET_ADDRESS!);
+    binanceWallet = await ethers.getSigner(process.env.BINANCE_WALLET_ADDRESS!);
+
+    const deployer = (await ethers.getSigners())[0];
+
+    const usdcAddress = process.env.USDC!;
+    const usdtAddress = process.env.USDT!;
+    const wethAddress = process.env.WETH!;
+
+    const usdc = await ethers.getContractAt('IERC20', usdcAddress);
+    const usdt = await ethers.getContractAt('IERC20', usdtAddress);
+    const weth = await ethers.getContractAt('IERC20', wethAddress);
+
+    const YieldBoxURIBuilder = new YieldBoxURIBuilder__factory(deployer);
+    const YieldBox = new YieldBox__factory(deployer);
+    const uriBuilder = await YieldBoxURIBuilder.deploy();
+    const yieldBox = await YieldBox.deploy(
+        ethers.constants.AddressZero,
+        uriBuilder.address,
+    );
+
+    const wethStrategy = await createTokenEmptyStrategy(
+        deployer,
+        yieldBox.address,
+        wethAddress,
+    );
+    await yieldBox.registerAsset(1, wethAddress, wethStrategy.address, 0);
+    const wethAssetId = await yieldBox.ids(
+        1,
+        wethAddress,
+        wethStrategy.address,
+        0,
+    );
+
+    const usdcStrategy = await createTokenEmptyStrategy(
+        deployer,
+        yieldBox.address,
+        usdcAddress,
+    );
+    await yieldBox.registerAsset(1, usdcAddress, usdcStrategy.address, 0);
+    const usdcAssetId = await yieldBox.ids(
+        1,
+        usdcAddress,
+        usdcStrategy.address,
+        0,
+    );
+
+    const usdtStrategy = await createTokenEmptyStrategy(
+        deployer,
+        yieldBox.address,
+        usdtAddress,
+    );
+    await yieldBox.registerAsset(1, usdtAddress, usdtStrategy.address, 0);
+    const usdtAssetId = await yieldBox.ids(
+        1,
+        usdtAddress,
+        usdtStrategy.address,
+        0,
+    );
+
+    const router = process.env.UniswapV2Router02!;
+    const factory = process.env.UniswapV2Factory!;
+    const uniswapV2Swapper = await (
+        await ethers.getContractFactory('UniswapV2Swapper')
+    ).deploy(router, factory, yieldBox.address);
+    await uniswapV2Swapper.deployed();
+
+    const routerV3 = process.env.UniswapV3Router!;
+    const factoryV3 = process.env.UniswapV3Factory!;
+    const uniswapV3Swapper = await (
+        await ethers.getContractFactory('UniswapV3Swapper')
+    ).deploy(yieldBox.address, routerV3, factoryV3);
+    await uniswapV3Swapper.deployed();
+
+
+    const curve3Pool = process.env.Curve3Pool!;
+    const curveSwapper = await (
+        await ethers.getContractFactory('CurveSwapper')
+    ).deploy(curve3Pool, yieldBox.address);
+    await curveSwapper.deployed();
+
+    return { weth, usdc, usdt, wethAssetId, usdcAssetId, usdtAssetId, deployer, binanceWallet, yieldBox, uniswapV2Swapper, uniswapV3Swapper, curveSwapper, createSimpleSwapData, createYbSwapData };
+}
+
+const createYbSwapData = (token1Id: BigNumberish, token2Id: BigNumberish, shareIn: BigNumberish, shareOut: BigNumberish) => {
+    const swapData = {
+        tokensData: {
+            tokenIn: ethers.constants.AddressZero,
+            tokenInId: token1Id,
+            tokenOut: ethers.constants.AddressZero,
+            tokenOutId: token2Id,
+        },
+        amountData: {
+            amountIn: 0,
+            amountOut: 0,
+            shareIn: shareIn,
+            shareOut: shareOut,
+        },
+        yieldBoxData: {
+            withdrawFromYb: true,
+            depositToYb: true
+        }
+    }
+
+    return swapData;
+}
+const createSimpleSwapData = (token1: string, token2: string, amountIn: BigNumberish, amountOut: BigNumberish) => {
+    const swapData = {
+        tokensData: {
+            tokenIn: token1,
+            tokenInId: 0,
+            tokenOut: token2,
+            tokenOutId: 0,
+        },
+        amountData: {
+            amountIn: amountIn,
+            amountOut: amountOut,
+            shareIn: 0,
+            shareOut: 0,
+        },
+        yieldBoxData: {
+            withdrawFromYb: false,
+            depositToYb: false
+        }
+    }
+
+    return swapData;
 }
