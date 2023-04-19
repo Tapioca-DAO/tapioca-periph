@@ -1,7 +1,7 @@
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
-import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/contracts/singularity/Singularity.sol/Singularity.json';
+import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
 
 import {
     YieldBox__factory,

@@ -6,9 +6,9 @@ import { fromRpcSig } from 'ethereumjs-utils';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import LZEndpointMockArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-mocks/contracts/LZEndpointMock.sol/LZEndpointMock.json';
-import MarketsProxyArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/contracts/MarketsProxy.sol/MarketsProxy.json';
-import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/contracts/singularity/Singularity.sol/Singularity.json';
+import LZEndpointMockArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-mocks/LZEndpointMock.json';
+import MarketsProxyArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/MarketsProxy.json';
+import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
 
 import {
     LiquidationQueue__factory,
@@ -21,7 +21,10 @@ import {
     ERC20WithoutStrategy__factory,
     YieldBox,
 } from '../gitsub_tapioca-sdk/src/typechain/YieldBox';
-import { ERC20Mock__factory, LZEndpointMock__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+import {
+    ERC20Mock__factory,
+    LZEndpointMock__factory,
+} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 
 const MAX_DEADLINE = 9999999999999;
 
