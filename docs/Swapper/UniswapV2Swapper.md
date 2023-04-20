@@ -1,8 +1,8 @@
-# CurveSwapper
+# UniswapV2Swapper
 
 
 
-> Curve pool swapper
+
 
 
 
@@ -10,13 +10,13 @@
 
 ## Methods
 
-### curvePool
+### factory
 
 ```solidity
-function curvePool() external view returns (contract ICurvePool)
+function factory() external view returns (contract IUniswapV2Factory)
 ```
 
-*** VARS *** ***  ***
+
 
 
 
@@ -25,12 +25,12 @@ function curvePool() external view returns (contract ICurvePool)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract ICurvePool | undefined |
+| _0 | contract IUniswapV2Factory | undefined |
 
 ### getDefaultSwapData
 
 ```solidity
-function getDefaultSwapData() external pure returns (bytes)
+function getDefaultSwapData() external view returns (bytes)
 ```
 
 *** VIEW METHODS *** ***  ***
@@ -47,30 +47,7 @@ function getDefaultSwapData() external pure returns (bytes)
 ### getInputAmount
 
 ```solidity
-function getInputAmount(ISwapper.SwapData, bytes) external pure returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | ISwapper.SwapData | undefined |
-| _1 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### getOutputAmount
-
-```solidity
-function getOutputAmount(ISwapper.SwapData swapData, bytes dexOptions) external view returns (uint256 amountOut)
+function getInputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountIn)
 ```
 
 
@@ -82,7 +59,30 @@ function getOutputAmount(ISwapper.SwapData swapData, bytes dexOptions) external 
 | Name | Type | Description |
 |---|---|---|
 | swapData | ISwapper.SwapData | undefined |
-| dexOptions | bytes | undefined |
+| _1 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountIn | uint256 | undefined |
+
+### getOutputAmount
+
+```solidity
+function getOutputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| swapData | ISwapper.SwapData | undefined |
+| _1 | bytes | undefined |
 
 #### Returns
 
@@ -143,6 +143,23 @@ function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, byte
 |---|---|---|
 | amountOut | uint256 | undefined |
 | shareOut | uint256 | undefined |
+
+### swapRouter
+
+```solidity
+function swapRouter() external view returns (contract IUniswapV2Router02)
+```
+
+*** VARS *** ***  ***
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IUniswapV2Router02 | undefined |
 
 ### transferOwnership
 
@@ -206,28 +223,6 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 ```solidity
 error AddressNotValid()
-```
-
-*** ERRORS *** ***  ***
-
-
-
-
-### NotImplemented
-
-```solidity
-error NotImplemented()
-```
-
-
-
-
-
-
-### Undefined
-
-```solidity
-error Undefined()
 ```
 
 *** ERRORS *** ***  ***

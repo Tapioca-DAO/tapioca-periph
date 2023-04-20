@@ -27,23 +27,39 @@ function factory() external view returns (contract IUniswapV3Factory)
 |---|---|---|
 | _0 | contract IUniswapV3Factory | undefined |
 
+### getDefaultSwapData
+
+```solidity
+function getDefaultSwapData() external view returns (bytes)
+```
+
+*** VIEW METHODS *** ***  ***
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
 ### getInputAmount
 
 ```solidity
-function getInputAmount(uint256 tokenOutId, uint256 shareOut, bytes dexData) external view returns (uint256 amountIn)
+function getInputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountIn)
 ```
 
-returns necessary input amount for a fixed output amount
 
-*dexData examples:     - for UniV2, it should contain address[] swapPath     - for UniV3, it should contain uint256 tokenInId*
+
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| tokenOutId | uint256 | YieldBox asset id |
-| shareOut | uint256 | Shares out to compute the amount for |
-| dexData | bytes | Custom DEX data for query execution |
+| swapData | ISwapper.SwapData | undefined |
+| _1 | bytes | undefined |
 
 #### Returns
 
@@ -54,20 +70,19 @@ returns necessary input amount for a fixed output amount
 ### getOutputAmount
 
 ```solidity
-function getOutputAmount(uint256 tokenInId, uint256 shareIn, bytes dexData) external view returns (uint256 amountOut)
+function getOutputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountOut)
 ```
 
-returns the possible output amount for input share
 
-*dexData examples:     - for UniV2, it should contain address[] swapPath     - for Curve, it should contain uint256[] tokenIndexes     - for UniV3, it should contain uint256 tokenOutId*
+
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| tokenInId | uint256 | YieldBox asset id |
-| shareIn | uint256 | Shares to get the amount for |
-| dexData | bytes | Custom DEX data for query execution |
+| swapData | ISwapper.SwapData | undefined |
+| _1 | bytes | undefined |
 
 #### Returns
 
@@ -83,7 +98,7 @@ function owner() external view returns (address)
 
 
 
-
+*Returns the address of the current owner.*
 
 
 #### Returns
@@ -109,13 +124,24 @@ function poolFee() external view returns (uint24)
 |---|---|---|
 | _0 | uint24 | undefined |
 
+### renounceOwnership
+
+```solidity
+function renounceOwnership() external nonpayable
+```
+
+
+
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+
+
 ### setPoolFee
 
 ```solidity
 function setPoolFee(uint24 _newFee) external nonpayable
 ```
 
-sets a new pool fee
+*** OWNER METHODS *** ***  ***
 
 
 
@@ -123,28 +149,26 @@ sets a new pool fee
 
 | Name | Type | Description |
 |---|---|---|
-| _newFee | uint24 | the new value |
+| _newFee | uint24 | undefined |
 
 ### swap
 
 ```solidity
-function swap(uint256 tokenInId, uint256 tokenOutId, uint256 shareIn, address to, uint256 amountOutMin, bytes dexData) external nonpayable returns (uint256 amountOut, uint256 shareOut)
+function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, bytes data) external nonpayable returns (uint256 amountOut, uint256 shareOut)
 ```
 
-swaps token in with token out
 
-*returns both amount and sharesdexData examples:     - for UniV2, it should contain address[] swapPath     - for Curve, it should contain uint256[] tokenIndexes     - for UniV3, it should contain uint256 deadline*
+
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| tokenInId | uint256 | YieldBox asset id |
-| tokenOutId | uint256 | YieldBox asset id |
-| shareIn | uint256 | Shares to be swapped |
-| to | address | Receiver address |
-| amountOutMin | uint256 | Minimum amount to be received |
-| dexData | bytes | Custom DEX data for query execution |
+| swapData | ISwapper.SwapData | undefined |
+| amountOutMin | uint256 | undefined |
+| to | address | undefined |
+| data | bytes | undefined |
 
 #### Returns
 
@@ -170,9 +194,42 @@ function swapRouter() external view returns (contract ISwapRouter)
 |---|---|---|
 | _0 | contract ISwapRouter | undefined |
 
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) external nonpayable
+```
+
+
+
+*Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newOwner | address | undefined |
+
 
 
 ## Events
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
 
 ### PoolFee
 
@@ -190,6 +247,20 @@ event PoolFee(uint256 _old, uint256 _new)
 |---|---|---|
 | _old  | uint256 | undefined |
 | _new  | uint256 | undefined |
+
+
+
+## Errors
+
+### AddressNotValid
+
+```solidity
+error AddressNotValid()
+```
+
+*** ERRORS *** ***  ***
+
+
 
 
 

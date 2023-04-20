@@ -7,8 +7,8 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
-import 'hardhat-tracer';
 import { HttpNetworkConfig } from 'hardhat/types';
+import 'hardhat-tracer';
 
 dotenv.config();
 
@@ -63,9 +63,14 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
-            allowUnlimitedContractSize: true,
+            saveDeployments: false,
+            chainId: 1,
+            forking: {
+                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+                blockNumber: 17068626,
+            },
             hardfork: 'merge',
-            gas: 10_000_000,
+            allowUnlimitedContractSize: true,
             accounts: {
                 mnemonic:
                     'test test test test test test test test test test test junk',

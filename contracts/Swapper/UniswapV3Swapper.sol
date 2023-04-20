@@ -6,11 +6,10 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IYieldBox.sol";
-
-import "../interfaces/ISwapper.sol";
 import "./libraries/OracleLibrary.sol";
+import "./BaseSwapper.sol";
 
 /*
 
@@ -26,14 +25,15 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /// @title UniswapV3 swapper contract
-contract UniswapV3Swapper is ISwapper {
+contract UniswapV3Swapper is ISwapper, BaseSwapper {
+    using SafeERC20 for IERC20;
+
     // ************ //
     // *** VARS *** //
     // ************ //
     IYieldBox private immutable yieldBox;
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable factory;
-    address public owner;
 
     uint24 public poolFee = 3000;
 
@@ -42,45 +42,48 @@ contract UniswapV3Swapper is ISwapper {
     // ************** //
     event PoolFee(uint256 _old, uint256 _new);
 
-    /// @notice creates a new UniswapV3Swapper contract
     constructor(
         IYieldBox _yieldBox,
         ISwapRouter _swapRouter,
         IUniswapV3Factory _factory
-    ) {
+    )
+        validAddress(address(_yieldBox))
+        validAddress(address(_swapRouter))
+        validAddress(address(_factory))
+    {
         yieldBox = _yieldBox;
         swapRouter = _swapRouter;
         factory = _factory;
-        owner = msg.sender;
     }
 
-    /// @notice sets a new pool fee
-    /// @param _newFee the new value
-    function setPoolFee(uint24 _newFee) external {
-        require(msg.sender == owner, "UniswapV3Swapper: not authorized");
+    /// *** OWNER METHODS ***
+    /// ***  ***
+    function setPoolFee(uint24 _newFee) external onlyOwner {
         emit PoolFee(poolFee, _newFee);
         poolFee = _newFee;
     }
 
-    /// @notice returns the possible output amount for input share
-    /// @param tokenInId YieldBox asset id
-    /// @param shareIn Shares to get the amount for
-    /// @param dexData Custom DEX data for query execution
-    /// @dev dexData examples:
-    ///     - for UniV2, it should contain address[] swapPath
-    ///     - for Curve, it should contain uint256[] tokenIndexes
-    ///     - for UniV3, it should contain uint256 tokenOutId
+    /// *** VIEW METHODS ***
+    /// ***  ***
+    function getDefaultSwapData() public view override returns (bytes memory) {
+        return abi.encode(block.timestamp + 1 hours);
+    }
+
     function getOutputAmount(
-        uint256 tokenInId,
-        uint256 shareIn,
-        bytes calldata dexData
+        SwapData calldata swapData,
+        bytes calldata
     ) external view override returns (uint256 amountOut) {
-        uint256 tokenOutId = abi.decode(dexData, (uint256));
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
 
-        (, address tokenIn, , ) = yieldBox.assets(tokenInId);
-        (, address tokenOut, , ) = yieldBox.assets(tokenOutId);
-
-        uint256 amountIn = yieldBox.toAmount(tokenInId, shareIn, false);
+        (uint256 amountIn, ) = _getAmounts(
+            swapData.amountData,
+            swapData.tokensData.tokenInId,
+            swapData.tokensData.tokenOutId,
+            yieldBox
+        );
 
         address pool = factory.getPool(tokenIn, tokenOut, poolFee);
         (int24 tick, ) = OracleLibrary.consult(pool, 60);
@@ -93,24 +96,21 @@ contract UniswapV3Swapper is ISwapper {
         );
     }
 
-    /// @notice returns necessary input amount for a fixed output amount
-    /// @param tokenOutId YieldBox asset id
-    /// @param shareOut Shares out to compute the amount for
-    /// @param dexData Custom DEX data for query execution
-    /// @dev dexData examples:
-    ///     - for UniV2, it should contain address[] swapPath
-    ///     - for UniV3, it should contain uint256 tokenInId
     function getInputAmount(
-        uint256 tokenOutId,
-        uint256 shareOut,
-        bytes calldata dexData
+        SwapData calldata swapData,
+        bytes calldata
     ) external view override returns (uint256 amountIn) {
-        uint256 tokenInId = abi.decode(dexData, (uint256));
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
 
-        (, address tokenIn, , ) = yieldBox.assets(tokenInId);
-        (, address tokenOut, , ) = yieldBox.assets(tokenOutId);
-
-        uint256 amountOut = yieldBox.toAmount(tokenOutId, shareOut, false);
+        (, uint256 amountOut) = _getAmounts(
+            swapData.amountData,
+            swapData.tokensData.tokenInId,
+            swapData.tokensData.tokenOutId,
+            yieldBox
+        );
 
         address pool = factory.getPool(tokenIn, tokenOut, poolFee);
 
@@ -123,61 +123,71 @@ contract UniswapV3Swapper is ISwapper {
         );
     }
 
-    /// @notice swaps token in with token out
-    /// @dev returns both amount and shares
-    /// @param tokenInId YieldBox asset id
-    /// @param tokenOutId YieldBox asset id
-    /// @param shareIn Shares to be swapped
-    /// @param to Receiver address
-    /// @param amountOutMin Minimum amount to be received
-    /// @param dexData Custom DEX data for query execution
-    /// @dev dexData examples:
-    ///     - for UniV2, it should contain address[] swapPath
-    ///     - for Curve, it should contain uint256[] tokenIndexes
-    ///     - for UniV3, it should contain uint256 deadline
+    /// *** PUBLIC METHODS ***
+    /// ***  ***
     function swap(
-        uint256 tokenInId,
-        uint256 tokenOutId,
-        uint256 shareIn,
-        address to,
+        SwapData calldata swapData,
         uint256 amountOutMin,
-        bytes calldata dexData
+        address to,
+        bytes memory data
     ) external override returns (uint256 amountOut, uint256 shareOut) {
-        (, address tokenIn, , ) = yieldBox.assets(tokenInId);
-        (, address tokenOut, , ) = yieldBox.assets(tokenOutId);
+        // Get tokens' addresses
+        (address tokenIn, address tokenOut) = _getTokens(
+            swapData.tokensData,
+            yieldBox
+        );
 
-        (uint256 amountIn, ) = yieldBox.withdraw(
-            tokenInId,
-            address(this),
-            address(this),
-            0,
-            shareIn
+        // Get tokens' amounts
+        (uint256 amountIn, ) = _getAmounts(
+            swapData.amountData,
+            swapData.tokensData.tokenInId,
+            swapData.tokensData.tokenOutId,
+            yieldBox
+        );
+
+        // Retrieve tokens from sender or from YieldBox
+        amountIn = _extractTokens(
+            swapData.yieldBoxData,
+            yieldBox,
+            tokenIn,
+            swapData.tokensData.tokenInId,
+            amountIn,
+            swapData.amountData.shareIn
         );
 
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
-        uint256 deadline = abi.decode(dexData, (uint256));
+        // Perform the swap operation
+        if (data.length == 0) {
+            data = getDefaultSwapData();
+        }
+        uint256 deadline = abi.decode(data, (uint256));
+
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
             .ExactInputSingleParams({
                 tokenIn: tokenIn,
                 tokenOut: tokenOut,
                 fee: poolFee,
-                recipient: address(this),
+                recipient: swapData.yieldBoxData.depositToYb
+                    ? address(this)
+                    : to,
                 deadline: deadline,
                 amountIn: amountIn,
                 amountOutMinimum: amountOutMin,
                 sqrtPriceLimitX96: 0
             });
 
+        // Compute outputs
         amountOut = swapRouter.exactInputSingle(params);
-
-        IERC20(tokenOut).approve(address(yieldBox), amountOut);
-        (, shareOut) = yieldBox.depositAsset(
-            tokenOutId,
-            address(this),
-            to,
-            amountOut,
-            0
-        );
+        if (swapData.yieldBoxData.depositToYb) {
+            _safeApprove(tokenOut, address(yieldBox), amountOut);
+            (, shareOut) = yieldBox.depositAsset(
+                swapData.tokensData.tokenOutId,
+                address(this),
+                to,
+                amountOut,
+                0
+            );
+        }
     }
 }
