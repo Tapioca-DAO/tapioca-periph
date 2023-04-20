@@ -31,189 +31,7 @@ const MAX_DEADLINE = 9999999999999;
 const symbol = 'MTKN';
 const version = '1';
 
-describe('Magnetar', () => {
-    async function getYieldBoxPermitSignature(
-        permitType: 'asset' | 'all',
-        wallet: SignerWithAddress,
-        token: YieldBox,
-        spender: string,
-        assetId: number,
-        deadline = MAX_DEADLINE,
-        permitConfig?: {
-            nonce?: any;
-            name?: string;
-            chainId?: number;
-            version?: string;
-        },
-    ) {
-        const [nonce, name, version, chainId] = await Promise.all([
-            permitConfig?.nonce ?? token.nonces(wallet.address),
-            'YieldBox',
-            permitConfig?.version ?? '1',
-            permitConfig?.chainId ?? wallet.getChainId(),
-        ]);
-
-        const typesInfo = [
-            {
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                name: 'spender',
-                type: 'address',
-            },
-            {
-                name: 'assetId',
-                type: 'uint256',
-            },
-            {
-                name: 'nonce',
-                type: 'uint256',
-            },
-            {
-                name: 'deadline',
-                type: 'uint256',
-            },
-        ];
-
-        return ethers.utils.splitSignature(
-            await wallet._signTypedData(
-                {
-                    name,
-                    version,
-                    chainId,
-                    verifyingContract: token.address,
-                },
-                permitType === 'asset'
-                    ? {
-                          Permit: typesInfo,
-                      }
-                    : {
-                          PermitAll: typesInfo.filter(
-                              (x) =>
-                                  permitType !== 'all' ||
-                                  (permitType === 'all' &&
-                                      x.name !== 'assetId'),
-                          ),
-                      },
-
-                {
-                    ...(permitType === 'all' ? {} : { assetId }),
-                    owner: wallet.address,
-                    spender,
-                    assetId,
-                    nonce,
-                    deadline,
-                },
-            ),
-        );
-    }
-
-    const buildData = (
-        chainId: number,
-        verifyingContract: string,
-        name: string,
-        owner: string,
-        spender: string,
-        value: number,
-        nonce: number,
-        deadline = MAX_DEADLINE,
-    ) => ({
-        primaryType: 'Permit',
-        types: { EIP712Domain, Permit },
-        domain: { name, version, chainId, verifyingContract },
-        message: { owner, spender, value, nonce, deadline },
-    });
-
-    it('should test sendToYb', async () => {
-        const {
-            deployer,
-            bar,
-            proxyDeployer,
-            mediumRiskMC,
-            yieldBox,
-            weth,
-            usdc,
-            wethAssetId,
-            createWethUsd0Singularity,
-            deployCurveStableToUsdoBidder,
-        } = await loadFixture(register);
-
-        const magnetar = await (
-            await ethers.getContractFactory('Magnetar')
-        ).deploy(deployer.address);
-        await magnetar.deployed();
-        const {
-            proxySrc,
-            proxyDst,
-            singularitySrc,
-            singularityDst,
-            lzEndpointSrc,
-            lzEndpointDst,
-            usd0Src,
-            usd0Dst,
-            usd0DstId,
-            usd0SrcId,
-        } = await setupUsd0Environment(
-            proxyDeployer,
-            mediumRiskMC,
-            yieldBox,
-            bar,
-            usdc,
-            weth,
-            wethAssetId,
-            createWethUsd0Singularity,
-            deployCurveStableToUsdoBidder,
-            deployer,
-        );
-
-        const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(100);
-        await usd0Dst.mint(deployer.address, usdoAmount);
-
-        await usd0Dst.setUseCustomAdapterParams(true);
-        await usd0Src.setUseCustomAdapterParams(true);
-
-        await usd0Src.setMinDstGas(await lzEndpointDst.getChainId(), 1, 1);
-        await usd0Src.setMinDstGas(await lzEndpointDst.getChainId(), 0, 1);
-        await usd0Dst.setMinDstGas(await lzEndpointSrc.getChainId(), 1, 1);
-        await usd0Dst.setMinDstGas(await lzEndpointSrc.getChainId(), 0, 1);
-
-        await yieldBox.setApprovalForAll(usd0Src.address, true);
-        await yieldBox.setApprovalForAll(usd0Dst.address, true);
-
-        const sendToYbEncoded = usd0Dst.interface.encodeFunctionData(
-            'sendToYB',
-            [
-                deployer.address,
-                deployer.address,
-                usdoAmount,
-                usd0SrcId,
-                await lzEndpointSrc.getChainId(),
-                {
-                    extraGasLimit: 500000,
-                    zroPaymentAddress: ethers.constants.AddressZero,
-                    strategyDeposit: false,
-                },
-            ],
-        );
-        await usd0Dst.approve(magnetar.address, ethers.constants.MaxUint256);
-        await magnetar.connect(deployer).burst(
-            [
-                {
-                    id: 15,
-                    target: usd0Dst.address,
-                    value: ethers.utils.parseEther('2'),
-                    allowFailure: false,
-                    call: sendToYbEncoded,
-                },
-            ],
-            { value: ethers.utils.parseEther('2') },
-        );
-
-        const ybBalance = await yieldBox.balanceOf(deployer.address, usd0SrcId);
-        expect(ybBalance.gt(0)).to.be.true;
-    });
-
+describe.only('MagnetarV2', () => {
     it('should test send from', async () => {
         const {
             deployer,
@@ -229,7 +47,7 @@ describe('Magnetar', () => {
         } = await loadFixture(register);
 
         const magnetar = await (
-            await ethers.getContractFactory('Magnetar')
+            await ethers.getContractFactory('MagnetarV2')
         ).deploy(deployer.address);
         await magnetar.deployed();
         const {
@@ -292,7 +110,7 @@ describe('Magnetar', () => {
         await magnetar.connect(deployer).burst(
             [
                 {
-                    id: 11,
+                    id: 301,
                     target: usd0Dst.address,
                     value: ethers.utils.parseEther('1'),
                     allowFailure: false,
@@ -313,7 +131,7 @@ describe('Magnetar', () => {
         const { deployer, eoa1 } = await loadFixture(register);
 
         const magnetar = await (
-            await ethers.getContractFactory('Magnetar')
+            await ethers.getContractFactory('MagnetarV2')
         ).deploy(deployer.address);
         await magnetar.deployed();
 
@@ -401,7 +219,7 @@ describe('Magnetar', () => {
             await loadFixture(register);
 
         const magnetar = await (
-            await ethers.getContractFactory('Magnetar')
+            await ethers.getContractFactory('MagnetarV2')
         ).deploy(deployer.address);
         await magnetar.deployed();
 
@@ -527,7 +345,7 @@ describe('Magnetar', () => {
                 call: permitAllEncoded,
             },
             {
-                id: 3,
+                id: 100,
                 target: yieldBox.address,
                 value: 0,
                 allowFailure: false,
@@ -573,7 +391,7 @@ describe('Magnetar', () => {
         } = await loadFixture(register);
 
         const magnetar = await (
-            await ethers.getContractFactory('Magnetar')
+            await ethers.getContractFactory('MagnetarV2')
         ).deploy(deployer.address);
         await magnetar.deployed();
 
@@ -792,14 +610,14 @@ describe('Magnetar', () => {
                 call: permitAllSGLEncoded,
             },
             {
-                id: 3,
+                id: 100,
                 target: yieldBox.address,
                 value: 0,
                 allowFailure: false,
                 call: depositAssetEncoded,
             },
             {
-                id: 8,
+                id: 203,
                 target: wethUsdoSingularity.address,
                 value: 0,
                 allowFailure: false,
@@ -821,6 +639,99 @@ describe('Magnetar', () => {
         expect(sglBalance.gt(0)).to.be.true;
     });
 });
+
+async function getYieldBoxPermitSignature(
+    permitType: 'asset' | 'all',
+    wallet: SignerWithAddress,
+    token: YieldBox,
+    spender: string,
+    assetId: number,
+    deadline = MAX_DEADLINE,
+    permitConfig?: {
+        nonce?: any;
+        name?: string;
+        chainId?: number;
+        version?: string;
+    },
+) {
+    const [nonce, name, version, chainId] = await Promise.all([
+        permitConfig?.nonce ?? token.nonces(wallet.address),
+        'YieldBox',
+        permitConfig?.version ?? '1',
+        permitConfig?.chainId ?? wallet.getChainId(),
+    ]);
+
+    const typesInfo = [
+        {
+            name: 'owner',
+            type: 'address',
+        },
+        {
+            name: 'spender',
+            type: 'address',
+        },
+        {
+            name: 'assetId',
+            type: 'uint256',
+        },
+        {
+            name: 'nonce',
+            type: 'uint256',
+        },
+        {
+            name: 'deadline',
+            type: 'uint256',
+        },
+    ];
+
+    return ethers.utils.splitSignature(
+        await wallet._signTypedData(
+            {
+                name,
+                version,
+                chainId,
+                verifyingContract: token.address,
+            },
+            permitType === 'asset'
+                ? {
+                      Permit: typesInfo,
+                  }
+                : {
+                      PermitAll: typesInfo.filter(
+                          (x) =>
+                              permitType !== 'all' ||
+                              (permitType === 'all' && x.name !== 'assetId'),
+                      ),
+                  },
+
+            {
+                ...(permitType === 'all' ? {} : { assetId }),
+                owner: wallet.address,
+                spender,
+                assetId,
+                nonce,
+                deadline,
+            },
+        ),
+    );
+}
+
+const buildData = (
+    chainId: number,
+    verifyingContract: string,
+    name: string,
+    owner: string,
+    spender: string,
+    value: number,
+    nonce: number,
+    deadline = MAX_DEADLINE,
+) => ({
+    primaryType: 'Permit',
+    types: { EIP712Domain, Permit },
+    domain: { name, version, chainId, verifyingContract },
+    message: { owner, spender, value, nonce, deadline },
+});
+
 
 const EIP712Domain = [
     { name: 'name', type: 'string' },

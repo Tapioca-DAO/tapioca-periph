@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./MagnetarData.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "./MagnetarV2Actions.sol";
+import "./MagnetarV2ActionsData.sol";
+import "./MagnetarV2Operations.sol";
 
 /*
 
@@ -18,14 +23,125 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract Magnetar is Ownable, MagnetarData {
+contract MagnetarV2 is
+    Ownable,
+    ReentrancyGuard,
+    MagnetarV2Actions,
+    MagnetarV2ActionsData,
+    MagnetarV2Operations
+{
+    using SafeERC20 for IERC20;
+    using RebaseLibrary for Rebase;
+
     constructor(address _owner) {
         transferOwnership(_owner);
     }
 
-    // ************************ //
-    // *** PUBLIC FUNCTIONS *** //
-    // ************************ //
+    receive() external payable override {}
+
+    /// *** VIEW METHODS ***
+    /// ***  ***
+
+    /// @notice returns Singularity markets' information
+    /// @param who user to return for
+    /// @param markets the list of Singularity markets to query for
+    function singularityMarketInfo(
+        address who,
+        ISingularity[] memory markets
+    ) external view returns (SingularityInfo[] memory) {
+        return _singularityMarketInfo(who, markets);
+    }
+
+    /// @notice returns BigBang markets' information
+    /// @param who user to return for
+    /// @param markets the list of BigBang markets to query for
+    function bigBangMarketInfo(
+        address who,
+        IBigBang[] memory markets
+    ) external view returns (BigBangInfo[] memory) {
+        return _bigBangMarketInfo(who, markets);
+    }
+
+    /// @notice Calculate the collateral amount off the shares.
+    /// @param market the Singularity or BigBang address
+    /// @param share The shares.
+    /// @return amount The amount.
+    function getCollateralAmountForShare(
+        IMarket market,
+        uint256 share
+    ) public view returns (uint256 amount) {
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        return yieldBox.toAmount(market.collateralId(), share, false);
+    }
+
+    /// @notice Calculate the collateral shares that are needed for `borrowPart`,
+    /// taking the current exchange rate into account.
+    /// @param market the Singularity or BigBang address
+    /// @param borrowPart The borrow part.
+    /// @return collateralShares The collateral shares.
+    function getCollateralSharesForBorrowPart(
+        IMarket market,
+        uint256 borrowPart,
+        uint256 liquidationMultiplierPrecision,
+        uint256 exchangeRatePrecision
+    ) public view returns (uint256 collateralShares) {
+        Rebase memory _totalBorrowed;
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
+            .totalBorrow();
+        _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
+
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
+        return
+            yieldBox.toShare(
+                market.collateralId(),
+                (borrowAmount *
+                    market.liquidationMultiplier() *
+                    market.exchangeRate()) /
+                    (liquidationMultiplierPrecision * exchangeRatePrecision),
+                false
+            );
+    }
+
+    /// @notice Return the equivalent of borrow part in asset amount.
+    /// @param market the Singularity or BigBang address
+    /// @param borrowPart The amount of borrow part to convert.
+    /// @return amount The equivalent of borrow part in asset amount.
+    function getAmountForBorrowPart(
+        IMarket market,
+        uint256 borrowPart
+    ) public view returns (uint256 amount) {
+        Rebase memory _totalBorrowed;
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
+            .totalBorrow();
+        _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
+
+        return _totalBorrowed.toElastic(borrowPart, false);
+    }
+
+    /// @notice Compute the amount of `singularity.assetId` from `fraction`
+    /// `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
+    /// @param singularity the singularity address
+    /// @param fraction The fraction.
+    /// @return amount The amount.
+    function getAmountForAssetFraction(
+        ISingularity singularity,
+        uint256 fraction
+    ) public view returns (uint256 amount) {
+        (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity
+            .totalAsset();
+
+        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+        return
+            yieldBox.toAmount(
+                singularity.assetId(),
+                (fraction * totalAssetElastic) / totalAssetBase,
+                false
+            );
+    }
+
+    /// *** PUBLIC METHODS ***
+    /// ***  ***
     /// @notice Batch multiple calls together
     /// @param calls The list of actions to perform
     function burst(
@@ -42,7 +158,7 @@ contract Magnetar is Ownable, MagnetarData {
                 require(
                     _action.call.length > 0,
                     string.concat(
-                        "Magnetar: Missing call for action with index",
+                        "MagnetarV2: Missing call for action with index",
                         string(abi.encode(i))
                     )
                 );
@@ -129,7 +245,7 @@ contract Magnetar is Ownable, MagnetarData {
                     success: true,
                     returnData: abi.encode(amountOut, shareOut)
                 });
-            } else if (_action.id == SGL_ADD_COLLATERAL) {
+            } else if (_action.id == MARKET_ADD_COLLATERAL) {
                 SGLAddCollateralData memory data = abi.decode(
                     _action.call[4:],
                     (SGLAddCollateralData)
@@ -142,7 +258,7 @@ contract Magnetar is Ownable, MagnetarData {
                     data.skim,
                     data.share
                 );
-            } else if (_action.id == SGL_BORROW) {
+            } else if (_action.id == MARKET_BORROW) {
                 SGLBorrowData memory data = abi.decode(
                     _action.call[4:],
                     (SGLBorrowData)
@@ -158,7 +274,7 @@ contract Magnetar is Ownable, MagnetarData {
                     success: true,
                     returnData: abi.encode(part, share)
                 });
-            } else if (_action.id == SGL_WITHDRAW_TO) {
+            } else if (_action.id == MARKET_WITHDRAW_TO) {
                 (
                     address from,
                     uint16 dstChainId,
@@ -180,7 +296,7 @@ contract Magnetar is Ownable, MagnetarData {
                     adapterParams,
                     refundAddress
                 );
-            } else if (_action.id == SGL_LEND) {
+            } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(
                     _action.call[4:],
                     (SGLLendData)
@@ -197,7 +313,7 @@ contract Magnetar is Ownable, MagnetarData {
                     success: true,
                     returnData: abi.encode(fraction)
                 });
-            } else if (_action.id == SGL_REPAY) {
+            } else if (_action.id == MARKET_REPAY) {
                 SGLRepayData memory data = abi.decode(
                     _action.call[4:],
                     (SGLRepayData)
@@ -278,68 +394,21 @@ contract Magnetar is Ownable, MagnetarData {
                     options,
                     approvals
                 );
-            } else if (_action.id == TOFT_SEND_YB) {
-                USDOSendToYBData memory data = abi.decode(
-                    _action.call[4:],
-                    (USDOSendToYBData)
-                );
-                _checkSender(data.from);
-
-                ITOFT(_action.target).sendToYB{value: _action.value}(
-                    msg.sender,
-                    data.to,
-                    data.amount,
-                    data.assetId,
-                    data.lzDstChainId,
-                    data.options
-                );
-            } else if (_action.id == TOFT_RETRIEVE_YB) {
-                (
-                    address from,
-                    uint256 amount,
-                    uint256 assetId,
-                    uint16 lzDstChainId,
-                    address zroPaymentAddress,
-                    bytes memory airdropAdapterParam,
-                    bool strategyWithdrawal
-                ) = abi.decode(
-                        _action.call[4:],
-                        (
-                            address,
-                            uint256,
-                            uint256,
-                            uint16,
-                            address,
-                            bytes,
-                            bool
-                        )
-                    );
-                _checkSender(from);
-
-                ITOFT(_action.target).retrieveFromYB{value: _action.value}(
-                    msg.sender,
-                    amount,
-                    assetId,
-                    lzDstChainId,
-                    zroPaymentAddress,
-                    airdropAdapterParam,
-                    strategyWithdrawal
-                );
-            } else if (_action.id == HELPER_LEND) {
+            } else if (_action.id == MARKET_YBDEPOSIT_AND_LEND) {
                 HelperLendData memory data = abi.decode(
                     _action.call[4:],
                     (HelperLendData)
                 );
                 _checkSender(data.from);
 
-                IMarketHelper(_action.target).depositAndAddAsset(
-                    data.market,
+                _depositAndAddAsset(
+                    IMarket(data.market),
                     data.from,
                     data.amount,
                     data.deposit,
                     false
                 );
-            } else if (_action.id == HELPER_BORROW) {
+            } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
                 (
                     address market,
                     address user,
@@ -364,10 +433,8 @@ contract Magnetar is Ownable, MagnetarData {
                     );
                 _checkSender(user);
 
-                IMarketHelper(_action.target).depositAddCollateralAndBorrow{
-                    value: _action.value
-                }(
-                    market,
+                _depositAddCollateralAndBorrow(
+                    IMarket(market),
                     user,
                     collateralAmount,
                     borrowAmount,
@@ -377,16 +444,15 @@ contract Magnetar is Ownable, MagnetarData {
                     withdrawData
                 );
             } else {
-                revert("Magnetar: action not valid");
+                revert("MagnetarV2: action not valid");
             }
         }
 
-        require(msg.value == valAccumulator, "Magnetar: value mismatch");
+        require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
     }
 
-    // ************************* //
-    // *** PRIVATE FUNCTIONS *** //
-    // ************************* //
+    /// *** PRIVATE METHODS ***
+    /// ***  ***
     function _permit(
         address target,
         bytes calldata actionCalldata,
@@ -414,13 +480,13 @@ contract Magnetar is Ownable, MagnetarData {
     }
 
     function _checkSender(address sent) private view {
-        require(msg.sender == sent, "Magnetar: unauthorized");
+        require(msg.sender == sent, "MagnetarV2: Unauthorized");
     }
 
     function _getRevertMsg(bytes memory _returnData) private pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert("Reason unknown");
+        if (_returnData.length < 68) revert("MagnetarV2: Reason unknown");
 
         assembly {
             // Slice the sighash.
