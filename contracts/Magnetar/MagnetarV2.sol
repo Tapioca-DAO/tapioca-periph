@@ -41,7 +41,6 @@ contract MagnetarV2 is
 
     /// *** VIEW METHODS ***
     /// ***  ***
-
     /// @notice returns Singularity markets' information
     /// @param who user to return for
     /// @param markets the list of Singularity markets to query for
@@ -449,6 +448,126 @@ contract MagnetarV2 is
         }
 
         require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
+    }
+
+    function depositAddCollateralAndBorrow(
+        IMarket market,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool extractFromSender,
+        bool deposit,
+        bool withdraw,
+        bytes memory withdrawData
+    ) external {
+        _depositAddCollateralAndBorrow(
+            market,
+            user,
+            collateralAmount,
+            borrowAmount,
+            extractFromSender,
+            deposit,
+            withdraw,
+            withdrawData
+        );
+    }
+
+    function depositAndRepay(
+        IMarket market,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        bool deposit,
+        bool extractFromSender
+    ) external {
+        _depositAndRepay(
+            market,
+            user,
+            depositAmount,
+            repayAmount,
+            deposit,
+            extractFromSender
+        );
+    }
+
+    function depositRepayAndRemoveCollateral(
+        IMarket market,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        uint256 collateralAmount,
+        bool deposit,
+        bool withdraw,
+        bool extractFromSender
+    ) external {
+        _depositRepayAndRemoveCollateral(
+            market,
+            user,
+            depositAmount,
+            repayAmount,
+            collateralAmount,
+            deposit,
+            withdraw,
+            extractFromSender
+        );
+    }
+
+    function mintAndLend(
+        ISingularity singularity,
+        IMarket bingBang,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool deposit,
+        bool extractFromSender
+    ) external {
+        _mintAndLend(
+            singularity,
+            bingBang,
+            user,
+            collateralAmount,
+            borrowAmount,
+            deposit,
+            extractFromSender
+        );
+    }
+
+    function depositAndAddAsset(
+        IMarket singularity,
+        address _user,
+        uint256 _amount,
+        bool deposit_,
+        bool extractFromSender
+    ) external {
+        _depositAndAddAsset(
+            singularity,
+            _user,
+            _amount,
+            deposit_,
+            extractFromSender
+        );
+    }
+
+    function removeAssetAndRepay(
+        ISingularity singularity,
+        IMarket bingBang,
+        address user,
+        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
+        uint256 repayAmount,
+        uint256 collateralShare,
+        bool withdraw,
+        bytes calldata withdrawData
+    ) external {
+        _removeAssetAndRepay(
+            singularity,
+            bingBang,
+            user,
+            removeShare,
+            repayAmount,
+            collateralShare,
+            withdraw,
+            withdrawData
+        );
     }
 
     /// *** PRIVATE METHODS ***

@@ -55,6 +55,93 @@ function burst(MagnetarV2ActionsData.Call[] calls) external payable returns (str
 |---|---|---|
 | returnData | MagnetarV2ActionsData.Result[] | undefined |
 
+### depositAddCollateralAndBorrow
+
+```solidity
+function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | contract IMarket | undefined |
+| user | address | undefined |
+| collateralAmount | uint256 | undefined |
+| borrowAmount | uint256 | undefined |
+| extractFromSender | bool | undefined |
+| deposit | bool | undefined |
+| withdraw | bool | undefined |
+| withdrawData | bytes | undefined |
+
+### depositAndAddAsset
+
+```solidity
+function depositAndAddAsset(contract IMarket singularity, address _user, uint256 _amount, bool deposit_, bool extractFromSender) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| singularity | contract IMarket | undefined |
+| _user | address | undefined |
+| _amount | uint256 | undefined |
+| deposit_ | bool | undefined |
+| extractFromSender | bool | undefined |
+
+### depositAndRepay
+
+```solidity
+function depositAndRepay(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, bool deposit, bool extractFromSender) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | contract IMarket | undefined |
+| user | address | undefined |
+| depositAmount | uint256 | undefined |
+| repayAmount | uint256 | undefined |
+| deposit | bool | undefined |
+| extractFromSender | bool | undefined |
+
+### depositRepayAndRemoveCollateral
+
+```solidity
+function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool withdraw, bool extractFromSender) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | contract IMarket | undefined |
+| user | address | undefined |
+| depositAmount | uint256 | undefined |
+| repayAmount | uint256 | undefined |
+| collateralAmount | uint256 | undefined |
+| deposit | bool | undefined |
+| withdraw | bool | undefined |
+| extractFromSender | bool | undefined |
+
 ### getAmountForAssetFraction
 
 ```solidity
@@ -149,6 +236,28 @@ Calculate the collateral shares that are needed for `borrowPart`, taking the cur
 |---|---|---|
 | collateralShares | uint256 | The collateral shares. |
 
+### mintAndLend
+
+```solidity
+function mintAndLend(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 collateralAmount, uint256 borrowAmount, bool deposit, bool extractFromSender) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| singularity | contract ISingularity | undefined |
+| bingBang | contract IMarket | undefined |
+| user | address | undefined |
+| collateralAmount | uint256 | undefined |
+| borrowAmount | uint256 | undefined |
+| deposit | bool | undefined |
+| extractFromSender | bool | undefined |
+
 ### owner
 
 ```solidity
@@ -165,6 +274,29 @@ function owner() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### removeAssetAndRepay
+
+```solidity
+function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare, bool withdraw, bytes withdrawData) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| singularity | contract ISingularity | undefined |
+| bingBang | contract IMarket | undefined |
+| user | address | undefined |
+| removeShare | uint256 | undefined |
+| repayAmount | uint256 | undefined |
+| collateralShare | uint256 | undefined |
+| withdraw | bool | undefined |
+| withdrawData | bytes | undefined |
 
 ### renounceOwnership
 
@@ -183,7 +315,7 @@ function renounceOwnership() external nonpayable
 function singularityMarketInfo(address who, contract ISingularity[] markets) external view returns (struct MagnetarV2Operations.SingularityInfo[])
 ```
 
-returns Singularity markets&#39; information
+*** VIEW METHODS *** ***  ***returns Singularity markets&#39; information
 
 
 

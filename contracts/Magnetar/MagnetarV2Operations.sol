@@ -14,6 +14,8 @@ abstract contract MagnetarV2Operations {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
+    /// *** VARS ***
+    /// ***  ***
     struct MarketInfo {
         address collateral;
         uint256 collateralId;
@@ -41,6 +43,8 @@ abstract contract MagnetarV2Operations {
         IBigBang.AccrueInfo accrueInfo;
     }
 
+    /// *** VIEW METHODS ***
+    /// ***  ***
     function _singularityMarketInfo(
         address who,
         ISingularity[] memory markets
@@ -97,15 +101,17 @@ abstract contract MagnetarV2Operations {
         return result;
     }
 
+    /// *** INTERNAL METHODS ***
+    /// ***  ***
     function _depositAddCollateralAndBorrow(
         IMarket market,
-        address _user,
-        uint256 _collateralAmount,
-        uint256 _borrowAmount,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
         bool extractFromSender,
-        bool deposit_,
-        bool withdraw_,
-        bytes memory _withdrawData
+        bool deposit,
+        bool withdraw,
+        bytes memory withdrawData
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -116,18 +122,18 @@ abstract contract MagnetarV2Operations {
         //deposit into the yieldbox
         uint256 _share = yieldBox.toShare(
             collateralId,
-            _collateralAmount,
+            collateralAmount,
             false
         );
-        if (deposit_) {
+        if (deposit) {
             _extractTokens(
-                extractFromSender ? msg.sender : _user,
+                extractFromSender ? msg.sender : user,
                 collateralAddress,
-                _collateralAmount
+                collateralAmount
             );
             IERC20(collateralAddress).approve(
                 address(yieldBox),
-                _collateralAmount
+                collateralAmount
             );
             yieldBox.depositAsset(
                 collateralId,
@@ -141,23 +147,23 @@ abstract contract MagnetarV2Operations {
         //add collateral
         _setApprovalForYieldBox(market, yieldBox);
         market.addCollateral(
-            deposit_ ? address(this) : _user,
-            _user,
+            deposit ? address(this) : user,
+            user,
             false,
             _share
         );
 
         //borrow
-        address borrowReceiver = withdraw_ ? address(this) : _user;
-        market.borrow(_user, borrowReceiver, _borrowAmount);
+        address borrowReceiver = withdraw ? address(this) : user;
+        market.borrow(user, borrowReceiver, borrowAmount);
 
-        if (withdraw_) {
+        if (withdraw) {
             _withdraw(
                 borrowReceiver,
-                _withdrawData,
+                withdrawData,
                 market,
                 yieldBox,
-                _borrowAmount,
+                borrowAmount,
                 0,
                 false
             );
@@ -166,10 +172,10 @@ abstract contract MagnetarV2Operations {
 
     function _depositAndRepay(
         IMarket market,
-        address _user,
-        uint256 _depositAmount,
-        uint256 _repayAmount,
-        bool deposit_,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        bool deposit,
         bool extractFromSender
     ) internal {
         uint256 assetId = market.assetId();
@@ -178,69 +184,64 @@ abstract contract MagnetarV2Operations {
         (, address assetAddress, , ) = yieldBox.assets(assetId);
 
         //deposit into the yieldbox
-        if (deposit_) {
+        if (deposit) {
             _extractTokens(
-                extractFromSender ? msg.sender : _user,
+                extractFromSender ? msg.sender : user,
                 assetAddress,
-                _depositAmount
+                depositAmount
             );
-            IERC20(assetAddress).approve(address(yieldBox), _depositAmount);
+            IERC20(assetAddress).approve(address(yieldBox), depositAmount);
             yieldBox.depositAsset(
                 assetId,
                 address(this),
                 address(this),
-                _depositAmount,
+                depositAmount,
                 0
             );
         }
 
         //repay
         _setApprovalForYieldBox(market, yieldBox);
-        market.repay(
-            deposit_ ? address(this) : _user,
-            _user,
-            false,
-            _repayAmount
-        );
+        market.repay(deposit ? address(this) : user, user, false, repayAmount);
     }
 
     function _depositRepayAndRemoveCollateral(
         IMarket market,
-        address _user,
-        uint256 _depositAmount,
-        uint256 _repayAmount,
-        uint256 _collateralAmount,
-        bool deposit_,
-        bool withdraw_,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        uint256 collateralAmount,
+        bool deposit,
+        bool withdraw,
         bool extractFromSender
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         _depositAndRepay(
             market,
-            _user,
-            _depositAmount,
-            _repayAmount,
-            deposit_,
+            user,
+            depositAmount,
+            repayAmount,
+            deposit,
             extractFromSender
         );
 
         //remove collateral
-        address receiver = withdraw_ ? address(this) : _user;
+        address receiver = withdraw ? address(this) : user;
         uint256 collateralShare = yieldBox.toShare(
             market.collateralId(),
-            _collateralAmount,
+            collateralAmount,
             false
         );
-        market.removeCollateral(_user, receiver, collateralShare);
+        market.removeCollateral(user, receiver, collateralShare);
 
         //withdraw
-        if (withdraw_) {
+        if (withdraw) {
             yieldBox.withdraw(
                 market.collateralId(),
                 address(this),
-                _user,
-                _collateralAmount,
+                user,
+                collateralAmount,
                 0
             );
         }
@@ -249,10 +250,10 @@ abstract contract MagnetarV2Operations {
     function _mintAndLend(
         ISingularity singularity,
         IMarket bingBang,
-        address _user,
-        uint256 _collateralAmount,
-        uint256 _borrowAmount,
-        bool deposit_,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool deposit,
         bool extractFromSender
     ) internal {
         uint256 collateralId = bingBang.collateralId();
@@ -261,20 +262,20 @@ abstract contract MagnetarV2Operations {
         (, address collateralAddress, , ) = yieldBox.assets(collateralId);
         uint256 _share = yieldBox.toShare(
             collateralId,
-            _collateralAmount,
+            collateralAmount,
             false
         );
 
-        if (deposit_) {
+        if (deposit) {
             //deposit to YieldBox
             _extractTokens(
-                extractFromSender ? msg.sender : _user,
+                extractFromSender ? msg.sender : user,
                 collateralAddress,
-                _collateralAmount
+                collateralAmount
             );
             IERC20(collateralAddress).approve(
                 address(yieldBox),
-                _collateralAmount
+                collateralAmount
             );
             yieldBox.depositAsset(
                 collateralId,
@@ -285,20 +286,20 @@ abstract contract MagnetarV2Operations {
             );
         }
 
-        if (_collateralAmount > 0) {
+        if (collateralAmount > 0) {
             //add collateral to BingBang
             _setApprovalForYieldBox(bingBang, yieldBox);
-            bingBang.addCollateral(address(this), _user, false, _share);
+            bingBang.addCollateral(address(this), user, false, _share);
         }
 
         //borrow from BingBang
-        bingBang.borrow(_user, _user, _borrowAmount);
+        bingBang.borrow(user, user, borrowAmount);
 
         //lend to Singularity
         uint256 assetId = singularity.assetId();
-        uint256 borrowShare = yieldBox.toShare(assetId, _borrowAmount, false);
+        uint256 borrowShare = yieldBox.toShare(assetId, borrowAmount, false);
         _setApprovalForYieldBox(singularity, yieldBox);
-        singularity.addAsset(_user, _user, false, borrowShare);
+        singularity.addAsset(user, user, false, borrowShare);
     }
 
     function _depositAndAddAsset(
@@ -339,11 +340,12 @@ abstract contract MagnetarV2Operations {
     function _removeAssetAndRepay(
         ISingularity singularity,
         IMarket bingBang,
-        uint256 _removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 _repayAmount,
-        uint256 _collateralShare,
-        bool withdraw_,
-        bytes calldata withdrawData_
+        address user,
+        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
+        uint256 repayAmount,
+        uint256 collateralShare,
+        bool withdraw,
+        bytes calldata withdrawData
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
@@ -351,22 +353,22 @@ abstract contract MagnetarV2Operations {
         uint256 bbAssetId = bingBang.assetId();
         uint256 _removeAmount = yieldBox.toAmount(
             bbAssetId,
-            _removeShare,
+            removeShare,
             false
         );
-        singularity.removeAsset(msg.sender, address(this), _removeShare);
+        singularity.removeAsset(user, address(this), removeShare);
 
         //repay
         uint256 repayed = bingBang.repay(
             address(this),
-            msg.sender,
+            user,
             false,
-            _repayAmount
+            repayAmount
         );
         if (repayed < _removeAmount) {
             yieldBox.transfer(
                 address(this),
-                msg.sender,
+                user,
                 bbAssetId,
                 yieldBox.toShare(bbAssetId, _removeAmount - repayed, false)
             );
@@ -374,25 +376,27 @@ abstract contract MagnetarV2Operations {
 
         //remove collateral
         bingBang.removeCollateral(
-            msg.sender,
-            withdraw_ ? address(this) : msg.sender,
-            _collateralShare
+            user,
+            withdraw ? address(this) : user,
+            collateralShare
         );
 
         //withdraw
-        if (withdraw_) {
+        if (withdraw) {
             _withdraw(
                 address(this),
-                withdrawData_,
+                withdrawData,
                 singularity,
                 yieldBox,
                 0,
-                _collateralShare,
+                collateralShare,
                 true
             );
         }
     }
 
+    /// *** HELPER METHODS ***
+    /// ***  ***
     function _setApprovalForYieldBox(
         IMarket market,
         IYieldBoxBase yieldBox

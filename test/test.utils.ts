@@ -40,6 +40,7 @@ import {
 } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import {
     CurveSwapper__factory,
+    UniswapV2Swapper,
     UniswapV2Swapper__factory,
 } from '../typechain';
 
@@ -657,7 +658,7 @@ async function createUniV2Usd0Pairs(
 
 async function registerUniUsdoToWethBidder(
     deployer: any,
-    uniSwapper: MultiSwapper,
+    uniSwapper: UniswapV2Swapper,
     wethAssetId: BigNumber,
     staging?: boolean,
 ) {
@@ -1074,15 +1075,16 @@ export async function register(staging?: boolean) {
         staging,
     );
 
-    // ------------------- 15 Create MarketsHelper -------------------
-    log('Deploying MarketsHelper', staging);
-    const MarketsHelper = new MarketsHelper__factory(deployer);
-    const marketsHelper = await MarketsHelper.deploy();
+    // ------------------- 15 Create Magnetar -------------------
+    log('Deploying MagnetarV2', staging);
+    const magnetar = await (
+        await ethers.getContractFactory('MagnetarV2')
+    ).deploy(deployer.address);
+    await magnetar.deployed();
     log(
-        `Deployed MarketsHelper ${marketsHelper.address} with no args`,
+        `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
         staging,
     );
-
     // ------------------- 16 Create UniswapUsdoToWethBidder -------------------
     log('Deploying UniswapUsdoToWethBidder', staging);
     const { usdoToWethBidder } = await registerUniUsdoToWethBidder(
@@ -1168,7 +1170,7 @@ export async function register(staging?: boolean) {
         wethUsdcSingularity,
         _sglLiquidationModule,
         _sglLendingBorrowingModule,
-        marketsHelper,
+        magnetar,
         eoa1,
         multiSwapper,
         singularityFeeTo,
