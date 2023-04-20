@@ -623,7 +623,7 @@ describe.only('MagnetarV2', () => {
         expect(sglBalance.gt(0)).to.be.true;
     });
 
-    it.only('Should deposit to yieldBox & add asset', async () => {
+    it('Should deposit to yieldBox & add asset', async () => {
         const {
             weth,
             yieldBox,
@@ -682,15 +682,20 @@ describe.only('MagnetarV2', () => {
         );
         expect(balanceOfSGL.gt(0)).to.be.true;
 
-        await magnetar.connect(deployer).burst([
+        await magnetar.connect(deployer).burst(
+            [
+                {
+                    id: 205,
+                    target: magnetar.address,
+                    value: ethers.utils.parseEther('2'),
+                    allowFailure: false,
+                    call: lendFn,
+                },
+            ],
             {
-                id: 205,
-                target: magnetar.address,
                 value: ethers.utils.parseEther('2'),
-                allowFailure: false,
-                call: lendFn,
             },
-        ]);
+        );
 
         balanceOfSGL = await wethUsdcSingularity.balanceOf(deployer.address);
         const amount = await yieldBox.toAmount(
@@ -1007,7 +1012,7 @@ describe.only('MagnetarV2', () => {
     });
 
 
-    it('should deposit and repay through SGL helper', async () => {
+    it('should deposit and repay through Magnetar', async () => {
         const {
             weth,
             wethUsdcSingularity,
@@ -1075,14 +1080,13 @@ describe.only('MagnetarV2', () => {
             .connect(eoa1)
             .depositAndRepay(
                 wethUsdcSingularity.address,
-                deployer.address,
+                eoa1.address,
                 userBorrowPart.mul(2),
                 userBorrowPart,
                 true,
                 true,
             );
     });
-
 
     it('should deposit, repay, remove collateral and withdraw through Magnetar', async () => {
         const {
@@ -1166,7 +1170,7 @@ describe.only('MagnetarV2', () => {
             .connect(eoa1)
             .depositRepayAndRemoveCollateral(
                 wethUsdcSingularity.address,
-                deployer.address,
+                eoa1.address,
                 userBorrowPart.mul(2),
                 userBorrowPart,
                 collateralAmount,
@@ -1243,11 +1247,10 @@ describe.only('MagnetarV2', () => {
             magnetar.address,
             ethers.constants.MaxUint256,
         );
-
         await magnetar.mintAndLend(
             wethUsdoSingularity.address,
-            deployer.address,
             wethBigBangMarket.address,
+            deployer.address,
             wethMintVal,
             borrowAmount,
             true,
@@ -1278,7 +1281,6 @@ describe.only('MagnetarV2', () => {
         );
         expect(lentAssetAmount.eq(borrowAmount)).to.be.true;
     });
-
 
     it('should remove asset, repay BingBang, remove collateral and withdraw', async () => {
         const {
@@ -1347,8 +1349,8 @@ describe.only('MagnetarV2', () => {
 
         await magnetar.mintAndLend(
             wethUsdoSingularity.address,
-            deployer.address,
             wethBigBangMarket.address,
+            deployer.address,
             wethMintVal,
             borrowAmount,
             true,
@@ -1377,16 +1379,12 @@ describe.only('MagnetarV2', () => {
             magnetar.removeAssetAndRepay(
                 wethUsdoSingularity.address,
                 wethBigBangMarket.address,
+                deployer.address,
                 fraction,
                 fraction,
                 totalBingBangCollateral,
                 true,
-                encodeMagnetarWithdrawData(
-                    false,
-                    0,
-                    deployer.address,
-                    '0x00',
-                ),
+                encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
             ),
         ).to.be.revertedWith('SGL: min limit');
 
