@@ -58,7 +58,7 @@ function burst(MagnetarV2ActionsData.Call[] calls) external payable returns (str
 ### depositAddCollateralAndBorrow
 
 ```solidity
-function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external nonpayable
+function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external payable
 ```
 
 
@@ -81,7 +81,7 @@ function depositAddCollateralAndBorrow(contract IMarket market, address user, ui
 ### depositAndAddAsset
 
 ```solidity
-function depositAndAddAsset(contract IMarket singularity, address _user, uint256 _amount, bool deposit_, bool extractFromSender) external nonpayable
+function depositAndAddAsset(contract IMarket singularity, address _user, uint256 _amount, bool deposit_, bool extractFromSender) external payable
 ```
 
 
@@ -101,7 +101,7 @@ function depositAndAddAsset(contract IMarket singularity, address _user, uint256
 ### depositAndRepay
 
 ```solidity
-function depositAndRepay(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, bool deposit, bool extractFromSender) external nonpayable
+function depositAndRepay(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, bool deposit, bool extractFromSender) external payable
 ```
 
 
@@ -122,7 +122,7 @@ function depositAndRepay(contract IMarket market, address user, uint256 depositA
 ### depositRepayAndRemoveCollateral
 
 ```solidity
-function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool withdraw, bool extractFromSender) external nonpayable
+function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool withdraw, bool extractFromSender) external payable
 ```
 
 
@@ -239,7 +239,7 @@ Calculate the collateral shares that are needed for `borrowPart`, taking the cur
 ### mintAndLend
 
 ```solidity
-function mintAndLend(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 collateralAmount, uint256 borrowAmount, bool deposit, bool extractFromSender) external nonpayable
+function mintAndLend(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 collateralAmount, uint256 borrowAmount, bool deposit, bool extractFromSender) external payable
 ```
 
 
@@ -278,7 +278,7 @@ function owner() external view returns (address)
 ### removeAssetAndRepay
 
 ```solidity
-function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare, bool withdraw, bytes withdrawData) external nonpayable
+function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare, bool withdraw, bytes withdrawData) external payable
 ```
 
 

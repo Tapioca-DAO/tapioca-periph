@@ -459,7 +459,7 @@ contract MagnetarV2 is
         bool deposit,
         bool withdraw,
         bytes memory withdrawData
-    ) external {
+    ) external payable {
         _depositAddCollateralAndBorrow(
             market,
             user,
@@ -479,7 +479,7 @@ contract MagnetarV2 is
         uint256 repayAmount,
         bool deposit,
         bool extractFromSender
-    ) external {
+    ) external payable {
         _depositAndRepay(
             market,
             user,
@@ -499,7 +499,7 @@ contract MagnetarV2 is
         bool deposit,
         bool withdraw,
         bool extractFromSender
-    ) external {
+    ) external payable {
         _depositRepayAndRemoveCollateral(
             market,
             user,
@@ -520,7 +520,7 @@ contract MagnetarV2 is
         uint256 borrowAmount,
         bool deposit,
         bool extractFromSender
-    ) external {
+    ) external payable {
         _mintAndLend(
             singularity,
             bingBang,
@@ -538,7 +538,7 @@ contract MagnetarV2 is
         uint256 _amount,
         bool deposit_,
         bool extractFromSender
-    ) external {
+    ) external payable {
         _depositAndAddAsset(
             singularity,
             _user,
@@ -557,7 +557,7 @@ contract MagnetarV2 is
         uint256 collateralShare,
         bool withdraw,
         bytes calldata withdrawData
-    ) external {
+    ) external payable {
         _removeAssetAndRepay(
             singularity,
             bingBang,
