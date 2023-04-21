@@ -33,7 +33,7 @@ function curvePool() external view returns (contract ICurvePool)
 function getDefaultSwapData() external pure returns (bytes)
 ```
 
-*** VIEW METHODS *** ***  ***
+*** VIEW METHODS *** ***  ***returns default bytes swap data
 
 
 

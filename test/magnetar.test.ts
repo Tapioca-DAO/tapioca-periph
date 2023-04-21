@@ -1,14 +1,18 @@
 import { expect } from 'chai';
 import hre, { ethers, config } from 'hardhat';
-import { BN, register } from './test.utils';
+import { BN, register, getSGLPermitSignature } from './test.utils';
 import { signTypedMessage } from 'eth-sig-util';
 import { fromRpcSig } from 'ethereumjs-utils';
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import {
+    loadFixture,
+    takeSnapshot,
+} from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 import LZEndpointMockArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-mocks/LZEndpointMock.json';
 import MarketsProxyArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/MarketsProxy.json';
 import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
+import TapiocaOFTArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/TapiocaOFT.json';
 
 import {
     LiquidationQueue__factory,
@@ -24,14 +28,19 @@ import {
 import {
     ERC20Mock__factory,
     LZEndpointMock__factory,
+    OracleMock__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+import {
+    BaseTOFT,
+    TapiocaOFT__factory,
+} from 'tapioca-sdk/dist/typechain/TapiocaZ';
 
 const MAX_DEADLINE = 9999999999999;
 
 const symbol = 'MTKN';
 const version = '1';
 
-describe.only('MagnetarV2', () => {
+describe('MagnetarV2', () => {
     it('should test send from', async () => {
         const {
             deployer,
@@ -1011,7 +1020,6 @@ describe.only('MagnetarV2', () => {
             );
     });
 
-
     it('should deposit and repay through Magnetar', async () => {
         const {
             weth,
@@ -1404,7 +1412,6 @@ describe.only('MagnetarV2', () => {
         expect(wethBalanceAfter.eq(wethMintVal.div(5))).to.be.true;
     });
 
-
     it('should remove asset, repay BingBang and remove collateral', async () => {
         const {
             weth,
@@ -1516,6 +1523,1323 @@ describe.only('MagnetarV2', () => {
 
         const wethBalanceAfter = await weth.balanceOf(deployer.address);
         expect(wethBalanceAfter.eq(0)).to.be.true;
+    });
+
+    it('should deposit and add asset through Magnetar', async () => {
+        const {
+            yieldBox,
+            deployer,
+            magnetar,
+            registerSingularity,
+            mediumRiskMC,
+            bar,
+        } = await loadFixture(register);
+
+        const TapiocaOFTMock__factory = (
+            (await ethers.getContractFactoryFromArtifact(
+                TapiocaOFTArtifact,
+            )) as TapiocaOFT__factory
+        ).connect(deployer);
+
+        // -------------------  Get LZ endpoints -------------------
+        const LZEndpointMock = new LZEndpointMock__factory(deployer);
+        const lzEndpoint1 = await LZEndpointMock.deploy(1);
+        const lzEndpoint2 = await LZEndpointMock.deploy(2);
+
+        // -------------------   Create TOFT -------------------
+        const ERC20Mock = new ERC20Mock__factory(deployer);
+        const erc20Mock = await ERC20Mock.deploy(
+            'Test',
+            'T',
+            BN(100e18),
+            18,
+            deployer.address,
+        );
+        await erc20Mock.updateMintLimit(BN(100e18));
+
+        // Collateral
+        const collateralHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+
+        const collateralLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'collateralMock',
+            18,
+            1,
+        );
+
+        // Asset
+        const USDO = new USDO__factory(deployer);
+        const assetHost = await USDO.deploy(
+            lzEndpoint1.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        const assetLinked = await USDO.deploy(
+            lzEndpoint2.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        // -------------------  Link TOFTs -------------------
+
+        // Collateral
+        lzEndpoint1.setDestLzEndpoint(
+            collateralLinked.address,
+            lzEndpoint2.address,
+        );
+        lzEndpoint2.setDestLzEndpoint(
+            collateralHost.address,
+            lzEndpoint1.address,
+        );
+
+        await collateralHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralLinked.address, collateralHost.address],
+            ),
+        );
+        await collateralLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralHost.address, collateralLinked.address],
+            ),
+        );
+        await collateralHost.setMinDstGas(2, 774, 200_00);
+        await collateralHost.setMinDstGas(2, 775, 200_00);
+        await collateralLinked.setMinDstGas(1, 774, 200_00);
+        await collateralLinked.setMinDstGas(1, 775, 200_00);
+
+        // Asset
+        lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
+        lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+        await assetHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetLinked.address, assetHost.address],
+            ),
+        );
+        await assetLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetHost.address, assetLinked.address],
+            ),
+        );
+
+        // ------------------- Deploy TOFT mock oracle -------------------
+        const toftUsdcPrice = BN(22e18);
+        const OracleMock = new OracleMock__factory(deployer);
+        const toftUsdcOracle = await OracleMock.deploy(
+            'WETHMOracle',
+            'WETHMOracle',
+            toftUsdcPrice.toString(),
+        );
+
+        // ------------------- Register Penrose Asset -------------------
+        // Collateral
+        const collateralHostStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            collateralHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+
+        const collateralHostAssetId = await yieldBox.ids(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+        // Asset
+        const hostAssetStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            assetHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+        const assetHostId = await yieldBox.ids(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+
+        // ------------------- Deploy ToftUSDC medium risk MC clone-------------------
+        const { singularityMarket: assetCollateralSingularity } =
+            await registerSingularity(
+                deployer,
+                mediumRiskMC.address,
+                yieldBox,
+                bar,
+                assetHost,
+                assetHostId,
+                collateralHost,
+                collateralHostAssetId,
+                toftUsdcOracle,
+                ethers.utils.parseEther('1'),
+                false,
+            );
+        // ------------------- Init SGL -------------------
+        const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+            10,
+        );
+        const assetMintVal = collateralMintVal.mul(
+            toftUsdcPrice.div((1e18).toString()),
+        );
+
+        // We get asset
+        await assetLinked.freeMint(assetMintVal);
+        // ------------------- Permit Setup -------------------
+        const deadline = BN(
+            (await ethers.provider.getBlock('latest')).timestamp + 10_000,
+        );
+        const permitLendAmount = ethers.constants.MaxUint256;
+        const buildSig = async (nonce?: number) =>
+            await getSGLPermitSignature(
+                'Permit',
+                deployer,
+                assetCollateralSingularity,
+                magnetar.address,
+                permitLendAmount,
+                deadline,
+                { nonce },
+            );
+        const snapshot = await takeSnapshot();
+
+        // Fail without allowFailure
+        {
+            const permitLend = await buildSig(12); // wrong nonce
+            const permitLendStruct: BaseTOFT.IApprovalStruct = {
+                allowFailure: false,
+                deadline,
+                permitBorrow: false,
+                owner: deployer.address,
+                spender: magnetar.address,
+                value: permitLendAmount,
+                r: permitLend.r,
+                s: permitLend.s,
+                v: permitLend.v,
+                target: assetCollateralSingularity.address,
+            };
+
+            // ------------------- Actual TOFT test -------------------
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.equal(0);
+            await assetCollateralSingularity.approve(
+                magnetar.address,
+                permitLendAmount,
+            );
+
+            await assetLinked.sendToYBAndLend(
+                deployer.address,
+                deployer.address,
+                1,
+                {
+                    amount: assetMintVal,
+                    marketHelper: magnetar.address,
+                    market: assetCollateralSingularity.address,
+                },
+                {
+                    extraGasLimit: 1_000_000,
+                    strategyDeposit: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                [permitLendStruct],
+                { value: ethers.utils.parseEther('2') },
+            );
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.eq(0);
+        }
+
+        await snapshot.restore();
+        // Succeed with allowFailure
+        {
+            const permitLend = await buildSig(12); // wrong nonce
+            const permitLendStruct: BaseTOFT.IApprovalStruct = {
+                allowFailure: true,
+                deadline,
+                permitBorrow: false,
+                owner: deployer.address,
+                spender: magnetar.address,
+                value: permitLendAmount,
+                r: permitLend.r,
+                s: permitLend.s,
+                v: permitLend.v,
+                target: assetCollateralSingularity.address,
+            };
+
+            // ------------------- Actual TOFT test -------------------
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.equal(0);
+
+            await assetCollateralSingularity.approve(
+                magnetar.address,
+                permitLendAmount,
+            );
+            await assetLinked.sendToYBAndLend(
+                deployer.address,
+                deployer.address,
+                1,
+                {
+                    amount: assetMintVal,
+                    marketHelper: magnetar.address,
+                    market: assetCollateralSingularity.address,
+                },
+                {
+                    extraGasLimit: 1_000_000,
+                    strategyDeposit: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                [permitLendStruct],
+                { value: ethers.utils.parseEther('2') },
+            );
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.eq(
+                await yieldBox.toShare(assetHostId, assetMintVal, false),
+            );
+        }
+
+        await snapshot.restore();
+        // Success with normal flow
+        {
+            const permitLend = await buildSig(); // wrong nonce
+            const permitLendStruct: BaseTOFT.IApprovalStruct = {
+                allowFailure: false,
+                deadline,
+                permitBorrow: false,
+                owner: deployer.address,
+                spender: magnetar.address,
+                value: permitLendAmount,
+                r: permitLend.r,
+                s: permitLend.s,
+                v: permitLend.v,
+                target: assetCollateralSingularity.address,
+            };
+
+            // ------------------- Actual TOFT test -------------------
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.equal(0);
+
+            await assetLinked.sendToYBAndLend(
+                deployer.address,
+                deployer.address,
+                1,
+                {
+                    amount: assetMintVal,
+                    marketHelper: magnetar.address,
+                    market: assetCollateralSingularity.address,
+                },
+                {
+                    extraGasLimit: 1_000_000,
+                    strategyDeposit: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                [permitLendStruct],
+                { value: ethers.utils.parseEther('2') },
+            );
+
+            expect(
+                await assetCollateralSingularity.balanceOf(deployer.address),
+            ).to.be.eq(
+                await yieldBox.toShare(assetHostId, assetMintVal, false),
+            );
+        }
+    });
+
+    it('should deposit and add asset through burst', async () => {
+        const {
+            yieldBox,
+            deployer,
+            magnetar,
+            registerSingularity,
+            mediumRiskMC,
+            bar,
+        } = await loadFixture(register);
+
+        const TapiocaOFTMock__factory = (
+            (await ethers.getContractFactoryFromArtifact(
+                TapiocaOFTArtifact,
+            )) as TapiocaOFT__factory
+        ).connect(deployer);
+
+        // -------------------  Get LZ endpoints -------------------
+        const LZEndpointMock = new LZEndpointMock__factory(deployer);
+        const lzEndpoint1 = await LZEndpointMock.deploy(1);
+        const lzEndpoint2 = await LZEndpointMock.deploy(2);
+
+        // -------------------   Create TOFT -------------------
+        const ERC20Mock = new ERC20Mock__factory(deployer);
+        const erc20Mock = await ERC20Mock.deploy(
+            'Test',
+            'T',
+            BN(100e18),
+            18,
+            deployer.address,
+        );
+        await erc20Mock.updateMintLimit(BN(100e18));
+
+        // Collateral
+        const collateralHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+
+        const collateralLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'collateralMock',
+            18,
+            1,
+        );
+
+        // Asset
+        const USDO = new USDO__factory(deployer);
+        const assetHost = await USDO.deploy(
+            lzEndpoint1.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        const assetLinked = await USDO.deploy(
+            lzEndpoint2.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        // -------------------  Link TOFTs -------------------
+
+        // Collateral
+        lzEndpoint1.setDestLzEndpoint(
+            collateralLinked.address,
+            lzEndpoint2.address,
+        );
+        lzEndpoint2.setDestLzEndpoint(
+            collateralHost.address,
+            lzEndpoint1.address,
+        );
+
+        await collateralHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralLinked.address, collateralHost.address],
+            ),
+        );
+        await collateralLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralHost.address, collateralLinked.address],
+            ),
+        );
+        await collateralHost.setMinDstGas(2, 774, 200_00);
+        await collateralHost.setMinDstGas(2, 775, 200_00);
+        await collateralLinked.setMinDstGas(1, 774, 200_00);
+        await collateralLinked.setMinDstGas(1, 775, 200_00);
+
+        // Asset
+        lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
+        lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+        await assetHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetLinked.address, assetHost.address],
+            ),
+        );
+        await assetLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetHost.address, assetLinked.address],
+            ),
+        );
+
+        // ------------------- Deploy TOFT mock oracle -------------------
+        const toftUsdcPrice = BN(22e18);
+        const OracleMock = new OracleMock__factory(deployer);
+        const toftUsdcOracle = await OracleMock.deploy(
+            'WETHMOracle',
+            'WETHMOracle',
+            toftUsdcPrice.toString(),
+        );
+
+        // ------------------- Register Penrose Asset -------------------
+        // Collateral
+        const collateralHostStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            collateralHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+
+        const collateralHostAssetId = await yieldBox.ids(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+        // Asset
+        const hostAssetStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            assetHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+        const assetHostId = await yieldBox.ids(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+
+        // ------------------- Deploy ToftUSDC medium risk MC clone-------------------
+        const { singularityMarket: assetCollateralSingularity } =
+            await registerSingularity(
+                deployer,
+                mediumRiskMC.address,
+                yieldBox,
+                bar,
+                assetHost,
+                assetHostId,
+                collateralHost,
+                collateralHostAssetId,
+                toftUsdcOracle,
+                ethers.utils.parseEther('1'),
+                false,
+            );
+        // ------------------- Init SGL -------------------
+        const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+            10,
+        );
+        const assetMintVal = collateralMintVal.mul(
+            toftUsdcPrice.div((1e18).toString()),
+        );
+
+        // ------------------- Permit Setup -------------------
+        const deadline = BN(
+            (await ethers.provider.getBlock('latest')).timestamp + 10_000,
+        );
+        const permitLendAmount = ethers.constants.MaxUint256;
+        const permitLend = await getSGLPermitSignature(
+            'Permit',
+            deployer,
+            assetCollateralSingularity,
+            magnetar.address,
+            permitLendAmount,
+            deadline,
+        );
+        const permitLendStruct: BaseTOFT.IApprovalStruct = {
+            allowFailure: false,
+            deadline,
+            owner: deployer.address,
+            spender: magnetar.address,
+            value: permitLendAmount,
+            r: permitLend.r,
+            s: permitLend.s,
+            v: permitLend.v,
+            target: assetCollateralSingularity.address,
+        };
+
+        // ------------------- Actual TOFT test -------------------
+        // We get asset
+        await assetLinked.freeMint(assetMintVal);
+
+        expect(
+            await assetCollateralSingularity.balanceOf(deployer.address),
+        ).to.be.equal(0);
+        assetCollateralSingularity.approve(magnetar.address, 1);
+
+        const sendToYbAndLendFn = assetLinked.interface.encodeFunctionData(
+            'sendToYBAndLend',
+            [
+                deployer.address,
+                deployer.address,
+                1,
+                {
+                    amount: assetMintVal,
+                    marketHelper: magnetar.address,
+                    market: assetCollateralSingularity.address,
+                },
+                {
+                    extraGasLimit: 1_000_000,
+                    strategyDeposit: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                [permitLendStruct],
+            ],
+        );
+
+        await assetLinked.approve(
+            magnetar.address,
+            ethers.constants.MaxUint256,
+        );
+
+        await magnetar.connect(deployer).burst(
+            [
+                {
+                    id: 304,
+                    target: assetLinked.address,
+                    value: ethers.utils.parseEther('2'),
+                    allowFailure: false,
+                    call: sendToYbAndLendFn,
+                },
+            ],
+            {
+                value: ethers.utils.parseEther('2'),
+            },
+        );
+
+        expect(
+            await assetCollateralSingularity.balanceOf(deployer.address),
+        ).to.be.eq(await yieldBox.toShare(assetHostId, assetMintVal, false));
+    });
+
+    it.skip('should deposit, add collateral and borrow through Magnetar', async () => {
+        const {
+            yieldBox,
+            deployer,
+            eoa1,
+            magnetar,
+            registerSingularity,
+            mediumRiskMC,
+            bar,
+            timeTravel,
+        } = await loadFixture(register);
+
+        const TapiocaOFTMock__factory = (
+            (await ethers.getContractFactoryFromArtifact(
+                TapiocaOFTArtifact,
+            )) as TapiocaOFT__factory
+        ).connect(deployer);
+
+        // -------------------  Get LZ endpoints -------------------
+        const LZEndpointMock = new LZEndpointMock__factory(deployer);
+        const lzEndpoint1 = await LZEndpointMock.deploy(1);
+        const lzEndpoint2 = await LZEndpointMock.deploy(2);
+
+        // -------------------   Create TOFT -------------------
+        const ERC20Mock = new ERC20Mock__factory(deployer);
+        const erc20Mock = await ERC20Mock.deploy(
+            'Test',
+            'T',
+            BN(100e18),
+            18,
+            deployer.address,
+        );
+        // await erc20Mock.updateMintLimit(BN(100e18));
+
+        // Collateral
+        const collateralHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+
+        const collateralLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'collateralMock',
+            18,
+            1,
+        );
+
+        // Asset
+        const assetHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'assetHost',
+            'assetHost',
+            18,
+            1,
+        );
+
+        const assetLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'assetLinked',
+            'assetLinked',
+            18,
+            1,
+        );
+
+        // -------------------  Link TOFTs -------------------
+
+        // Collateral
+        lzEndpoint1.setDestLzEndpoint(
+            collateralLinked.address,
+            lzEndpoint2.address,
+        );
+        lzEndpoint2.setDestLzEndpoint(
+            collateralHost.address,
+            lzEndpoint1.address,
+        );
+
+        await collateralHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralLinked.address, collateralHost.address],
+            ),
+        );
+        await collateralLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralHost.address, collateralLinked.address],
+            ),
+        );
+        await collateralHost.setMinDstGas(2, 774, 200_000);
+        await collateralHost.setMinDstGas(2, 775, 200_000);
+        await collateralLinked.setMinDstGas(1, 774, 200_000);
+        await collateralLinked.setMinDstGas(1, 775, 200_000);
+
+        // Asset
+        lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
+        lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+        await assetHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetLinked.address, assetHost.address],
+            ),
+        );
+        await assetLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetHost.address, assetLinked.address],
+            ),
+        );
+
+        // ------------------- Deploy TOFT mock oracle -------------------
+        const toftUsdcPrice = BN(22e18);
+        const OracleMock = new OracleMock__factory(deployer);
+        const toftUsdcOracle = await OracleMock.deploy(
+            'WETHMOracle',
+            'WETHMOracle',
+            toftUsdcPrice.toString(),
+        );
+
+        // ------------------- Register Penrose Asset -------------------
+        // Collateral
+        const collateralHostStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            collateralHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+
+        const collateralHostAssetId = await yieldBox.ids(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+        // Asset
+        const hostAssetStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            assetHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+        const assetHostId = await yieldBox.ids(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+
+        // ------------------- Deploy ToftUSDC medium risk MC clone-------------------
+        const { singularityMarket: assetCollateralSingularity } =
+            await registerSingularity(
+                deployer,
+                mediumRiskMC.address,
+                yieldBox,
+                bar,
+                assetHost,
+                assetHostId,
+                collateralHost,
+                collateralHostAssetId,
+                toftUsdcOracle,
+                ethers.utils.parseEther('1'),
+                false,
+            );
+        // ------------------- Init SGL -------------------
+
+        const borrowAmount = ethers.BigNumber.from((1e10).toString());
+        const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+            10,
+        );
+        const assetMintVal = collateralMintVal.mul(
+            toftUsdcPrice.div((1e18).toString()),
+        );
+
+        // We get asset
+        await timeTravel(86401);
+        await erc20Mock.connect(eoa1).freeMint(assetMintVal);
+        await timeTravel(86401);
+        await erc20Mock.connect(eoa1).approve(assetHost.address, assetMintVal);
+        await assetHost
+            .connect(eoa1)
+            .wrap(eoa1.address, eoa1.address, assetMintVal);
+
+        await assetHost.connect(eoa1).approve(magnetar.address, assetMintVal);
+        await magnetar
+            .connect(eoa1)
+            .depositAndAddAsset(
+                assetCollateralSingularity.address,
+                eoa1.address,
+                assetMintVal,
+                true,
+                true,
+            );
+
+        // ------------------- Permit Setup -------------------
+        const deadline = BN(
+            (await ethers.provider.getBlock('latest')).timestamp + 10_000,
+        );
+
+        const permitBorrowAmount = ethers.constants.MaxUint256;
+        const permitBorrow = await getSGLPermitSignature(
+            'PermitBorrow',
+            deployer,
+            assetCollateralSingularity,
+            magnetar.address,
+            permitBorrowAmount,
+            deadline,
+        );
+        const permitBorrowStruct: BaseTOFT.IApprovalStruct = {
+            allowFailure: false,
+            deadline,
+            permitBorrow: true,
+            owner: deployer.address,
+            spender: magnetar.address,
+            value: permitBorrowAmount,
+            r: permitBorrow.r,
+            s: permitBorrow.s,
+            v: permitBorrow.v,
+            target: assetCollateralSingularity.address,
+        };
+
+        const permitLendAmount = ethers.constants.MaxUint256;
+        const permitLend = await getSGLPermitSignature(
+            'Permit',
+            deployer,
+            assetCollateralSingularity,
+            magnetar.address,
+            permitLendAmount,
+            deadline,
+            {
+                nonce: (
+                    await assetCollateralSingularity.nonces(deployer.address)
+                ).add(1),
+            },
+        );
+        const permitLendStruct: BaseTOFT.IApprovalStruct = {
+            allowFailure: false,
+            deadline,
+            permitBorrow: false,
+            owner: deployer.address,
+            spender: magnetar.address,
+            value: permitLendAmount,
+            r: permitLend.r,
+            s: permitLend.s,
+            v: permitLend.v,
+            target: assetCollateralSingularity.address,
+        };
+
+        // ------------------- Actual TOFT test -------------------
+        const withdrawFees = await assetHost.estimateSendFee(
+            2,
+            ethers.utils
+                .solidityPack(['address'], [assetLinked.address])
+                .padEnd(66, '0'),
+            borrowAmount,
+            false,
+            '0x',
+        );
+
+        const airdropAdapterParams = ethers.utils.solidityPack(
+            ['uint16', 'uint', 'uint', 'address'],
+            [
+                2, //it needs to be 2
+                1_000_000, //extra gas limit; min 200k
+                ethers.utils.parseEther('4.678'), //amount of eth to airdrop
+                magnetar.address,
+            ],
+        );
+
+        // Execute
+        await timeTravel(86401);
+        await erc20Mock.freeMint(collateralMintVal);
+        await erc20Mock.approve(collateralLinked.address, collateralMintVal);
+        await collateralLinked.wrap(
+            deployer.address,
+            deployer.address,
+            collateralMintVal,
+        );
+
+        await collateralLinked.sendToYBAndBorrow(
+            deployer.address,
+            deployer.address,
+            1,
+            airdropAdapterParams,
+            {
+                amount: collateralMintVal,
+                borrowAmount,
+                marketHelper: magnetar.address,
+                market: assetCollateralSingularity.address,
+            },
+            {
+                withdrawAdapterParams: ethers.utils.solidityPack(
+                    ['uint16', 'uint256'],
+                    [1, 2250000],
+                ),
+                withdrawLzChainId: 2,
+                withdrawLzFeeAmount: withdrawFees.nativeFee,
+                withdrawOnOtherChain: true,
+            },
+            {
+                extraGasLimit: 1_000_000,
+                strategyDeposit: false,
+                wrap: false,
+                zroPaymentAddress: ethers.constants.AddressZero,
+            },
+            [permitBorrowStruct, permitLendStruct],
+            { value: ethers.utils.parseEther('15') },
+        );
+        expect(await assetLinked.balanceOf(deployer.address)).to.be.eq(
+            borrowAmount,
+        );
+    });
+
+    it('should deposit, and borrow through Magnetar', async () => {
+        const {
+            yieldBox,
+            eoa1,
+            deployer,
+            magnetar,
+            registerSingularity,
+            mediumRiskMC,
+            bar,
+        } = await loadFixture(register);
+
+        const TapiocaOFTMock__factory = (
+            (await ethers.getContractFactoryFromArtifact(
+                TapiocaOFTArtifact,
+            )) as TapiocaOFT__factory
+        ).connect(deployer);
+
+        // -------------------  Get LZ endpoints -------------------
+        const LZEndpointMock = new LZEndpointMock__factory(deployer);
+        const lzEndpoint1 = await LZEndpointMock.deploy(1);
+        const lzEndpoint2 = await LZEndpointMock.deploy(2);
+        // -------------------   Create TOFT -------------------
+        const ERC20Mock = new ERC20Mock__factory(deployer);
+        const erc20Mock = await ERC20Mock.deploy(
+            'Test',
+            'T',
+            BN(100e18),
+            18,
+            deployer.address,
+        );
+        await erc20Mock.updateMintLimit(BN(100e18));
+
+        // Collateral
+        const collateralHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+
+        const collateralLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'collateralMock',
+            'collateralMock',
+            18,
+            1,
+        );
+
+        // Asset
+        const USDO = new USDO__factory(deployer);
+        const assetHost = await USDO.deploy(
+            lzEndpoint1.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        const assetLinked = await USDO.deploy(
+            lzEndpoint2.address,
+            yieldBox.address,
+            deployer.address,
+        );
+
+        // -------------------  Link TOFTs -------------------
+
+        // Collateral
+        lzEndpoint1.setDestLzEndpoint(
+            collateralLinked.address,
+            lzEndpoint2.address,
+        );
+        lzEndpoint2.setDestLzEndpoint(
+            collateralHost.address,
+            lzEndpoint1.address,
+        );
+
+        await collateralHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralLinked.address, collateralHost.address],
+            ),
+        );
+        await collateralLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [collateralHost.address, collateralLinked.address],
+            ),
+        );
+        await collateralHost.setMinDstGas(2, 774, 200_000);
+        await collateralHost.setMinDstGas(2, 775, 200_000);
+        await collateralLinked.setMinDstGas(1, 774, 200_000);
+        await collateralLinked.setMinDstGas(1, 775, 200_000);
+
+        await assetHost.setUseCustomAdapterParams(true);
+        await assetLinked.setUseCustomAdapterParams(true);
+        await assetHost.setMinDstGas(2, 0, 200_000);
+        await assetLinked.setMinDstGas(1, 0, 200_000);
+
+        // Asset
+        lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
+        lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+        await assetHost.setTrustedRemote(
+            2,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetLinked.address, assetHost.address],
+            ),
+        );
+        await assetLinked.setTrustedRemote(
+            1,
+            ethers.utils.solidityPack(
+                ['address', 'address'],
+                [assetHost.address, assetLinked.address],
+            ),
+        );
+
+        // ------------------- Deploy TOFT mock oracle -------------------
+        const toftUsdcPrice = BN(22e18);
+        const OracleMock = new OracleMock__factory(deployer);
+        const toftUsdcOracle = await OracleMock.deploy(
+            'WETHMOracle',
+            'WETHMOracle',
+            toftUsdcPrice.toString(),
+        );
+
+        // ------------------- Register Penrose Asset -------------------
+        // Collateral
+        const collateralHostStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            collateralHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+
+        const collateralHostAssetId = await yieldBox.ids(
+            1,
+            collateralHost.address,
+            collateralHostStrategy.address,
+            0,
+        );
+        // Asset
+        const hostAssetStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            assetHost.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+        const assetHostId = await yieldBox.ids(
+            1,
+            assetHost.address,
+            hostAssetStrategy.address,
+            0,
+        );
+
+        // ------------------- Deploy ToftUSDC medium risk MC clone-------------------
+        const { singularityMarket: assetCollateralSingularity } =
+            await registerSingularity(
+                deployer,
+                mediumRiskMC.address,
+                yieldBox,
+                bar,
+                assetHost,
+                assetHostId,
+                collateralHost,
+                collateralHostAssetId,
+                toftUsdcOracle,
+                ethers.utils.parseEther('1'),
+                false,
+            );
+        // ------------------- Init SGL -------------------
+        const borrowAmount = ethers.BigNumber.from((1e10).toString());
+        const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+            10,
+        );
+        const assetMintVal = collateralMintVal.mul(
+            toftUsdcPrice.div((1e18).toString()),
+        );
+
+        // We get asset
+        await assetHost.connect(eoa1).freeMint(assetMintVal);
+
+        await assetHost.connect(eoa1).approve(magnetar.address, assetMintVal);
+        await magnetar
+            .connect(eoa1)
+            .depositAndAddAsset(
+                assetCollateralSingularity.address,
+                eoa1.address,
+                assetMintVal,
+                true,
+                true,
+            );
+
+        // ------------------- Permit Setup -------------------
+        const deadline = BN(
+            (await ethers.provider.getBlock('latest')).timestamp + 10_000,
+        );
+        const permitBorrowAmount = ethers.constants.MaxUint256;
+        const permitBorrow = await getSGLPermitSignature(
+            'PermitBorrow',
+            deployer,
+            assetCollateralSingularity,
+            magnetar.address,
+            permitBorrowAmount,
+            deadline,
+        );
+        const permitBorrowStruct: BaseTOFT.IApprovalStruct = {
+            allowFailure: false,
+            deadline,
+            permitBorrow: true,
+            owner: deployer.address,
+            spender: magnetar.address,
+            value: permitBorrowAmount,
+            r: permitBorrow.r,
+            s: permitBorrow.s,
+            v: permitBorrow.v,
+            target: assetCollateralSingularity.address,
+        };
+
+        const permitLendAmount = ethers.constants.MaxUint256;
+        const permitLend = await getSGLPermitSignature(
+            'Permit',
+            deployer,
+            assetCollateralSingularity,
+            magnetar.address,
+            permitLendAmount,
+            deadline,
+            {
+                nonce: (
+                    await assetCollateralSingularity.nonces(deployer.address)
+                ).add(1),
+            },
+        );
+        const permitLendStruct: BaseTOFT.IApprovalStruct = {
+            allowFailure: false,
+            deadline,
+            owner: deployer.address,
+            permitBorrow: false,
+            spender: magnetar.address,
+            value: permitLendAmount,
+            r: permitLend.r,
+            s: permitLend.s,
+            v: permitLend.v,
+            target: assetCollateralSingularity.address,
+        };
+
+        // ------------------- Actual TOFT test -------------------
+        // We get asset
+        await erc20Mock.freeMint(collateralMintVal);
+        await erc20Mock.approve(collateralLinked.address, collateralMintVal);
+        await collateralLinked.wrap(
+            deployer.address,
+            deployer.address,
+            collateralMintVal,
+        );
+
+        const withdrawFees = await assetHost.estimateSendFee(
+            2,
+            ethers.utils
+                .solidityPack(['address'], [assetLinked.address])
+                .padEnd(66, '0'),
+            borrowAmount,
+            false,
+            '0x',
+        );
+
+        await collateralLinked.approve(
+            magnetar.address,
+            ethers.constants.MaxUint256,
+        );
+
+        const airdropAdapterParams = ethers.utils.solidityPack(
+            ['uint16', 'uint', 'uint', 'address'],
+            [
+                2, //it needs to be 2
+                1_500_000, //extra gas limit; min 200k
+                ethers.utils.parseEther('4.678'), //amount of eth to airdrop
+                magnetar.address,
+            ],
+        );
+
+        const sendToYBAndBorrowFn =
+            collateralLinked.interface.encodeFunctionData('sendToYBAndBorrow', [
+                deployer.address,
+                deployer.address,
+                1,
+                airdropAdapterParams,
+                {
+                    amount: collateralMintVal,
+                    borrowAmount,
+                    marketHelper: magnetar.address,
+                    market: assetCollateralSingularity.address,
+                },
+                {
+                    withdrawAdapterParams: ethers.utils.solidityPack(
+                        ['uint16', 'uint256'],
+                        [1, 2_250_000],
+                    ),
+                    withdrawLzChainId: 2,
+                    withdrawLzFeeAmount: withdrawFees.nativeFee,
+                    withdrawOnOtherChain: true,
+                },
+                {
+                    extraGasLimit: 6_000_000,
+                    strategyDeposit: false,
+                    wrap: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                [permitBorrowStruct, permitLendStruct],
+            ]);
+
+        await assetLinked.approve(
+            magnetar.address,
+            ethers.constants.MaxUint256,
+        );
+        await magnetar.connect(deployer).burst(
+            [
+                {
+                    id: 303,
+                    target: collateralLinked.address,
+                    value: ethers.utils.parseEther('14'),
+                    allowFailure: false,
+                    call: sendToYBAndBorrowFn,
+                },
+            ],
+            {
+                value: ethers.utils.parseEther('14'),
+            },
+        );
+        expect(await assetLinked.balanceOf(deployer.address)).to.be.eq(
+            borrowAmount,
+        );
     });
 });
 

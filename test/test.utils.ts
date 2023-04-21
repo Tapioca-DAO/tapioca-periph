@@ -1,6 +1,7 @@
 import { time } from '@nomicfoundation/hardhat-network-helpers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish, Signature, Wallet } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
+import { splitSignature } from 'ethers/lib/utils';
 import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
 import BigBangArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/BigBang.json';
 
@@ -44,6 +45,7 @@ import {
     UniswapV2Swapper,
     UniswapV2Swapper__factory,
 } from '../typechain';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
 const verifyEtherscanQueue: { address: string; args: any[] }[] = [];
@@ -768,8 +770,6 @@ async function deployProxyDeployer(deployer: any) {
 
     return { proxyDeployer };
 }
-
-
 
 async function createWethUsd0Singularity(
     deployer: any,
@@ -1536,6 +1536,70 @@ export async function registerFork() {
     };
 }
 
+export async function getSGLPermitSignature(
+    type: 'Permit' | 'PermitBorrow',
+    wallet: Wallet | SignerWithAddress,
+    token: Singularity,
+    spender: string,
+    value: BigNumberish = ethers.constants.MaxUint256,
+    deadline = ethers.constants.MaxUint256,
+    permitConfig?: {
+        nonce?: BigNumberish;
+        name?: string;
+        chainId?: number;
+        version?: string;
+    },
+): Promise<Signature> {
+    const [nonce, _, version, chainId] = await Promise.all([
+        permitConfig?.nonce ?? token.nonces(wallet.address),
+        permitConfig?.name ?? token.name(),
+        permitConfig?.version ?? '1',
+        permitConfig?.chainId ?? wallet.getChainId(),
+    ]);
+
+    const permit = [
+        {
+            name: 'owner',
+            type: 'address',
+        },
+        {
+            name: 'spender',
+            type: 'address',
+        },
+        {
+            name: 'value',
+            type: 'uint256',
+        },
+        {
+            name: 'nonce',
+            type: 'uint256',
+        },
+        {
+            name: 'deadline',
+            type: 'uint256',
+        },
+    ];
+
+    return splitSignature(
+        await wallet._signTypedData(
+            {
+                name: 'Tapioca Singularity',
+                version,
+                chainId,
+                verifyingContract: token.address,
+            },
+            type === 'Permit' ? { Permit: permit } : { PermitBorrow: permit },
+            {
+                owner: wallet.address,
+                spender,
+                value,
+                nonce,
+                deadline,
+            },
+        ),
+    );
+}
+
 const createYbSwapData = (
     token1Id: BigNumberish,
     token2Id: BigNumberish,
@@ -1585,9 +1649,9 @@ const createSimpleSwapData = (
         },
         yieldBoxData: {
             withdrawFromYb: false,
-            depositToYb: false
-        }
-    }
+            depositToYb: false,
+        },
+    };
 
     return swapData;
-}
+};

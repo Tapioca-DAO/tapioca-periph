@@ -65,10 +65,13 @@ contract UniswapV3Swapper is ISwapper, BaseSwapper {
 
     /// *** VIEW METHODS ***
     /// ***  ***
+    /// @notice returns default bytes swap data
     function getDefaultSwapData() public view override returns (bytes memory) {
         return abi.encode(block.timestamp + 1 hours);
     }
 
+    /// @notice Computes amount out for amount in
+    /// @param swapData operation data
     function getOutputAmount(
         SwapData calldata swapData,
         bytes calldata
@@ -96,6 +99,7 @@ contract UniswapV3Swapper is ISwapper, BaseSwapper {
         );
     }
 
+    /// @notice Comutes amount in for amount out
     function getInputAmount(
         SwapData calldata swapData,
         bytes calldata
@@ -125,6 +129,11 @@ contract UniswapV3Swapper is ISwapper, BaseSwapper {
 
     /// *** PUBLIC METHODS ***
     /// ***  ***
+    /// @notice swaps amount in
+    /// @param swapData operation data
+    /// @param amountOutMin min amount out to receive
+    /// @param to receiver address
+    /// @param data AMM data
     function swap(
         SwapData calldata swapData,
         uint256 amountOutMin,
