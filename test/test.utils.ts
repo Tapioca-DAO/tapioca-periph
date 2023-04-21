@@ -1,7 +1,9 @@
 import { time } from '@nomicfoundation/hardhat-network-helpers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish, Signature, Wallet } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
+import { splitSignature } from 'ethers/lib/utils';
 import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
+import BigBangArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/BigBang.json';
 
 import {
     YieldBox__factory,
@@ -18,12 +20,12 @@ import {
     SGLLendingBorrowing__factory,
     LiquidationQueue__factory,
     USDO,
-    MarketsHelper__factory,
     UniUsdoToWethBidder__factory,
     CurveStableToUsdoBidder__factory,
     ProxyDeployer__factory,
     USDO__factory,
     CurveStableToUsdoBidder,
+    BigBang__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -40,8 +42,10 @@ import {
 } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import {
     CurveSwapper__factory,
+    UniswapV2Swapper,
     UniswapV2Swapper__factory,
 } from '../typechain';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
 const verifyEtherscanQueue: { address: string; args: any[] }[] = [];
@@ -390,6 +394,28 @@ async function deployMediumRiskMC(
     return { mediumRiskMC };
 }
 
+async function deployMediumRiskBigBangMC(
+    deployer: any,
+    bar: Penrose,
+    staging?: boolean,
+) {
+    const BigBang = new BigBang__factory(deployer);
+    const mediumRiskBigBangMC = await BigBang.deploy();
+    log(
+        `Deployed MediumRiskBigBangMC ${mediumRiskBigBangMC.address} with no arguments`,
+        staging,
+    );
+
+    await (
+        await bar.registerBigBangMasterContract(mediumRiskBigBangMC.address, 1)
+    ).wait();
+    log('MediumRiskMC was set on Penrose', staging);
+
+    await verifyEtherscan(mediumRiskBigBangMC.address, [], staging);
+
+    return { mediumRiskBigBangMC };
+}
+
 async function registerSingularity(
     deployer: any,
     mediumRiskMC: string,
@@ -451,7 +477,7 @@ async function registerSingularity(
         ),
         SingularityArtifact.abi,
         ethers.provider,
-    );
+    ).connect(deployer);
 
     await verifyEtherscan(singularityMarket.address, [], staging);
 
@@ -657,7 +683,7 @@ async function createUniV2Usd0Pairs(
 
 async function registerUniUsdoToWethBidder(
     deployer: any,
-    uniSwapper: MultiSwapper,
+    uniSwapper: UniswapV2Swapper,
     wethAssetId: BigNumber,
     staging?: boolean,
 ) {
@@ -826,7 +852,7 @@ async function createWethUsd0Singularity(
         ),
         SingularityArtifact.abi,
         ethers.provider,
-    );
+    ).connect(deployer);
     log(
         `Deployed WethUsd0Singularity at ${wethUsdoSingularity.address} with no arguments`,
         staging,
@@ -881,6 +907,61 @@ async function createWethUsd0Singularity(
     log('WethUsd0LiquidationQueue was set for WethUsd0Singularity', staging);
 
     return { wethUsdoSingularity };
+}
+
+async function registerBigBangMarket(
+    deployer: any,
+    mediumRiskBigBangMC: string,
+    yieldBox: YieldBox,
+    bar: Penrose,
+    collateral: ERC20Mock,
+    collateralId: BigNumberish,
+    oracle: OracleMock,
+    exchangeRatePrecision?: BigNumberish,
+    debtRateAgainstEth?: BigNumberish,
+    debtRateMin?: BigNumberish,
+    debtRateMax?: BigNumberish,
+    debtStartPoint?: BigNumberish,
+    staging?: boolean,
+) {
+    const data = new ethers.utils.AbiCoder().encode(
+        [
+            'address',
+            'address',
+            'uint256',
+            'address',
+            'uint256',
+            'uint256',
+            'uint256',
+            'uint256',
+            'uint256',
+        ],
+        [
+            bar.address,
+            collateral.address,
+            collateralId,
+            oracle.address,
+            exchangeRatePrecision,
+            debtRateAgainstEth,
+            debtRateMin,
+            debtRateMax,
+            debtStartPoint,
+        ],
+    );
+
+    await (await bar.registerBigBang(mediumRiskBigBangMC, data, true)).wait();
+    log('BigBang market registered on Penrose', staging);
+
+    const bigBangMarket = new ethers.Contract(
+        await bar.clonesOf(
+            mediumRiskBigBangMC,
+            (await bar.clonesOfCount(mediumRiskBigBangMC)).sub(1),
+        ),
+        BigBangArtifact.abi,
+        ethers.provider,
+    ).connect(deployer);
+
+    return { bigBangMarket };
 }
 
 const log = (message: string, staging?: boolean) =>
@@ -998,6 +1079,15 @@ export async function register(staging?: boolean) {
     const { mediumRiskMC } = await deployMediumRiskMC(deployer, bar, staging);
     log(`Deployed MediumRiskMC ${mediumRiskMC.address}`, staging);
 
+    // ------------------- 6.1 Deploy MediumRiskBigBang master contract -------------------
+    log('Deploying MediumRiskBigBangMC', staging);
+    const { mediumRiskBigBangMC } = await deployMediumRiskBigBangMC(
+        deployer,
+        bar,
+        staging,
+    );
+    log(`Deployed MediumRiskBigBangMC ${mediumRiskBigBangMC.address}`, staging);
+
     // ------------------- 7 Deploy WethUSDC medium risk MC clone-------------------
     log('Deploying WethUsdcSingularity', staging);
     const wethUsdcSingularityData = await registerSingularity(
@@ -1058,6 +1148,31 @@ export async function register(staging?: boolean) {
     await bar.setUsdoToken(usd0.address);
     log('USDO was set on Penrose', staging);
 
+    // ------------------- 12 Register WETH BigBang -------------------
+    log('Deploying WethMinterSingularity', staging);
+    const bigBangRegData = await registerBigBangMarket(
+        deployer,
+        mediumRiskBigBangMC.address,
+        yieldBox,
+        bar,
+        weth,
+        wethAssetId,
+        usd0WethOracle,
+        ethers.utils.parseEther('1'),
+        0,
+        0,
+        0,
+        0, //ignored, as this is the main market
+        staging,
+    );
+    const wethBigBangMarket = bigBangRegData.bigBangMarket;
+    await bar.setBigBangEthMarket(wethBigBangMarket.address);
+    log(`WethMinterSingularity deployed ${wethBigBangMarket.address}`, staging);
+
+    // ------------------- 13 Set Minter and Burner for USDO -------------------
+    await usd0.setMinterStatus(wethBigBangMarket.address, true);
+    await usd0.setBurnerStatus(wethBigBangMarket.address, true);
+
     // ------------------- 14 Create weth-usd0 pair -------------------
     log('Creating WethUSDO and TapUSDO pairs', staging);
     const { __wethUsdoMockPair, __tapUsdoMockPair } =
@@ -1074,15 +1189,16 @@ export async function register(staging?: boolean) {
         staging,
     );
 
-    // ------------------- 15 Create MarketsHelper -------------------
-    log('Deploying MarketsHelper', staging);
-    const MarketsHelper = new MarketsHelper__factory(deployer);
-    const marketsHelper = await MarketsHelper.deploy();
+    // ------------------- 15 Create Magnetar -------------------
+    log('Deploying MagnetarV2', staging);
+    const magnetar = await (
+        await ethers.getContractFactory('MagnetarV2')
+    ).deploy(deployer.address);
+    await magnetar.deployed();
     log(
-        `Deployed MarketsHelper ${marketsHelper.address} with no args`,
+        `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
         staging,
     );
-
     // ------------------- 16 Create UniswapUsdoToWethBidder -------------------
     log('Deploying UniswapUsdoToWethBidder', staging);
     const { usdoToWethBidder } = await registerUniUsdoToWethBidder(
@@ -1166,9 +1282,10 @@ export async function register(staging?: boolean) {
         yieldBox,
         bar,
         wethUsdcSingularity,
+        wethBigBangMarket,
         _sglLiquidationModule,
         _sglLendingBorrowingModule,
-        marketsHelper,
+        magnetar,
         eoa1,
         multiSwapper,
         singularityFeeTo,
@@ -1319,7 +1436,6 @@ export async function register(staging?: boolean) {
     return { ...initialSetup, ...utilFuncs, verifyEtherscanQueue };
 }
 
-
 export async function registerFork() {
     let binanceWallet;
     await impersonateAccount(process.env.BINANCE_WALLET_ADDRESS!);
@@ -1396,17 +1512,100 @@ export async function registerFork() {
     ).deploy(yieldBox.address, routerV3, factoryV3);
     await uniswapV3Swapper.deployed();
 
-
     const curve3Pool = process.env.Curve3Pool!;
     const curveSwapper = await (
         await ethers.getContractFactory('CurveSwapper')
     ).deploy(curve3Pool, yieldBox.address);
     await curveSwapper.deployed();
 
-    return { weth, usdc, usdt, wethAssetId, usdcAssetId, usdtAssetId, deployer, binanceWallet, yieldBox, uniswapV2Swapper, uniswapV3Swapper, curveSwapper, createSimpleSwapData, createYbSwapData };
+    return {
+        weth,
+        usdc,
+        usdt,
+        wethAssetId,
+        usdcAssetId,
+        usdtAssetId,
+        deployer,
+        binanceWallet,
+        yieldBox,
+        uniswapV2Swapper,
+        uniswapV3Swapper,
+        curveSwapper,
+        createSimpleSwapData,
+        createYbSwapData,
+    };
 }
 
-const createYbSwapData = (token1Id: BigNumberish, token2Id: BigNumberish, shareIn: BigNumberish, shareOut: BigNumberish) => {
+export async function getSGLPermitSignature(
+    type: 'Permit' | 'PermitBorrow',
+    wallet: Wallet | SignerWithAddress,
+    token: Singularity,
+    spender: string,
+    value: BigNumberish = ethers.constants.MaxUint256,
+    deadline = ethers.constants.MaxUint256,
+    permitConfig?: {
+        nonce?: BigNumberish;
+        name?: string;
+        chainId?: number;
+        version?: string;
+    },
+): Promise<Signature> {
+    const [nonce, _, version, chainId] = await Promise.all([
+        permitConfig?.nonce ?? token.nonces(wallet.address),
+        permitConfig?.name ?? token.name(),
+        permitConfig?.version ?? '1',
+        permitConfig?.chainId ?? wallet.getChainId(),
+    ]);
+
+    const permit = [
+        {
+            name: 'owner',
+            type: 'address',
+        },
+        {
+            name: 'spender',
+            type: 'address',
+        },
+        {
+            name: 'value',
+            type: 'uint256',
+        },
+        {
+            name: 'nonce',
+            type: 'uint256',
+        },
+        {
+            name: 'deadline',
+            type: 'uint256',
+        },
+    ];
+
+    return splitSignature(
+        await wallet._signTypedData(
+            {
+                name: 'Tapioca Singularity',
+                version,
+                chainId,
+                verifyingContract: token.address,
+            },
+            type === 'Permit' ? { Permit: permit } : { PermitBorrow: permit },
+            {
+                owner: wallet.address,
+                spender,
+                value,
+                nonce,
+                deadline,
+            },
+        ),
+    );
+}
+
+const createYbSwapData = (
+    token1Id: BigNumberish,
+    token2Id: BigNumberish,
+    shareIn: BigNumberish,
+    shareOut: BigNumberish,
+) => {
     const swapData = {
         tokensData: {
             tokenIn: ethers.constants.AddressZero,
@@ -1422,13 +1621,19 @@ const createYbSwapData = (token1Id: BigNumberish, token2Id: BigNumberish, shareI
         },
         yieldBoxData: {
             withdrawFromYb: true,
-            depositToYb: true
-        }
-    }
+            depositToYb: true,
+        },
+    };
 
     return swapData;
-}
-const createSimpleSwapData = (token1: string, token2: string, amountIn: BigNumberish, amountOut: BigNumberish) => {
+};
+
+const createSimpleSwapData = (
+    token1: string,
+    token2: string,
+    amountIn: BigNumberish,
+    amountOut: BigNumberish,
+) => {
     const swapData = {
         tokensData: {
             tokenIn: token1,
@@ -1444,9 +1649,9 @@ const createSimpleSwapData = (token1: string, token2: string, amountIn: BigNumbe
         },
         yieldBoxData: {
             withdrawFromYb: false,
-            depositToYb: false
-        }
-    }
+            depositToYb: false,
+        },
+    };
 
     return swapData;
-}
+};

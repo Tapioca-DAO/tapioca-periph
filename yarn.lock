@@ -3372,7 +3372,7 @@ hardhat-gas-reporter@^1.0.8:
 
 hardhat-tracer@^2.2.2:
   version "2.2.2"
-  resolved "https://registry.yarnpkg.com/hardhat-tracer/-/hardhat-tracer-2.2.2.tgz#10a791381774cd526a70cdcc48167e0d1b14ebd9"
+  resolved "https://registry.npmjs.org/hardhat-tracer/-/hardhat-tracer-2.2.2.tgz#10a791381774cd526a70cdcc48167e0d1b14ebd9"
   integrity sha512-+zZnVy24XgB/sksczP914Ar0HuYhSqAu2dgelVL3+xetLq7gLDAr3N28V4T1sCRM97oJ1PLx0iHzFV1OvYn0Yw==
   dependencies:
     chalk "^4.1.2"
