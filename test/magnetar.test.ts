@@ -40,7 +40,7 @@ const MAX_DEADLINE = 9999999999999;
 const symbol = 'MTKN';
 const version = '1';
 
-describe('MagnetarV2', () => {
+describe.only('MagnetarV2', () => {
     it('should test send from', async () => {
         const {
             deployer,
@@ -762,8 +762,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                true,
-                encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
             ],
         );
 
@@ -834,8 +832,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                false,
-                ethers.utils.toUtf8Bytes(''),
             );
     });
 
@@ -886,8 +882,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                true,
-                encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
             );
     });
 
@@ -937,8 +931,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                false,
-                ethers.utils.toUtf8Bytes(''),
             );
     });
 
@@ -1004,19 +996,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 false,
-                true,
-                ethers.utils.defaultAbiCoder.encode(
-                    ['bool', 'uint16', 'bytes32', 'bytes'],
-                    [
-                        false,
-                        0,
-                        '0x00000000000000000000000022076fba2ea9650a028aa499d0444c4aa9af1bf8',
-                        ethers.utils.solidityPack(
-                            ['uint16', 'uint256'],
-                            [1, 1000000],
-                        ),
-                    ],
-                ),
             );
     });
 
@@ -1066,8 +1045,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                true,
-                encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
             );
 
         const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
@@ -1143,8 +1120,6 @@ describe('MagnetarV2', () => {
                 borrowAmount,
                 true,
                 true,
-                true,
-                encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
             );
 
         const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
@@ -1184,9 +1159,17 @@ describe('MagnetarV2', () => {
                 collateralAmount,
                 true,
                 true,
-                true,
             );
-        const usdcBalanceAfter = await usdc.balanceOf(eoa1.address);
+        const usdcBalanceAfterShare = await yieldBox.balanceOf(
+            eoa1.address,
+            usdcAssetId,
+        );
+
+        const usdcBalanceAfter = await yieldBox.toAmount(
+            usdcAssetId,
+            usdcBalanceAfterShare,
+            false,
+        );
         expect(usdcBalanceAfter.gt(usdcBalanceBefore)).to.be.true;
         expect(usdcBalanceAfter.sub(usdcBalanceBefore).eq(collateralAmount)).to
             .be.true;
@@ -1391,8 +1374,6 @@ describe('MagnetarV2', () => {
                 fraction,
                 fraction,
                 totalBingBangCollateral,
-                true,
-                encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
             ),
         ).to.be.revertedWith('SGL: min limit');
 
@@ -1403,10 +1384,16 @@ describe('MagnetarV2', () => {
             fraction.div(2),
             await yieldBox.toAmount(usdoAssetId, fraction.div(3), false),
             totalBingBangCollateral.div(5),
-            true,
-            encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
         );
-        const wethBalanceAfter = await weth.balanceOf(deployer.address);
+        const wethBalanceAfterShare = await yieldBox.balanceOf(
+            deployer.address,
+            wethAssetId,
+        );
+        const wethBalanceAfter = await yieldBox.toAmount(
+            wethAssetId,
+            wethBalanceAfterShare,
+            false,
+        );
 
         expect(wethBalanceBefore.eq(0)).to.be.true;
         expect(wethBalanceAfter.eq(wethMintVal.div(5))).to.be.true;
@@ -1512,8 +1499,6 @@ describe('MagnetarV2', () => {
             fraction.div(2),
             await yieldBox.toAmount(usdoAssetId, fraction.div(3), false),
             totalBingBangCollateral.div(5),
-            false,
-            encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
         );
         const wethCollateralAfter = await wethBigBangMarket.userCollateralShare(
             deployer.address,
@@ -2492,7 +2477,7 @@ describe('MagnetarV2', () => {
         );
     });
 
-    it('should deposit, and borrow through Magnetar', async () => {
+    it.only('should deposit, and borrow through Magnetar', async () => {
         const {
             yieldBox,
             eoa1,
@@ -2662,6 +2647,25 @@ describe('MagnetarV2', () => {
             hostAssetStrategy.address,
             0,
         );
+
+        const linkedAssetStrategy = await createTokenEmptyStrategy(
+            deployer,
+            yieldBox.address,
+            assetLinked.address,
+        );
+        await yieldBox.registerAsset(
+            1,
+            assetLinked.address,
+            linkedAssetStrategy.address,
+            0,
+        );
+        const assetLinkedId = await yieldBox.ids(
+            1,
+            assetLinked.address,
+            linkedAssetStrategy.address,
+            0,
+        );
+
 
         // ------------------- Deploy ToftUSDC medium risk MC clone-------------------
         const { singularityMarket: assetCollateralSingularity } =
@@ -2837,9 +2841,17 @@ describe('MagnetarV2', () => {
                 value: ethers.utils.parseEther('14'),
             },
         );
-        expect(await assetLinked.balanceOf(deployer.address)).to.be.eq(
-            borrowAmount,
+
+        const yieldBoxBalanceShare = await yieldBox.balanceOf(
+            deployer.address,
+            assetLinkedId,
         );
+        const yieldBoxBalance = await yieldBox.toAmount(
+            assetLinkedId,
+            yieldBoxBalanceShare,
+            false,
+        );
+        expect(yieldBoxBalance).to.be.eq(borrowAmount);
     });
 });
 

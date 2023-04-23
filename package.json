@@ -12,7 +12,8 @@
         "prepare": "husky install",
         "lint:ts": "eslint ./*.ts --fix",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",
-        "lint": "npm run lint:ts && npm run lint:sol"
+        "lint": "npm run lint:ts && npm run lint:sol",
+        "contracts_size": "npm run compile && NODE_ENV=hardhat hardhat size-contracts"
     },
     "devDependencies": {
         "@boringcrypto/boring-solidity": "https://github.com/boringcrypto/BoringSolidity#e0ff4a7771edfa09a90694c4e0f891938cf62a43",

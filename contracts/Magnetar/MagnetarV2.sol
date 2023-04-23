@@ -275,7 +275,9 @@ contract MagnetarV2 is
                 });
             } else if (_action.id == MARKET_WITHDRAW_TO) {
                 (
+                    address yieldBox,
                     address from,
+                    uint256 assetId,
                     uint16 dstChainId,
                     bytes32 receiver,
                     uint256 amount,
@@ -283,17 +285,29 @@ contract MagnetarV2 is
                     address payable refundAddress
                 ) = abi.decode(
                         _action.call[4:],
-                        (address, uint16, bytes32, uint256, bytes, address)
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint16,
+                            bytes32,
+                            uint256,
+                            bytes,
+                            address
+                        )
                     );
                 _checkSender(from);
 
-                IMarket(_action.target).withdrawTo{value: _action.value}(
-                    msg.sender,
+                _withdrawTo(
+                    IYieldBoxBase(yieldBox),
+                    from,
+                    assetId,
                     dstChainId,
                     receiver,
                     amount,
                     adapterParams,
-                    refundAddress
+                    refundAddress,
+                    _action.value
                 );
             } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(
@@ -414,21 +428,10 @@ contract MagnetarV2 is
                     uint256 collateralAmount,
                     uint256 borrowAmount,
                     ,
-                    bool deposit,
-                    bool withdraw,
-                    bytes memory withdrawData
+                    bool deposit
                 ) = abi.decode(
                         _action.call[4:],
-                        (
-                            address,
-                            address,
-                            uint256,
-                            uint256,
-                            bool,
-                            bool,
-                            bool,
-                            bytes
-                        )
+                        (address, address, uint256, uint256, bool, bool)
                     );
                 _checkSender(user);
 
@@ -438,9 +441,7 @@ contract MagnetarV2 is
                     collateralAmount,
                     borrowAmount,
                     false,
-                    deposit,
-                    withdraw,
-                    withdrawData
+                    deposit
                 );
             } else {
                 revert("MagnetarV2: action not valid");
@@ -450,15 +451,37 @@ contract MagnetarV2 is
         require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
     }
 
+    function withdrawTo(
+        IYieldBoxBase yieldBox,
+        address user,
+        uint256 assetId,
+        uint16 dstChainId,
+        bytes32 receiver,
+        uint256 amount,
+        bytes calldata adapterParams,
+        address payable refundAddress,
+        uint256 gas
+    ) external payable {
+        _withdrawTo(
+            yieldBox,
+            user,
+            assetId,
+            dstChainId,
+            receiver,
+            amount,
+            adapterParams,
+            refundAddress,
+            gas
+        );
+    }
+
     function depositAddCollateralAndBorrow(
         IMarket market,
         address user,
         uint256 collateralAmount,
         uint256 borrowAmount,
         bool extractFromSender,
-        bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        bool deposit
     ) external payable {
         _depositAddCollateralAndBorrow(
             market,
@@ -466,9 +489,7 @@ contract MagnetarV2 is
             collateralAmount,
             borrowAmount,
             extractFromSender,
-            deposit,
-            withdraw,
-            withdrawData
+            deposit
         );
     }
 
@@ -497,7 +518,6 @@ contract MagnetarV2 is
         uint256 repayAmount,
         uint256 collateralAmount,
         bool deposit,
-        bool withdraw,
         bool extractFromSender
     ) external payable {
         _depositRepayAndRemoveCollateral(
@@ -507,7 +527,6 @@ contract MagnetarV2 is
             repayAmount,
             collateralAmount,
             deposit,
-            withdraw,
             extractFromSender
         );
     }
@@ -554,9 +573,7 @@ contract MagnetarV2 is
         address user,
         uint256 removeShare, //slightly greater than _repayAmount to cover the interest
         uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        uint256 collateralShare
     ) external payable {
         _removeAssetAndRepay(
             singularity,
@@ -564,9 +581,7 @@ contract MagnetarV2 is
             user,
             removeShare,
             repayAmount,
-            collateralShare,
-            withdraw,
-            withdrawData
+            collateralShare
         );
     }
 

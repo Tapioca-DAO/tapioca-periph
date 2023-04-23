@@ -58,7 +58,7 @@ function burst(MagnetarV2ActionsData.Call[] calls) external payable returns (str
 ### depositAddCollateralAndBorrow
 
 ```solidity
-function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external payable
+function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit) external payable
 ```
 
 
@@ -75,8 +75,6 @@ function depositAddCollateralAndBorrow(contract IMarket market, address user, ui
 | borrowAmount | uint256 | undefined |
 | extractFromSender | bool | undefined |
 | deposit | bool | undefined |
-| withdraw | bool | undefined |
-| withdrawData | bytes | undefined |
 
 ### depositAndAddAsset
 
@@ -122,7 +120,7 @@ function depositAndRepay(contract IMarket market, address user, uint256 depositA
 ### depositRepayAndRemoveCollateral
 
 ```solidity
-function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool withdraw, bool extractFromSender) external payable
+function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool extractFromSender) external payable
 ```
 
 
@@ -139,7 +137,6 @@ function depositRepayAndRemoveCollateral(contract IMarket market, address user, 
 | repayAmount | uint256 | undefined |
 | collateralAmount | uint256 | undefined |
 | deposit | bool | undefined |
-| withdraw | bool | undefined |
 | extractFromSender | bool | undefined |
 
 ### getAmountForAssetFraction
@@ -278,7 +275,7 @@ function owner() external view returns (address)
 ### removeAssetAndRepay
 
 ```solidity
-function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare, bool withdraw, bytes withdrawData) external payable
+function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare) external payable
 ```
 
 
@@ -295,8 +292,6 @@ function removeAssetAndRepay(contract ISingularity singularity, contract IMarket
 | removeShare | uint256 | undefined |
 | repayAmount | uint256 | undefined |
 | collateralShare | uint256 | undefined |
-| withdraw | bool | undefined |
-| withdrawData | bytes | undefined |
 
 ### renounceOwnership
 
@@ -347,6 +342,30 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
+
+### withdrawTo
+
+```solidity
+function withdrawTo(contract IYieldBoxBase yieldBox, address user, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| yieldBox | contract IYieldBoxBase | undefined |
+| user | address | undefined |
+| assetId | uint256 | undefined |
+| dstChainId | uint16 | undefined |
+| receiver | bytes32 | undefined |
+| amount | uint256 | undefined |
+| adapterParams | bytes | undefined |
+| refundAddress | address payable | undefined |
+| gas | uint256 | undefined |
 
 
 

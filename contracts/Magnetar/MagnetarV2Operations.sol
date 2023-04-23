@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
@@ -9,6 +10,7 @@ import "../interfaces/IMarket.sol";
 import "../interfaces/IBigBang.sol";
 import "../interfaces/ISingularity.sol";
 import "../interfaces/IYieldBoxBase.sol";
+import "../interfaces/ISendFrom.sol";
 
 abstract contract MagnetarV2Operations {
     using SafeERC20 for IERC20;
@@ -103,21 +105,68 @@ abstract contract MagnetarV2Operations {
 
     /// *** INTERNAL METHODS ***
     /// ***  ***
+    function _withdrawTo(
+        IYieldBoxBase yieldBox,
+        address user,
+        uint256 assetId,
+        uint16 dstChainId,
+        bytes32 receiver,
+        uint256 amount,
+        bytes memory adapterParams,
+        address payable refundAddress,
+        uint256 gas
+    ) internal {
+        if (dstChainId == 0) {
+            yieldBox.withdraw(
+                assetId,
+                user,
+                LzLib.bytes32ToAddress(receiver),
+                amount,
+                0
+            );
+            return;
+        }
+
+        (, address asset, , ) = yieldBox.assets(assetId);
+        try
+            IERC165(asset).supportsInterface(type(ISendFrom).interfaceId)
+        {} catch {
+            return;
+        }
+
+        require(
+            yieldBox.toAmount(
+                assetId,
+                yieldBox.balanceOf(user, assetId),
+                false
+            ) >= amount,
+            "MagnetarV2: not available"
+        );
+        yieldBox.withdraw(assetId, user, address(this), amount, 0);
+        bytes memory _adapterParams;
+        ISendFrom.LzCallParams memory callParams = ISendFrom.LzCallParams({
+            refundAddress: gas > 0 ? refundAddress : payable(this),
+            zroPaymentAddress: address(0),
+            adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
+                ? adapterParams
+                : _adapterParams
+        });
+        ISendFrom(address(asset)).sendFrom{
+            value: gas > 0 ? gas : address(this).balance
+        }(address(this), dstChainId, receiver, amount, callParams);
+    }
+
     function _depositAddCollateralAndBorrow(
         IMarket market,
         address user,
         uint256 collateralAmount,
         uint256 borrowAmount,
         bool extractFromSender,
-        bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        bool deposit
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
-
-        (, address collateralAddress, , ) = yieldBox.assets(collateralId);
 
         //deposit into the yieldbox
         uint256 _share = yieldBox.toShare(
@@ -126,6 +175,7 @@ abstract contract MagnetarV2Operations {
             false
         );
         if (deposit) {
+            (, address collateralAddress, , ) = yieldBox.assets(collateralId);
             _extractTokens(
                 extractFromSender ? msg.sender : user,
                 collateralAddress,
@@ -154,20 +204,7 @@ abstract contract MagnetarV2Operations {
         );
 
         //borrow
-        address borrowReceiver = withdraw ? address(this) : user;
-        market.borrow(user, borrowReceiver, borrowAmount);
-
-        if (withdraw) {
-            _withdraw(
-                borrowReceiver,
-                withdrawData,
-                market,
-                yieldBox,
-                borrowAmount,
-                0,
-                false
-            );
-        }
+        market.borrow(user, user, borrowAmount);
     }
 
     function _depositAndRepay(
@@ -212,7 +249,6 @@ abstract contract MagnetarV2Operations {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool deposit,
-        bool withdraw,
         bool extractFromSender
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
@@ -227,24 +263,12 @@ abstract contract MagnetarV2Operations {
         );
 
         //remove collateral
-        address receiver = withdraw ? address(this) : user;
         uint256 collateralShare = yieldBox.toShare(
             market.collateralId(),
             collateralAmount,
             false
         );
-        market.removeCollateral(user, receiver, collateralShare);
-
-        //withdraw
-        if (withdraw) {
-            yieldBox.withdraw(
-                market.collateralId(),
-                address(this),
-                user,
-                collateralAmount,
-                0
-            );
-        }
+        market.removeCollateral(user, user, collateralShare);
     }
 
     function _mintAndLend(
@@ -343,9 +367,7 @@ abstract contract MagnetarV2Operations {
         address user,
         uint256 removeShare, //slightly greater than _repayAmount to cover the interest
         uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        uint256 collateralShare
     ) internal {
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
@@ -375,24 +397,7 @@ abstract contract MagnetarV2Operations {
         }
 
         //remove collateral
-        bingBang.removeCollateral(
-            user,
-            withdraw ? address(this) : user,
-            collateralShare
-        );
-
-        //withdraw
-        if (withdraw) {
-            _withdraw(
-                address(this),
-                withdrawData,
-                singularity,
-                yieldBox,
-                0,
-                collateralShare,
-                true
-            );
-        }
+        bingBang.removeCollateral(user, user, collateralShare);
     }
 
     /// *** HELPER METHODS ***
@@ -417,48 +422,6 @@ abstract contract MagnetarV2Operations {
         uint256 _amount
     ) internal {
         IERC20(_token).safeTransferFrom(_from, address(this), _amount);
-    }
-
-    function _withdraw(
-        address _from,
-        bytes memory _withdrawData,
-        IMarket market,
-        IYieldBoxBase yieldBox,
-        uint256 _amount,
-        uint256 _share,
-        bool _withdrawCollateral
-    ) internal {
-        bool _otherChain;
-        uint16 _destChain;
-        bytes32 _receiver;
-        bytes memory _adapterParams;
-        require(_withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
-
-        (_otherChain, _destChain, _receiver, _adapterParams) = abi.decode(
-            _withdrawData,
-            (bool, uint16, bytes32, bytes)
-        );
-        if (!_otherChain) {
-            yieldBox.withdraw(
-                _withdrawCollateral ? market.collateralId() : market.assetId(),
-                address(this),
-                LzLib.bytes32ToAddress(_receiver),
-                _amount,
-                _share
-            );
-            return;
-        }
-
-        market.withdrawTo{
-            value: msg.value > 0 ? msg.value : address(this).balance
-        }(
-            _from,
-            _destChain,
-            _receiver,
-            _amount,
-            _adapterParams,
-            msg.value > 0 ? payable(msg.sender) : payable(this)
-        );
     }
 
     function _commonInfo(

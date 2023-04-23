@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "../interfaces/ISendFrom.sol";
 import "../interfaces/ITOFT.sol";
 
 abstract contract MagnetarV2ActionsData {

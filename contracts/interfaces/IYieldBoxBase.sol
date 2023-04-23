@@ -57,4 +57,9 @@ interface IYieldBoxBase {
         uint256 share,
         bool roundUp
     ) external view returns (uint256 amount);
+
+    function balanceOf(
+        address user,
+        uint256 assetId
+    ) external view returns (uint256 share);
 }
