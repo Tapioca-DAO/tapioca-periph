@@ -35,6 +35,29 @@ function assets(uint256 assetId) external view returns (enum TokenType tokenType
 | strategy | address | undefined |
 | tokenId | uint256 | undefined |
 
+### balanceOf
+
+```solidity
+function balanceOf(address user, uint256 assetId) external view returns (uint256 share)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user | address | undefined |
+| assetId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| share | uint256 | undefined |
+
 ### depositAsset
 
 ```solidity
