@@ -275,25 +275,42 @@ contract MagnetarV2 is
                 });
             } else if (_action.id == MARKET_WITHDRAW_TO) {
                 (
+                    address yieldBox,
                     address from,
+                    uint256 assetId,
                     uint16 dstChainId,
                     bytes32 receiver,
                     uint256 amount,
+                    uint256 share,
                     bytes memory adapterParams,
                     address payable refundAddress
                 ) = abi.decode(
                         _action.call[4:],
-                        (address, uint16, bytes32, uint256, bytes, address)
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint16,
+                            bytes32,
+                            uint256,
+                            uint256,
+                            bytes,
+                            address
+                        )
                     );
                 _checkSender(from);
 
-                IMarket(_action.target).withdrawTo{value: _action.value}(
-                    msg.sender,
+                _withdrawTo(
+                    IYieldBoxBase(yieldBox),
+                    from,
+                    assetId,
                     dstChainId,
                     receiver,
                     amount,
+                    share,
                     adapterParams,
-                    refundAddress
+                    refundAddress,
+                    _action.value
                 );
             } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(
@@ -448,6 +465,32 @@ contract MagnetarV2 is
         }
 
         require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
+    }
+
+    function withdrawTo(
+        IYieldBoxBase yieldBox,
+        address from,
+        uint256 assetId,
+        uint16 dstChainId,
+        bytes32 receiver,
+        uint256 amount,
+        uint256 share,
+        bytes memory adapterParams,
+        address payable refundAddress,
+        uint256 gas
+    ) external payable {
+        _withdrawTo(
+            yieldBox,
+            from,
+            assetId,
+            dstChainId,
+            receiver,
+            amount,
+            share,
+            adapterParams,
+            refundAddress,
+            gas
+        );
     }
 
     function depositAddCollateralAndBorrow(

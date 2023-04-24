@@ -348,6 +348,31 @@ function transferOwnership(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
+### withdrawTo
+
+```solidity
+function withdrawTo(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| yieldBox | contract IYieldBoxBase | undefined |
+| from | address | undefined |
+| assetId | uint256 | undefined |
+| dstChainId | uint16 | undefined |
+| receiver | bytes32 | undefined |
+| amount | uint256 | undefined |
+| share | uint256 | undefined |
+| adapterParams | bytes | undefined |
+| refundAddress | address payable | undefined |
+| gas | uint256 | undefined |
+
 
 
 ## Events
