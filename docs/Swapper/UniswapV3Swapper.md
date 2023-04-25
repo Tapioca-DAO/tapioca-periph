@@ -10,6 +10,58 @@
 
 ## Methods
 
+### buildSwapData
+
+```solidity
+function buildSwapData(uint256 tokenInId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external pure returns (struct ISwapper.SwapData)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenInId | uint256 | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
+### buildSwapData
+
+```solidity
+function buildSwapData(address tokenIn, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external pure returns (struct ISwapper.SwapData)
+```
+
+*** VIEW METHODS *** ***  ***
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenIn | address | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
 ### factory
 
 ```solidity
@@ -27,10 +79,10 @@ function factory() external view returns (contract IUniswapV3Factory)
 |---|---|---|
 | _0 | contract IUniswapV3Factory | undefined |
 
-### getDefaultSwapData
+### getDefaultDexOptions
 
 ```solidity
-function getDefaultSwapData() external view returns (bytes)
+function getDefaultDexOptions() external view returns (bytes)
 ```
 
 *** VIEW METHODS *** ***  ***returns default bytes swap data

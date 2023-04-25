@@ -18,7 +18,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 */
 
-contract UniswapV2Swapper is ISwapper, BaseSwapper {
+contract UniswapV2Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
 
     /// *** VARS ***
@@ -44,7 +44,12 @@ contract UniswapV2Swapper is ISwapper, BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultSwapData() public view override returns (bytes memory) {
+    function getDefaultDexOptions()
+        public
+        view
+        override
+        returns (bytes memory)
+    {
         return abi.encode(block.timestamp + 1 hours);
     }
 
@@ -140,7 +145,7 @@ contract UniswapV2Swapper is ISwapper, BaseSwapper {
         // Perform the swap operation
         _safeApprove(tokenIn, address(swapRouter), amountIn);
         if (data.length == 0) {
-            data = getDefaultSwapData();
+            data = getDefaultDexOptions();
         }
         uint256 deadline = abi.decode(data, (uint256));
         uint256[] memory amounts = swapRouter.swapExactTokensForTokens(

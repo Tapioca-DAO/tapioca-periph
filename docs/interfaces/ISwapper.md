@@ -10,10 +10,62 @@
 
 ## Methods
 
-### getDefaultSwapData
+### buildSwapData
 
 ```solidity
-function getDefaultSwapData() external view returns (bytes)
+function buildSwapData(uint256 tokenInId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenInId | uint256 | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
+### buildSwapData
+
+```solidity
+function buildSwapData(address tokenIn, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenIn | address | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
+### getDefaultDexOptions
+
+```solidity
+function getDefaultDexOptions() external view returns (bytes)
 ```
 
 

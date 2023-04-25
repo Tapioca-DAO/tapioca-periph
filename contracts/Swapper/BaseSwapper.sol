@@ -8,7 +8,7 @@ import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IYieldBox.sol";
 
 import "../interfaces/ISwapper.sol";
 
-abstract contract BaseSwapper is Ownable, ReentrancyGuard {
+abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;
 
     /// *** ERRORS ***
@@ -20,8 +20,71 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard {
         _;
     }
 
+    /// *** VIEW METHODS ***
+    /// ***  ***
+    function buildSwapData(
+        address tokenIn,
+        uint256 amountIn,
+        uint256 shareIn,
+        bool withdrawFromYb,
+        bool depositToYb
+    ) external pure override returns (SwapData memory) {
+        return
+            _buildSwapData(
+                tokenIn,
+                0,
+                amountIn,
+                shareIn,
+                withdrawFromYb,
+                depositToYb
+            );
+    }
+
+    function buildSwapData(
+        uint256 tokenInId,
+        uint256 amountIn,
+        uint256 shareIn,
+        bool withdrawFromYb,
+        bool depositToYb
+    ) external pure override returns (SwapData memory) {
+        return
+            _buildSwapData(
+                address(0),
+                tokenInId,
+                amountIn,
+                shareIn,
+                withdrawFromYb,
+                depositToYb
+            );
+    }
+
     /// *** INTERNAL METHODS ***
     /// ***  ***
+    function _buildSwapData(
+        address tokenIn,
+        uint256 tokenInId,
+        uint256 amountIn,
+        uint256 shareIn,
+        bool withdrawFromYb,
+        bool depositToYb
+    ) internal pure returns (ISwapper.SwapData memory swapData) {
+        ISwapper.SwapAmountData memory swapAmountData;
+        swapAmountData.amountIn = amountIn;
+        swapAmountData.shareIn = shareIn;
+
+        ISwapper.SwapTokensData memory swapTokenData;
+        swapTokenData.tokenIn = tokenIn;
+        swapTokenData.tokenInId = tokenInId;
+
+        ISwapper.YieldBoxData memory swapYBData;
+        swapYBData.withdrawFromYb = withdrawFromYb;
+        swapYBData.depositToYb = depositToYb;
+
+        swapData.tokensData = swapTokenData;
+        swapData.amountData = swapAmountData;
+        swapData.yieldBoxData = swapYBData;
+    }
+
     function _safeApprove(address token, address to, uint256 value) internal {
         (bool success, bytes memory data) = token.call(
             abi.encodeWithSelector(0x095ea7b3, to, value)

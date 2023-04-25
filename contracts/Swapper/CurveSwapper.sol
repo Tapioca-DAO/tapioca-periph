@@ -20,7 +20,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /// @title Curve pool swapper
-contract CurveSwapper is ISwapper, BaseSwapper {
+contract CurveSwapper is BaseSwapper {
     using SafeERC20 for IERC20;
 
     /// *** VARS ***
@@ -44,7 +44,12 @@ contract CurveSwapper is ISwapper, BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultSwapData() public pure override returns (bytes memory) {
+    function getDefaultDexOptions()
+        public
+        pure
+        override
+        returns (bytes memory)
+    {
         revert Undefined();
     }
 
