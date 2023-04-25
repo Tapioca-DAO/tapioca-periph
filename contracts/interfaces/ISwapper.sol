@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+interface ICurveSwapper {
+    function curvePool() external view returns (address);
+}
+
 interface ISwapper {
     struct SwapTokensData {
         address tokenIn;
