@@ -13,7 +13,7 @@
 ### buildSwapData
 
 ```solidity
-function buildSwapData(uint256 tokenInId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
 ```
 
 
@@ -24,7 +24,8 @@ function buildSwapData(uint256 tokenInId, uint256 amountIn, uint256 shareIn, boo
 
 | Name | Type | Description |
 |---|---|---|
-| tokenInId | uint256 | undefined |
+| tokenIn | address | undefined |
+| tokenOut | address | undefined |
 | amountIn | uint256 | undefined |
 | shareIn | uint256 | undefined |
 | withdrawFromYb | bool | undefined |
@@ -39,7 +40,7 @@ function buildSwapData(uint256 tokenInId, uint256 amountIn, uint256 shareIn, boo
 ### buildSwapData
 
 ```solidity
-function buildSwapData(address tokenIn, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+function buildSwapData(uint256 tokenInId, uint256 tokenOutId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
 ```
 
 
@@ -50,7 +51,8 @@ function buildSwapData(address tokenIn, uint256 amountIn, uint256 shareIn, bool 
 
 | Name | Type | Description |
 |---|---|---|
-| tokenIn | address | undefined |
+| tokenInId | uint256 | undefined |
+| tokenOutId | uint256 | undefined |
 | amountIn | uint256 | undefined |
 | shareIn | uint256 | undefined |
 | withdrawFromYb | bool | undefined |

@@ -24,6 +24,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     /// ***  ***
     function buildSwapData(
         address tokenIn,
+        address tokenOut,
         uint256 amountIn,
         uint256 shareIn,
         bool withdrawFromYb,
@@ -32,6 +33,8 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         return
             _buildSwapData(
                 tokenIn,
+                tokenOut,
+                0,
                 0,
                 amountIn,
                 shareIn,
@@ -42,6 +45,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
     function buildSwapData(
         uint256 tokenInId,
+        uint256 tokenOutId,
         uint256 amountIn,
         uint256 shareIn,
         bool withdrawFromYb,
@@ -50,7 +54,9 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         return
             _buildSwapData(
                 address(0),
+                address(0),
                 tokenInId,
+                tokenOutId,
                 amountIn,
                 shareIn,
                 withdrawFromYb,
@@ -62,7 +68,9 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     /// ***  ***
     function _buildSwapData(
         address tokenIn,
+        address tokenOut,
         uint256 tokenInId,
+        uint256 tokenOutId,
         uint256 amountIn,
         uint256 shareIn,
         bool withdrawFromYb,
@@ -74,7 +82,9 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
         ISwapper.SwapTokensData memory swapTokenData;
         swapTokenData.tokenIn = tokenIn;
+        swapTokenData.tokenOut = tokenOut;
         swapTokenData.tokenInId = tokenInId;
+        swapTokenData.tokenOutId = tokenOutId;
 
         ISwapper.YieldBoxData memory swapYBData;
         swapYBData.withdrawFromYb = withdrawFromYb;

@@ -30,6 +30,7 @@ interface ISwapper {
     //Add more overloads if needed
     function buildSwapData(
         address tokenIn,
+        address tokenOut,
         uint256 amountIn,
         uint256 shareIn,
         bool withdrawFromYb,
@@ -38,6 +39,7 @@ interface ISwapper {
 
     function buildSwapData(
         uint256 tokenInId,
+        uint256 tokenOutId,
         uint256 amountIn,
         uint256 shareIn,
         bool withdrawFromYb,
