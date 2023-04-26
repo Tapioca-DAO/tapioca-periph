@@ -4,7 +4,6 @@ pragma solidity ^0.8.18;
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapV2Router02.sol";
 import "./BaseSwapper.sol";
-import "hardhat/console.sol";
 
 /*
 
@@ -144,17 +143,11 @@ contract UniswapV2Swapper is BaseSwapper {
         );
 
         // Perform the swap operation
-        console.log("UniswapV2Swapper: approving router %s");
         _safeApprove(tokenIn, address(swapRouter), amountIn);
-        console.log("UniswapV2Swapper: approved router");
         if (data.length == 0) {
-            console.log("UniswapV2Swapper: creating data");
             data = getDefaultDexOptions();
         }
-        console.log("UniswapV2Swapper: decoding");
         uint256 deadline = abi.decode(data, (uint256));
-        console.log("UniswapV2Swapper: swapping %s", amountIn);
-        console.log("UniswapV2Swapper: swapping %s", amountOutMin);
         uint256[] memory amounts = swapRouter.swapExactTokensForTokens(
             amountIn,
             amountOutMin,
@@ -162,7 +155,6 @@ contract UniswapV2Swapper is BaseSwapper {
             swapData.yieldBoxData.depositToYb ? address(this) : to,
             deadline
         );
-        console.log("UniswapV2Swapper: swapped");
 
         // Compute outputs
         amountOut = amounts[1];
