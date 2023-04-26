@@ -30,6 +30,26 @@ describe('CurveSwapper', () => {
         await expect(curveSwapper.getInputAmount(swapData, '0x')).to.be.reverted;
     });
 
+    it('should create swapData throug the contract', async () => {
+        const { curveSwapper, binanceWallet, deployer, usdc, usdt } =
+            await loadFixture(registerFork);
+
+        const amount = BN(1e6).mul(1000);
+        await usdt.connect(binanceWallet).transfer(deployer.address, amount);
+
+        const swapData = await curveSwapper[
+            'buildSwapData(address,address,uint256,uint256,bool,bool)'
+        ](usdt.address, usdc.address, amount, 0, false, false);
+        const data = ethers.utils.defaultAbiCoder.encode(
+            ['uint256[]'],
+            [[2, 1]],
+        );
+        await usdt.approve(curveSwapper.address, amount);
+        await curveSwapper.swap(swapData, 1, deployer.address, data);
+        const usdcBalanceAfter = await usdc.balanceOf(deployer.address);
+        expect(usdcBalanceAfter.gt(0)).to.be.true;
+    });
+
     it('should swap', async () => {
         const {
             curveSwapper,
@@ -101,7 +121,9 @@ describe('CurveSwapper', () => {
         );
         expect(ybUsdcBalanceBefore.eq(0)).to.be.true;
 
-        const swapData = createYbSwapData(usdtAssetId, usdcAssetId, share, 0);
+        const swapData = await curveSwapper[
+            'buildSwapData(uint256,uint256,uint256,uint256,bool,bool)'
+        ](usdtAssetId, usdcAssetId, 0, share, true, true);
 
         const data = ethers.utils.defaultAbiCoder.encode(
             ['uint256[]'],

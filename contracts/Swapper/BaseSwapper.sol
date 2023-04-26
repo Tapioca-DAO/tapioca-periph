@@ -129,18 +129,14 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
             amountOut = amounts.amountOut;
         } else {
             if (tokenInId > 0) {
-                amountIn = _yieldBox.toAmount(
-                    tokenInId,
-                    amounts.shareIn,
-                    false
-                );
+                amountIn = amounts.amountIn == 0
+                    ? _yieldBox.toAmount(tokenInId, amounts.shareIn, false)
+                    : amounts.amountIn;
             }
             if (tokenOutId > 0) {
-                amountOut = _yieldBox.toAmount(
-                    tokenOutId,
-                    amounts.shareOut,
-                    false
-                );
+                amountOut = amounts.amountOut == 0
+                    ? _yieldBox.toAmount(tokenOutId, amounts.shareOut, false)
+                    : amounts.amountOut;
             }
         }
     }

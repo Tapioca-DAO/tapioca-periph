@@ -13,7 +13,7 @@
 ### buildSwapData
 
 ```solidity
-function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external view returns (struct ISwapper.SwapData)
 ```
 
 
@@ -40,7 +40,7 @@ function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint
 ### buildSwapData
 
 ```solidity
-function buildSwapData(uint256 tokenInId, uint256 tokenOutId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external nonpayable returns (struct ISwapper.SwapData)
+function buildSwapData(uint256 tokenInId, uint256 tokenOutId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external view returns (struct ISwapper.SwapData)
 ```
 
 
