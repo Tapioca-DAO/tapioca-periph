@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ICurvePool.sol";
 import "./BaseSwapper.sol";
 
-import "hardhat/console.sol";
 
 /*
 
@@ -159,11 +158,8 @@ contract CurveSwapper is BaseSwapper {
 
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
 
-        console.log("CurveSwapper: approving");
         _safeApprove(tokenIn, address(curvePool), amountIn);
-        console.log("CurveSwapper: exchanging");
         curvePool.exchange(i, j, amountIn, amountOutMin);
-        console.log("CurveSwapper: exchanged");
 
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));
         require(balanceAfter > balanceBefore, "swap failed");
