@@ -39,7 +39,7 @@ interface ISwapper {
         uint256 shareIn,
         bool withdrawFromYb,
         bool depositToYb
-    ) external returns (SwapData memory);
+    ) external view returns (SwapData memory);
 
     function buildSwapData(
         uint256 tokenInId,
@@ -48,7 +48,7 @@ interface ISwapper {
         uint256 shareIn,
         bool withdrawFromYb,
         bool depositToYb
-    ) external returns (SwapData memory);
+    ) external view returns (SwapData memory);
 
     function getDefaultDexOptions() external view returns (bytes memory);
 
