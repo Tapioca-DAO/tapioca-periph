@@ -27,7 +27,26 @@ interface ISwapper {
         YieldBoxData yieldBoxData;
     }
 
-    function getDefaultSwapData() external view returns (bytes memory);
+    //Add more overloads if needed
+    function buildSwapData(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 shareIn,
+        bool withdrawFromYb,
+        bool depositToYb
+    ) external view returns (SwapData memory);
+
+    function buildSwapData(
+        uint256 tokenInId,
+        uint256 tokenOutId,
+        uint256 amountIn,
+        uint256 shareIn,
+        bool withdrawFromYb,
+        bool depositToYb
+    ) external view returns (SwapData memory);
+
+    function getDefaultDexOptions() external view returns (bytes memory);
 
     function getOutputAmount(
         SwapData calldata swapData,
@@ -45,4 +64,8 @@ interface ISwapper {
         address to,
         bytes calldata dexOptions
     ) external returns (uint256 amountOut, uint256 shareOut);
+}
+
+interface ICurveSwapper is ISwapper {
+    function curvePool() external view returns (address);
 }

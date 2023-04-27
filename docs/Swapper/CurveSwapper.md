@@ -10,6 +10,60 @@
 
 ## Methods
 
+### buildSwapData
+
+```solidity
+function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external pure returns (struct ISwapper.SwapData)
+```
+
+*** VIEW METHODS *** ***  ***
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenIn | address | undefined |
+| tokenOut | address | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
+### buildSwapData
+
+```solidity
+function buildSwapData(uint256 tokenInId, uint256 tokenOutId, uint256 amountIn, uint256 shareIn, bool withdrawFromYb, bool depositToYb) external pure returns (struct ISwapper.SwapData)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenInId | uint256 | undefined |
+| tokenOutId | uint256 | undefined |
+| amountIn | uint256 | undefined |
+| shareIn | uint256 | undefined |
+| withdrawFromYb | bool | undefined |
+| depositToYb | bool | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ISwapper.SwapData | undefined |
+
 ### curvePool
 
 ```solidity
@@ -27,10 +81,10 @@ function curvePool() external view returns (contract ICurvePool)
 |---|---|---|
 | _0 | contract ICurvePool | undefined |
 
-### getDefaultSwapData
+### getDefaultDexOptions
 
 ```solidity
-function getDefaultSwapData() external pure returns (bytes)
+function getDefaultDexOptions() external pure returns (bytes)
 ```
 
 *** VIEW METHODS *** ***  ***returns default bytes swap data

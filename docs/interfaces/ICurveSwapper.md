@@ -1,4 +1,4 @@
-# ISwapper
+# ICurveSwapper
 
 
 
@@ -63,6 +63,23 @@ function buildSwapData(uint256 tokenInId, uint256 tokenOutId, uint256 amountIn, 
 | Name | Type | Description |
 |---|---|---|
 | _0 | ISwapper.SwapData | undefined |
+
+### curvePool
+
+```solidity
+function curvePool() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### getDefaultDexOptions
 

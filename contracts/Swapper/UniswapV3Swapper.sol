@@ -25,7 +25,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /// @title UniswapV3 swapper contract
-contract UniswapV3Swapper is ISwapper, BaseSwapper {
+contract UniswapV3Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
 
     // ************ //
@@ -66,7 +66,12 @@ contract UniswapV3Swapper is ISwapper, BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultSwapData() public view override returns (bytes memory) {
+    function getDefaultDexOptions()
+        public
+        view
+        override
+        returns (bytes memory)
+    {
         return abi.encode(block.timestamp + 1 hours);
     }
 
@@ -168,7 +173,7 @@ contract UniswapV3Swapper is ISwapper, BaseSwapper {
 
         // Perform the swap operation
         if (data.length == 0) {
-            data = getDefaultSwapData();
+            data = getDefaultDexOptions();
         }
         uint256 deadline = abi.decode(data, (uint256));
 
