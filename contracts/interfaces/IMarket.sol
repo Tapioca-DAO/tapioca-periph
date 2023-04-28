@@ -72,4 +72,6 @@ interface IMarket {
     ) external returns (uint256 feeShares);
 
     function penrose() external view returns (address);
+
+    function owner() external view returns (address);
 }
