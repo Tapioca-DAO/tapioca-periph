@@ -70,4 +70,6 @@ interface IMarket {
     function refreshPenroseFees(
         address feeTo
     ) external returns (uint256 feeShares);
+
+    function penrose() external view returns (address);
 }
