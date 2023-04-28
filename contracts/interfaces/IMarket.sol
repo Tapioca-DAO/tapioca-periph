@@ -56,15 +56,6 @@ interface IMarket {
         uint256 part
     ) external returns (uint256 amount);
 
-    function withdrawTo(
-        address from,
-        uint16 dstChainId,
-        bytes32 receiver,
-        uint256 amount,
-        bytes calldata adapterParams,
-        address payable refundAddress
-    ) external payable;
-
     function borrow(
         address from,
         address to,
@@ -75,4 +66,8 @@ interface IMarket {
         bytes[] calldata calls,
         bool revertOnFail
     ) external returns (bool[] memory successes, string[] memory results);
+
+    function refreshPenroseFees(
+        address feeTo
+    ) external returns (uint256 feeShares);
 }
