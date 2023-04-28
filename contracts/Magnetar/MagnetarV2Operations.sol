@@ -7,6 +7,7 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import "../interfaces/IMarket.sol";
+import "../interfaces/IOracle.sol";
 import "../interfaces/IBigBang.sol";
 import "../interfaces/ISingularity.sol";
 import "../interfaces/IYieldBoxBase.sol";
@@ -517,7 +518,7 @@ abstract contract MagnetarV2Operations {
 
         info.collateral = market.collateral();
         info.asset = market.asset();
-        info.oracle = market.oracle();
+        info.oracle = IOracle(market.oracle());
         info.oracleData = market.oracleData();
         info.totalCollateralShare = market.totalCollateralShare();
         info.userCollateralShare = market.userCollateralShare(who);
@@ -529,8 +530,12 @@ abstract contract MagnetarV2Operations {
         info.userBorrowPart = market.userBorrowPart(who);
 
         info.currentExchangeRate = market.exchangeRate();
-        (, info.oracleExchangeRate) = market.oracle().peek(market.oracleData());
-        info.spotExchangeRate = market.oracle().peekSpot(market.oracleData());
+        (, info.oracleExchangeRate) = IOracle(market.oracle()).peek(
+            market.oracleData()
+        );
+        info.spotExchangeRate = IOracle(market.oracle()).peekSpot(
+            market.oracleData()
+        );
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();

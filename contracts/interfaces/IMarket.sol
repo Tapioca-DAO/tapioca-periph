@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./IOracle.sol";
-
 interface IMarket {
     function asset() external view returns (address);
 
@@ -25,7 +23,7 @@ interface IMarket {
         view
         returns (uint128 elastic, uint128 base);
 
-    function oracle() external view returns (IOracle);
+    function oracle() external view returns (address);
 
     function oracleData() external view returns (bytes memory);
 
@@ -58,15 +56,6 @@ interface IMarket {
         uint256 part
     ) external returns (uint256 amount);
 
-    function withdrawTo(
-        address from,
-        uint16 dstChainId,
-        bytes32 receiver,
-        uint256 amount,
-        bytes calldata adapterParams,
-        address payable refundAddress
-    ) external payable;
-
     function borrow(
         address from,
         address to,
@@ -77,4 +66,12 @@ interface IMarket {
         bytes[] calldata calls,
         bool revertOnFail
     ) external returns (bool[] memory successes, string[] memory results);
+
+    function refreshPenroseFees(
+        address feeTo
+    ) external returns (uint256 feeShares);
+
+    function penrose() external view returns (address);
+
+    function owner() external view returns (address);
 }
