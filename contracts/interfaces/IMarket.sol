@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./IOracle.sol";
-
 interface IMarket {
     function asset() external view returns (address);
 
@@ -25,7 +23,7 @@ interface IMarket {
         view
         returns (uint128 elastic, uint128 base);
 
-    function oracle() external view returns (IOracle);
+    function oracle() external view returns (address);
 
     function oracleData() external view returns (bytes memory);
 

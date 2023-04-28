@@ -208,7 +208,7 @@ function liquidationMultiplier() external view returns (uint256)
 ### oracle
 
 ```solidity
-function oracle() external view returns (contract IOracle)
+function oracle() external view returns (address)
 ```
 
 
@@ -220,7 +220,7 @@ function oracle() external view returns (contract IOracle)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IOracle | undefined |
+| _0 | address | undefined |
 
 ### oracleData
 
