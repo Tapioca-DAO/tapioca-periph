@@ -73,6 +73,52 @@ function addCollateral(address from, address to, bool skim, uint256 share) exter
 | skim | bool | undefined |
 | share | uint256 | undefined |
 
+### allowance
+
+```solidity
+function allowance(address, address) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| _1 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### approve
+
+```solidity
+function approve(address spender, uint256 amount) external nonpayable returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### asset
 
 ```solidity
@@ -246,6 +292,62 @@ function liquidationMultiplier() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### liquidationQueue
+
+```solidity
+function liquidationQueue() external view returns (address payable)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address payable | undefined |
+
+### name
+
+```solidity
+function name() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### nonces
+
+```solidity
+function nonces(address) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### oracle
 
 ```solidity
@@ -279,6 +381,84 @@ function oracleData() external view returns (bytes)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes | undefined |
+
+### owner
+
+```solidity
+function owner() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### penrose
+
+```solidity
+function penrose() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### permit
+
+```solidity
+function permit(address owner_, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner_ | address | undefined |
+| spender | address | undefined |
+| value | uint256 | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+### refreshPenroseFees
+
+```solidity
+function refreshPenroseFees(address feeTo) external nonpayable returns (uint256 feeShares)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| feeTo | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| feeShares | uint256 | undefined |
 
 ### removeAsset
 
@@ -460,27 +640,6 @@ function userCollateralShare(address) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### withdrawTo
-
-```solidity
-function withdrawTo(address from, uint16 dstChainId, bytes32 receiver, uint256 amount, bytes adapterParams, address payable refundAddress) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| dstChainId | uint16 | undefined |
-| receiver | bytes32 | undefined |
-| amount | uint256 | undefined |
-| adapterParams | bytes | undefined |
-| refundAddress | address payable | undefined |
 
 ### yieldBox
 
