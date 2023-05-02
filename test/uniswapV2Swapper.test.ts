@@ -4,7 +4,8 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, registerFork } from './test.utils';
 
 describe('UniswapV2Swapper', () => {
-    it('should get output amount', async () => {
+    describe('getOutputAmount()', () => {
+        it('should get output amount', async () => {
         const { uniswapV2Swapper, weth, usdc, createSimpleSwapData } = await loadFixture(registerFork);
         const amount = BN(1e18);
 
@@ -20,26 +21,30 @@ describe('UniswapV2Swapper', () => {
         );
         expect(amountOut.gt(0)).to.be.true;
     });
-
-    it('should get input amount', async () => {
-        const { uniswapV2Swapper, weth, usdc, createSimpleSwapData } = await loadFixture(registerFork);
-        const amount = BN(1e6).mul(1000);
-
-        const swapData = createSimpleSwapData(
-            weth.address,
-            usdc.address,
-            0,
-            amount,
-        );
-        const amountIn = await uniswapV2Swapper.getInputAmount(
-            swapData,
-            '0x00',
-        );
-
-        expect(amountIn.gt(0)).to.be.true;
     });
 
-    it('should swap', async () => {
+    describe('getInputAmount()', () => {
+        it('should get input amount', async () => {
+            const { uniswapV2Swapper, weth, usdc, createSimpleSwapData } = await loadFixture(registerFork);
+            const amount = BN(1e6).mul(1000);
+
+            const swapData = createSimpleSwapData(
+                weth.address,
+                usdc.address,
+                0,
+                amount,
+            );
+            const amountIn = await uniswapV2Swapper.getInputAmount(
+                swapData,
+                '0x00',
+            );
+
+            expect(amountIn.gt(0)).to.be.true;
+        });
+    });
+    
+    describe('swap()', () => {
+        it('should swap', async () => {
         const {
             uniswapV2Swapper,
             deployer,
@@ -125,5 +130,6 @@ describe('UniswapV2Swapper', () => {
             usdcAssetId,
         );
         expect(ybUsdcBalanceAfter.gt(0)).to.be.true;
+    });
     });
 });

@@ -4,7 +4,8 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, registerFork } from './test.utils';
 
 describe('CurveSwapper', () => {
-    it('should get output amount', async () => {
+    describe('getOutputAmount()', () => {
+        it('should get output amount', async () => {
         const { curveSwapper, usdt, usdc, createSimpleSwapData } = await loadFixture(registerFork);
         const amount = BN(1e6).mul(1000);
 
@@ -21,16 +22,20 @@ describe('CurveSwapper', () => {
         const amountOut = await curveSwapper.getOutputAmount(swapData, data);
         expect(amountOut.gt(0)).to.be.true;
     });
-
-    it('should get input amount', async () => {
+    });
+    
+    describe('getInputAmount()', () => {
+        it('should get input amount', async () => {
         const { curveSwapper, usdt, usdc, createSimpleSwapData } =
             await loadFixture(registerFork);
 
         const swapData = createSimpleSwapData(usdt.address, usdc.address, 0, 0);
         await expect(curveSwapper.getInputAmount(swapData, '0x')).to.be.reverted;
     });
-
-    it('should create swapData throug the contract', async () => {
+    });
+    
+    describe('swap data', () => {
+         it('should create swapData throug the contract', async () => {
         const { curveSwapper, binanceWallet, deployer, usdc, usdt } =
             await loadFixture(registerFork);
 
@@ -49,8 +54,10 @@ describe('CurveSwapper', () => {
         const usdcBalanceAfter = await usdc.balanceOf(deployer.address);
         expect(usdcBalanceAfter.gt(0)).to.be.true;
     });
-
-    it('should swap', async () => {
+    });
+   
+    describe('swap', () => {
+        it('should swap', async () => {
         const {
             curveSwapper,
             usdt,
@@ -148,5 +155,6 @@ describe('CurveSwapper', () => {
             usdcAssetId,
         );
         expect(ybUsdcBalanceAfter.gt(0)).to.be.true;
+    });
     });
 });

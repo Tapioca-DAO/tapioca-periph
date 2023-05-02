@@ -11,7 +11,8 @@ import { register } from './test.utils';
 import { Multicall3 } from '../typechain';
 
 describe('Multicall test', () => {
-    it('should test revert string', async () => {
+    describe('reverts', () => {
+        it('should test revert string', async () => {
         const { deployer } = await loadFixture(register);
 
         const ContractThatReverts = new ContractThatReverts__factory(deployer);
@@ -80,5 +81,6 @@ describe('Multicall test', () => {
         await expect(multiCall.multicall(calls)).to.be.revertedWith(
             'Create2: Failed deploying contract ContractThatCannotBeDeployed',
         );
+    });
     });
 });
