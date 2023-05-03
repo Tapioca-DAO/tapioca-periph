@@ -63,4 +63,15 @@ interface IMagnetar {
         bool withdraw,
         bytes calldata withdrawData
     ) external payable;
+
+    function depositAddCollateralAndBorrow(
+        address market,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool extractFromSender,
+        bool deposit,
+        bool withdraw,
+        bytes memory withdrawData
+    ) external payable;
 }
