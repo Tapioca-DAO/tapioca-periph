@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-interface ITapiocaOFT {
-    struct SendOptions {
+import "./ISendFrom.sol";
+
+/// @dev used for generic TOFTs
+interface ITapiocaOFT is ISendFrom {
+    struct ISendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
         bool wrap;
     }
+
     struct IApproval {
         bool allowFailure;
         address target;
@@ -19,12 +23,14 @@ interface ITapiocaOFT {
         bytes32 r;
         bytes32 s;
     }
+
     struct IWithdrawParams {
         uint256 withdrawLzFeeAmount;
         bool withdrawOnOtherChain;
         uint16 withdrawLzChainId;
         bytes withdrawAdapterParams;
     }
+
     struct IBorrowParams {
         uint256 amount;
         uint256 borrowAmount;
@@ -57,6 +63,10 @@ interface ITapiocaOFT {
 
     function extractUnderlying(uint256 _amount) external;
 
+    function unwrap(address _toAddress, uint256 _amount) external;
+
+    function harvestFees() external;
+
     function wrap(
         address fromAddress,
         address toAddress,
@@ -65,19 +75,7 @@ interface ITapiocaOFT {
 
     function wrapNative(address _toAddress) external payable;
 
-    function unwrap(address _toAddress, uint256 _amount) external;
-
-    function harvestFees() external;
-
-    function sendToYB(
-        address _from,
-        address _to,
-        uint256 amount,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        SendOptions calldata options
-    ) external payable;
-
+    /// OFT specific methods
     function sendToYBAndBorrow(
         address _from,
         address _to,
@@ -85,17 +83,25 @@ interface ITapiocaOFT {
         bytes calldata airdropAdapterParams,
         IBorrowParams calldata borrowParams,
         IWithdrawParams calldata withdrawParams,
-        SendOptions calldata options,
+        ISendOptions calldata options,
         IApproval[] calldata approvals
     ) external payable;
 
-    function retrieveFromYB(
+    function sendToStrategy(
+        address _from,
+        address _to,
+        uint256 amount,
+        uint256 assetId,
+        uint16 lzDstChainId,
+        ISendOptions calldata options
+    ) external payable;
+
+    function retrieveFromStrategy(
         address _from,
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam,
-        bool strategyWithdrawal
+        bytes memory airdropAdapterParam
     ) external payable;
 }

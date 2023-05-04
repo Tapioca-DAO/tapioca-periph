@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "../interfaces/ISendFrom.sol";
-import "../interfaces/ITOFT.sol";
+import "../interfaces/ITapiocaOFT.sol";
+import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
 abstract contract MagnetarV2ActionsData {
     struct Call {
@@ -53,19 +53,19 @@ abstract contract MagnetarV2ActionsData {
         address to;
         uint16 lzDstChainId;
         bytes airdropAdapterParams;
-        ITOFT.IBorrowParams borrowParams;
-        ITOFT.IWithdrawParams withdrawParams;
-        ITOFT.ITOFTSendOptions options;
-        ITOFT.ITOFTApproval[] approvals;
+        ITapiocaOFT.IBorrowParams borrowParams;
+        ITapiocaOFT.IWithdrawParams withdrawParams;
+        ITapiocaOFT.ISendOptions options;
+        ITapiocaOFT.IApproval[] approvals;
     }
 
     struct TOFTSendAndLendData {
         address from;
         address to;
         uint16 lzDstChainId;
-        ITOFT.ILendParams lendParams;
-        ITOFT.IUSDOSendOptions options;
-        ITOFT.IUSDOApproval[] approvals;
+        IUSDOBase.ILendParams lendParams;
+        IUSDOBase.ISendOptions options;
+        IUSDOBase.IApproval[] approvals;
     }
 
     struct TOFTSendToYBData {
@@ -74,7 +74,7 @@ abstract contract MagnetarV2ActionsData {
         uint256 amount;
         uint256 assetId;
         uint16 lzDstChainId;
-        ITOFT.ITOFTSendOptions options;
+        ITapiocaOFT.ISendOptions options;
     }
     struct USDOSendToYBData {
         address from;
@@ -82,7 +82,7 @@ abstract contract MagnetarV2ActionsData {
         uint256 amount;
         uint256 assetId;
         uint16 lzDstChainId;
-        ITOFT.IUSDOSendOptions options;
+        IUSDOBase.ISendOptions options;
     }
 
     struct YieldBoxDepositData {

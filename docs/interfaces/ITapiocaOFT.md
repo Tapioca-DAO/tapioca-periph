@@ -6,7 +6,7 @@
 
 
 
-
+*used for generic TOFTs*
 
 ## Methods
 
@@ -190,10 +190,10 @@ function isTrustedRemote(uint16 lzChainId, bytes path) external view returns (bo
 |---|---|---|
 | _0 | bool | undefined |
 
-### retrieveFromYB
+### retrieveFromStrategy
 
 ```solidity
-function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, bool strategyWithdrawal) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 
@@ -210,12 +210,31 @@ function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 l
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
 | airdropAdapterParam | bytes | undefined |
-| strategyWithdrawal | bool | undefined |
 
-### sendToYB
+### sendFrom
 
 ```solidity
-function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.SendOptions options) external payable
+function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256 _amount, ISendFrom.LzCallParams _callParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| _dstChainId | uint16 | undefined |
+| _toAddress | bytes32 | undefined |
+| _amount | uint256 | undefined |
+| _callParams | ISendFrom.LzCallParams | undefined |
+
+### sendToStrategy
+
+```solidity
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
 ```
 
 
@@ -231,12 +250,12 @@ function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, u
 | amount | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| options | ITapiocaOFT.SendOptions | undefined |
+| options | ITapiocaOFT.ISendOptions | undefined |
 
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.SendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
 ```
 
 
@@ -253,7 +272,7 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 | airdropAdapterParams | bytes | undefined |
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
 | withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
-| options | ITapiocaOFT.SendOptions | undefined |
+| options | ITapiocaOFT.ISendOptions | undefined |
 | approvals | ITapiocaOFT.IApproval[] | undefined |
 
 ### totalFees
@@ -289,6 +308,23 @@ function unwrap(address _toAddress, uint256 _amount) external nonpayable
 |---|---|---|
 | _toAddress | address | undefined |
 | _amount | uint256 | undefined |
+
+### useCustomAdapterParams
+
+```solidity
+function useCustomAdapterParams() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### wrap
 

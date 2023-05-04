@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+/// @dev interface for TAP token
 interface ITapOFT {
     function extractTAP(address to, uint256 value) external;
 

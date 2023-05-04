@@ -10,6 +10,29 @@
 
 ## Methods
 
+### depositAddCollateralAndBorrow
+
+```solidity
+function depositAddCollateralAndBorrow(address market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | address | undefined |
+| user | address | undefined |
+| collateralAmount | uint256 | undefined |
+| borrowAmount | uint256 | undefined |
+| extractFromSender | bool | undefined |
+| deposit | bool | undefined |
+| withdraw | bool | undefined |
+| withdrawData | bytes | undefined |
+
 ### depositAndAddAsset
 
 ```solidity
