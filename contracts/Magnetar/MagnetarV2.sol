@@ -188,11 +188,11 @@ contract MagnetarV2 is
                     unchecked {
                         valAccumulator += _action.value;
                     }
-                    ITOFT(_action.target).wrapNative{value: _action.value}(
-                        data.to
-                    );
+                    ITapiocaOFT(_action.target).wrapNative{
+                        value: _action.value
+                    }(data.to);
                 } else {
-                    ITOFT(_action.target).wrap(
+                    ITapiocaOFT(_action.target).wrap(
                         msg.sender,
                         data.to,
                         data.amount
@@ -352,10 +352,10 @@ contract MagnetarV2 is
                     address to,
                     uint16 lzDstChainId,
                     bytes memory airdropAdapterParams,
-                    ITOFT.IBorrowParams memory borrowParams,
-                    ITOFT.IWithdrawParams memory withdrawParams,
-                    ITOFT.ITOFTSendOptions memory options,
-                    ITOFT.ITOFTApproval[] memory approvals
+                    ITapiocaOFT.IBorrowParams memory borrowParams,
+                    ITapiocaOFT.IWithdrawParams memory withdrawParams,
+                    ITapiocaOFT.ISendOptions memory options,
+                    ITapiocaOFT.IApproval[] memory approvals
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -363,15 +363,17 @@ contract MagnetarV2 is
                             address,
                             uint16,
                             bytes,
-                            ITOFT.IBorrowParams,
-                            ITOFT.IWithdrawParams,
-                            ITOFT.ITOFTSendOptions,
-                            ITOFT.ITOFTApproval[]
+                            ITapiocaOFT.IBorrowParams,
+                            ITapiocaOFT.IWithdrawParams,
+                            ITapiocaOFT.ISendOptions,
+                            ITapiocaOFT.IApproval[]
                         )
                     );
                 _checkSender(from);
 
-                ITOFT(_action.target).sendToYBAndBorrow{value: _action.value}(
+                ITapiocaOFT(_action.target).sendToYBAndBorrow{
+                    value: _action.value
+                }(
                     msg.sender,
                     to,
                     lzDstChainId,
@@ -386,23 +388,23 @@ contract MagnetarV2 is
                     address from,
                     address to,
                     uint16 dstChainId,
-                    ITOFT.ILendParams memory lendParams,
-                    ITOFT.IUSDOSendOptions memory options,
-                    ITOFT.IUSDOApproval[] memory approvals
+                    IUSDOBase.ILendParams memory lendParams,
+                    IUSDOBase.ISendOptions memory options,
+                    IUSDOBase.IApproval[] memory approvals
                 ) = abi.decode(
                         _action.call[4:],
                         (
                             address,
                             address,
                             uint16,
-                            (ITOFT.ILendParams),
-                            (ITOFT.IUSDOSendOptions),
-                            (ITOFT.IUSDOApproval[])
+                            (IUSDOBase.ILendParams),
+                            (IUSDOBase.ISendOptions),
+                            (IUSDOBase.IApproval[])
                         )
                     );
                 _checkSender(from);
 
-                ITOFT(_action.target).sendToYBAndLend{value: _action.value}(
+                IUSDOBase(_action.target).sendToYBAndLend{value: _action.value}(
                     msg.sender,
                     to,
                     dstChainId,
