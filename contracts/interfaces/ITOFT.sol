@@ -8,7 +8,6 @@ interface ITOFT {
     struct ITOFTSendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
-        bool strategyDeposit;
         bool wrap;
     }
     struct IUSDOSendOptions {
