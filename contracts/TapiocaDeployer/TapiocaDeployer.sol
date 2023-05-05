@@ -43,7 +43,7 @@ contract TapiocaDeployer {
         require(
             addr != address(0),
             string.concat(
-                "Create2: Failed on deploy for contract",
+                "Create2: Failed on deploy for contract ",
                 contractName
             )
         );
