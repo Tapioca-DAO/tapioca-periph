@@ -22,18 +22,31 @@ contract TapiocaDeployer {
     function deploy(
         uint256 amount,
         bytes32 salt,
-        bytes memory bytecode
+        bytes memory bytecode,
+        string memory contractName
     ) external payable returns (address addr) {
         require(
             address(this).balance >= amount,
             "Create2: insufficient balance"
         );
-        require(bytecode.length != 0, "Create2: bytecode length is zero");
+        require(
+            bytecode.length != 0,
+            string.concat(
+                "Create2: bytecode length is zero for contract ",
+                contractName
+            )
+        );
         /// @solidity memory-safe-assembly
         assembly {
             addr := create2(amount, add(bytecode, 0x20), mload(bytecode), salt)
         }
-        require(addr != address(0), "Create2: Failed on deploy");
+        require(
+            addr != address(0),
+            string.concat(
+                "Create2: Failed on deploy for contract",
+                contractName
+            )
+        );
     }
 
     /**

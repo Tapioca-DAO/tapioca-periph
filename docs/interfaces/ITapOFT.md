@@ -6,7 +6,7 @@
 
 
 
-*interface for TAP token *
+*interface for TAP token*
 
 ## Methods
 

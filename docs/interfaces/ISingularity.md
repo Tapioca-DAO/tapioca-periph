@@ -234,6 +234,29 @@ function collateralId() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### computeAllowedLendShare
+
+```solidity
+function computeAllowedLendShare(uint256 amount, uint256 tokenId) external view returns (uint256 share)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| tokenId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| share | uint256 | undefined |
+
 ### exchangeRate
 
 ```solidity
