@@ -1817,6 +1817,7 @@ describe('MagnetarV2', () => {
             permitBorrowAmount,
             deadline,
         );
+
         const permitBorrowStruct: BaseTOFT.IApprovalStruct = {
             allowFailure: false,
             deadline,
@@ -1891,6 +1892,7 @@ describe('MagnetarV2', () => {
                 magnetar.address,
             ],
         );
+        
 
         const sendToYBAndBorrowFn =
             collateralLinked.interface.encodeFunctionData('sendToYBAndBorrow', [
@@ -1915,7 +1917,6 @@ describe('MagnetarV2', () => {
                 },
                 {
                     extraGasLimit: 6_000_000,
-                    strategyDeposit: false,
                     wrap: false,
                     zroPaymentAddress: ethers.constants.AddressZero,
                 },

@@ -60,7 +60,7 @@ function computeAddress(bytes32 salt, bytes32 bytecodeHash, address deployer) ex
 ### deploy
 
 ```solidity
-function deploy(uint256 amount, bytes32 salt, bytes bytecode) external payable returns (address addr)
+function deploy(uint256 amount, bytes32 salt, bytes bytecode, string contractName) external payable returns (address addr)
 ```
 
 
@@ -74,6 +74,7 @@ function deploy(uint256 amount, bytes32 salt, bytes bytecode) external payable r
 | amount | uint256 | undefined |
 | salt | bytes32 | undefined |
 | bytecode | bytes | undefined |
+| contractName | string | undefined |
 
 #### Returns
 
