@@ -7,8 +7,8 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
-import 'hardhat-tracer';
 import { HttpNetworkConfig } from 'hardhat/types';
+import 'hardhat-tracer';
 
 dotenv.config();
 
@@ -42,7 +42,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
+    SDK: { project: 'tapioca-periphery' }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
     solidity: {
         compilers: [
             {
@@ -51,7 +51,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     viaIR: true,
                     optimizer: {
                         enabled: true,
-                        runs: 700,
+                        runs: 200,
                     },
                 },
             },
@@ -63,17 +63,20 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
+            saveDeployments: false,
+            chainId: 1,
+            forking: {
+                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+                blockNumber: 17068626,
+            },
             hardfork: 'merge',
-            gas: 10_000_000,
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [
-                          {
-                              privateKey: process.env.PRIVATE_KEY,
-                              balance: '1000000000000000000000000',
-                          },
-                      ]
-                    : [],
+            allowUnlimitedContractSize: true,
+            accounts: {
+                mnemonic:
+                    'test test test test test test test test test test test junk',
+                count: 10,
+                accountsBalance: '1000000000000000000000',
+            },
         },
         ...supportedChains,
     },
