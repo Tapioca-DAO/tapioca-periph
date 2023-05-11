@@ -22,7 +22,6 @@ import {
     USDO,
     UniUsdoToWethBidder__factory,
     CurveStableToUsdoBidder__factory,
-    ProxyDeployer__factory,
     USDO__factory,
     CurveStableToUsdoBidder,
     BigBang__factory,
@@ -764,13 +763,6 @@ async function deployCurveStableToUsdoBidder(
     return { stableToUsdoBidder, curveSwapper };
 }
 
-async function deployProxyDeployer(deployer: any) {
-    const ProxyDeployer = new ProxyDeployer__factory(deployer);
-    const proxyDeployer = await ProxyDeployer.deploy();
-
-    return { proxyDeployer };
-}
-
 async function createWethUsd0Singularity(
     deployer: any,
     usd0: USDO,
@@ -1253,9 +1245,6 @@ export async function register(staging?: boolean) {
         );
     }
 
-    // ------------------- 19 Create ProxyDeployer -------------------
-    const { proxyDeployer } = await deployProxyDeployer(deployer);
-
     const timeTravel = async (seconds: number) => {
         await time.increase(seconds);
     };
@@ -1294,7 +1283,6 @@ export async function register(staging?: boolean) {
         feeCollector,
         usdoToWethBidder,
         mediumRiskMC,
-        proxyDeployer,
         registerSingularity,
         __uniFactory,
         __uniRouter,
