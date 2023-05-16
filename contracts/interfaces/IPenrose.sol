@@ -44,4 +44,6 @@ interface IPenrose {
     function wethToken() external view returns (address);
 
     function wethAssetId() external view returns (uint256);
+
+    function isMarketRegistered(address market) external view returns (bool);
 }
