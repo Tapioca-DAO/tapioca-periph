@@ -236,6 +236,29 @@ Calculate the collateral shares that are needed for `borrowPart`, taking the cur
 |---|---|---|
 | collateralShares | uint256 | The collateral shares. |
 
+### isApprovedForAll
+
+```solidity
+function isApprovedForAll(address, address) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| _1 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### mintAndLend
 
 ```solidity
@@ -309,6 +332,23 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### setApprovalForAll
+
+```solidity
+function setApprovalForAll(address operator, bool approved) external nonpayable
+```
+
+*** PUBLIC METHODS *** ***  ***Update approval status for an operator
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| operator | address | The address approved to perform actions on your behalf |
+| approved | bool | True/False |
+
 ### singularityMarketInfo
 
 ```solidity
@@ -376,6 +416,24 @@ function withdrawTo(contract IYieldBoxBase yieldBox, address from, uint256 asset
 
 
 ## Events
+
+### ApprovalForAll
+
+```solidity
+event ApprovalForAll(address owner, address operator, bool approved)
+```
+
+*** EVENTS *** ***  ***
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner  | address | undefined |
+| operator  | address | undefined |
+| approved  | bool | undefined |
 
 ### OwnershipTransferred
 

@@ -1164,6 +1164,7 @@ describe('MagnetarV2', () => {
                     magnetar.address,
                     permitLendAmount,
                 );
+
                 await assetLinked.sendToYBAndLend(
                     deployer.address,
                     deployer.address,
@@ -1211,6 +1212,7 @@ describe('MagnetarV2', () => {
                 expect(
                     await assetCollateralSingularity.balanceOf(deployer.address),
                 ).to.be.equal(0);
+
 
                 await assetLinked.sendToYBAndLend(
                     deployer.address,
