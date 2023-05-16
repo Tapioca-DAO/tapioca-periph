@@ -46,6 +46,17 @@ abstract contract MagnetarV2Operations {
         IBigBang.AccrueInfo accrueInfo;
     }
 
+    mapping(address => mapping(address => bool)) public isApprovedForAll;
+
+    /// *** EVENTS ***
+    /// ***  ***
+    event ApprovalForAll(address owner, address operator, bool approved);
+
+    modifier allowed(address _from) {
+        _checkSender(_from);
+        _;
+    }
+
     /// *** VIEW METHODS ***
     /// ***  ***
     function _singularityMarketInfo(
@@ -104,6 +115,22 @@ abstract contract MagnetarV2Operations {
         return result;
     }
 
+    /// *** PUBLIC METHODS ***
+    /// ***  ***
+    /// @notice Update approval status for an operator
+    /// @param operator The address approved to perform actions on your behalf
+    /// @param approved True/False
+    function setApprovalForAll(address operator, bool approved) public {
+        // Checks
+        require(operator != address(0), "YieldBox: operator not set"); // Important for security
+        require(operator != address(this), "YieldBox: can't approve yieldBox");
+
+        // Effects
+        isApprovedForAll[msg.sender][operator] = approved;
+
+        emit ApprovalForAll(msg.sender, operator, approved);
+    }
+
     /// *** INTERNAL METHODS ***
     /// ***  ***
     function _depositAddCollateralAndBorrow(
@@ -129,6 +156,9 @@ abstract contract MagnetarV2Operations {
             false
         );
         if (deposit) {
+            if (!extractFromSender) {
+                _checkSender(user);
+            }
             _extractTokens(
                 extractFromSender ? msg.sender : user,
                 collateralAddress,
@@ -319,6 +349,9 @@ abstract contract MagnetarV2Operations {
 
         uint256 _share = yieldBox.toShare(assetId, _amount, false);
         if (deposit_) {
+            if (!extractFromSender) {
+                _checkSender(_user);
+            }
             //deposit into the yieldbox
             _extractTokens(
                 extractFromSender ? msg.sender : _user,
@@ -540,6 +573,13 @@ abstract contract MagnetarV2Operations {
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();
         return info;
+    }
+
+    function _checkSender(address _from) internal view {
+        require(
+            _from == msg.sender || isApprovedForAll[_from][msg.sender] == true,
+            "MagnetarV2: operator not approved"
+        );
     }
 
     receive() external payable virtual {}

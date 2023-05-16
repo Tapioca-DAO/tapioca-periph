@@ -167,6 +167,13 @@ contract MagnetarV2 is
                 valAccumulator += _action.value;
             }
 
+            if (_action.id == SET_APPROVAL) {
+                (address operator, bool approved) = abi.decode(
+                    _action.call[4:],
+                    (address, bool)
+                );
+                setApprovalForAll(operator, approved);
+            }
             if (_action.id == PERMIT_ALL) {
                 _permit(
                     _action.target,
@@ -480,7 +487,7 @@ contract MagnetarV2 is
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
-    ) external payable {
+    ) external payable allowed(from) {
         _withdrawTo(
             yieldBox,
             from,
@@ -524,7 +531,7 @@ contract MagnetarV2 is
         uint256 repayAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable {
+    ) external payable allowed(user) {
         _depositAndRepay(
             market,
             user,
@@ -544,7 +551,7 @@ contract MagnetarV2 is
         bool deposit,
         bool withdraw,
         bool extractFromSender
-    ) external payable {
+    ) external payable allowed(user) {
         _depositRepayAndRemoveCollateral(
             market,
             user,
@@ -565,7 +572,7 @@ contract MagnetarV2 is
         uint256 borrowAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable {
+    ) external payable allowed(user) {
         _mintAndLend(
             singularity,
             bingBang,
@@ -602,7 +609,7 @@ contract MagnetarV2 is
         uint256 collateralShare,
         bool withdraw,
         bytes calldata withdrawData
-    ) external payable {
+    ) external payable allowed(user) {
         _removeAssetAndRepay(
             singularity,
             bingBang,
@@ -641,10 +648,6 @@ contract MagnetarV2 is
         if (!success && !allowFailure) {
             _getRevertMsg(returnData);
         }
-    }
-
-    function _checkSender(address sent) private view {
-        require(msg.sender == sent, "MagnetarV2: Unauthorized");
     }
 
     function _getRevertMsg(bytes memory _returnData) private pure {
