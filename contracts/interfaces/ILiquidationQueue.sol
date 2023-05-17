@@ -53,7 +53,7 @@ interface ILiquidationQueue {
         uint256 discountedBidderAmount;
     }
 
-     // ************** //
+    // ************** //
     // *** EVENTS *** //
     // ************** //
     /// @notice event emitted when a bid is placed
@@ -100,7 +100,6 @@ interface ILiquidationQueue {
     event BidSwapperUpdated(IBidder indexed _old, address indexed _new);
     /// @notice event emitted when usdo swapper is updated
     event UsdoSwapperUpdated(IBidder indexed _old, address indexed _new);
-
 
     function lqAssetId() external view returns (uint256);
 
