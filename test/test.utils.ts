@@ -1435,9 +1435,9 @@ export async function registerFork() {
     const usdtAddress = process.env.USDT!;
     const wethAddress = process.env.WETH!;
 
-    const usdc = await ethers.getContractAt('IERC20', usdcAddress);
-    const usdt = await ethers.getContractAt('IERC20', usdtAddress);
-    const weth = await ethers.getContractAt('IERC20', wethAddress);
+    const usdc = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdcAddress);
+    const usdt = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdtAddress);
+    const weth = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', wethAddress);
 
     const YieldBoxURIBuilder = new YieldBoxURIBuilder__factory(deployer);
     const YieldBox = new YieldBox__factory(deployer);

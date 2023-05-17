@@ -339,7 +339,7 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param user The bidder.
     /// @param pool To which pool the bid should go.
     /// @param amount The amount in asset to bid.
-    function bid(address user, uint256 pool, uint256 amount) external Active {
+    function bid(address user, uint256 pool, uint256 amount) external override Active {
         require(pool <= MAX_BID_POOLS, "LQ: premium too high");
         require(amount >= liquidationQueueMeta.minBidAmount, "LQ: bid too low");
 
@@ -359,7 +359,7 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @dev Spam vector attack is mitigated the min amount req., 10min CD + activation fees.
     /// @param user The user to activate the bid for.
     /// @param pool The target pool.
-    function activateBid(address user, uint256 pool) external {
+    function activateBid(address user, uint256 pool) external override {
         Bidder memory bidder = bidPools[pool].users[user];
 
         require(bidder.timestamp > 0, "LQ: bid not available"); //fail early
@@ -420,7 +420,7 @@ contract LiquidationQueue is ILiquidationQueue {
     function removeBid(
         address user,
         uint256 pool
-    ) external returns (uint256 amountRemoved) {
+    ) external override returns (uint256 amountRemoved) {
         bool isUsdo = bidPools[pool].users[msg.sender].isUsdo;
         amountRemoved = isUsdo
             ? bidPools[pool].users[msg.sender].usdoAmount
@@ -467,7 +467,7 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @notice Redeem a balance.
     /// @dev `msg.sender` is used as the redeemer.
     /// @param to The address to redeem to.
-    function redeem(address to) external {
+    function redeem(address to) external override {
         require(balancesDue[msg.sender] > 0, "LQ: No balance due");
 
         uint256 balance = balancesDue[msg.sender];

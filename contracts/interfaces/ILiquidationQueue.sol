@@ -53,7 +53,25 @@ interface ILiquidationQueue {
         uint256 discountedBidderAmount;
     }
 
+    function lqAssetId() external view returns (uint256);
+    function marketAssetId() external view returns (uint256);
+    function liquidatedAssetId() external view returns (uint256);
+
     function init(LiquidationQueueMeta calldata, address singularity) external;
+
+    function market() external view returns (string memory);
+    function getOrderBookSize(uint256 pool) external view returns (uint256 size);
+    function getOrderBookPoolEntries(
+        uint256 pool
+    ) external view returns (OrderBookPoolEntry[] memory x);
+    function getBidPoolUserInfo(
+        uint256 pool,
+        address user
+    ) external view returns (Bidder memory);
+    function userBidIndexLength(
+        address user,
+        uint256 pool
+    ) external view returns (uint256 len);
 
     function onlyOnce() external view returns (bool);
 
@@ -66,10 +84,25 @@ interface ILiquidationQueue {
         view
         returns (uint256 i, bool available, uint256 totalAmount);
 
+    function bidWithStable(
+        address user,
+        uint256 pool,
+        uint256 stableAssetId,
+        uint256 amountIn,
+        bytes calldata data
+    ) external;
+
+    function bid(address user, uint256 pool, uint256 amount) external;
+    function activateBid(address user, uint256 pool) external;
+    function removeBid(
+        address user,
+        uint256 pool
+    ) external returns (uint256 amountRemoved);
+    function redeem(address to) external;
+
     function executeBids(
         uint256 collateralAmountToLiquidate,
         bytes calldata swapData
     ) external returns (uint256 amountExecuted, uint256 collateralLiquidated);
 
-    function lqAssetId() external view returns(uint256);
 }
