@@ -53,21 +53,78 @@ interface ILiquidationQueue {
         uint256 discountedBidderAmount;
     }
 
+     // ************** //
+    // *** EVENTS *** //
+    // ************** //
+    /// @notice event emitted when a bid is placed
+    event Bid(
+        address indexed caller,
+        address indexed bidder,
+        uint256 indexed pool,
+        uint256 usdoAmount,
+        uint256 liquidatedAssetAmount,
+        uint256 timestamp
+    );
+    /// @notice event emitted when a bid is activated
+    event ActivateBid(
+        address indexed caller,
+        address indexed bidder,
+        uint256 indexed pool,
+        uint256 usdoAmount,
+        uint256 liquidatedAssetAmount,
+        uint256 collateralValue,
+        uint256 timestamp
+    );
+    /// @notice event emitted a bid is removed
+    event RemoveBid(
+        address indexed caller,
+        address indexed bidder,
+        uint256 indexed pool,
+        uint256 usdoAmount,
+        uint256 liquidatedAssetAmount,
+        uint256 collateralValue,
+        uint256 timestamp
+    );
+    /// @notice event emitted when bids are executed
+    event ExecuteBids(
+        address indexed caller,
+        uint256 indexed pool,
+        uint256 usdoAmountExecuted,
+        uint256 liquidatedAssetAmountExecuted,
+        uint256 collateralLiquidated,
+        uint256 timestamp
+    );
+    /// @notice event emitted when funds are redeemed
+    event Redeem(address indexed redeemer, address indexed to, uint256 amount);
+    /// @notice event emitted when bid swapper is updated
+    event BidSwapperUpdated(IBidder indexed _old, address indexed _new);
+    /// @notice event emitted when usdo swapper is updated
+    event UsdoSwapperUpdated(IBidder indexed _old, address indexed _new);
+
+
     function lqAssetId() external view returns (uint256);
+
     function marketAssetId() external view returns (uint256);
+
     function liquidatedAssetId() external view returns (uint256);
 
     function init(LiquidationQueueMeta calldata, address singularity) external;
 
     function market() external view returns (string memory);
-    function getOrderBookSize(uint256 pool) external view returns (uint256 size);
+
+    function getOrderBookSize(
+        uint256 pool
+    ) external view returns (uint256 size);
+
     function getOrderBookPoolEntries(
         uint256 pool
     ) external view returns (OrderBookPoolEntry[] memory x);
+
     function getBidPoolUserInfo(
         uint256 pool,
         address user
     ) external view returns (Bidder memory);
+
     function userBidIndexLength(
         address user,
         uint256 pool
@@ -93,16 +150,18 @@ interface ILiquidationQueue {
     ) external;
 
     function bid(address user, uint256 pool, uint256 amount) external;
+
     function activateBid(address user, uint256 pool) external;
+
     function removeBid(
         address user,
         uint256 pool
     ) external returns (uint256 amountRemoved);
+
     function redeem(address to) external;
 
     function executeBids(
         uint256 collateralAmountToLiquidate,
         bytes calldata swapData
     ) external returns (uint256 amountExecuted, uint256 collateralLiquidated);
-
 }

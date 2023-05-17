@@ -85,54 +85,6 @@ contract LiquidationQueue is ILiquidationQueue {
     uint256 private constant WITHDRAWAL_FEE = 50; // 0.5%
     uint256 private constant WITHDRAWAL_FEE_PRECISION = 10_000;
 
-    // ************** //
-    // *** EVENTS *** //
-    // ************** //
-    /// @notice event emitted when a bid is placed
-    event Bid(
-        address indexed caller,
-        address indexed bidder,
-        uint256 indexed pool,
-        uint256 usdoAmount,
-        uint256 liquidatedAssetAmount,
-        uint256 timestamp
-    );
-    /// @notice event emitted when a bid is activated
-    event ActivateBid(
-        address indexed caller,
-        address indexed bidder,
-        uint256 indexed pool,
-        uint256 usdoAmount,
-        uint256 liquidatedAssetAmount,
-        uint256 collateralValue,
-        uint256 timestamp
-    );
-    /// @notice event emitted a bid is removed
-    event RemoveBid(
-        address indexed caller,
-        address indexed bidder,
-        uint256 indexed pool,
-        uint256 usdoAmount,
-        uint256 liquidatedAssetAmount,
-        uint256 collateralValue,
-        uint256 timestamp
-    );
-    /// @notice event emitted when bids are executed
-    event ExecuteBids(
-        address indexed caller,
-        uint256 indexed pool,
-        uint256 usdoAmountExecuted,
-        uint256 liquidatedAssetAmountExecuted,
-        uint256 collateralLiquidated,
-        uint256 timestamp
-    );
-    /// @notice event emitted when funds are redeemed
-    event Redeem(address indexed redeemer, address indexed to, uint256 amount);
-    /// @notice event emitted when bid swapper is updated
-    event BidSwapperUpdated(IBidder indexed _old, address indexed _new);
-    /// @notice event emitted when usdo swapper is updated
-    event UsdoSwapperUpdated(IBidder indexed _old, address indexed _new);
-
     // ***************** //
     // *** MODIFIERS *** //
     // ***************** //
@@ -339,7 +291,11 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param user The bidder.
     /// @param pool To which pool the bid should go.
     /// @param amount The amount in asset to bid.
-    function bid(address user, uint256 pool, uint256 amount) external override Active {
+    function bid(
+        address user,
+        uint256 pool,
+        uint256 amount
+    ) external override Active {
         require(pool <= MAX_BID_POOLS, "LQ: premium too high");
         require(amount >= liquidationQueueMeta.minBidAmount, "LQ: bid too low");
 

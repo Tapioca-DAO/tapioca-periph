@@ -373,4 +373,145 @@ function userBidIndexLength(address user, uint256 pool) external view returns (u
 
 
 
+## Events
+
+### ActivateBid
+
+```solidity
+event ActivateBid(address indexed caller, address indexed bidder, uint256 indexed pool, uint256 usdoAmount, uint256 liquidatedAssetAmount, uint256 collateralValue, uint256 timestamp)
+```
+
+event emitted when a bid is activated
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| caller `indexed` | address | undefined |
+| bidder `indexed` | address | undefined |
+| pool `indexed` | uint256 | undefined |
+| usdoAmount  | uint256 | undefined |
+| liquidatedAssetAmount  | uint256 | undefined |
+| collateralValue  | uint256 | undefined |
+| timestamp  | uint256 | undefined |
+
+### Bid
+
+```solidity
+event Bid(address indexed caller, address indexed bidder, uint256 indexed pool, uint256 usdoAmount, uint256 liquidatedAssetAmount, uint256 timestamp)
+```
+
+event emitted when a bid is placed
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| caller `indexed` | address | undefined |
+| bidder `indexed` | address | undefined |
+| pool `indexed` | uint256 | undefined |
+| usdoAmount  | uint256 | undefined |
+| liquidatedAssetAmount  | uint256 | undefined |
+| timestamp  | uint256 | undefined |
+
+### BidSwapperUpdated
+
+```solidity
+event BidSwapperUpdated(contract IBidder indexed _old, address indexed _new)
+```
+
+event emitted when bid swapper is updated
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _old `indexed` | contract IBidder | undefined |
+| _new `indexed` | address | undefined |
+
+### ExecuteBids
+
+```solidity
+event ExecuteBids(address indexed caller, uint256 indexed pool, uint256 usdoAmountExecuted, uint256 liquidatedAssetAmountExecuted, uint256 collateralLiquidated, uint256 timestamp)
+```
+
+event emitted when bids are executed
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| caller `indexed` | address | undefined |
+| pool `indexed` | uint256 | undefined |
+| usdoAmountExecuted  | uint256 | undefined |
+| liquidatedAssetAmountExecuted  | uint256 | undefined |
+| collateralLiquidated  | uint256 | undefined |
+| timestamp  | uint256 | undefined |
+
+### Redeem
+
+```solidity
+event Redeem(address indexed redeemer, address indexed to, uint256 amount)
+```
+
+event emitted when funds are redeemed
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| redeemer `indexed` | address | undefined |
+| to `indexed` | address | undefined |
+| amount  | uint256 | undefined |
+
+### RemoveBid
+
+```solidity
+event RemoveBid(address indexed caller, address indexed bidder, uint256 indexed pool, uint256 usdoAmount, uint256 liquidatedAssetAmount, uint256 collateralValue, uint256 timestamp)
+```
+
+event emitted a bid is removed
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| caller `indexed` | address | undefined |
+| bidder `indexed` | address | undefined |
+| pool `indexed` | uint256 | undefined |
+| usdoAmount  | uint256 | undefined |
+| liquidatedAssetAmount  | uint256 | undefined |
+| collateralValue  | uint256 | undefined |
+| timestamp  | uint256 | undefined |
+
+### UsdoSwapperUpdated
+
+```solidity
+event UsdoSwapperUpdated(contract IBidder indexed _old, address indexed _new)
+```
+
+event emitted when usdo swapper is updated
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _old `indexed` | contract IBidder | undefined |
+| _new `indexed` | address | undefined |
+
+
 
