@@ -70,6 +70,23 @@ function init(ILiquidationQueue.LiquidationQueueMeta, address singularity) exter
 | _0 | ILiquidationQueue.LiquidationQueueMeta | undefined |
 | singularity | address | undefined |
 
+### lqAssetId
+
+```solidity
+function lqAssetId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### onlyOnce
 
 ```solidity

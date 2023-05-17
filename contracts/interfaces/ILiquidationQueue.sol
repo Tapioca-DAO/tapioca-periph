@@ -70,4 +70,6 @@ interface ILiquidationQueue {
         uint256 collateralAmountToLiquidate,
         bytes calldata swapData
     ) external returns (uint256 amountExecuted, uint256 collateralLiquidated);
+
+    function lqAssetId() external view returns(uint256);
 }
