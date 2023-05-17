@@ -61,6 +61,28 @@ function feeTo() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### isMarketRegistered
+
+```solidity
+function isMarketRegistered(address market) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### swappers
 
 ```solidity
