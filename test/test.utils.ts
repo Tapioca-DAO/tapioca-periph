@@ -494,8 +494,8 @@ async function registerLiquidationQueue(
     feeCollector: string,
     staging?: boolean,
 ) {
-    const LiquidationQueue = new LiquidationQueue__factory(deployer);
-    const liquidationQueue = await LiquidationQueue.deploy();
+    const LiquidationQueueFactory = await ethers.getContractFactory('LiquidationQueue');
+    const liquidationQueue = await LiquidationQueueFactory.deploy();
     log(
         `Deployed LiquidationQueue ${liquidationQueue.address} with no arguments`,
         staging,
@@ -686,8 +686,8 @@ async function registerUniUsdoToWethBidder(
     wethAssetId: BigNumber,
     staging?: boolean,
 ) {
-    const UniUsdoToWethBidder = new UniUsdoToWethBidder__factory(deployer);
-    const usdoToWethBidder = await UniUsdoToWethBidder.deploy(
+    const UniUsdoToWethBidderFactory = await ethers.getContractFactory('UniUsdoToWethBidder');
+    const usdoToWethBidder = await UniUsdoToWethBidderFactory.deploy(
         uniSwapper.address,
         wethAssetId,
     );
@@ -734,8 +734,10 @@ async function deployCurveStableToUsdoBidder(
         staging,
     );
 
-    const CurveStableToUsdoBidder = new CurveStableToUsdoBidder__factory(deployer);
-    const stableToUsdoBidder = await CurveStableToUsdoBidder.deploy(
+    const CurveStableToUsdoBidderFactory = await ethers.getContractFactory(
+        'CurveStableToUsdoBidder',
+    );
+    const stableToUsdoBidder = await CurveStableToUsdoBidderFactory.deploy(
         curveSwapper.address,
         2,
     );
@@ -858,8 +860,8 @@ async function createWethUsd0Singularity(
         staging,
     );
 
-    const LiquidationQueue = new LiquidationQueue__factory(deployer);
-    const liquidationQueue = await LiquidationQueue.deploy();
+    const LiquidationQueueFactory = await ethers.getContractFactory('LiquidationQueue');
+    const liquidationQueue = await LiquidationQueueFactory.deploy();
     log(
         `Deployed WethUsd0LiquidationQueue at ${liquidationQueue.address} with no arguments`,
         staging,

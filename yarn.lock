@@ -5793,10 +5793,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.3.93:
-  version "1.3.93"
-  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.3.93.tgz#a1d65ee3499c2f2baa22ade82b3f9644cb2a5320"
-  integrity sha512-Iw+3hSh6CkaEUqQ5af6HMXOzuD+YpSBwvEuEsrwyPektt8eVmCzbbqh2ppG+QsHlEcXzuyH7165yfzmIVUfv9g==
+tapioca-sdk@^1.3.100:
+  version "1.3.100"
+  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.3.100.tgz#85b0040ef5cfb9af6f0586c7c254ca3d0257fe51"
+  integrity sha512-HUcXdRQwjsRcNB6JPzBpU2Sw9eEu1s0u/f95lJuu8UT+LMBTYQJhBnRfczrNdLGmB0MLTrGzpdUr4dK7o3wxRw==
   dependencies:
     ethers "^5.4.7"
     fs-extra "^11.1.1"
