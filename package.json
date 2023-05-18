@@ -8,7 +8,7 @@
         "gen:sdk": "npx hardhat exportSDK --network",
         "list": "npx hardhat listDeploy --network",
         "size": "npx hardhat size-contracts",
-        "test": "npx hardhat test --max-memory 12096",
+        "test": "npx hardhat test",
         "prepare": "husky install",
         "lint:ts": "eslint ./*.ts --fix",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",

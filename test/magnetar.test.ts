@@ -14,7 +14,6 @@ import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar
 import TapiocaOFTArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/TapiocaOFT.json';
 
 import {
-    LiquidationQueue__factory,
     SGLLendingBorrowing__factory,
     SGLLiquidation__factory,
     Singularity,
@@ -113,14 +112,16 @@ describe('MagnetarV2', () => {
                 ),
                 SingularityArtifact.abi,
                 ethers.provider,
-            );
+            ).connect(deployer);
 
             //Deploy & set LiquidationQueue
             await usd0.setMinterStatus(wethUsdoSingularity.address, true);
             await usd0.setBurnerStatus(wethUsdoSingularity.address, true);
 
-            const LiquidationQueue = new LiquidationQueue__factory(deployer);
-            const liquidationQueue = await LiquidationQueue.deploy();
+            const LiquidationQueueFactory = await ethers.getContractFactory(
+                'LiquidationQueue',
+            );
+            const liquidationQueue = await LiquidationQueueFactory.deploy();
 
             const feeCollector = new ethers.Wallet(
                 ethers.Wallet.createRandom().privateKey,
@@ -187,6 +188,7 @@ describe('MagnetarV2', () => {
             await weth.approve(yieldBox.address, ethers.constants.MaxUint256);
             await weth.approve(magnetar.address, ethers.constants.MaxUint256);
 
+            await wethUsdoSingularity.approve(magnetar.address, ethers.constants.MaxUint256);
             const calls = [
                 {
                     id: 100,
@@ -686,14 +688,15 @@ describe('MagnetarV2', () => {
                 ),
                 SingularityArtifact.abi,
                 ethers.provider,
-            );
+            ).connect(deployer);
 
             //Deploy & set LiquidationQueue
             await usd0.setMinterStatus(wethUsdoSingularity.address, true);
             await usd0.setBurnerStatus(wethUsdoSingularity.address, true);
-
-            const LiquidationQueue = new LiquidationQueue__factory(deployer);
-            const liquidationQueue = await LiquidationQueue.deploy();
+            const LiquidationQueueFactory = await ethers.getContractFactory(
+                'LiquidationQueue',
+            );
+            const liquidationQueue = await LiquidationQueueFactory.deploy();
 
             const feeCollector = new ethers.Wallet(
                 ethers.Wallet.createRandom().privateKey,
@@ -826,6 +829,7 @@ describe('MagnetarV2', () => {
                 [deployer.address, deployer.address, false, usdoShare],
             );
 
+            await wethUsdoSingularity.approve(magnetar.address, ethers.constants.MaxUint256);
             const calls = [
                 {
                     id: 2,
@@ -1444,14 +1448,14 @@ describe('MagnetarV2', () => {
             );
             const permitLendStruct: BaseTOFT.IApprovalStruct = {
                 allowFailure: false,
-                deadline,
+                target: assetCollateralSingularity.address,
                 owner: deployer.address,
                 spender: magnetar.address,
                 value: permitLendAmount,
+                deadline,
+                v: permitLend.v,
                 r: permitLend.r,
                 s: permitLend.s,
-                v: permitLend.v,
-                target: assetCollateralSingularity.address,
             };
 
             // ------------------- Actual TOFT test -------------------
@@ -1462,6 +1466,31 @@ describe('MagnetarV2', () => {
                 await assetCollateralSingularity.balanceOf(deployer.address),
             ).to.be.equal(0);
             assetCollateralSingularity.approve(magnetar.address, 1);
+
+            // const LendParamsStruct = "(uint256 amount, address marketHelper, address market)";
+            // const SendOptionsStruct = "(uint256 extraGasLimit, address zroPaymentAddress)";
+            // const ApprovalStruct = "(bool allowFailure,address target, address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)";
+            // const ABI = [
+            //     `function sendToYBAndLend(address from, address to, uint16 chain, ${LendParamsStruct} lendParams, ${SendOptionsStruct} options, ${ApprovalStruct}[] approvlas)`,
+            // ];
+            // const iface = new ethers.utils.Interface(ABI);
+            // const testSendToYbAndLend = iface.encodeFunctionData('sendToYBAndLend',
+            //     [
+            //         deployer.address,
+            //         deployer.address,
+            //         1,
+            //         {
+            //             amount: assetMintVal,
+            //             marketHelper: magnetar.address,
+            //             market: assetCollateralSingularity.address,
+            //         },
+            //         {
+            //             extraGasLimit: 1_000_000,
+            //             zroPaymentAddress: ethers.constants.AddressZero,
+            //         },
+            //         [permitLendStruct],
+            //     ],
+            // );
 
             const sendToYbAndLendFn = assetLinked.interface.encodeFunctionData(
                 'sendToYBAndLend',
@@ -1476,7 +1505,6 @@ describe('MagnetarV2', () => {
                     },
                     {
                         extraGasLimit: 1_000_000,
-                        strategyDeposit: false,
                         zroPaymentAddress: ethers.constants.AddressZero,
                     },
                     [permitLendStruct],
@@ -2487,6 +2515,11 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+
+            await wethBigBangMarket.approveBorrow(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             await magnetar.mintAndLend(
                 wethUsdoSingularity.address,
                 wethBigBangMarket.address,
@@ -2588,6 +2621,10 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+            await wethBigBangMarket.approveBorrow(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            ); 
 
             await magnetar.mintAndLend(
                 wethUsdoSingularity.address,
@@ -2706,6 +2743,10 @@ describe('MagnetarV2', () => {
             await wethBigBangMarket.updateOperator(magnetar.address, true);
             await weth.approve(magnetar.address, wethMintVal);
             await wethUsdoSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
+            await wethBigBangMarket.approveBorrow(
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
