@@ -32,6 +32,7 @@ import {
     BaseTOFT,
     TapiocaOFT__factory,
 } from 'tapioca-sdk/dist/typechain/TapiocaZ';
+import { ITapiocaOFT__factory } from '../typechain';
 
 const MAX_DEADLINE = 9999999999999;
 
@@ -1467,33 +1468,14 @@ describe('MagnetarV2', () => {
             ).to.be.equal(0);
             assetCollateralSingularity.approve(magnetar.address, 1);
 
-            // const LendParamsStruct = "(uint256 amount, address marketHelper, address market)";
-            // const SendOptionsStruct = "(uint256 extraGasLimit, address zroPaymentAddress)";
-            // const ApprovalStruct = "(bool allowFailure,address target, address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)";
-            // const ABI = [
-            //     `function sendToYBAndLend(address from, address to, uint16 chain, ${LendParamsStruct} lendParams, ${SendOptionsStruct} options, ${ApprovalStruct}[] approvlas)`,
-            // ];
-            // const iface = new ethers.utils.Interface(ABI);
-            // const testSendToYbAndLend = iface.encodeFunctionData('sendToYBAndLend',
-            //     [
-            //         deployer.address,
-            //         deployer.address,
-            //         1,
-            //         {
-            //             amount: assetMintVal,
-            //             marketHelper: magnetar.address,
-            //             market: assetCollateralSingularity.address,
-            //         },
-            //         {
-            //             extraGasLimit: 1_000_000,
-            //             zroPaymentAddress: ethers.constants.AddressZero,
-            //         },
-            //         [permitLendStruct],
-            //     ],
-            // );
-
-            const sendToYbAndLendFn = assetLinked.interface.encodeFunctionData(
-                'sendToYBAndLend',
+            const LendParamsStruct = "(uint256 amount, address marketHelper, address market)";
+            const SendOptionsStruct = "(uint256 extraGasLimit, address zroPaymentAddress)";
+            const ApprovalStruct = "(bool allowFailure,address target, address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)";
+            const ABI = [
+                `function sendToYBAndLend(address from, address to, uint16 chain, ${LendParamsStruct} lendParams, ${SendOptionsStruct} options, ${ApprovalStruct}[] approvlas)`,
+            ];
+            const iface = new ethers.utils.Interface(ABI);
+            const testSendToYbAndLend = iface.encodeFunctionData('sendToYBAndLend',
                 [
                     deployer.address,
                     deployer.address,
@@ -1511,10 +1493,34 @@ describe('MagnetarV2', () => {
                 ],
             );
 
+            // const sendToYbAndLendFn = assetLinked.interface.encodeFunctionData(
+            //     'sendToYBAndLend',
+            //     [
+            //         deployer.address,
+            //         deployer.address,
+            //         1,
+            //         {
+            //             amount: assetMintVal,
+            //             marketHelper: magnetar.address,
+            //             market: assetCollateralSingularity.address,
+            //         },
+            //         {
+            //             extraGasLimit: 1_000_000,
+            //             zroPaymentAddress: ethers.constants.AddressZero,
+            //         },
+            //         [permitLendStruct],
+            //     ],
+            // );
+
             await assetLinked.approve(
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+
+            await assetCollateralSingularity
+                .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
+            await assetCollateralSingularity
+                .approve(magnetar.address, ethers.constants.MaxUint256);
 
             await magnetar.connect(deployer).burst(
                 [
@@ -1523,7 +1529,7 @@ describe('MagnetarV2', () => {
                         target: assetLinked.address,
                         value: ethers.utils.parseEther('2'),
                         allowFailure: false,
-                        call: sendToYbAndLendFn,
+                        call: testSendToYbAndLend,
                     },
                 ],
                 {
@@ -2624,7 +2630,7 @@ describe('MagnetarV2', () => {
             await wethBigBangMarket.approveBorrow(
                 magnetar.address,
                 ethers.constants.MaxUint256,
-            ); 
+            );
 
             await magnetar.mintAndLend(
                 wethUsdoSingularity.address,
@@ -2790,9 +2796,8 @@ describe('MagnetarV2', () => {
                 false,
                 encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
             );
-            const wethCollateralAfter = await wethBigBangMarket.userCollateralShare(
-                deployer.address,
-            );
+            const wethCollateralAfter =
+                await wethBigBangMarket.userCollateralShare(deployer.address);
 
             expect(wethCollateralAfter.lt(wethCollateralBefore)).to.be.true;
 
@@ -3142,6 +3147,71 @@ describe('MagnetarV2', () => {
         );
     });
 
+    describe('strategy', () => {
+        it('should decode send to strategy correctly', async () => {
+            const { deployer, magnetar, yieldBox } = await loadFixture(register);
+
+            const sendToStrategyEncoded =
+                ITapiocaOFT__factory.createInterface().encodeFunctionData(
+                    'sendToStrategy',
+                    [
+                        yieldBox.address,
+                        yieldBox.address,
+                        100,
+                        1000,
+                        1,
+                        10109,
+                        {
+                            extraGasLimit: 0,
+                            zroPaymentAddress: ethers.constants.AddressZero,
+                            wrap: false,
+                        },
+                    ],
+                );
+
+            await expect(
+                magnetar.burst([
+                    {
+                        id: 305,
+                        target: deployer.address,
+                        value: 0,
+                        allowFailure: false,
+                        call: sendToStrategyEncoded,
+                    },
+                ]),
+            ).to.be.revertedWith('MagnetarV2: operator not approved');
+        });
+
+        it('should decode send to strategy correctly', async () => {
+            const { deployer, magnetar, yieldBox } = await loadFixture(register);
+
+            const encoded =
+                ITapiocaOFT__factory.createInterface().encodeFunctionData(
+                    'retrieveFromStrategy',
+                    [
+                        yieldBox.address,
+                        100,
+                        1000,
+                        1,
+                        10109,
+                        ethers.constants.AddressZero,
+                        ethers.utils.toUtf8Bytes(''),
+                    ],
+                );
+
+            await expect(
+                magnetar.burst([
+                    {
+                        id: 306,
+                        target: deployer.address,
+                        value: 0,
+                        allowFailure: false,
+                        call: encoded,
+                    },
+                ]),
+            ).to.be.revertedWith('MagnetarV2: operator not approved');
+        });
+    });
 });
 
 async function getYieldBoxPermitSignature(

@@ -193,7 +193,7 @@ function isTrustedRemote(uint16 lzChainId, bytes path) external view returns (bo
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 
@@ -206,6 +206,7 @@ function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, ui
 |---|---|---|
 | _from | address | undefined |
 | amount | uint256 | undefined |
+| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
@@ -234,7 +235,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
 ```
 
 
@@ -248,6 +249,7 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 asse
 | _from | address | undefined |
 | _to | address | undefined |
 | amount | uint256 | undefined |
+| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | options | ITapiocaOFT.ISendOptions | undefined |

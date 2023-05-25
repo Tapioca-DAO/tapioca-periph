@@ -68,21 +68,24 @@ abstract contract MagnetarV2ActionsData {
         IUSDOBase.IApproval[] approvals;
     }
 
-    struct TOFTSendToYBData {
+    struct TOFTSendToStrategyData {
         address from;
         address to;
         uint256 amount;
+        uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
         ITapiocaOFT.ISendOptions options;
     }
-    struct USDOSendToYBData {
+
+    struct TOFTRetrieveFromStrategyData {
         address from;
-        address to;
         uint256 amount;
+        uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
-        IUSDOBase.ISendOptions options;
+        address zroPaymentAddress;
+        bytes airdropAdapterParam;
     }
 
     struct YieldBoxDepositData {

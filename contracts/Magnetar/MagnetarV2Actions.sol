@@ -21,6 +21,8 @@ abstract contract MagnetarV2Actions {
     uint16 internal constant TOFT_SEND_APPROVAL = 302;
     uint16 internal constant TOFT_SEND_AND_BORROW = 303;
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
+    uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
+    uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
 
     uint16 internal constant SET_APPROVAL = 400;
 }
