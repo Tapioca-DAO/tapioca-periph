@@ -188,29 +188,6 @@ Return the equivalent of borrow part in asset amount.
 |---|---|---|
 | amount | uint256 | The equivalent of borrow part in asset amount. |
 
-### getCollateralAmountForShare
-
-```solidity
-function getCollateralAmountForShare(contract IMarket market, uint256 share) external view returns (uint256 amount)
-```
-
-Calculate the collateral amount off the shares.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| market | contract IMarket | the Singularity or BigBang address |
-| share | uint256 | The shares. |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | The amount. |
-
 ### getCollateralSharesForBorrowPart
 
 ```solidity

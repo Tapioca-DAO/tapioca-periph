@@ -61,18 +61,6 @@ contract MagnetarV2 is
         return _bigBangMarketInfo(who, markets);
     }
 
-    /// @notice Calculate the collateral amount off the shares.
-    /// @param market the Singularity or BigBang address
-    /// @param share The shares.
-    /// @return amount The amount.
-    function getCollateralAmountForShare(
-        IMarket market,
-        uint256 share
-    ) public view returns (uint256 amount) {
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
-        return yieldBox.toAmount(market.collateralId(), share, false);
-    }
-
     /// @notice Calculate the collateral shares that are needed for `borrowPart`,
     /// taking the current exchange rate into account.
     /// @param market the Singularity or BigBang address
@@ -418,6 +406,59 @@ contract MagnetarV2 is
                     lendParams,
                     options,
                     approvals
+                );
+            } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
+                TOFTSendToStrategyData memory data = abi.decode(
+                    _action.call[4:],
+                    (TOFTSendToStrategyData)
+                );
+                _checkSender(data.from);
+
+                ITapiocaOFT(_action.target).sendToStrategy{
+                    value: _action.value
+                }(
+                    msg.sender,
+                    data.to,
+                    data.amount,
+                    data.share,
+                    data.assetId,
+                    data.lzDstChainId,
+                    data.options
+                );
+            } else if (_action.id == TOFT_RETRIEVE_FROM_STRATEGY) {
+                (
+                    address from,
+                    uint256 amount,
+                    uint256 share,
+                    uint256 assetId,
+                    uint16 lzDstChainId,
+                    address zroPaymentAddress,
+                    bytes memory airdropAdapterParam
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            uint256,
+                            uint256,
+                            uint256,
+                            uint16,
+                            address,
+                            bytes
+                        )
+                    );
+
+                _checkSender(from);
+
+                ITapiocaOFT(_action.target).retrieveFromStrategy{
+                    value: _action.value
+                }(
+                    msg.sender,
+                    amount,
+                    share,
+                    assetId,
+                    lzDstChainId,
+                    zroPaymentAddress,
+                    airdropAdapterParam
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_AND_LEND) {
                 HelperLendData memory data = abi.decode(

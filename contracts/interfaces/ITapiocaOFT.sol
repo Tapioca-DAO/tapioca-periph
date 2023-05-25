@@ -91,6 +91,7 @@ interface ITapiocaOFT is ISendFrom {
         address _from,
         address _to,
         uint256 amount,
+        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         ISendOptions calldata options
@@ -99,6 +100,7 @@ interface ITapiocaOFT is ISendFrom {
     function retrieveFromStrategy(
         address _from,
         uint256 amount,
+        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
