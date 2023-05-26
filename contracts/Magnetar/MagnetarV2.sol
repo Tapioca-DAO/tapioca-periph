@@ -250,6 +250,7 @@ contract MagnetarV2 is
                     msg.sender,
                     data.to,
                     data.skim,
+                    data.amount,
                     data.share
                 );
             } else if (_action.id == MARKET_BORROW) {
