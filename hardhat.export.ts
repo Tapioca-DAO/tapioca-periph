@@ -9,6 +9,7 @@ import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
 import { HttpNetworkConfig } from 'hardhat/types';
 import 'hardhat-tracer';
+import { TAPIOCA_PROJECTS_NAME } from './gitsub_tapioca-sdk/src/api/config';
 
 dotenv.config();
 
@@ -42,7 +43,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: 'tapioca-periphery' }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
+    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
     solidity: {
         compilers: [
             {
@@ -66,7 +67,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
             saveDeployments: false,
             chainId: 1,
             forking: {
-                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
                 blockNumber: 17068626,
             },
             hardfork: 'merge',
