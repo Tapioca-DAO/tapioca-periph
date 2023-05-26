@@ -100,6 +100,7 @@ abstract contract MagnetarV2ActionsData {
         address from;
         address to;
         bool skim;
+        uint256 amount;
         uint256 share;
     }
 

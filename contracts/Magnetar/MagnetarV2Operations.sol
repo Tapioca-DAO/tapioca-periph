@@ -183,6 +183,7 @@ abstract contract MagnetarV2Operations {
             deposit ? address(this) : user,
             user,
             false,
+            collateralAmount,
             _share
         );
 
@@ -322,7 +323,13 @@ abstract contract MagnetarV2Operations {
         if (collateralAmount > 0) {
             //add collateral to BingBang
             _setApprovalForYieldBox(bingBang, yieldBox);
-            bingBang.addCollateral(address(this), user, false, _share);
+            bingBang.addCollateral(
+                address(this),
+                user,
+                false,
+                collateralAmount,
+                _share
+            );
         }
 
         //borrow from BingBang

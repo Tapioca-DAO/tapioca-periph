@@ -57,7 +57,7 @@ function addAsset(address from, address to, bool skim, uint256 share) external n
 ### addCollateral
 
 ```solidity
-function addCollateral(address from, address to, bool skim, uint256 share) external nonpayable
+function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share) external nonpayable
 ```
 
 
@@ -71,6 +71,7 @@ function addCollateral(address from, address to, bool skim, uint256 share) exter
 | from | address | undefined |
 | to | address | undefined |
 | skim | bool | undefined |
+| amount | uint256 | undefined |
 | share | uint256 | undefined |
 
 ### allowance
