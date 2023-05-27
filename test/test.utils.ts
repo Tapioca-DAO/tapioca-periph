@@ -17,14 +17,12 @@ import {
     Penrose__factory,
     Singularity__factory,
     SGLLiquidation__factory,
-    SGLLendingBorrowing__factory,
-    LiquidationQueue__factory,
     USDO,
-    UniUsdoToWethBidder__factory,
-    CurveStableToUsdoBidder__factory,
     USDO__factory,
-    CurveStableToUsdoBidder,
     BigBang__factory,
+    SGLCollateral__factory,
+    SGLBorrow__factory,
+    SGLLeverage__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -435,15 +433,20 @@ async function registerSingularity(
         staging,
     );
 
-    const SGLLendingBorrowing = new SGLLendingBorrowing__factory(deployer);
-    const _sglLendingBorrowingModule = await SGLLendingBorrowing.deploy();
-    log(
-        `Deployed WethUsdcSGLLendingBorrowing ${_sglLendingBorrowingModule.address} with no arguments`,
-        staging,
-    );
+    const SGLCollateral = new SGLCollateral__factory(deployer);
+    const _sglCollateralModule = await SGLCollateral.deploy();
+
+    const SGLBorrow = new SGLBorrow__factory(deployer);
+    const _sglBorrowModule = await SGLBorrow.deploy();
+
+    const SGLLeverage = new SGLLeverage__factory(deployer);
+    const _sglLeverageModule = await SGLLeverage.deploy();
+
 
     const data = new ethers.utils.AbiCoder().encode(
         [
+            'address',
+            'address',
             'address',
             'address',
             'address',
@@ -456,7 +459,9 @@ async function registerSingularity(
         ],
         [
             _sglLiquidationModule.address,
-            _sglLendingBorrowingModule.address,
+            _sglBorrowModule.address,
+            _sglCollateralModule.address,
+            _sglLeverageModule.address,
             bar.address,
             weth.address,
             wethAssetId,
@@ -483,7 +488,9 @@ async function registerSingularity(
     return {
         singularityMarket,
         _sglLiquidationModule,
-        _sglLendingBorrowingModule,
+        _sglCollateralModule,
+        _sglBorrowModule,
+        _sglLeverageModule
     };
 }
 
@@ -785,14 +792,15 @@ async function createWethUsd0Singularity(
         staging,
     );
 
-    const SGLLendingBorrowing = new SGLLendingBorrowing__factory(deployer);
-    const _sglLendingBorrowingModule = await SGLLendingBorrowing.deploy();
-    log(
-        `Deployed WethUsd0SGLLendingBorrowingModule ${_sglLendingBorrowingModule.address} with no arguments`,
-        staging,
-    );
+    const SGLCollateral = new SGLCollateral__factory(deployer);
+    const _sglCollateralModule = await SGLCollateral.deploy();
 
-    const collateralSwapPath = [usd0.address, weth.address];
+    const SGLBorrow = new SGLBorrow__factory(deployer);
+    const _sglBorrowModule = await SGLBorrow.deploy();
+
+    const SGLLeverage = new SGLLeverage__factory(deployer);
+    const _sglLeverageModule = await SGLLeverage.deploy();
+
 
     // Deploy WethUSD0 mock oracle
     const OracleMock = new OracleMock__factory(deployer);
@@ -816,6 +824,8 @@ async function createWethUsd0Singularity(
             'address',
             'address',
             'address',
+            'address',
+            'address',
             'uint256',
             'address',
             'uint256',
@@ -824,7 +834,9 @@ async function createWethUsd0Singularity(
         ],
         [
             _sglLiquidationModule.address,
-            _sglLendingBorrowingModule.address,
+            _sglBorrowModule.address,
+            _sglCollateralModule.address,
+            _sglLeverageModule.address,
             bar.address,
             usd0.address,
             usdoAssetId,
@@ -1098,8 +1110,15 @@ export async function register(staging?: boolean) {
         staging,
     );
     const wethUsdcSingularity = wethUsdcSingularityData.singularityMarket;
-    const _sglLendingBorrowingModule =
-        wethUsdcSingularityData._sglLendingBorrowingModule;
+    const SGLCollateral = new SGLCollateral__factory(deployer);
+    const _sglCollateralModule = await SGLCollateral.deploy();
+
+    const SGLBorrow = new SGLBorrow__factory(deployer);
+    const _sglBorrowModule = await SGLBorrow.deploy();
+
+    const SGLLeverage = new SGLLeverage__factory(deployer);
+    const _sglLeverageModule = await SGLLeverage.deploy();
+
     const _sglLiquidationModule = wethUsdcSingularityData._sglLiquidationModule;
     log(`Deployed WethUsdcSingularity ${wethUsdcSingularity.address}`, staging);
 
@@ -1275,7 +1294,9 @@ export async function register(staging?: boolean) {
         wethUsdcSingularity,
         wethBigBangMarket,
         _sglLiquidationModule,
-        _sglLendingBorrowingModule,
+        _sglCollateralModule,
+        _sglBorrowModule,
+        _sglLeverageModule,
         magnetar,
         eoa1,
         multiSwapper,
