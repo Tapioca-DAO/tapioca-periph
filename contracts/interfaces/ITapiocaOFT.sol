@@ -3,8 +3,20 @@ pragma solidity ^0.8.18;
 
 import "./ISendFrom.sol";
 
+interface ITapiocaOFTBase {
+    function isNative() external view returns (bool);
+
+     function wrap(
+        address fromAddress,
+        address toAddress,
+        uint256 amount
+    ) external;
+
+    function wrapNative(address _toAddress) external payable;
+}
+
 /// @dev used for generic TOFTs
-interface ITapiocaOFT is ISendFrom {
+interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     struct ISendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
@@ -50,8 +62,6 @@ interface ITapiocaOFT is ISendFrom {
 
     function balanceOf(address _holder) external view returns (uint256);
 
-    function isNative() external view returns (bool);
-
     function isTrustedRemote(
         uint16 lzChainId,
         bytes calldata path
@@ -66,14 +76,6 @@ interface ITapiocaOFT is ISendFrom {
     function unwrap(address _toAddress, uint256 _amount) external;
 
     function harvestFees() external;
-
-    function wrap(
-        address fromAddress,
-        address toAddress,
-        uint256 amount
-    ) external;
-
-    function wrapNative(address _toAddress) external payable;
 
     /// OFT specific methods
     function sendToYBAndBorrow(

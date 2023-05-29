@@ -61,7 +61,6 @@ contract MagnetarV2 is
         return _bigBangMarketInfo(who, markets);
     }
 
-
     /// @notice Calculate the collateral shares that are needed for `borrowPart`,
     /// taking the current exchange rate into account.
     /// @param market the Singularity or BigBang address

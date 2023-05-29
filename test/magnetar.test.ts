@@ -240,10 +240,6 @@ describe('MagnetarV2', () => {
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
-
-
-
-            hre.tracer.enabled = true;
             const borrowFn = magnetar.interface.encodeFunctionData(
                 'depositAddCollateralAndBorrow',
                 [
@@ -257,7 +253,6 @@ describe('MagnetarV2', () => {
                     encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
                 ],
             );
-            hre.tracer.enabled = false;
 
             let borrowPart = await wethUsdoSingularity.userBorrowPart(deployer.address);
             expect(borrowPart.eq(0)).to.be.true;
