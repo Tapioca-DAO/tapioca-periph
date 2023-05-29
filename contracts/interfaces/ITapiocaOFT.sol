@@ -6,7 +6,7 @@ import "./ISendFrom.sol";
 interface ITapiocaOFTBase {
     function isNative() external view returns (bool);
 
-     function wrap(
+    function wrap(
         address fromAddress,
         address toAddress,
         uint256 amount

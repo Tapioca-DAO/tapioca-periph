@@ -41,12 +41,10 @@ interface IUSDOBase {
     }
     struct ILeverageExternalContractsData {
         address swapper;
-        address proxy;
+        address magnetar;
         address tOft;
         address srcMarket;
         uint16 srcLzChainId;
-        uint256 sendToYBExtraGasLimit;
-        uint256 executeOnChainGasLimit;
         uint256 dstAssetId;
     }
 
