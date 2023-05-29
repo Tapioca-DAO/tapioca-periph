@@ -46,7 +46,7 @@ contract MagnetarV2 is
     /// @param markets the list of Singularity markets to query for
     function singularityMarketInfo(
         address who,
-        ISingularity[] memory markets
+        ISingularity[] calldata markets
     ) external view returns (SingularityInfo[] memory) {
         return _singularityMarketInfo(who, markets);
     }
@@ -56,10 +56,11 @@ contract MagnetarV2 is
     /// @param markets the list of BigBang markets to query for
     function bigBangMarketInfo(
         address who,
-        IBigBang[] memory markets
+        IBigBang[] calldata markets
     ) external view returns (BigBangInfo[] memory) {
         return _bigBangMarketInfo(who, markets);
     }
+
 
     /// @notice Calculate the collateral shares that are needed for `borrowPart`,
     /// taking the current exchange rate into account.

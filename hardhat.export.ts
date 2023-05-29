@@ -96,7 +96,10 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         outDir: './typechain',
     },
     gasReporter: {},
-    dodoc: {},
+    dodoc: {
+        runOnCompile: false,
+        freshOutput: true,
+    },
     mocha: {
         timeout: 4000000,
     },

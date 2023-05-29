@@ -26,6 +26,29 @@ interface IUSDOBase {
         address zroPaymentAddress;
     }
 
+    struct ILeverageLZData {
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        bytes airdropAdapterParam;
+        address refundAddress;
+    }
+
+    struct ILeverageSwapData {
+        address tokenOut;
+        uint256 amountOutMin;
+        bytes data;
+    }
+    struct ILeverageExternalContractsData {
+        address swapper;
+        address proxy;
+        address tOft;
+        address srcMarket;
+        uint16 srcLzChainId;
+        uint256 sendToYBExtraGasLimit;
+        uint256 executeOnChainGasLimit;
+        uint256 dstAssetId;
+    }
+
     function mint(address _to, uint256 _amount) external;
 
     function burn(address _from, uint256 _amount) external;
@@ -37,6 +60,14 @@ interface IUSDOBase {
         ILendParams calldata lendParams,
         ISendOptions calldata options,
         IApproval[] calldata approvals
+    ) external payable;
+
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        ILeverageLZData calldata lzData,
+        ILeverageSwapData calldata swapData,
+        ILeverageExternalContractsData calldata externalData
     ) external payable;
 }
 
