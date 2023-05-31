@@ -34,7 +34,6 @@ interface IUSDOBase {
     }
 
     struct ILeverageSwapData {
-        address tokenIn;
         address tokenOut;
         uint256 amountOutMin;
         bytes data;
@@ -44,8 +43,6 @@ interface IUSDOBase {
         address magnetar;
         address tOft;
         address srcMarket;
-        uint16 srcLzChainId;
-        uint256 dstAssetId;
     }
 
     function mint(address _to, uint256 _amount) external;
