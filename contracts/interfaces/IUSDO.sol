@@ -61,7 +61,6 @@ interface IUSDOBase {
     function sendForLeverage(
         uint256 amount,
         address leverageFor,
-        bool up,
         ILeverageLZData calldata lzData,
         ILeverageSwapData calldata swapData,
         ILeverageExternalContractsData calldata externalData

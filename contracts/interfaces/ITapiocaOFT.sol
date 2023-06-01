@@ -13,7 +13,7 @@ interface ITapiocaOFTBase {
     ) external;
 
     function wrapNative(address _toAddress) external payable;
-    
+
     function unwrap(address _toAddress, uint256 _amount) external;
 }
 
@@ -74,7 +74,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     function approve(address _spender, uint256 _amount) external returns (bool);
 
     function extractUnderlying(uint256 _amount) external;
-
 
     function harvestFees() external;
 
