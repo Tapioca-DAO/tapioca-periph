@@ -13,6 +13,8 @@ interface ITapiocaOFTBase {
     ) external;
 
     function wrapNative(address _toAddress) external payable;
+    
+    function unwrap(address _toAddress, uint256 _amount) external;
 }
 
 /// @dev used for generic TOFTs
@@ -73,7 +75,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
 
     function extractUnderlying(uint256 _amount) external;
 
-    function unwrap(address _toAddress, uint256 _amount) external;
 
     function harvestFees() external;
 
