@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 import "./ISendFrom.sol";
 
 interface ITapiocaOFTBase {
-    function isNative() external view returns (bool);
+    function hostChainID() external view returns (uint256);
 
     function wrap(
         address fromAddress,
@@ -55,8 +55,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     function totalFees() external view returns (uint256);
 
     function erc20() external view returns (address);
-
-    function hostChainID() external view returns (uint256);
 
     function wrappedAmount(uint256 _amount) external view returns (uint256);
 
