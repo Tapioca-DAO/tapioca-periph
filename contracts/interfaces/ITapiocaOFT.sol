@@ -16,6 +16,8 @@ interface ITapiocaOFTBase {
     function wrapNative(address _toAddress) external payable;
 
     function unwrap(address _toAddress, uint256 _amount) external;
+
+    function erc20() external view returns (address);
 }
 
 /// @dev used for generic TOFTs
