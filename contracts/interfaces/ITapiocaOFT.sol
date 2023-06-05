@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "./ISendFrom.sol";
+import {IUSDOBase} from "./IUSDO.sol";
 
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);
@@ -22,7 +23,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     struct ISendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
-        bool wrap;
     }
 
     struct IApproval {
@@ -105,5 +105,13 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
+    ) external payable;
+
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable;
 }
