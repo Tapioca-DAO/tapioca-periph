@@ -27,9 +27,12 @@ interface IUSDOBase {
     }
 
     struct ILeverageLZData {
+        uint256 srcExtraGasLimit;
+        uint16 lzSrcChainId;
         uint16 lzDstChainId;
         address zroPaymentAddress;
-        bytes airdropAdapterParam;
+        bytes dstAirdropAdapterParam;
+        bytes srcAirdropAdapterParam;
         address refundAddress;
     }
 

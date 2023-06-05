@@ -43,6 +43,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     }
 
     struct IWithdrawParams {
+        bool withdraw;
         uint256 withdrawLzFeeAmount;
         bool withdrawOnOtherChain;
         uint16 withdrawLzChainId;
