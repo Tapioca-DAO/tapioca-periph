@@ -18,6 +18,8 @@ interface ITapiocaOFTBase {
     function unwrap(address _toAddress, uint256 _amount) external;
 
     function erc20() external view returns (address);
+
+    function lzEndpoint() external view returns (address);
 }
 
 /// @dev used for generic TOFTs
@@ -68,8 +70,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint16 lzChainId,
         bytes calldata path
     ) external view returns (bool);
-
-    function getLzChainId() external view returns (uint16);
 
     function approve(address _spender, uint256 _amount) external returns (bool);
 
