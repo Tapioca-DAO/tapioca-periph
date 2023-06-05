@@ -16,6 +16,7 @@ interface IUSDOBase {
         bytes32 s;
     }
     struct ILendParams {
+        bool repay;
         uint256 amount;
         address marketHelper;
         address market;
@@ -52,7 +53,7 @@ interface IUSDOBase {
 
     function burn(address _from, uint256 _amount) external;
 
-    function sendToYBAndLend(
+    function sendAndLendOrRepay(
         address _from,
         address _to,
         uint16 lzDstChainId,
