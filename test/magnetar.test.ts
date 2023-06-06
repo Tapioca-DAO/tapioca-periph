@@ -60,7 +60,7 @@ describe('MagnetarV2', () => {
                 usdc,
                 magnetar,
                 initContracts,
-                timeTravel
+                timeTravel,
             } = await loadFixture(register);
 
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
@@ -149,10 +149,12 @@ describe('MagnetarV2', () => {
             const LQ_META = {
                 activationTime: 600, // 10min
                 minBidAmount: ethers.BigNumber.from((1e18).toString()).mul(200), // 200 USDC
-                closeToMinBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
-                    202,
-                ),
-                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(400), // 400 USDC
+                closeToMinBidAmount: ethers.BigNumber.from(
+                    (1e18).toString(),
+                ).mul(202),
+                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
+                    400,
+                ), // 400 USDC
                 feeCollector: feeCollector.address,
                 bidExecutionSwapper: ethers.constants.AddressZero,
                 usdoSwapper: stableToUsdoBidder.address,
@@ -185,21 +187,30 @@ describe('MagnetarV2', () => {
                 [usdoAssetId, deployer.address, deployer.address, 0, usdoShare],
             );
 
-            const sglLendEncoded = wethUsdoSingularity.interface.encodeFunctionData(
-                'addAsset',
-                [deployer.address, deployer.address, false, usdoShare],
-            );
+            const sglLendEncoded =
+                wethUsdoSingularity.interface.encodeFunctionData('addAsset', [
+                    deployer.address,
+                    deployer.address,
+                    false,
+                    usdoShare,
+                ]);
 
             await usd0.approve(magnetar.address, ethers.constants.MaxUint256);
             await usd0.approve(yieldBox.address, ethers.constants.MaxUint256);
-            await usd0.approve(wethUsdoSingularity.address, ethers.constants.MaxUint256);
+            await usd0.approve(
+                wethUsdoSingularity.address,
+                ethers.constants.MaxUint256,
+            );
             await yieldBox.setApprovalForAll(deployer.address, true);
-            await yieldBox.setApprovalForAll(wethUsdoSingularity.address, true)
-            await yieldBox.setApprovalForAll(magnetar.address, true)
+            await yieldBox.setApprovalForAll(wethUsdoSingularity.address, true);
+            await yieldBox.setApprovalForAll(magnetar.address, true);
             await weth.approve(yieldBox.address, ethers.constants.MaxUint256);
             await weth.approve(magnetar.address, ethers.constants.MaxUint256);
 
-            await wethUsdoSingularity.approve(magnetar.address, ethers.constants.MaxUint256);
+            await wethUsdoSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             const calls = [
                 {
                     id: 100,
@@ -230,7 +241,6 @@ describe('MagnetarV2', () => {
             );
             expect(sglBalance.gt(0)).to.be.true;
 
-
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
             await timeTravel(86401);
             const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(1);
@@ -239,9 +249,6 @@ describe('MagnetarV2', () => {
             await wethUsdoSingularity
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
-
-
-
 
             hre.tracer.enabled = true;
             const borrowFn = magnetar.interface.encodeFunctionData(
@@ -259,7 +266,9 @@ describe('MagnetarV2', () => {
             );
             hre.tracer.enabled = false;
 
-            let borrowPart = await wethUsdoSingularity.userBorrowPart(deployer.address);
+            let borrowPart = await wethUsdoSingularity.userBorrowPart(
+                deployer.address,
+            );
             expect(borrowPart.eq(0)).to.be.true;
             await magnetar.connect(deployer).burst(
                 [
@@ -276,25 +285,45 @@ describe('MagnetarV2', () => {
                 },
             );
 
-            const collateralBalance = await wethUsdoSingularity.userCollateralShare(deployer.address);
-            const collateralAmpunt = await yieldBox.toAmount(wethAssetId, collateralBalance, false);
+            const collateralBalance =
+                await wethUsdoSingularity.userCollateralShare(deployer.address);
+            const collateralAmpunt = await yieldBox.toAmount(
+                wethAssetId,
+                collateralBalance,
+                false,
+            );
             expect(collateralAmpunt.eq(wethMintVal)).to.be.true;
 
             const totalAsset = await wethUsdoSingularity.totalSupply();
 
-            await wethUsdoSingularity.connect(deployer).borrow(deployer.address, deployer.address, borrowAmount);
+            await wethUsdoSingularity
+                .connect(deployer)
+                .borrow(deployer.address, deployer.address, borrowAmount);
 
-            borrowPart = await wethUsdoSingularity.userBorrowPart(deployer.address);
+            borrowPart = await wethUsdoSingularity.userBorrowPart(
+                deployer.address,
+            );
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
-
             const receiverSplit = deployer.address.split('0x');
-            await magnetar.withdrawTo(yieldBox.address, deployer.address, usdoAssetId, 0, '0x'.concat(receiverSplit[1].padStart(64, '0')), borrowAmount, 0, '0x00', deployer.address, 0);
+            await magnetar.withdrawTo(
+                yieldBox.address,
+                deployer.address,
+                usdoAssetId,
+                0,
+                '0x'.concat(receiverSplit[1].padStart(64, '0')),
+                borrowAmount,
+                0,
+                '0x00',
+                deployer.address,
+                0,
+            );
 
-            const usdoBalanceOfDeployer = await usd0.balanceOf(deployer.address);
+            const usdoBalanceOfDeployer = await usd0.balanceOf(
+                deployer.address,
+            );
             expect(usdoBalanceOfDeployer.eq(borrowAmount)).to.be.true;
-
-        })
+        });
     });
 
     describe('sendFrom()', () => {
@@ -337,7 +366,9 @@ describe('MagnetarV2', () => {
                 [1, 2250000],
             );
 
-            const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(100);
+            const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(
+                100,
+            );
             await usd0Dst.mint(deployer.address, usdoAmount);
 
             await usd0Dst.setUseCustomAdapterParams(true);
@@ -365,7 +396,10 @@ describe('MagnetarV2', () => {
                     },
                 ],
             );
-            await usd0Dst.approve(magnetar.address, ethers.constants.MaxUint256);
+            await usd0Dst.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             await magnetar.connect(deployer).burst(
                 [
                     {
@@ -473,9 +507,13 @@ describe('MagnetarV2', () => {
 
     describe('ybDeposit()', () => {
         it('should execute YB deposit asset', async () => {
-            const { deployer, eoa1, yieldBox, magnetar, createTokenEmptyStrategy } =
-                await loadFixture(register);
-
+            const {
+                deployer,
+                eoa1,
+                yieldBox,
+                magnetar,
+                createTokenEmptyStrategy,
+            } = await loadFixture(register);
 
             const name = 'Token One';
 
@@ -543,15 +581,18 @@ describe('MagnetarV2', () => {
             const signature = signTypedMessage(privateKey, { data });
             const { v, r, s } = fromRpcSig(signature);
 
-            const permitEncoded = tokenOne.interface.encodeFunctionData('permit', [
-                deployer.address,
-                yieldBox.address,
-                mintVal,
-                MAX_DEADLINE,
-                v,
-                r,
-                s,
-            ]);
+            const permitEncoded = tokenOne.interface.encodeFunctionData(
+                'permit',
+                [
+                    deployer.address,
+                    yieldBox.address,
+                    mintVal,
+                    MAX_DEADLINE,
+                    v,
+                    r,
+                    s,
+                ],
+            );
 
             const permitAllSigData = await getYieldBoxPermitSignature(
                 'all',
@@ -734,10 +775,12 @@ describe('MagnetarV2', () => {
             const LQ_META = {
                 activationTime: 600, // 10min
                 minBidAmount: ethers.BigNumber.from((1e18).toString()).mul(200), // 200 USDC
-                closeToMinBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
-                    202,
-                ),
-                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(400), // 400 USDC
+                closeToMinBidAmount: ethers.BigNumber.from(
+                    (1e18).toString(),
+                ).mul(202),
+                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
+                    400,
+                ), // 400 USDC
                 feeCollector: feeCollector.address,
                 bidExecutionSwapper: ethers.constants.AddressZero,
                 usdoSwapper: stableToUsdoBidder.address,
@@ -845,12 +888,18 @@ describe('MagnetarV2', () => {
                 [usdoAssetId, deployer.address, deployer.address, 0, usdoShare],
             );
 
-            const sglLendEncoded = wethUsdoSingularity.interface.encodeFunctionData(
-                'addAsset',
-                [deployer.address, deployer.address, false, usdoShare],
-            );
+            const sglLendEncoded =
+                wethUsdoSingularity.interface.encodeFunctionData('addAsset', [
+                    deployer.address,
+                    deployer.address,
+                    false,
+                    usdoShare,
+                ]);
 
-            await wethUsdoSingularity.approve(magnetar.address, ethers.constants.MaxUint256);
+            await wethUsdoSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             const calls = [
                 {
                     id: 2,
@@ -1007,8 +1056,14 @@ describe('MagnetarV2', () => {
             await collateralLinked.setMinDstGas(1, 775, 200_00);
 
             // Asset
-            lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
-            lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+            lzEndpoint1.setDestLzEndpoint(
+                assetLinked.address,
+                lzEndpoint2.address,
+            );
+            lzEndpoint2.setDestLzEndpoint(
+                assetHost.address,
+                lzEndpoint1.address,
+            );
             await assetHost.setTrustedRemote(
                 2,
                 ethers.utils.solidityPack(
@@ -1088,9 +1143,9 @@ describe('MagnetarV2', () => {
                     false,
                 );
             // ------------------- Init SGL -------------------
-            const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
-            );
+            const collateralMintVal = ethers.BigNumber.from(
+                (1e18).toString(),
+            ).mul(10);
             const assetMintVal = collateralMintVal.mul(
                 toftUsdcPrice.div((1e18).toString()),
             );
@@ -1133,7 +1188,9 @@ describe('MagnetarV2', () => {
                 // ------------------- Actual TOFT test -------------------
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.equal(0);
                 await assetCollateralSingularity.approve(
                     magnetar.address,
@@ -1159,7 +1216,9 @@ describe('MagnetarV2', () => {
                 );
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.eq(0);
             }
 
@@ -1183,7 +1242,9 @@ describe('MagnetarV2', () => {
                 // ------------------- Actual TOFT test -------------------
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.equal(0);
 
                 await assetCollateralSingularity.approve(
@@ -1210,7 +1271,9 @@ describe('MagnetarV2', () => {
                 );
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.eq(
                     await yieldBox.toShare(assetHostId, assetMintVal, false),
                 );
@@ -1236,9 +1299,10 @@ describe('MagnetarV2', () => {
                 // ------------------- Actual TOFT test -------------------
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.equal(0);
-
 
                 await assetLinked.sendToYBAndLend(
                     deployer.address,
@@ -1259,7 +1323,9 @@ describe('MagnetarV2', () => {
                 );
 
                 expect(
-                    await assetCollateralSingularity.balanceOf(deployer.address),
+                    await assetCollateralSingularity.balanceOf(
+                        deployer.address,
+                    ),
                 ).to.be.eq(
                     await yieldBox.toShare(assetHostId, assetMintVal, false),
                 );
@@ -1368,8 +1434,14 @@ describe('MagnetarV2', () => {
             await collateralLinked.setMinDstGas(1, 775, 200_00);
 
             // Asset
-            lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
-            lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+            lzEndpoint1.setDestLzEndpoint(
+                assetLinked.address,
+                lzEndpoint2.address,
+            );
+            lzEndpoint2.setDestLzEndpoint(
+                assetHost.address,
+                lzEndpoint1.address,
+            );
             await assetHost.setTrustedRemote(
                 2,
                 ethers.utils.solidityPack(
@@ -1449,9 +1521,9 @@ describe('MagnetarV2', () => {
                     false,
                 );
             // ------------------- Init SGL -------------------
-            const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
-            );
+            const collateralMintVal = ethers.BigNumber.from(
+                (1e18).toString(),
+            ).mul(10);
             const assetMintVal = collateralMintVal.mul(
                 toftUsdcPrice.div((1e18).toString()),
             );
@@ -1490,14 +1562,18 @@ describe('MagnetarV2', () => {
             ).to.be.equal(0);
             assetCollateralSingularity.approve(magnetar.address, 1);
 
-            const LendParamsStruct = "(uint256 amount, address marketHelper, address market)";
-            const SendOptionsStruct = "(uint256 extraGasLimit, address zroPaymentAddress)";
-            const ApprovalStruct = "(bool allowFailure,address target, address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)";
+            const LendParamsStruct =
+                '(uint256 amount, address marketHelper, address market)';
+            const SendOptionsStruct =
+                '(uint256 extraGasLimit, address zroPaymentAddress)';
+            const ApprovalStruct =
+                '(bool allowFailure,address target, address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)';
             const ABI = [
                 `function sendToYBAndLend(address from, address to, uint16 chain, ${LendParamsStruct} lendParams, ${SendOptionsStruct} options, ${ApprovalStruct}[] approvlas)`,
             ];
             const iface = new ethers.utils.Interface(ABI);
-            const testSendToYbAndLend = iface.encodeFunctionData('sendToYBAndLend',
+            const testSendToYbAndLend = iface.encodeFunctionData(
+                'sendToYBAndLend',
                 [
                     deployer.address,
                     deployer.address,
@@ -1539,10 +1615,14 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
 
-            await assetCollateralSingularity
-                .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
-            await assetCollateralSingularity
-                .approve(magnetar.address, ethers.constants.MaxUint256);
+            await assetCollateralSingularity.approveBorrow(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
+            await assetCollateralSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
 
             await magnetar.connect(deployer).burst(
                 [
@@ -1561,7 +1641,9 @@ describe('MagnetarV2', () => {
 
             expect(
                 await assetCollateralSingularity.balanceOf(deployer.address),
-            ).to.be.eq(await yieldBox.toShare(assetHostId, assetMintVal, false));
+            ).to.be.eq(
+                await yieldBox.toShare(assetHostId, assetMintVal, false),
+            );
         });
 
         it('Should deposit to yieldBox & add asset', async () => {
@@ -1637,7 +1719,9 @@ describe('MagnetarV2', () => {
                 },
             );
 
-            balanceOfSGL = await wethUsdcSingularity.balanceOf(deployer.address);
+            balanceOfSGL = await wethUsdcSingularity.balanceOf(
+                deployer.address,
+            );
             const amount = await yieldBox.toAmount(
                 wethAssetId,
                 balanceOfSGL,
@@ -1645,7 +1729,7 @@ describe('MagnetarV2', () => {
             );
             expect(amount.gte(mintVal)).to.be.true;
         });
-    })
+    });
 
     describe('add collateral', () => {
         //skipped until BB is added bc .freeMint does not exist anymore
@@ -1755,8 +1839,14 @@ describe('MagnetarV2', () => {
             await assetLinked.setMinDstGas(1, 0, 200_000);
 
             // Asset
-            lzEndpoint1.setDestLzEndpoint(assetLinked.address, lzEndpoint2.address);
-            lzEndpoint2.setDestLzEndpoint(assetHost.address, lzEndpoint1.address);
+            lzEndpoint1.setDestLzEndpoint(
+                assetLinked.address,
+                lzEndpoint2.address,
+            );
+            lzEndpoint2.setDestLzEndpoint(
+                assetHost.address,
+                lzEndpoint1.address,
+            );
             await assetHost.setTrustedRemote(
                 2,
                 ethers.utils.solidityPack(
@@ -1837,9 +1927,9 @@ describe('MagnetarV2', () => {
                 );
             // ------------------- Init SGL -------------------
             const borrowAmount = ethers.BigNumber.from((1e10).toString());
-            const collateralMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
-            );
+            const collateralMintVal = ethers.BigNumber.from(
+                (1e18).toString(),
+            ).mul(10);
             const assetMintVal = collateralMintVal.mul(
                 toftUsdcPrice.div((1e18).toString()),
             );
@@ -1847,7 +1937,9 @@ describe('MagnetarV2', () => {
             // We get asset
             await assetHost.connect(eoa1).freeMint(assetMintVal);
 
-            await assetHost.connect(eoa1).approve(magnetar.address, assetMintVal);
+            await assetHost
+                .connect(eoa1)
+                .approve(magnetar.address, assetMintVal);
             await magnetar
                 .connect(eoa1)
                 .depositAndAddAsset(
@@ -1895,7 +1987,9 @@ describe('MagnetarV2', () => {
                 deadline,
                 {
                     nonce: (
-                        await assetCollateralSingularity.nonces(deployer.address)
+                        await assetCollateralSingularity.nonces(
+                            deployer.address,
+                        )
                     ).add(1),
                 },
             );
@@ -1915,7 +2009,10 @@ describe('MagnetarV2', () => {
             // ------------------- Actual TOFT test -------------------
             // We get asset
             await erc20Mock.freeMint(collateralMintVal);
-            await erc20Mock.approve(collateralLinked.address, collateralMintVal);
+            await erc20Mock.approve(
+                collateralLinked.address,
+                collateralMintVal,
+            );
             await collateralLinked.wrap(
                 deployer.address,
                 deployer.address,
@@ -1947,35 +2044,37 @@ describe('MagnetarV2', () => {
                 ],
             );
 
-
             const sendToYBAndBorrowFn =
-                collateralLinked.interface.encodeFunctionData('sendToYBAndBorrow', [
-                    deployer.address,
-                    deployer.address,
-                    1,
-                    airdropAdapterParams,
-                    {
-                        amount: collateralMintVal,
-                        borrowAmount,
-                        marketHelper: magnetar.address,
-                        market: assetCollateralSingularity.address,
-                    },
-                    {
-                        withdrawAdapterParams: ethers.utils.solidityPack(
-                            ['uint16', 'uint256'],
-                            [1, 2_250_000],
-                        ),
-                        withdrawLzChainId: 2,
-                        withdrawLzFeeAmount: withdrawFees.nativeFee,
-                        withdrawOnOtherChain: true,
-                    },
-                    {
-                        extraGasLimit: 6_000_000,
-                        wrap: false,
-                        zroPaymentAddress: ethers.constants.AddressZero,
-                    },
-                    [permitBorrowStruct, permitLendStruct],
-                ]);
+                collateralLinked.interface.encodeFunctionData(
+                    'sendToYBAndBorrow',
+                    [
+                        deployer.address,
+                        deployer.address,
+                        1,
+                        airdropAdapterParams,
+                        {
+                            amount: collateralMintVal,
+                            borrowAmount,
+                            marketHelper: magnetar.address,
+                            market: assetCollateralSingularity.address,
+                        },
+                        {
+                            withdrawAdapterParams: ethers.utils.solidityPack(
+                                ['uint16', 'uint256'],
+                                [1, 2_250_000],
+                            ),
+                            withdrawLzChainId: 2,
+                            withdrawLzFeeAmount: withdrawFees.nativeFee,
+                            withdrawOnOtherChain: true,
+                        },
+                        {
+                            extraGasLimit: 6_000_000,
+                            wrap: false,
+                            zroPaymentAddress: ethers.constants.AddressZero,
+                        },
+                        [permitBorrowStruct, permitLendStruct],
+                    ],
+                );
 
             await assetLinked.approve(
                 magnetar.address,
@@ -2020,7 +2119,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2052,7 +2153,9 @@ describe('MagnetarV2', () => {
                 ],
             );
 
-            let borrowPart = await wethUsdcSingularity.userBorrowPart(eoa1.address);
+            let borrowPart = await wethUsdcSingularity.userBorrowPart(
+                eoa1.address,
+            );
             expect(borrowPart.eq(0)).to.be.true;
             await magnetar.connect(eoa1).burst(
                 [
@@ -2093,7 +2196,9 @@ describe('MagnetarV2', () => {
             const collateralId = await wethUsdcSingularity.collateralId();
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2144,7 +2249,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2196,7 +2303,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2249,7 +2358,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2327,7 +2438,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2369,7 +2482,11 @@ describe('MagnetarV2', () => {
                 .connect(eoa1)
                 .approve(
                     magnetar.address,
-                    await yieldBox.toShare(assetId, userBorrowPart.mul(2), true),
+                    await yieldBox.toShare(
+                        assetId,
+                        userBorrowPart.mul(2),
+                        true,
+                    ),
                 );
             await magnetar
                 .connect(eoa1)
@@ -2403,7 +2520,9 @@ describe('MagnetarV2', () => {
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
             const usdcMintVal = wethMintVal
                 .mul(10)
                 .mul(__wethUsdcPrice.div((1e18).toString()));
@@ -2438,9 +2557,8 @@ describe('MagnetarV2', () => {
                 eoa1.address,
             );
 
-            const collateralShare = await wethUsdcSingularity.userCollateralShare(
-                eoa1.address,
-            );
+            const collateralShare =
+                await wethUsdcSingularity.userCollateralShare(eoa1.address);
             const collateralAmount = await yieldBox.toAmount(
                 usdcAssetId,
                 collateralShare,
@@ -2458,7 +2576,11 @@ describe('MagnetarV2', () => {
                 .connect(eoa1)
                 .approveBorrow(
                     magnetar.address,
-                    await yieldBox.toShare(collateralId, collateralAmount, true),
+                    await yieldBox.toShare(
+                        collateralId,
+                        collateralAmount,
+                        true,
+                    ),
                 );
 
             await magnetar
@@ -2475,8 +2597,8 @@ describe('MagnetarV2', () => {
                 );
             const usdcBalanceAfter = await usdc.balanceOf(eoa1.address);
             expect(usdcBalanceAfter.gt(usdcBalanceBefore)).to.be.true;
-            expect(usdcBalanceAfter.sub(usdcBalanceBefore).eq(collateralAmount)).to
-                .be.true;
+            expect(usdcBalanceAfter.sub(usdcBalanceBefore).eq(collateralAmount))
+                .to.be.true;
         });
     });
 
@@ -2529,8 +2651,12 @@ describe('MagnetarV2', () => {
                 false,
             );
 
-            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(100);
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(
+                100,
+            );
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
 
             // We get asset
             await weth.freeMint(wethMintVal);
@@ -2634,8 +2760,12 @@ describe('MagnetarV2', () => {
                 false,
             );
 
-            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(100);
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(
+                100,
+            );
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
 
             await usd0.mint(deployer.address, borrowAmount.mul(2));
             // We get asset
@@ -2674,7 +2804,9 @@ describe('MagnetarV2', () => {
                 0,
             );
             const wethBalanceBefore = await weth.balanceOf(deployer.address);
-            const fraction = await wethUsdoSingularity.balanceOf(deployer.address);
+            const fraction = await wethUsdoSingularity.balanceOf(
+                deployer.address,
+            );
             const fractionAmount = await yieldBox.toAmount(
                 usdoAssetId,
                 fraction,
@@ -2692,7 +2824,12 @@ describe('MagnetarV2', () => {
                     fraction,
                     totalBingBangCollateral,
                     true,
-                    encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
+                    encodeMagnetarWithdrawData(
+                        false,
+                        0,
+                        deployer.address,
+                        '0x00',
+                    ),
                 ),
             ).to.be.revertedWith('SGL: min limit');
 
@@ -2759,8 +2896,12 @@ describe('MagnetarV2', () => {
                 false,
             );
 
-            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(100);
-            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(10);
+            const borrowAmount = ethers.BigNumber.from((1e18).toString()).mul(
+                100,
+            );
+            const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
+                10,
+            );
 
             await usd0.mint(deployer.address, borrowAmount.mul(2));
             // We get asset
@@ -2800,7 +2941,9 @@ describe('MagnetarV2', () => {
             );
             const wethCollateralBefore =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
-            const fraction = await wethUsdoSingularity.balanceOf(deployer.address);
+            const fraction = await wethUsdoSingularity.balanceOf(
+                deployer.address,
+            );
             const fractionAmount = await yieldBox.toAmount(
                 usdoAssetId,
                 fraction,
@@ -3172,7 +3315,9 @@ describe('MagnetarV2', () => {
 
     describe('strategy', () => {
         it('should decode send to strategy correctly', async () => {
-            const { deployer, magnetar, yieldBox } = await loadFixture(register);
+            const { deployer, magnetar, yieldBox } = await loadFixture(
+                register,
+            );
 
             const sendToStrategyEncoded =
                 ITapiocaOFT__factory.createInterface().encodeFunctionData(
@@ -3206,7 +3351,9 @@ describe('MagnetarV2', () => {
         });
 
         it('should decode send to strategy correctly', async () => {
-            const { deployer, magnetar, yieldBox } = await loadFixture(register);
+            const { deployer, magnetar, yieldBox } = await loadFixture(
+                register,
+            );
 
             const encoded =
                 ITapiocaOFT__factory.createInterface().encodeFunctionData(
@@ -3291,15 +3438,15 @@ async function getYieldBoxPermitSignature(
             },
             permitType === 'asset'
                 ? {
-                    Permit: typesInfo,
-                }
+                      Permit: typesInfo,
+                  }
                 : {
-                    PermitAll: typesInfo.filter(
-                        (x) =>
-                            permitType !== 'all' ||
-                            (permitType === 'all' && x.name !== 'assetId'),
-                    ),
-                },
+                      PermitAll: typesInfo.filter(
+                          (x) =>
+                              permitType !== 'all' ||
+                              (permitType === 'all' && x.name !== 'assetId'),
+                      ),
+                  },
 
             {
                 ...(permitType === 'all' ? {} : { assetId }),
@@ -3328,7 +3475,6 @@ const buildData = (
     domain: { name, version, chainId, verifyingContract },
     message: { owner, spender, value, nonce, deadline },
 });
-
 
 const EIP712Domain = [
     { name: 'name', type: 'string' },
