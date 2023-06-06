@@ -2,6 +2,11 @@
 pragma solidity ^0.8.18;
 
 interface IMagnetar {
+    function getAmountForBorrowPart(
+        address market,
+        uint256 borrowPart
+    ) external view returns (uint256 amount);
+
     function withdrawTo(
         address yieldBox,
         address from,

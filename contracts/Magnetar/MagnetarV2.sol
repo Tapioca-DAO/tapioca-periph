@@ -400,7 +400,7 @@ contract MagnetarV2 is
                     );
                 _checkSender(from);
 
-                IUSDOBase(_action.target).sendToYBAndLend{value: _action.value}(
+                IUSDOBase(_action.target).sendAndLendOrRepay{value: _action.value}(
                     msg.sender,
                     to,
                     dstChainId,
