@@ -400,14 +400,9 @@ contract MagnetarV2 is
                     );
                 _checkSender(from);
 
-                IUSDOBase(_action.target).sendAndLendOrRepay{value: _action.value}(
-                    msg.sender,
-                    to,
-                    dstChainId,
-                    lendParams,
-                    options,
-                    approvals
-                );
+                IUSDOBase(_action.target).sendAndLendOrRepay{
+                    value: _action.value
+                }(msg.sender, to, dstChainId, lendParams, options, approvals);
             } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
                 TOFTSendToStrategyData memory data = abi.decode(
                     _action.call[4:],
