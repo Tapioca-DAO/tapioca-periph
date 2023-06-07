@@ -24,11 +24,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract MagnetarV2 is
-    Ownable,
-    ReentrancyGuard,
-    MagnetarV2Storage
-{
+contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
@@ -152,7 +148,6 @@ contract MagnetarV2 is
             )
         );
     }
-
 
     // ********************** //
     // *** PUBLIC METHODS *** //
@@ -339,7 +334,6 @@ contract MagnetarV2 is
                         _action.value
                     )
                 );
-              
             } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(
                     _action.call[4:],
@@ -528,11 +522,13 @@ contract MagnetarV2 is
                             bytes
                         )
                     );
-                
+
                 _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
-                        MagnetarMarketModule.depositAddCollateralAndBorrow.selector,
+                        MagnetarMarketModule
+                            .depositAddCollateralAndBorrow
+                            .selector,
                         market,
                         user,
                         collateralAmount,
@@ -725,7 +721,7 @@ contract MagnetarV2 is
         );
     }
 
-     // ********************** //
+    // ********************** //
     // *** PRIVATE METHODS *** //
     // *********************** //
     function _commonInfo(
@@ -761,7 +757,7 @@ contract MagnetarV2 is
         return info;
     }
 
-     function _singularityMarketInfo(
+    function _singularityMarketInfo(
         address who,
         ISingularity[] memory markets
     ) private view returns (SingularityInfo[] memory) {
@@ -865,7 +861,7 @@ contract MagnetarV2 is
 
         (success, returnData) = module.delegatecall(_data);
         if (!success) {
-           _getRevertMsg(returnData);
+            _getRevertMsg(returnData);
         }
     }
 
@@ -879,6 +875,5 @@ contract MagnetarV2 is
             _returnData := add(_returnData, 0x04)
         }
         revert(abi.decode(_returnData, (string))); // All that remains is the revert string
-
     }
 }

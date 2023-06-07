@@ -17,7 +17,6 @@ contract MagnetarV2Storage {
     // ************ //
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
-
     struct MarketInfo {
         address collateral;
         uint256 collateralId;
@@ -44,7 +43,6 @@ contract MagnetarV2Storage {
         MarketInfo market;
         IBigBang.AccrueInfo accrueInfo;
     }
-
 
     // --- ACTIONS DATA ----
     struct Call {
@@ -184,7 +182,6 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
-    
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
@@ -222,7 +219,6 @@ contract MagnetarV2Storage {
         _checkSender(_from);
         _;
     }
-
 
     // ************************ //
     // *** INTERNAL METHODS *** //

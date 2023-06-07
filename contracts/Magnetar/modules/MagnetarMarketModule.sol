@@ -22,15 +22,18 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     /// @param approved True/False
     function setApprovalForAll(address operator, bool approved) public {
         // Checks
-        require(operator != address(0), "MagnetarV2: operator not set"); 
-        require(operator != address(this), "MagnetarV2: can't approve magnetar");
+        require(operator != address(0), "MagnetarV2: operator not set");
+        require(
+            operator != address(this),
+            "MagnetarV2: can't approve magnetar"
+        );
 
         // Effects
         isApprovedForAll[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
     }
-    
+
     function withdrawTo(
         IYieldBoxBase yieldBox,
         address from,
@@ -66,7 +69,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bool deposit,
         bool withdraw,
         bytes memory withdrawData
-    ) external payable allowed(user){
+    ) external payable allowed(user) {
         _depositAddCollateralAndBorrow(
             market,
             user,
@@ -145,7 +148,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 amount,
         bool deposit_,
         bool extractFromSender
-    ) external payable allowed(user){
+    ) external payable allowed(user) {
         _depositAndAddAsset(
             singularity,
             user,
@@ -177,11 +180,10 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         );
     }
 
-
     // *********************** //
     // *** PRIVATE METHODS *** //
     // *********************** //
-   function _depositAddCollateralAndBorrow(
+    function _depositAddCollateralAndBorrow(
         IMarket market,
         address user,
         uint256 collateralAmount,
