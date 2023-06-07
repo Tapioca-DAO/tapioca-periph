@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+//OZ
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./MagnetarV2Actions.sol";
-import "./MagnetarV2ActionsData.sol";
-import "./MagnetarV2Operations.sol";
+//TAPIOCA
+import "./MagnetarV2Storage.sol";
+import "./modules/MagnetarMarketModule.sol";
 
 /*
 
@@ -26,21 +27,29 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 contract MagnetarV2 is
     Ownable,
     ReentrancyGuard,
-    MagnetarV2Actions,
-    MagnetarV2ActionsData,
-    MagnetarV2Operations
+    MagnetarV2Storage
 {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
-    constructor(address _owner) {
-        transferOwnership(_owner);
+    // ************ //
+    // *** VARS *** //
+    // ************ //
+    enum Module {
+        Market
     }
 
-    receive() external payable override {}
+    /// @notice returns the Market module
+    MagnetarMarketModule public marketModule;
 
-    /// *** VIEW METHODS ***
-    /// ***  ***
+    constructor(address _owner, address payable _marketModule) {
+        transferOwnership(_owner);
+        marketModule = MagnetarMarketModule(_marketModule);
+    }
+
+    // ******************** //
+    // *** VIEW METHODS *** //
+    // ******************** //
     /// @notice returns Singularity markets' information
     /// @param who user to return for
     /// @param markets the list of Singularity markets to query for
@@ -127,8 +136,27 @@ contract MagnetarV2 is
             );
     }
 
-    /// *** PUBLIC METHODS ***
-    /// ***  ***
+    // ********************* //
+    // *** OWNER METHODS *** //
+    // ********************* //
+    /// @notice Update approval status for an operator
+    /// @param operator The address approved to perform actions on your behalf
+    /// @param approved True/False
+    function setApprovalForAll(address operator, bool approved) public {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.setApprovalForAll.selector,
+                operator,
+                approved
+            )
+        );
+    }
+
+
+    // ********************** //
+    // *** PUBLIC METHODS *** //
+    // ********************** //
     /// @notice Batch multiple calls together
     /// @param calls The list of actions to perform
     function burst(
@@ -294,20 +322,24 @@ contract MagnetarV2 is
                             address
                         )
                     );
-                _checkSender(from);
 
-                _withdrawTo(
-                    IYieldBoxBase(yieldBox),
-                    from,
-                    assetId,
-                    dstChainId,
-                    receiver,
-                    amount,
-                    share,
-                    adapterParams,
-                    refundAddress,
-                    _action.value
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule.withdrawTo.selector,
+                        yieldBox,
+                        from,
+                        assetId,
+                        dstChainId,
+                        receiver,
+                        amount,
+                        share,
+                        adapterParams,
+                        refundAddress,
+                        _action.value
+                    )
                 );
+              
             } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(
                     _action.call[4:],
@@ -461,14 +493,17 @@ contract MagnetarV2 is
                     _action.call[4:],
                     (HelperLendData)
                 );
-                _checkSender(data.from);
 
-                _depositAndAddAsset(
-                    IMarket(data.market),
-                    data.from,
-                    data.amount,
-                    data.deposit,
-                    false
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule.depositAndAddAsset.selector,
+                        data.market,
+                        data.from,
+                        data.amount,
+                        data.deposit,
+                        false
+                    )
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
                 (
@@ -493,17 +528,20 @@ contract MagnetarV2 is
                             bytes
                         )
                     );
-                _checkSender(user);
-
-                _depositAddCollateralAndBorrow(
-                    IMarket(market),
-                    user,
-                    collateralAmount,
-                    borrowAmount,
-                    false,
-                    deposit,
-                    withdraw,
-                    withdrawData
+                
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule.depositAddCollateralAndBorrow.selector,
+                        market,
+                        user,
+                        collateralAmount,
+                        borrowAmount,
+                        false,
+                        deposit,
+                        withdraw,
+                        withdrawData
+                    )
                 );
             } else {
                 revert("MagnetarV2: action not valid");
@@ -524,18 +562,22 @@ contract MagnetarV2 is
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
-    ) external payable allowed(from) {
-        _withdrawTo(
-            yieldBox,
-            from,
-            assetId,
-            dstChainId,
-            receiver,
-            amount,
-            share,
-            adapterParams,
-            refundAddress,
-            gas
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.withdrawTo.selector,
+                yieldBox,
+                from,
+                assetId,
+                dstChainId,
+                receiver,
+                amount,
+                share,
+                adapterParams,
+                refundAddress,
+                gas
+            )
         );
     }
 
@@ -549,15 +591,19 @@ contract MagnetarV2 is
         bool withdraw,
         bytes memory withdrawData
     ) external payable {
-        _depositAddCollateralAndBorrow(
-            market,
-            user,
-            collateralAmount,
-            borrowAmount,
-            extractFromSender,
-            deposit,
-            withdraw,
-            withdrawData
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.depositAddCollateralAndBorrow.selector,
+                market,
+                user,
+                collateralAmount,
+                borrowAmount,
+                extractFromSender,
+                deposit,
+                withdraw,
+                withdrawData
+            )
         );
     }
 
@@ -568,14 +614,18 @@ contract MagnetarV2 is
         uint256 repayAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable allowed(user) {
-        _depositAndRepay(
-            market,
-            user,
-            depositAmount,
-            repayAmount,
-            deposit,
-            extractFromSender
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.depositAndRepay.selector,
+                market,
+                user,
+                depositAmount,
+                repayAmount,
+                deposit,
+                extractFromSender
+            )
         );
     }
 
@@ -588,16 +638,20 @@ contract MagnetarV2 is
         bool deposit,
         bool withdraw,
         bool extractFromSender
-    ) external payable allowed(user) {
-        _depositRepayAndRemoveCollateral(
-            market,
-            user,
-            depositAmount,
-            repayAmount,
-            collateralAmount,
-            deposit,
-            withdraw,
-            extractFromSender
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.depositRepayAndRemoveCollateral.selector,
+                market,
+                user,
+                depositAmount,
+                repayAmount,
+                collateralAmount,
+                deposit,
+                withdraw,
+                extractFromSender
+            )
         );
     }
 
@@ -609,31 +663,39 @@ contract MagnetarV2 is
         uint256 borrowAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable allowed(user) {
-        _mintAndLend(
-            singularity,
-            bingBang,
-            user,
-            collateralAmount,
-            borrowAmount,
-            deposit,
-            extractFromSender
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.mintAndLend.selector,
+                singularity,
+                bingBang,
+                user,
+                collateralAmount,
+                borrowAmount,
+                deposit,
+                extractFromSender
+            )
         );
     }
 
     function depositAndAddAsset(
         IMarket singularity,
-        address _user,
-        uint256 _amount,
-        bool deposit_,
+        address user,
+        uint256 amount,
+        bool deposit,
         bool extractFromSender
     ) external payable {
-        _depositAndAddAsset(
-            singularity,
-            _user,
-            _amount,
-            deposit_,
-            extractFromSender
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.depositAndAddAsset.selector,
+                singularity,
+                user,
+                amount,
+                deposit,
+                extractFromSender
+            )
         );
     }
 
@@ -646,21 +708,115 @@ contract MagnetarV2 is
         uint256 collateralShare,
         bool withdraw,
         bytes calldata withdrawData
-    ) external payable allowed(user) {
-        _removeAssetAndRepay(
-            singularity,
-            bingBang,
-            user,
-            removeShare,
-            repayAmount,
-            collateralShare,
-            withdraw,
-            withdrawData
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                MagnetarMarketModule.removeAssetAndRepay.selector,
+                singularity,
+                bingBang,
+                user,
+                removeShare,
+                repayAmount,
+                collateralShare,
+                withdraw,
+                withdrawData
+            )
         );
     }
 
-    /// *** PRIVATE METHODS ***
-    /// ***  ***
+     // ********************** //
+    // *** PRIVATE METHODS *** //
+    // *********************** //
+    function _commonInfo(
+        address who,
+        IMarket market
+    ) private view returns (MarketInfo memory) {
+        Rebase memory _totalBorrowed;
+        MarketInfo memory info;
+
+        info.collateral = market.collateral();
+        info.asset = market.asset();
+        info.oracle = IOracle(market.oracle());
+        info.oracleData = market.oracleData();
+        info.totalCollateralShare = market.totalCollateralShare();
+        info.userCollateralShare = market.userCollateralShare(who);
+
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
+            .totalBorrow();
+        _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
+        info.totalBorrow = _totalBorrowed;
+        info.userBorrowPart = market.userBorrowPart(who);
+
+        info.currentExchangeRate = market.exchangeRate();
+        (, info.oracleExchangeRate) = IOracle(market.oracle()).peek(
+            market.oracleData()
+        );
+        info.spotExchangeRate = IOracle(market.oracle()).peekSpot(
+            market.oracleData()
+        );
+        info.totalBorrowCap = market.totalBorrowCap();
+        info.assetId = market.assetId();
+        info.collateralId = market.collateralId();
+        return info;
+    }
+
+     function _singularityMarketInfo(
+        address who,
+        ISingularity[] memory markets
+    ) private view returns (SingularityInfo[] memory) {
+        uint256 len = markets.length;
+        SingularityInfo[] memory result = new SingularityInfo[](len);
+
+        Rebase memory _totalAsset;
+        ISingularity.AccrueInfo memory _accrueInfo;
+        for (uint256 i = 0; i < len; i++) {
+            ISingularity sgl = markets[i];
+
+            result[i].market = _commonInfo(who, IMarket(address(sgl)));
+
+            (uint128 totalAssetElastic, uint128 totalAssetBase) = sgl //
+                .totalAsset(); //
+            _totalAsset = Rebase(totalAssetElastic, totalAssetBase); //
+            result[i].totalAsset = _totalAsset; //
+            result[i].userAssetFraction = sgl.balanceOf(who); //
+
+            (
+                uint64 interestPerSecond,
+                uint64 lastBlockAccrued,
+                uint128 feesEarnedFraction
+            ) = sgl.accrueInfo();
+            _accrueInfo = ISingularity.AccrueInfo(
+                interestPerSecond,
+                lastBlockAccrued,
+                feesEarnedFraction
+            );
+            result[i].accrueInfo = _accrueInfo;
+        }
+
+        return result;
+    }
+
+    function _bigBangMarketInfo(
+        address who,
+        IBigBang[] memory markets
+    ) private view returns (BigBangInfo[] memory) {
+        uint256 len = markets.length;
+        BigBangInfo[] memory result = new BigBangInfo[](len);
+
+        IBigBang.AccrueInfo memory _accrueInfo;
+        for (uint256 i = 0; i < len; i++) {
+            IBigBang bigBang = markets[i];
+            result[i].market = _commonInfo(who, IMarket(address(bigBang)));
+
+            (uint64 debtRate, uint64 lastAccrued) = bigBang.accrueInfo();
+            _accrueInfo = IBigBang.AccrueInfo(debtRate, lastAccrued);
+            result[i].accrueInfo = _accrueInfo;
+        }
+
+        return result;
+    }
+
     function _permit(
         address target,
         bytes calldata actionCalldata,
@@ -687,6 +843,32 @@ contract MagnetarV2 is
         }
     }
 
+    function _extractModule(Module _module) private view returns (address) {
+        address module;
+        if (_module == Module.Market) {
+            module = address(marketModule);
+        }
+
+        if (module == address(0)) {
+            revert("MagnetarV2: module not found");
+        }
+
+        return module;
+    }
+
+    function _executeModule(
+        Module _module,
+        bytes memory _data
+    ) private returns (bytes memory returnData) {
+        bool success = true;
+        address module = _extractModule(_module);
+
+        (success, returnData) = module.delegatecall(_data);
+        if (!success) {
+           _getRevertMsg(returnData);
+        }
+    }
+
     function _getRevertMsg(bytes memory _returnData) private pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)
@@ -697,5 +879,6 @@ contract MagnetarV2 is
             _returnData := add(_returnData, 0x04)
         }
         revert(abi.decode(_returnData, (string))); // All that remains is the revert string
+
     }
 }

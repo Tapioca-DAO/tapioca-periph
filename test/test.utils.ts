@@ -23,6 +23,8 @@ import {
     SGLCollateral__factory,
     SGLBorrow__factory,
     SGLLeverage__factory,
+    USDOLeverageModule__factory,
+    USDOMarketModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -553,11 +555,25 @@ async function registerUsd0Contract(
     );
     await verifyEtherscan(lzEndpointContract.address, [chainId], staging);
 
+    const USDOLeverageModule = new USDOLeverageModule__factory(owner);
+    const usdo_leverage = await USDOLeverageModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+    );
+
+    const USDOMarketModule = new USDOMarketModule__factory(owner);
+    const usdo_market = await USDOMarketModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+    );
+
     const USDO = new USDO__factory(owner);
     const usd0 = await USDO.deploy(
         lzEndpointContract.address,
         yieldBox,
         owner.address,
+        usdo_leverage.address,
+        usdo_market.address,
     );
     log(
         `Deployed UDS0 ${usd0.address} with args [${lzEndpointContract.address},${yieldBox}]`,
@@ -1204,9 +1220,14 @@ export async function register(staging?: boolean) {
 
     // ------------------- 15 Create Magnetar -------------------
     log('Deploying MagnetarV2', staging);
+    const magnetarMarketModule = await (
+        await ethers.getContractFactory('MagnetarMarketModule')
+    ).deploy();
+    await magnetarMarketModule.deployed();
+
     const magnetar = await (
         await ethers.getContractFactory('MagnetarV2')
-    ).deploy(deployer.address);
+    ).deploy(deployer.address, magnetarMarketModule.address);
     await magnetar.deployed();
     log(
         `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,

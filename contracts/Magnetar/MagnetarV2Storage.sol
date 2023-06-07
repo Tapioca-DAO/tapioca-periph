@@ -1,10 +1,52 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+//Boring
+import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+
+//TAPIOCA
+import "../interfaces/IOracle.sol";
+import "../interfaces/ISingularity.sol";
+import "../interfaces/IBigBang.sol";
 import "../interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
-abstract contract MagnetarV2ActionsData {
+contract MagnetarV2Storage {
+    // ************ //
+    // *** VARS *** //
+    // ************ //
+    mapping(address => mapping(address => bool)) public isApprovedForAll;
+
+
+    struct MarketInfo {
+        address collateral;
+        uint256 collateralId;
+        address asset;
+        uint256 assetId;
+        IOracle oracle;
+        bytes oracleData;
+        uint256 totalCollateralShare;
+        uint256 userCollateralShare;
+        Rebase totalBorrow;
+        uint256 userBorrowPart;
+        uint256 currentExchangeRate;
+        uint256 spotExchangeRate;
+        uint256 oracleExchangeRate;
+        uint256 totalBorrowCap;
+    }
+    struct SingularityInfo {
+        MarketInfo market;
+        Rebase totalAsset;
+        uint256 userAssetFraction;
+        ISingularity.AccrueInfo accrueInfo;
+    }
+    struct BigBangInfo {
+        MarketInfo market;
+        IBigBang.AccrueInfo accrueInfo;
+    }
+
+
+    // --- ACTIONS DATA ----
     struct Call {
         uint16 id;
         address target;
@@ -18,7 +60,6 @@ abstract contract MagnetarV2ActionsData {
         bytes returnData;
     }
 
-    // Actions data
     struct PermitData {
         address owner;
         address spender;
@@ -142,4 +183,56 @@ abstract contract MagnetarV2ActionsData {
         bool withdraw;
         bytes withdrawData;
     }
+
+    
+    // --- ACTIONS IDS ----
+    uint16 internal constant PERMIT_ALL = 1;
+    uint16 internal constant PERMIT = 2;
+
+    uint16 internal constant YB_DEPOSIT_ASSET = 100;
+    uint16 internal constant YB_WITHDRAW_ASSET = 101;
+
+    uint16 internal constant MARKET_ADD_COLLATERAL = 200;
+    uint16 internal constant MARKET_BORROW = 201;
+    uint16 internal constant MARKET_WITHDRAW_TO = 202;
+    uint16 internal constant MARKET_LEND = 203;
+    uint16 internal constant MARKET_REPAY = 204;
+    uint16 internal constant MARKET_YBDEPOSIT_AND_LEND = 205;
+    uint16 internal constant MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW = 206;
+
+    uint16 internal constant TOFT_WRAP = 300;
+    uint16 internal constant TOFT_SEND_FROM = 301;
+    uint16 internal constant TOFT_SEND_APPROVAL = 302;
+    uint16 internal constant TOFT_SEND_AND_BORROW = 303;
+    uint16 internal constant TOFT_SEND_AND_LEND = 304;
+    uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
+    uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
+
+    uint16 internal constant SET_APPROVAL = 400;
+
+    // ************** //
+    // *** EVENTS *** //
+    // ************** //
+    event ApprovalForAll(address owner, address operator, bool approved);
+
+    // **************** //
+    // *** MODIFIERS *** //
+    // ***************** //
+    modifier allowed(address _from) {
+        _checkSender(_from);
+        _;
+    }
+
+
+    // ************************ //
+    // *** INTERNAL METHODS *** //
+    // ************************ //
+    function _checkSender(address _from) internal view {
+        require(
+            _from == msg.sender || isApprovedForAll[_from][msg.sender] == true,
+            "MagnetarV2: operator not approved"
+        );
+    }
+
+    receive() external payable virtual {}
 }
