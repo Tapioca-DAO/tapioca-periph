@@ -159,8 +159,7 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
     ) public view returns (uint256 fraction) {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity
             .totalAsset();
-        (uint128 totalBorrowElastic, ) = singularity
-            .totalBorrow();
+        (uint128 totalBorrowElastic, ) = singularity.totalBorrow();
         uint256 assetId = singularity.assetId();
 
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
@@ -169,9 +168,7 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
         uint256 allShare = totalAssetShare +
             yieldBox.toShare(assetId, totalBorrowElastic, true);
 
-        fraction = allShare == 0
-            ? share
-            : (share * totalAssetBase) / allShare;
+        fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
     }
 
     // ********************* //
@@ -582,17 +579,15 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
-                 HelperRemoveAssetData memory data = abi.decode(
+                HelperRemoveAssetData memory data = abi.decode(
                     _action.call[4:],
                     (HelperRemoveAssetData)
                 );
 
-                 _executeModule(
+                _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
-                        MagnetarMarketModule
-                            .removeAsset
-                            .selector,
+                        MagnetarMarketModule.removeAsset.selector,
                         data.market,
                         data.user,
                         data.fraction

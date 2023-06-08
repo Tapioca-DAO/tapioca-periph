@@ -122,7 +122,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         );
     }
 
-    function removeAsset(ISingularity singularity, address user, uint256 fraction) external payable allowed(user) {
+    function removeAsset(
+        ISingularity singularity,
+        address user,
+        uint256 fraction
+    ) external payable allowed(user) {
         _removeAsset(singularity, user, fraction);
     }
 
@@ -335,7 +339,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
     }
 
-    function _removeAsset(ISingularity singularity, address user, uint256 fraction) private {
+    function _removeAsset(
+        ISingularity singularity,
+        address user,
+        uint256 fraction
+    ) private {
         singularity.removeAsset(user, user, fraction);
     }
 
