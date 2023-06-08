@@ -163,6 +163,12 @@ contract MagnetarV2Storage {
         uint256 part;
     }
 
+    struct HelperRemoveAssetData {
+        address market;
+        address user;
+        uint256 fraction;
+    }
+
     struct HelperLendData {
         address market;
         address from;
@@ -188,14 +194,15 @@ contract MagnetarV2Storage {
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
     uint16 internal constant YB_WITHDRAW_ASSET = 101;
+    uint16 internal constant YB_WITHDRAW_TO = 102;
 
     uint16 internal constant MARKET_ADD_COLLATERAL = 200;
     uint16 internal constant MARKET_BORROW = 201;
-    uint16 internal constant MARKET_WITHDRAW_TO = 202;
     uint16 internal constant MARKET_LEND = 203;
     uint16 internal constant MARKET_REPAY = 204;
     uint16 internal constant MARKET_YBDEPOSIT_AND_LEND = 205;
     uint16 internal constant MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW = 206;
+    uint16 internal constant MARKET_REMOVE_ASSET = 207;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;

@@ -111,6 +111,22 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
         return _totalBorrowed.toElastic(borrowPart, false);
     }
 
+    /// @notice Return the equivalent of amount in borrow part.
+    /// @param market the Singularity or BigBang address
+    /// @param amount The amount to convert.
+    /// @return part The equivalent of amount in borrow part.
+    function getBorrowPartForAmount(
+        IMarket market,
+        uint256 amount
+    ) public view returns (uint256 part) {
+        Rebase memory _totalBorrowed;
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
+            .totalBorrow();
+        _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
+
+        return _totalBorrowed.toBase(amount, false);
+    }
+
     /// @notice Compute the amount of `singularity.assetId` from `fraction`
     /// `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
     /// @param singularity the singularity address
@@ -130,6 +146,32 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
                 (fraction * totalAssetElastic) / totalAssetBase,
                 false
             );
+    }
+
+    /// @notice Compute the fraction of `singularity.assetId` from `amount`
+    /// `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
+    /// @param singularity the singularity address
+    /// @param amount The amount.
+    /// @return fraction The fraction.
+    function getFractionForAmount(
+        ISingularity singularity,
+        uint256 amount
+    ) public view returns (uint256 fraction) {
+        (uint128 totalAssetShare, uint128 totalAssetBase) = singularity
+            .totalAsset();
+        (uint128 totalBorrowElastic, ) = singularity
+            .totalBorrow();
+        uint256 assetId = singularity.assetId();
+
+        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+
+        uint256 share = yieldBox.toShare(assetId, amount, false);
+        uint256 allShare = totalAssetShare +
+            yieldBox.toShare(assetId, totalBorrowElastic, true);
+
+        fraction = allShare == 0
+            ? share
+            : (share * totalAssetBase) / allShare;
     }
 
     // ********************* //
@@ -292,7 +334,7 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
                     success: true,
                     returnData: abi.encode(part, share)
                 });
-            } else if (_action.id == MARKET_WITHDRAW_TO) {
+            } else if (_action.id == YB_WITHDRAW_TO) {
                 (
                     address yieldBox,
                     address from,
@@ -537,6 +579,23 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
                         deposit,
                         withdraw,
                         withdrawData
+                    )
+                );
+            } else if (_action.id == MARKET_REMOVE_ASSET) {
+                 HelperRemoveAssetData memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperRemoveAssetData)
+                );
+
+                 _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule
+                            .removeAsset
+                            .selector,
+                        data.market,
+                        data.user,
+                        data.fraction
                     )
                 );
             } else {
