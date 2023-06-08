@@ -1,129 +1,32 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+//LZ
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
+
+//OZ
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../interfaces/IMarket.sol";
-import "../interfaces/IOracle.sol";
-import "../interfaces/IBigBang.sol";
-import "../interfaces/ISingularity.sol";
-import "../interfaces/IYieldBoxBase.sol";
-import "../interfaces/ISendFrom.sol";
+//TAPIOCA
+import "../../interfaces/IYieldBoxBase.sol";
 
-abstract contract MagnetarV2Operations {
+import "../MagnetarV2Storage.sol";
+
+contract MagnetarMarketModule is MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
-    /// *** VARS ***
-    /// ***  ***
-    struct MarketInfo {
-        address collateral;
-        uint256 collateralId;
-        address asset;
-        uint256 assetId;
-        IOracle oracle;
-        bytes oracleData;
-        uint256 totalCollateralShare;
-        uint256 userCollateralShare;
-        Rebase totalBorrow;
-        uint256 userBorrowPart;
-        uint256 currentExchangeRate;
-        uint256 spotExchangeRate;
-        uint256 oracleExchangeRate;
-        uint256 totalBorrowCap;
-    }
-    struct SingularityInfo {
-        MarketInfo market;
-        Rebase totalAsset;
-        uint256 userAssetFraction;
-        ISingularity.AccrueInfo accrueInfo;
-    }
-    struct BigBangInfo {
-        MarketInfo market;
-        IBigBang.AccrueInfo accrueInfo;
-    }
-
-    mapping(address => mapping(address => bool)) public isApprovedForAll;
-
-    /// *** EVENTS ***
-    /// ***  ***
-    event ApprovalForAll(address owner, address operator, bool approved);
-
-    modifier allowed(address _from) {
-        _checkSender(_from);
-        _;
-    }
-
-    /// *** VIEW METHODS ***
-    /// ***  ***
-    function _singularityMarketInfo(
-        address who,
-        ISingularity[] memory markets
-    ) internal view returns (SingularityInfo[] memory) {
-        uint256 len = markets.length;
-        SingularityInfo[] memory result = new SingularityInfo[](len);
-
-        Rebase memory _totalAsset;
-        ISingularity.AccrueInfo memory _accrueInfo;
-        for (uint256 i = 0; i < len; i++) {
-            ISingularity sgl = markets[i];
-
-            result[i].market = _commonInfo(who, IMarket(address(sgl)));
-
-            (uint128 totalAssetElastic, uint128 totalAssetBase) = sgl //
-                .totalAsset(); //
-            _totalAsset = Rebase(totalAssetElastic, totalAssetBase); //
-            result[i].totalAsset = _totalAsset; //
-            result[i].userAssetFraction = sgl.balanceOf(who); //
-
-            (
-                uint64 interestPerSecond,
-                uint64 lastBlockAccrued,
-                uint128 feesEarnedFraction
-            ) = sgl.accrueInfo();
-            _accrueInfo = ISingularity.AccrueInfo(
-                interestPerSecond,
-                lastBlockAccrued,
-                feesEarnedFraction
-            );
-            result[i].accrueInfo = _accrueInfo;
-        }
-
-        return result;
-    }
-
-    function _bigBangMarketInfo(
-        address who,
-        IBigBang[] memory markets
-    ) internal view returns (BigBangInfo[] memory) {
-        uint256 len = markets.length;
-        BigBangInfo[] memory result = new BigBangInfo[](len);
-
-        IBigBang.AccrueInfo memory _accrueInfo;
-        for (uint256 i = 0; i < len; i++) {
-            IBigBang bigBang = markets[i];
-            result[i].market = _commonInfo(who, IMarket(address(bigBang)));
-
-            (uint64 debtRate, uint64 lastAccrued) = bigBang.accrueInfo();
-            _accrueInfo = IBigBang.AccrueInfo(debtRate, lastAccrued);
-            result[i].accrueInfo = _accrueInfo;
-        }
-
-        return result;
-    }
-
-    /// *** PUBLIC METHODS ***
-    /// ***  ***
     /// @notice Update approval status for an operator
     /// @param operator The address approved to perform actions on your behalf
     /// @param approved True/False
     function setApprovalForAll(address operator, bool approved) public {
         // Checks
-        require(operator != address(0), "YieldBox: operator not set"); // Important for security
-        require(operator != address(this), "YieldBox: can't approve yieldBox");
+        require(operator != address(0), "MagnetarV2: operator not set");
+        require(
+            operator != address(this),
+            "MagnetarV2: can't approve magnetar"
+        );
 
         // Effects
         isApprovedForAll[msg.sender][operator] = approved;
@@ -131,8 +34,163 @@ abstract contract MagnetarV2Operations {
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    /// *** INTERNAL METHODS ***
-    /// ***  ***
+    function withdrawTo(
+        IYieldBoxBase yieldBox,
+        address from,
+        uint256 assetId,
+        uint16 dstChainId,
+        bytes32 receiver,
+        uint256 amount,
+        uint256 share,
+        bytes memory adapterParams,
+        address payable refundAddress,
+        uint256 gas
+    ) external payable allowed(from) {
+        _withdrawTo(
+            yieldBox,
+            from,
+            assetId,
+            dstChainId,
+            receiver,
+            amount,
+            share,
+            adapterParams,
+            refundAddress,
+            gas
+        );
+    }
+
+    function depositAddCollateralAndBorrow(
+        IMarket market,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool extractFromSender,
+        bool deposit,
+        bool withdraw,
+        bytes memory withdrawData
+    ) external payable allowed(user) {
+        _depositAddCollateralAndBorrow(
+            market,
+            user,
+            collateralAmount,
+            borrowAmount,
+            extractFromSender,
+            deposit,
+            withdraw,
+            withdrawData
+        );
+    }
+
+    function depositAndRepay(
+        IMarket market,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        bool deposit,
+        bool extractFromSender
+    ) external payable allowed(user) {
+        _depositAndRepay(
+            market,
+            user,
+            depositAmount,
+            repayAmount,
+            deposit,
+            extractFromSender
+        );
+    }
+
+    function depositRepayAndRemoveCollateral(
+        IMarket market,
+        address user,
+        uint256 depositAmount,
+        uint256 repayAmount,
+        uint256 collateralAmount,
+        bool deposit,
+        bool withdraw,
+        bool extractFromSender
+    ) external payable allowed(user) {
+        _depositRepayAndRemoveCollateral(
+            market,
+            user,
+            depositAmount,
+            repayAmount,
+            collateralAmount,
+            deposit,
+            withdraw,
+            extractFromSender
+        );
+    }
+
+    function removeAsset(
+        ISingularity singularity,
+        address user,
+        uint256 fraction
+    ) external payable allowed(user) {
+        _removeAsset(singularity, user, fraction);
+    }
+
+    function mintAndLend(
+        ISingularity singularity,
+        IMarket bingBang,
+        address user,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        bool deposit,
+        bool extractFromSender
+    ) external payable allowed(user) {
+        _mintAndLend(
+            singularity,
+            bingBang,
+            user,
+            collateralAmount,
+            borrowAmount,
+            deposit,
+            extractFromSender
+        );
+    }
+
+    function depositAndAddAsset(
+        IMarket singularity,
+        address user,
+        uint256 amount,
+        bool deposit_,
+        bool extractFromSender
+    ) external payable allowed(user) {
+        _depositAndAddAsset(
+            singularity,
+            user,
+            amount,
+            deposit_,
+            extractFromSender
+        );
+    }
+
+    function removeAssetAndRepay(
+        ISingularity singularity,
+        IMarket bingBang,
+        address user,
+        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
+        uint256 repayAmount,
+        uint256 collateralShare,
+        bool withdraw,
+        bytes calldata withdrawData
+    ) external payable allowed(user) {
+        _removeAssetAndRepay(
+            singularity,
+            bingBang,
+            user,
+            removeShare,
+            repayAmount,
+            collateralShare,
+            withdraw,
+            withdrawData
+        );
+    }
+
+    // *********************** //
+    // *** PRIVATE METHODS *** //
+    // *********************** //
     function _depositAddCollateralAndBorrow(
         IMarket market,
         address user,
@@ -142,7 +200,7 @@ abstract contract MagnetarV2Operations {
         bool deposit,
         bool withdraw,
         bytes memory withdrawData
-    ) internal {
+    ) private {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
@@ -211,7 +269,7 @@ abstract contract MagnetarV2Operations {
         uint256 repayAmount,
         bool deposit,
         bool extractFromSender
-    ) internal {
+    ) private {
         uint256 assetId = market.assetId();
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -248,7 +306,7 @@ abstract contract MagnetarV2Operations {
         bool deposit,
         bool withdraw,
         bool extractFromSender
-    ) internal {
+    ) private {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         _depositAndRepay(
@@ -281,6 +339,14 @@ abstract contract MagnetarV2Operations {
         }
     }
 
+    function _removeAsset(
+        ISingularity singularity,
+        address user,
+        uint256 fraction
+    ) private {
+        singularity.removeAsset(user, user, fraction);
+    }
+
     function _mintAndLend(
         ISingularity singularity,
         IMarket bingBang,
@@ -289,7 +355,7 @@ abstract contract MagnetarV2Operations {
         uint256 borrowAmount,
         bool deposit,
         bool extractFromSender
-    ) internal {
+    ) private {
         uint256 collateralId = bingBang.collateralId();
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
@@ -348,7 +414,7 @@ abstract contract MagnetarV2Operations {
         uint256 _amount,
         bool deposit_,
         bool extractFromSender
-    ) internal {
+    ) private {
         uint256 assetId = singularity.assetId();
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
@@ -389,7 +455,7 @@ abstract contract MagnetarV2Operations {
         uint256 collateralShare,
         bool withdraw,
         bytes calldata withdrawData
-    ) internal {
+    ) private {
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
         //remove asset
@@ -449,7 +515,7 @@ abstract contract MagnetarV2Operations {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
-    ) internal {
+    ) private {
         if (dstChainId == 0) {
             yieldBox.withdraw(
                 assetId,
@@ -496,9 +562,6 @@ abstract contract MagnetarV2Operations {
         );
     }
 
-    /// *** HELPER METHODS ***
-    /// ***  ***
-
     function _withdraw(
         address from,
         bytes memory withdrawData,
@@ -507,7 +570,7 @@ abstract contract MagnetarV2Operations {
         uint256 amount,
         uint256 share,
         bool withdrawCollateral
-    ) internal {
+    ) private {
         require(withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
         (, uint16 destChain, bytes32 receiver, bytes memory adapterParams) = abi
             .decode(withdrawData, (bool, uint16, bytes32, bytes));
@@ -530,7 +593,7 @@ abstract contract MagnetarV2Operations {
     function _setApprovalForYieldBox(
         IMarket market,
         IYieldBoxBase yieldBox
-    ) internal {
+    ) private {
         bool isApproved = yieldBox.isApprovedForAll(
             address(this),
             address(market)
@@ -545,49 +608,7 @@ abstract contract MagnetarV2Operations {
         address _from,
         address _token,
         uint256 _amount
-    ) internal {
+    ) private {
         IERC20(_token).safeTransferFrom(_from, address(this), _amount);
     }
-
-    function _commonInfo(
-        address who,
-        IMarket market
-    ) private view returns (MarketInfo memory) {
-        Rebase memory _totalBorrowed;
-        MarketInfo memory info;
-
-        info.collateral = market.collateral();
-        info.asset = market.asset();
-        info.oracle = IOracle(market.oracle());
-        info.oracleData = market.oracleData();
-        info.totalCollateralShare = market.totalCollateralShare();
-        info.userCollateralShare = market.userCollateralShare(who);
-
-        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
-            .totalBorrow();
-        _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
-        info.totalBorrow = _totalBorrowed;
-        info.userBorrowPart = market.userBorrowPart(who);
-
-        info.currentExchangeRate = market.exchangeRate();
-        (, info.oracleExchangeRate) = IOracle(market.oracle()).peek(
-            market.oracleData()
-        );
-        info.spotExchangeRate = IOracle(market.oracle()).peekSpot(
-            market.oracleData()
-        );
-        info.totalBorrowCap = market.totalBorrowCap();
-        info.assetId = market.assetId();
-        info.collateralId = market.collateralId();
-        return info;
-    }
-
-    function _checkSender(address _from) internal view {
-        require(
-            _from == msg.sender || isApprovedForAll[_from][msg.sender] == true,
-            "MagnetarV2: operator not approved"
-        );
-    }
-
-    receive() external payable virtual {}
 }

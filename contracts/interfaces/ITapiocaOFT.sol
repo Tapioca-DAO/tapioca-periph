@@ -2,13 +2,31 @@
 pragma solidity ^0.8.18;
 
 import "./ISendFrom.sol";
+import {IUSDOBase} from "./IUSDO.sol";
+
+interface ITapiocaOFTBase {
+    function hostChainID() external view returns (uint256);
+
+    function wrap(
+        address fromAddress,
+        address toAddress,
+        uint256 amount
+    ) external;
+
+    function wrapNative(address _toAddress) external payable;
+
+    function unwrap(address _toAddress, uint256 _amount) external;
+
+    function erc20() external view returns (address);
+
+    function lzEndpoint() external view returns (address);
+}
 
 /// @dev used for generic TOFTs
-interface ITapiocaOFT is ISendFrom {
+interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     struct ISendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
-        bool wrap;
     }
 
     struct IApproval {
@@ -25,6 +43,7 @@ interface ITapiocaOFT is ISendFrom {
     }
 
     struct IWithdrawParams {
+        bool withdraw;
         uint256 withdrawLzFeeAmount;
         bool withdrawOnOtherChain;
         uint16 withdrawLzChainId;
@@ -42,38 +61,22 @@ interface ITapiocaOFT is ISendFrom {
 
     function erc20() external view returns (address);
 
-    function hostChainID() external view returns (uint256);
-
     function wrappedAmount(uint256 _amount) external view returns (uint256);
 
     function isHostChain() external view returns (bool);
 
     function balanceOf(address _holder) external view returns (uint256);
 
-    function isNative() external view returns (bool);
-
     function isTrustedRemote(
         uint16 lzChainId,
         bytes calldata path
     ) external view returns (bool);
 
-    function getLzChainId() external view returns (uint16);
-
     function approve(address _spender, uint256 _amount) external returns (bool);
 
     function extractUnderlying(uint256 _amount) external;
 
-    function unwrap(address _toAddress, uint256 _amount) external;
-
     function harvestFees() external;
-
-    function wrap(
-        address fromAddress,
-        address toAddress,
-        uint256 amount
-    ) external;
-
-    function wrapNative(address _toAddress) external payable;
 
     /// OFT specific methods
     function sendToYBAndBorrow(
@@ -105,5 +108,13 @@ interface ITapiocaOFT is ISendFrom {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
+    ) external payable;
+
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable;
 }

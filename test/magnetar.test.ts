@@ -20,6 +20,8 @@ import {
     SGLLiquidation__factory,
     Singularity,
     USDO__factory,
+    USDOLeverageModule__factory,
+    USDOMarketModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-Bar';
 import {
     ERC20WithoutStrategy__factory,
@@ -240,10 +242,6 @@ describe('MagnetarV2', () => {
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
-
-
-
-            hre.tracer.enabled = true;
             const borrowFn = magnetar.interface.encodeFunctionData(
                 'depositAddCollateralAndBorrow',
                 [
@@ -257,7 +255,6 @@ describe('MagnetarV2', () => {
                     encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
                 ],
             );
-            hre.tracer.enabled = false;
 
             let borrowPart = await wethUsdoSingularity.userBorrowPart(deployer.address);
             expect(borrowPart.eq(0)).to.be.true;
@@ -293,7 +290,6 @@ describe('MagnetarV2', () => {
 
             const usdoBalanceOfDeployer = await usd0.balanceOf(deployer.address);
             expect(usdoBalanceOfDeployer.eq(borrowAmount)).to.be.true;
-
         })
     });
 
@@ -365,7 +361,10 @@ describe('MagnetarV2', () => {
                     },
                 ],
             );
-            await usd0Dst.approve(magnetar.address, ethers.constants.MaxUint256);
+            await usd0Dst.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             await magnetar.connect(deployer).burst(
                 [
                     {
@@ -1705,17 +1704,42 @@ describe('MagnetarV2', () => {
             );
 
             // Asset
+            const USDOLeverageModule = new USDOLeverageModule__factory(owner);
+            const USDOMarketModule = new USDOMarketModule__factory(owner);
+
+            const usdo_leverage_host = await USDOLeverageModule.deploy(
+                lzEndpoint1.address,
+                yieldBox,
+            );
+            const usdo_market_host = await USDOMarketModule.deploy(
+                lzEndpoint1.address,
+                yieldBox,
+            );
+
             const USDO = new USDO__factory(deployer);
             const assetHost = await USDO.deploy(
                 lzEndpoint1.address,
                 yieldBox.address,
                 deployer.address,
+                usdo_leverage_host.address,
+                usdo_market_host.address,
+            );
+
+            const usdo_leverage_linked = await USDOLeverageModule.deploy(
+                lzEndpoint2.address,
+                yieldBox,
+            );
+            const usdo_market_linked = await USDOMarketModule.deploy(
+                lzEndpoint2.address,
+                yieldBox,
             );
 
             const assetLinked = await USDO.deploy(
                 lzEndpoint2.address,
                 yieldBox.address,
                 deployer.address,
+                usdo_leverage_linked.address,
+                usdo_market_linked.address,
             );
 
             // -------------------  Link TOFTs -------------------
@@ -3400,12 +3424,26 @@ async function setupUsd0Environment(
     const lzEndpointSrc = await LZEndpointMock.deploy(chainIdSrc);
     const lzEndpointDst = await LZEndpointMock.deploy(chainIdDst);
 
+    const USDOLeverageModule = new USDOLeverageModule__factory(deployer);
+    const USDOMarketModule = new USDOMarketModule__factory(deployer);
+
+    const usdo_leverage_src = await USDOLeverageModule.deploy(
+        lzEndpointSrc.address,
+        yieldBox.address,
+    );
+    const usdo_market_src = await USDOMarketModule.deploy(
+        lzEndpointSrc.address,
+        yieldBox.address,
+    );
+
     //deploy usd0 tokens
     const USDO = new USDO__factory(deployer);
     const usd0Src = await USDO.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
         deployer.address,
+        usdo_leverage_src.address,
+        usdo_market_src.address,
     );
 
     const usd0SrcStrategy = await createTokenEmptyStrategy(
@@ -3426,10 +3464,21 @@ async function setupUsd0Environment(
         0,
     );
 
+    const usdo_leverage_dst = await USDOLeverageModule.deploy(
+        lzEndpointDst.address,
+        yieldBox.address,
+    );
+    const usdo_market_dst = await USDOMarketModule.deploy(
+        lzEndpointDst.address,
+        yieldBox.address,
+    );
+
     const usd0Dst = await USDO.deploy(
         lzEndpointDst.address,
         yieldBox.address,
         deployer.address,
+        usdo_leverage_dst.address,
+        usdo_market_dst.address,
     );
 
     const usd0DstStrategy = await createTokenEmptyStrategy(

@@ -16,6 +16,7 @@ interface IUSDOBase {
         bytes32 s;
     }
     struct ILendParams {
+        bool repay;
         uint256 amount;
         address marketHelper;
         address market;
@@ -26,17 +27,47 @@ interface IUSDOBase {
         address zroPaymentAddress;
     }
 
+    struct ILeverageLZData {
+        uint256 srcExtraGasLimit;
+        uint16 lzSrcChainId;
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        bytes dstAirdropAdapterParam;
+        bytes srcAirdropAdapterParam;
+        address refundAddress;
+    }
+
+    struct ILeverageSwapData {
+        address tokenOut;
+        uint256 amountOutMin;
+        bytes data;
+    }
+    struct ILeverageExternalContractsData {
+        address swapper;
+        address magnetar;
+        address tOft;
+        address srcMarket;
+    }
+
     function mint(address _to, uint256 _amount) external;
 
     function burn(address _from, uint256 _amount) external;
 
-    function sendToYBAndLend(
+    function sendAndLendOrRepay(
         address _from,
         address _to,
         uint16 lzDstChainId,
         ILendParams calldata lendParams,
         ISendOptions calldata options,
         IApproval[] calldata approvals
+    ) external payable;
+
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        ILeverageLZData calldata lzData,
+        ILeverageSwapData calldata swapData,
+        ILeverageExternalContractsData calldata externalData
     ) external payable;
 }
 
