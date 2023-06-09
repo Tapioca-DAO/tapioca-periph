@@ -5,7 +5,7 @@ import { BN, registerFork } from './test.utils';
 
 describe('UniswapV3Swapper', () => {
     describe('getOutputAmount()', () => {
-         it('should get output amount', async () => {
+        it('should get output amount', async () => {
             const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } =
                 await loadFixture(registerFork);
             const amount = BN(1e18);
@@ -23,27 +23,28 @@ describe('UniswapV3Swapper', () => {
             expect(amountOut.gt(0)).to.be.true;
         });
     });
-   
+
     describe('getInputAmount()', () => {
         it('should get input amount', async () => {
-        const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } = await loadFixture(registerFork);
-        const amount = BN(1e6).mul(1000);
+            const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } =
+                await loadFixture(registerFork);
+            const amount = BN(1e6).mul(1000);
 
-        const swapData = createSimpleSwapData(
-            weth.address,
-            usdc.address,
-            0,
-            amount,
-        );
-        const amountIn = await uniswapV3Swapper.getInputAmount(
-            swapData,
-            '0x00',
-        );
+            const swapData = createSimpleSwapData(
+                weth.address,
+                usdc.address,
+                0,
+                amount,
+            );
+            const amountIn = await uniswapV3Swapper.getInputAmount(
+                swapData,
+                '0x00',
+            );
 
-        expect(amountIn.gt(0)).to.be.true;
+            expect(amountIn.gt(0)).to.be.true;
+        });
     });
-    });
-    
+
     describe('swap()', () => {
         it('should swap', async () => {
             const {
@@ -56,7 +57,9 @@ describe('UniswapV3Swapper', () => {
             } = await loadFixture(registerFork);
             const amount = BN(1e18);
 
-            await weth.connect(binanceWallet).transfer(deployer.address, amount);
+            await weth
+                .connect(binanceWallet)
+                .transfer(deployer.address, amount);
             const usdcBalanceBefore = await usdc.balanceOf(deployer.address);
             expect(usdcBalanceBefore.eq(0)).to.be.true;
 
@@ -89,7 +92,9 @@ describe('UniswapV3Swapper', () => {
             const amount = BN(1e18);
             const share = await yieldBox.toShare(wethAssetId, amount, false);
 
-            await weth.connect(binanceWallet).transfer(deployer.address, amount);
+            await weth
+                .connect(binanceWallet)
+                .transfer(deployer.address, amount);
             await weth.approve(yieldBox.address, amount);
             await yieldBox.depositAsset(
                 wethAssetId,
@@ -111,7 +116,12 @@ describe('UniswapV3Swapper', () => {
             );
             expect(ybUsdcBalanceBefore.eq(0)).to.be.true;
 
-            const swapData = createYbSwapData(wethAssetId, usdcAssetId, share, 0);
+            const swapData = createYbSwapData(
+                wethAssetId,
+                usdcAssetId,
+                share,
+                0,
+            );
             await yieldBox.transfer(
                 deployer.address,
                 uniswapV3Swapper.address,
