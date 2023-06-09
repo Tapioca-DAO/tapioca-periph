@@ -10,7 +10,7 @@
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test",
         "prepare": "husky install",
-        "lint:ts": "eslint . --fix",
+        "lint:ts": "eslint . --fix --ext ts",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",
         "lint": "npm run lint:ts && npm run lint:sol",
         "contracts_size": "npm run compile && NODE_ENV=hardhat hardhat size-contracts"
@@ -70,7 +70,7 @@
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.4.0",
+        "tapioca-sdk": "^1.4.1",
         "uuid": "^9.0.0"
     }
 }

@@ -3,7 +3,6 @@ pragma solidity ^0.8.18;
 
 import "./ISwapper.sol";
 
-//TODO: move to tapioca-periph
 interface IPenrose {
     /// @notice swap extra data
     struct SwapData {

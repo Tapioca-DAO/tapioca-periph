@@ -52,7 +52,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     viaIR: true,
                     optimizer: {
                         enabled: true,
-                        runs: 2,
+                        runs: 300,
                     },
                 },
             },
@@ -96,7 +96,10 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         outDir: './typechain',
     },
     gasReporter: {},
-    dodoc: {},
+    dodoc: {
+        runOnCompile: false,
+        freshOutput: true,
+    },
     mocha: {
         timeout: 4000000,
     },
