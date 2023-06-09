@@ -3,3 +3,5 @@ artifacts
 cache
 coverage
 gitsub_tapioca-sdk
+typechain
+docs

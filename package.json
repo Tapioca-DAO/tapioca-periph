@@ -10,7 +10,7 @@
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test",
         "prepare": "husky install",
-        "lint:ts": "eslint ./*.ts --fix",
+        "lint:ts": "eslint . --fix --ext ts",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",
         "lint": "npm run lint:ts && npm run lint:sol",
         "contracts_size": "npm run compile && NODE_ENV=hardhat hardhat size-contracts"
