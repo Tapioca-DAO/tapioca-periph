@@ -808,6 +808,15 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();
+
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        
+        (info.totalYieldBoxCollateralShare, info.totalYieldBoxCollateralAmount) = yieldBox.assetTotals(info.collateralId);
+        (info.totalYieldBoxAssetShare, info.totalYieldBoxAssetAmount) = yieldBox.assetTotals(info.assetId);
+
+        (info.yieldBoxCollateralTokenType, info.yieldBoxCollateralContractAddress, info.yieldBoxCollateralStrategyAddress, info.yieldBoxCollateralTokenId) = yieldBox.assets(info.collateralId);
+        (info.yieldBoxAssetTokenType, info.yieldBoxAssetContractAddress, info.yieldBoxAssetStrategyAddress, info.yieldBoxAssetTokenId) = yieldBox.assets(info.assetId);
+
         return info;
     }
 

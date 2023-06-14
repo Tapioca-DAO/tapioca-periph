@@ -11,6 +11,10 @@ import "../interfaces/IBigBang.sol";
 import "../interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
+//YIELDBOX
+import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
+
+
 contract MagnetarV2Storage {
     // ************ //
     // *** VARS *** //
@@ -32,6 +36,21 @@ contract MagnetarV2Storage {
         uint256 spotExchangeRate;
         uint256 oracleExchangeRate;
         uint256 totalBorrowCap;
+
+        uint256 totalYieldBoxCollateralShare;
+        uint256 totalYieldBoxCollateralAmount;
+        uint256 totalYieldBoxAssetShare;
+        uint256 totalYieldBoxAssetAmount;
+
+        TokenType yieldBoxCollateralTokenType;
+        address yieldBoxCollateralContractAddress;
+        address yieldBoxCollateralStrategyAddress;
+        uint256 yieldBoxCollateralTokenId;
+
+        TokenType yieldBoxAssetTokenType;
+        address yieldBoxAssetContractAddress;
+        address yieldBoxAssetStrategyAddress;
+        uint256 yieldBoxAssetTokenId;
     }
     struct SingularityInfo {
         MarketInfo market;
@@ -193,7 +212,6 @@ contract MagnetarV2Storage {
     uint16 internal constant PERMIT = 2;
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
-    uint16 internal constant YB_WITHDRAW_ASSET = 101;
     uint16 internal constant YB_WITHDRAW_TO = 102;
 
     uint16 internal constant MARKET_ADD_COLLATERAL = 200;

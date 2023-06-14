@@ -286,11 +286,24 @@ describe('MagnetarV2', () => {
 
 
             const receiverSplit = deployer.address.split('0x');
-            await magnetar.withdrawTo(yieldBox.address, deployer.address, usdoAssetId, 0, '0x'.concat(receiverSplit[1].padStart(64, '0')), borrowAmount, 0, '0x00', deployer.address, 0);
+            await magnetar.withdrawTo(
+                yieldBox.address,
+                deployer.address,
+                usdoAssetId,
+                0,
+                '0x'.concat(receiverSplit[1].padStart(64, '0')),
+                borrowAmount,
+                0,
+                '0x00',
+                deployer.address,
+                0,
+            );
 
-            const usdoBalanceOfDeployer = await usd0.balanceOf(deployer.address);
+            const usdoBalanceOfDeployer = await usd0.balanceOf(
+                deployer.address,
+            );
             expect(usdoBalanceOfDeployer.eq(borrowAmount)).to.be.true;
-        })
+        });
     });
 
     describe('sendFrom()', () => {
