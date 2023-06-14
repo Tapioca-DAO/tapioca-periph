@@ -15,6 +15,13 @@ interface IUSDOBase {
         bytes32 r;
         bytes32 s;
     }
+
+    struct IRemoveParams {
+        uint256 share;
+        address marketHelper;
+        address market;
+    }
+
     struct ILendParams {
         bool repay;
         uint256 amount;

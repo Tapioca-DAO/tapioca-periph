@@ -14,7 +14,6 @@ import {IUSDOBase} from "../interfaces/IUSDO.sol";
 //YIELDBOX
 import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
 
-
 contract MagnetarV2Storage {
     // ************ //
     // *** VARS *** //
@@ -36,17 +35,14 @@ contract MagnetarV2Storage {
         uint256 spotExchangeRate;
         uint256 oracleExchangeRate;
         uint256 totalBorrowCap;
-
         uint256 totalYieldBoxCollateralShare;
         uint256 totalYieldBoxCollateralAmount;
         uint256 totalYieldBoxAssetShare;
         uint256 totalYieldBoxAssetAmount;
-
         TokenType yieldBoxCollateralTokenType;
         address yieldBoxCollateralContractAddress;
         address yieldBoxCollateralStrategyAddress;
         uint256 yieldBoxCollateralTokenId;
-
         TokenType yieldBoxAssetTokenType;
         address yieldBoxAssetContractAddress;
         address yieldBoxAssetStrategyAddress;

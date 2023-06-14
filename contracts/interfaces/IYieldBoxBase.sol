@@ -46,7 +46,9 @@ interface IYieldBoxBase {
             uint256 tokenId
         );
 
-    function assetTotals(uint256 assetId) external view returns (uint256 totalShare, uint256 totalAmount);
+    function assetTotals(
+        uint256 assetId
+    ) external view returns (uint256 totalShare, uint256 totalAmount);
 
     function toShare(
         uint256 assetId,
