@@ -534,7 +534,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         {} catch {
             return;
         }
-        
+
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
         bytes memory _adapterParams;
         ISendFrom.LzCallParams memory callParams = ISendFrom.LzCallParams({
