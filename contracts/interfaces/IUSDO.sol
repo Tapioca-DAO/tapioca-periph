@@ -7,6 +7,7 @@ interface IUSDOBase {
     struct IApproval {
         bool allowFailure;
         address target;
+        bool permitBorrow;
         address owner;
         address spender;
         uint256 value;
