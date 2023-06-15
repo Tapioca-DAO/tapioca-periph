@@ -1,30 +1,26 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: GPL-3.0
 
-library Math {
-    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
-    function sqrt(uint256 y) internal pure returns (uint256 z) {
-        if (y > 3) {
-            z = y;
-            uint256 x = y / 2 + 1;
-            while (x < z) {
-                z = x;
-                x = (y / x + x) / 2;
-            }
-        } else if (y != 0) {
-            z = 1;
-        }
-    }
+pragma solidity >=0.4.0;
 
-    // https://xn--2-umb.com/21/muldiv/
-    function mulDiv(
+/// @title Contains 512-bit math functions
+/// @notice Facilitates multiplication and division that can have overflow of an intermediate value without any loss of precision
+/// @dev Handles "phantom overflow" i.e., allows multiplication and division where an intermediate value overflows 256 bits
+/// @dev This contract was forked from Uniswap V3's contract `FullMath.sol` available here
+/// https://github.com/Uniswap/uniswap-v3-core/blob/main/contracts/libraries/FullMath.sol
+abstract contract FullMath {
+    /// @notice Calculates floor(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
+    /// @param a The multiplicand
+    /// @param b The multiplier
+    /// @param denominator The divisor
+    /// @return result The 256-bit result
+    /// @dev Credit to Remco Bloemen under MIT license https://xn--2-umb.com/21/muldiv
+    /// @dev Contrary to UniswapV3 implementation, this contract doesn't handle `a*b` overflows
+    /// and will revert if so
+    function _mulDiv(
         uint256 a,
         uint256 b,
         uint256 denominator
     ) internal pure returns (uint256 result) {
-        // Handle division by zero
-        require(denominator > 0);
-
         // 512-bit multiply [prod1 prod0] = a * b
         // Compute the product mod 2**256 and mod 2**256 - 1
         // then use the Chinese Remainder Theorem to reconstruct
@@ -38,28 +34,25 @@ library Math {
             prod1 := sub(sub(mm, prod0), lt(mm, prod0))
         }
 
-        // Short circuit 256 by 256 division
-        // This saves gas when a * b is small, at the cost of making the
-        // large case a bit more expensive. Depending on your use case you
-        // may want to remove this short circuit and always go through the
-        // 512 bit path.
+        // Handle non-overflow cases, 256 by 256 division
         if (prod1 == 0) {
+            require(denominator > 0);
             assembly {
                 result := div(prod0, denominator)
             }
             return result;
         }
 
+        // Make sure the result is less than 2**256.
+        // Also prevents denominator == 0
+        require(denominator > prod1);
+
         ///////////////////////////////////////////////
         // 512 by 256 division.
         ///////////////////////////////////////////////
 
-        // Handle overflow, the result must be < 2**256
-        require(prod1 < denominator);
-
         // Make division exact by subtracting the remainder from [prod1 prod0]
         // Compute remainder using mulmod
-        // Note mulmod(_, _, 0) == 0
         uint256 remainder;
         assembly {
             remainder := mulmod(a, b, denominator)
@@ -72,7 +65,7 @@ library Math {
 
         // Factor powers of two out of denominator
         // Compute largest power of two divisor of denominator.
-        // Always >= 1 unless denominator is zero, then twos is zero.
+        // Always >= 1.
         uint256 twos = denominator & (~denominator + 1);
         // Divide denominator by power of two
         assembly {
@@ -96,9 +89,8 @@ library Math {
         // modulo 2**256 such that denominator * inv = 1 mod 2**256.
         // Compute the inverse by starting with a seed that is correct
         // correct for four bits. That is, denominator * inv = 1 mod 2**4
-        // If denominator is zero the inverse starts with 2
         uint256 inv = (3 * denominator) ^ 2;
-        // Now use Newton-Raphson itteration to improve the precision.
+        // Now use Newton-Raphson iteration to improve the precision.
         // Thanks to Hensel's lifting lemma, this also works in modular
         // arithmetic, doubling the correct bits in each step.
         inv *= 2 - denominator * inv; // inverse mod 2**8
@@ -107,7 +99,6 @@ library Math {
         inv *= 2 - denominator * inv; // inverse mod 2**64
         inv *= 2 - denominator * inv; // inverse mod 2**128
         inv *= 2 - denominator * inv; // inverse mod 2**256
-        // If denominator is zero, inv is now 128
 
         // Because the division is now exact we can divide by multiplying
         // with the modular inverse of denominator. This will give us the
@@ -117,22 +108,5 @@ library Math {
         // is no longer required.
         result = prod0 * inv;
         return result;
-    }
-
-    /// @notice Calculates ceil(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
-    /// @param a The multiplicand
-    /// @param b The multiplier
-    /// @param denominator The divisor
-    /// @return result The 256-bit result
-    function mulDivRoundingUp(
-        uint256 a,
-        uint256 b,
-        uint256 denominator
-    ) internal pure returns (uint256 result) {
-        result = mulDiv(a, b, denominator);
-        if (mulmod(a, b, denominator) > 0) {
-            require(result < type(uint256).max);
-            result++;
-        }
     }
 }

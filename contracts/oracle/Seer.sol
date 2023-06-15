@@ -1,47 +1,44 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "./OracleMulti.sol";
+import "../interfaces/IOracle.sol" as ITOracle;
 
-import "./Math.sol";
-import "../interfaces/IAggregatorV3Interface.sol";
-import "../interfaces/IOracle.sol";
-
-contract Seer is IOracle {
-    AggregatorV3Interface internal immutable CHAINLINK_AGGREGATOR;
-    IUniswapV3Pool internal immutable UNI_POOL;
-
+contract Seer is ITOracle.IOracle, OracleMulti {
     string public _name;
     string public _symbol;
 
     constructor(
         string memory __name,
         string memory __symbol,
-        address chainlinkAggregator,
-        address uniPool
-    ) {
-        CHAINLINK_AGGREGATOR = AggregatorV3Interface(chainlinkAggregator);
-        UNI_POOL = IUniswapV3Pool(uniPool);
+        address[] memory addressInAndOutUni,
+        IUniswapV3Pool[] memory _circuitUniswap,
+        uint8[] memory _circuitUniIsMultiplied,
+        uint32 _twapPeriod,
+        uint16 observationLength,
+        uint8 _uniFinalCurrency,
+        address[] memory _circuitChainlink,
+        uint8[] memory _circuitChainIsMultiplied,
+        uint32 _stalePeriod,
+        address[] memory guardians,
+        bytes32 _description
+    )
+        OracleMulti(
+            addressInAndOutUni,
+            _circuitUniswap,
+            _circuitUniIsMultiplied,
+            _twapPeriod,
+            observationLength,
+            _uniFinalCurrency,
+            _circuitChainlink,
+            _circuitChainIsMultiplied,
+            _stalePeriod,
+            guardians,
+            _description
+        )
+    {
         _name = __name;
         _symbol = __symbol;
-    }
-
-    function _getUniPrice() public view returns (uint256) {
-        (uint160 sqrtPriceX96, , , , , , ) = UNI_POOL.slot0();
-
-        // sqrtPriceX96 is a Q64.96 fixed point number, so you need to decode it
-        uint256 numerator1 = uint256(sqrtPriceX96) * uint256(sqrtPriceX96);
-        uint256 numerator2 = 10 ** 18;
-        return Math.mulDiv(numerator1, numerator2, 1 << 192);
-    }
-
-    function getPrice() public view returns (int) {
-        (, int price, , , ) = CHAINLINK_AGGREGATOR.latestRoundData();
-        return price;
-    }
-
-    function getUniPrice() public view returns (int) {
-        return int(_getUniPrice());
     }
 
     /// @notice Get the latest exchange rate.
@@ -53,7 +50,8 @@ contract Seer is IOracle {
     function get(
         bytes calldata data
     ) external virtual returns (bool success, uint256 rate) {
-        return (true, uint256(getPrice()));
+        (uint256 low, uint256 high) = _readAll(inBase);
+        return (true, high);
     }
 
     /// @notice Check the last exchange rate without any state changes.
@@ -65,7 +63,8 @@ contract Seer is IOracle {
     function peek(
         bytes calldata data
     ) external view virtual returns (bool success, uint256 rate) {
-        return (true, uint256(getPrice()));
+        (uint256 low, uint256 high) = _readAll(inBase);
+        return (true, high);
     }
 
     /// @notice Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
@@ -76,7 +75,8 @@ contract Seer is IOracle {
     function peekSpot(
         bytes calldata data
     ) external view virtual returns (uint256 rate) {
-        return uint256(getPrice());
+        (uint256 low, uint256 high) = _readAll(inBase);
+        return high;
     }
 
     /// @notice Returns a human readable (short) name about this oracle.
