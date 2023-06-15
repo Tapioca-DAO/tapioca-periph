@@ -45,6 +45,7 @@ import {
     UniswapV2Swapper__factory,
 } from '../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { CurveStableToUsdoBidder } from 'tapioca-sdk/dist/typechain/tapioca-periphery';
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
 const verifyEtherscanQueue: { address: string; args: any[] }[] = [];

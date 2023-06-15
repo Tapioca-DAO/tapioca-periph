@@ -64,6 +64,7 @@
         "write-json-file": "4.3.0"
     },
     "dependencies": {
+        "@chainlink/contracts": "^0.6.1",
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "@types/inquirer": "^9.0.3",
         "@types/uuid": "^9.0.1",
