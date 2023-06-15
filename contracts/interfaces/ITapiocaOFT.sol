@@ -49,7 +49,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint16 withdrawLzChainId;
         bytes withdrawAdapterParams;
     }
-    
+
     struct IRemoveParams {
         uint256 share;
         address marketHelper;
