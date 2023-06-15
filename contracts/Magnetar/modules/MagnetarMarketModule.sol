@@ -236,30 +236,36 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         //add collateral
-        _setApprovalForYieldBox(market, yieldBox);
-        market.addCollateral(
-            deposit ? address(this) : user,
-            user,
-            false,
-            collateralAmount,
-            _share
-        );
-
-        //borrow
-        address borrowReceiver = withdraw ? address(this) : user;
-        market.borrow(user, borrowReceiver, borrowAmount);
-
-        if (withdraw) {
-            _withdraw(
-                borrowReceiver,
-                withdrawData,
-                market,
-                yieldBox,
-                borrowAmount,
-                0,
-                false
+        if (collateralAmount > 0) {
+            _setApprovalForYieldBox(market, yieldBox);
+            market.addCollateral(
+                deposit ? address(this) : user,
+                user,
+                false,
+                collateralAmount,
+                _share
             );
         }
+
+        //borrow
+        if (borrowAmount > 0) {
+            address borrowReceiver = withdraw ? address(this) : user;
+            market.borrow(user, borrowReceiver, borrowAmount);
+
+            if (withdraw) {
+                _withdraw(
+                    borrowReceiver,
+                    withdrawData,
+                    market,
+                    yieldBox,
+                    borrowAmount,
+                    0,
+                    false
+                );
+            }
+        }
+
+        _revertYieldBoxApproval(market, yieldBox);
     }
 
     function _depositAndRepay(
@@ -293,8 +299,16 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         //repay
-        _setApprovalForYieldBox(market, yieldBox);
-        market.repay(deposit ? address(this) : user, user, false, repayAmount);
+        if (repayAmount > 0) {
+            _setApprovalForYieldBox(market, yieldBox);
+            market.repay(
+                deposit ? address(this) : user,
+                user,
+                false,
+                repayAmount
+            );
+            _revertYieldBoxApproval(market, yieldBox);
+        }
     }
 
     function _depositRepayAndRemoveCollateral(
@@ -319,23 +333,25 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         );
 
         //remove collateral
-        address receiver = withdraw ? address(this) : user;
-        uint256 collateralShare = yieldBox.toShare(
-            market.collateralId(),
-            collateralAmount,
-            false
-        );
-        market.removeCollateral(user, receiver, collateralShare);
-
-        //withdraw
-        if (withdraw) {
-            yieldBox.withdraw(
+        if (collateralAmount > 0) {
+            address receiver = withdraw ? address(this) : user;
+            uint256 collateralShare = yieldBox.toShare(
                 market.collateralId(),
-                address(this),
-                user,
                 collateralAmount,
-                0
+                false
             );
+            market.removeCollateral(user, receiver, collateralShare);
+
+            //withdraw
+            if (withdraw) {
+                yieldBox.withdraw(
+                    market.collateralId(),
+                    address(this),
+                    user,
+                    collateralAmount,
+                    0
+                );
+            }
         }
     }
 
@@ -399,13 +415,21 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         //borrow from BingBang
-        bingBang.borrow(user, user, borrowAmount);
+        if (borrowAmount > 0) {
+            bingBang.borrow(user, user, borrowAmount);
 
-        //lend to Singularity
-        uint256 assetId = singularity.assetId();
-        uint256 borrowShare = yieldBox.toShare(assetId, borrowAmount, false);
-        _setApprovalForYieldBox(singularity, yieldBox);
-        singularity.addAsset(user, user, false, borrowShare);
+            //lend to Singularity
+            uint256 assetId = singularity.assetId();
+            uint256 borrowShare = yieldBox.toShare(
+                assetId,
+                borrowAmount,
+                false
+            );
+            _setApprovalForYieldBox(singularity, yieldBox);
+            singularity.addAsset(user, user, false, borrowShare);
+            _revertYieldBoxApproval(singularity, yieldBox);
+        }
+        _revertYieldBoxApproval(bingBang, yieldBox);
     }
 
     function _depositAndAddAsset(
@@ -444,6 +468,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         //add asset
         _setApprovalForYieldBox(singularity, yieldBox);
         singularity.addAsset(address(this), _user, false, _share);
+        _setApprovalForYieldBox(singularity, yieldBox);
     }
 
     function _removeAssetAndRepay(
@@ -484,23 +509,25 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         //remove collateral
-        bingBang.removeCollateral(
-            user,
-            withdraw ? address(this) : user,
-            collateralShare
-        );
-
-        //withdraw
-        if (withdraw) {
-            _withdraw(
-                address(this),
-                withdrawData,
-                singularity,
-                yieldBox,
-                0,
-                collateralShare,
-                true
+        if (collateralShare > 0) {
+            bingBang.removeCollateral(
+                user,
+                withdraw ? address(this) : user,
+                collateralShare
             );
+
+            //withdraw
+            if (withdraw) {
+                _withdraw(
+                    address(this),
+                    withdrawData,
+                    singularity,
+                    yieldBox,
+                    0,
+                    collateralShare,
+                    true
+                );
+            }
         }
     }
 
@@ -534,15 +561,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         {} catch {
             return;
         }
-
-        require(
-            yieldBox.toAmount(
-                assetId,
-                yieldBox.balanceOf(from, assetId),
-                false
-            ) >= amount,
-            "SGL: not available"
-        );
 
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
         bytes memory _adapterParams;
@@ -601,7 +619,19 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         if (!isApproved) {
             yieldBox.setApprovalForAll(address(market), true);
         }
-        isApproved = yieldBox.isApprovedForAll(address(this), address(market));
+    }
+
+    function _revertYieldBoxApproval(
+        IMarket market,
+        IYieldBoxBase yieldBox
+    ) private {
+        bool isApproved = yieldBox.isApprovedForAll(
+            address(this),
+            address(market)
+        );
+        if (isApproved) {
+            yieldBox.setApprovalForAll(address(market), false);
+        }
     }
 
     function _extractTokens(

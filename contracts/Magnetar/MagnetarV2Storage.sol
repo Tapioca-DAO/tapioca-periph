@@ -11,6 +11,9 @@ import "../interfaces/IBigBang.sol";
 import "../interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
+//YIELDBOX
+import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
+
 contract MagnetarV2Storage {
     // ************ //
     // *** VARS *** //
@@ -32,6 +35,18 @@ contract MagnetarV2Storage {
         uint256 spotExchangeRate;
         uint256 oracleExchangeRate;
         uint256 totalBorrowCap;
+        uint256 totalYieldBoxCollateralShare;
+        uint256 totalYieldBoxCollateralAmount;
+        uint256 totalYieldBoxAssetShare;
+        uint256 totalYieldBoxAssetAmount;
+        TokenType yieldBoxCollateralTokenType;
+        address yieldBoxCollateralContractAddress;
+        address yieldBoxCollateralStrategyAddress;
+        uint256 yieldBoxCollateralTokenId;
+        TokenType yieldBoxAssetTokenType;
+        address yieldBoxAssetContractAddress;
+        address yieldBoxAssetStrategyAddress;
+        uint256 yieldBoxAssetTokenId;
     }
     struct SingularityInfo {
         MarketInfo market;
@@ -188,12 +203,22 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
+    struct HelperDepositRepayRemoveCollateral {
+        address market;
+        address user;
+        uint256 depositAmount;
+        uint256 repayAmount;
+        uint256 collateralAmount;
+        bool deposit;
+        bool withdraw;
+        bool extractFromSender;
+    }
+
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
-    uint16 internal constant YB_WITHDRAW_ASSET = 101;
     uint16 internal constant YB_WITHDRAW_TO = 102;
 
     uint16 internal constant MARKET_ADD_COLLATERAL = 200;
@@ -203,6 +228,7 @@ contract MagnetarV2Storage {
     uint16 internal constant MARKET_YBDEPOSIT_AND_LEND = 205;
     uint16 internal constant MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW = 206;
     uint16 internal constant MARKET_REMOVE_ASSET = 207;
+    uint16 internal constant MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL = 208;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;
