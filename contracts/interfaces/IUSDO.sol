@@ -7,6 +7,7 @@ interface IUSDOBase {
     struct IApproval {
         bool allowFailure;
         address target;
+        bool permitBorrow;
         address owner;
         address spender;
         uint256 value;
@@ -15,11 +16,20 @@ interface IUSDOBase {
         bytes32 r;
         bytes32 s;
     }
+
+    struct IRemoveParams {
+        uint256 share;
+        address marketHelper;
+        address market;
+    }
+
     struct ILendParams {
         bool repay;
         uint256 amount;
         address marketHelper;
         address market;
+        bool removeCollateral;
+        uint256 removeCollateralShare;
     }
 
     struct ISendOptions {

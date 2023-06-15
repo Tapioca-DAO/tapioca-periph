@@ -3,7 +3,6 @@ pragma solidity ^0.8.18;
 
 //OZ
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 //TAPIOCA
@@ -24,7 +23,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
+contract MagnetarV2 is Ownable, MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
@@ -593,6 +592,28 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
                         data.fraction
                     )
                 );
+            } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
+                HelperDepositRepayRemoveCollateral memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperDepositRepayRemoveCollateral)
+                );
+
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule
+                            .depositRepayAndRemoveCollateral
+                            .selector,
+                        data.market,
+                        data.user,
+                        data.depositAmount,
+                        data.repayAmount,
+                        data.collateralAmount,
+                        data.deposit,
+                        data.withdraw,
+                        data.extractFromSender
+                    )
+                );
             } else {
                 revert("MagnetarV2: action not valid");
             }
@@ -808,6 +829,29 @@ contract MagnetarV2 is Ownable, ReentrancyGuard, MagnetarV2Storage {
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();
+
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+
+        (
+            info.totalYieldBoxCollateralShare,
+            info.totalYieldBoxCollateralAmount
+        ) = yieldBox.assetTotals(info.collateralId);
+        (info.totalYieldBoxAssetShare, info.totalYieldBoxAssetAmount) = yieldBox
+            .assetTotals(info.assetId);
+
+        (
+            info.yieldBoxCollateralTokenType,
+            info.yieldBoxCollateralContractAddress,
+            info.yieldBoxCollateralStrategyAddress,
+            info.yieldBoxCollateralTokenId
+        ) = yieldBox.assets(info.collateralId);
+        (
+            info.yieldBoxAssetTokenType,
+            info.yieldBoxAssetContractAddress,
+            info.yieldBoxAssetStrategyAddress,
+            info.yieldBoxAssetTokenId
+        ) = yieldBox.assets(info.assetId);
+
         return info;
     }
 

@@ -50,6 +50,12 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         bytes withdrawAdapterParams;
     }
 
+    struct IRemoveParams {
+        uint256 share;
+        address marketHelper;
+        address market;
+    }
+
     struct IBorrowParams {
         uint256 amount;
         uint256 borrowAmount;
