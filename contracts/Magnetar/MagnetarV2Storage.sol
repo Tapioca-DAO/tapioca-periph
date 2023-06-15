@@ -203,6 +203,17 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
+    struct HelperDepositRepayRemoveCollateral {
+        address market;
+        address user;
+        uint256 depositAmount;
+        uint256 repayAmount;
+        uint256 collateralAmount;
+        bool deposit;
+        bool withdraw;
+        bool extractFromSender;
+    }
+
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
@@ -217,6 +228,7 @@ contract MagnetarV2Storage {
     uint16 internal constant MARKET_YBDEPOSIT_AND_LEND = 205;
     uint16 internal constant MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW = 206;
     uint16 internal constant MARKET_REMOVE_ASSET = 207;
+    uint16 internal constant MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL = 208;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;

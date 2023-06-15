@@ -592,6 +592,28 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         data.fraction
                     )
                 );
+            } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
+                HelperDepositRepayRemoveCollateral memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperDepositRepayRemoveCollateral)
+                );
+
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule
+                            .depositRepayAndRemoveCollateral
+                            .selector,
+                        data.market,
+                        data.user,
+                        data.depositAmount,
+                        data.repayAmount,
+                        data.collateralAmount,
+                        data.deposit,
+                        data.withdraw,
+                        data.extractFromSender
+                    )
+                );
             } else {
                 revert("MagnetarV2: action not valid");
             }
