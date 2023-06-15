@@ -28,6 +28,8 @@ interface IUSDOBase {
         uint256 amount;
         address marketHelper;
         address market;
+        bool removeCollateral;
+        uint256 removeCollateralShare;
     }
 
     struct ISendOptions {
