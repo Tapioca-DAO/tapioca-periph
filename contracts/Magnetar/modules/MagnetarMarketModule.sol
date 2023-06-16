@@ -17,7 +17,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
-
     function withdrawTo(
         IYieldBoxBase yieldBox,
         address from,

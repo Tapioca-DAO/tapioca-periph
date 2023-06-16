@@ -424,25 +424,29 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address from,
                     address to,
                     uint16 dstChainId,
+                    address zroPaymentAddress,
                     IUSDOBase.ILendParams memory lendParams,
-                    IUSDOBase.ISendOptions memory options,
-                    IUSDOBase.IApproval[] memory approvals
+                    IUSDOBase.IApproval[] memory approvals,
+                    IUSDOBase.IWithdrawParams memory withdrawParams,
+                    bytes memory adapterParams
                 ) = abi.decode(
                         _action.call[4:],
                         (
                             address,
                             address,
                             uint16,
+                            address,
                             (IUSDOBase.ILendParams),
-                            (IUSDOBase.ISendOptions),
-                            (IUSDOBase.IApproval[])
+                            (IUSDOBase.IApproval[]),
+                            (IUSDOBase.IWithdrawParams),
+                            bytes
                         )
                     );
                 _checkSender(from);
 
                 IUSDOBase(_action.target).sendAndLendOrRepay{
                     value: _action.value
-                }(msg.sender, to, dstChainId, lendParams, options, approvals);
+                }(msg.sender, to, dstChainId, zroPaymentAddress, lendParams, approvals, withdrawParams, adapterParams);
             } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
                 TOFTSendToStrategyData memory data = abi.decode(
                     _action.call[4:],

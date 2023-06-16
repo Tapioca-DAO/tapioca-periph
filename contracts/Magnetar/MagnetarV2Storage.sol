@@ -247,10 +247,7 @@ contract MagnetarV2Storage {
     // *** INTERNAL METHODS *** //
     // ************************ //
     function _checkSender(address _from) internal view {
-        require(
-            _from == msg.sender,
-            "MagnetarV2: operator not approved"
-        );
+        require(_from == msg.sender, "MagnetarV2: operator not approved");
     }
 
     receive() external payable virtual {}
