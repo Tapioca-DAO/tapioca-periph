@@ -446,7 +446,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 IUSDOBase(_action.target).sendAndLendOrRepay{
                     value: _action.value
-                }(msg.sender, to, dstChainId, zroPaymentAddress, lendParams, approvals, withdrawParams, adapterParams);
+                }(
+                    msg.sender,
+                    to,
+                    dstChainId,
+                    zroPaymentAddress,
+                    lendParams,
+                    approvals,
+                    withdrawParams,
+                    adapterParams
+                );
             } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
                 TOFTSendToStrategyData memory data = abi.decode(
                     _action.call[4:],

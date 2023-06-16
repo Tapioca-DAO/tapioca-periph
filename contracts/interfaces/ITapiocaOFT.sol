@@ -123,4 +123,15 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable;
+
+    function removeCollateral(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        address zroPaymentAddress,
+        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ITapiocaOFT.IRemoveParams calldata removeParams,
+        ITapiocaOFT.IApproval[] calldata approvals,
+        bytes calldata adapterParams
+    ) external payable;
 }
