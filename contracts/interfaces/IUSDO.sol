@@ -25,7 +25,8 @@ interface IUSDOBase {
 
     struct ILendParams {
         bool repay;
-        uint256 amount;
+        uint256 depositAmount;
+        uint256 repayAmount;
         address marketHelper;
         address market;
         bool removeCollateral;

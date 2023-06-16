@@ -2732,7 +2732,6 @@ describe('MagnetarV2', () => {
                     encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
                 ),
             ).to.be.revertedWith('SGL: min limit');
-
             await magnetar.removeAssetAndRepay(
                 wethUsdoSingularity.address,
                 wethBigBangMarket.address,
