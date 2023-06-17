@@ -2,6 +2,9 @@
 pragma solidity ^0.8.18;
 
 interface IOracle {
+    // @notice Precision of the return value.
+    function decimals() external view returns (uint8);
+
     /// @notice Get the latest exchange rate.
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:

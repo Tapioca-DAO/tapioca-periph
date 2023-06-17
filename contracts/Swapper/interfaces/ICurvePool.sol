@@ -14,4 +14,10 @@ interface ICurvePool {
     ) external view returns (uint256);
 
     function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
+
+    function get_virtual_price() external view returns (uint256);
+
+    function gamma() external view returns (uint256);
+
+    function A() external view returns (uint256);
 }
