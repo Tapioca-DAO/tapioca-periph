@@ -7,10 +7,12 @@ import "../interfaces/IOracle.sol" as ITOracle;
 contract Seer is ITOracle.IOracle, OracleMulti {
     string public _name;
     string public _symbol;
+    uint8 public immutable override decimals;
 
     constructor(
         string memory __name,
         string memory __symbol,
+        uint8 _decimals,
         address[] memory addressInAndOutUni,
         IUniswapV3Pool[] memory _circuitUniswap,
         uint8[] memory _circuitUniIsMultiplied,
@@ -39,6 +41,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     {
         _name = __name;
         _symbol = __symbol;
+        decimals = _decimals;
     }
 
     /// @notice Get the latest exchange rate.
