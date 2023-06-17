@@ -66,9 +66,11 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         hardhat: {
             saveDeployments: false,
             chainId: 1,
+            // chainId: 42161,
             forking: {
                 url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-                blockNumber: 17068626,
+                // url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+                blockNumber: 17068626, // Mainnet
             },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
