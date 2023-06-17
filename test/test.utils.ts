@@ -45,6 +45,7 @@ import {
     UniswapV2Swapper__factory,
 } from '../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { CurveStableToUsdoBidder } from 'tapioca-sdk/dist/typechain/tapioca-periphery';
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
 const verifyEtherscanQueue: { address: string; args: any[] }[] = [];
@@ -444,7 +445,6 @@ async function registerSingularity(
     const SGLLeverage = new SGLLeverage__factory(deployer);
     const _sglLeverageModule = await SGLLeverage.deploy();
 
-
     const data = new ethers.utils.AbiCoder().encode(
         [
             'address',
@@ -492,7 +492,7 @@ async function registerSingularity(
         _sglLiquidationModule,
         _sglCollateralModule,
         _sglBorrowModule,
-        _sglLeverageModule
+        _sglLeverageModule,
     };
 }
 
@@ -503,7 +503,9 @@ async function registerLiquidationQueue(
     feeCollector: string,
     staging?: boolean,
 ) {
-    const LiquidationQueueFactory = await ethers.getContractFactory('LiquidationQueue');
+    const LiquidationQueueFactory = await ethers.getContractFactory(
+        'LiquidationQueue',
+    );
     const liquidationQueue = await LiquidationQueueFactory.deploy();
     log(
         `Deployed LiquidationQueue ${liquidationQueue.address} with no arguments`,
@@ -709,7 +711,9 @@ async function registerUniUsdoToWethBidder(
     wethAssetId: BigNumber,
     staging?: boolean,
 ) {
-    const UniUsdoToWethBidderFactory = await ethers.getContractFactory('UniUsdoToWethBidder');
+    const UniUsdoToWethBidderFactory = await ethers.getContractFactory(
+        'UniUsdoToWethBidder',
+    );
     const usdoToWethBidder = await UniUsdoToWethBidderFactory.deploy(
         uniSwapper.address,
         wethAssetId,
@@ -817,7 +821,6 @@ async function createWethUsd0Singularity(
     const SGLLeverage = new SGLLeverage__factory(deployer);
     const _sglLeverageModule = await SGLLeverage.deploy();
 
-
     // Deploy WethUSD0 mock oracle
     const OracleMock = new OracleMock__factory(deployer);
     const wethUsd0Oracle = await OracleMock.deploy(
@@ -888,7 +891,9 @@ async function createWethUsd0Singularity(
         staging,
     );
 
-    const LiquidationQueueFactory = await ethers.getContractFactory('LiquidationQueue');
+    const LiquidationQueueFactory = await ethers.getContractFactory(
+        'LiquidationQueue',
+    );
     const liquidationQueue = await LiquidationQueueFactory.deploy();
     log(
         `Deployed WethUsd0LiquidationQueue at ${liquidationQueue.address} with no arguments`,
@@ -1471,6 +1476,7 @@ export async function register(staging?: boolean) {
 export async function registerFork() {
     let binanceWallet;
     await impersonateAccount(process.env.BINANCE_WALLET_ADDRESS!);
+    // eslint-disable-next-line prefer-const
     binanceWallet = await ethers.getSigner(process.env.BINANCE_WALLET_ADDRESS!);
 
     const deployer = (await ethers.getSigners())[0];
@@ -1479,9 +1485,18 @@ export async function registerFork() {
     const usdtAddress = process.env.USDT!;
     const wethAddress = process.env.WETH!;
 
-    const usdc = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdcAddress);
-    const usdt = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', usdtAddress);
-    const weth = await ethers.getContractAt('@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20', wethAddress);
+    const usdc = await ethers.getContractAt(
+        '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+        usdcAddress,
+    );
+    const usdt = await ethers.getContractAt(
+        '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+        usdtAddress,
+    );
+    const weth = await ethers.getContractAt(
+        '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20',
+        wethAddress,
+    );
 
     const YieldBoxURIBuilder = new YieldBoxURIBuilder__factory(deployer);
     const YieldBox = new YieldBox__factory(deployer);

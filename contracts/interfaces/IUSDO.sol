@@ -13,6 +13,7 @@ interface IUSDOBase {
     }
 
     struct IApproval {
+        bool permitAll;
         bool allowFailure;
         address target;
         bool permitBorrow;

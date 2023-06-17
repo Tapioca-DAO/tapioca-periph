@@ -30,6 +30,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     }
 
     struct IApproval {
+        bool permitAll;
         bool allowFailure;
         address target;
         bool permitBorrow;
