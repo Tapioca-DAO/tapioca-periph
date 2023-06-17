@@ -5861,7 +5861,7 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
 
 tapioca-sdk@^1.4.1:
   version "1.4.1"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.4.1.tgz#33063f3ecba027e7e2f599a13bad3588b1fb39bb"
+  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.4.1.tgz#33063f3ecba027e7e2f599a13bad3588b1fb39bb"
   integrity sha512-emH9VRkHvwMYvfFoLYAHDszCOSrkOO/pr5AjhmExc7A0uAH8dxhgcDzK7TWSrZvQ1ePXLj7AGyTBfYQ81D+n3g==
   dependencies:
     ethers "^5.4.7"

@@ -4,15 +4,6 @@ pragma solidity ^0.8.18;
 import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
 
 interface IYieldBoxBase {
-    function permitAll(
-        address owner,
-        address spender,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-    
     function depositAsset(
         uint256 assetId,
         address from,
