@@ -2,65 +2,55 @@
 pragma solidity ^0.8.9;
 
 import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
-
 import "../../interfaces/IOracle.sol" as ITOracle;
 
-interface ICurvePool {
-    function coins(uint256 i) external view returns (address);
+interface IStargatePool {
+    function deltaCredit() external view returns (uint256);
 
-    function get_dy(
-        int128 i,
-        int128 j,
-        uint256 dx
-    ) external view returns (uint256);
+    function totalLiquidity() external view returns (uint256);
 
-    function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
+    function totalSupply() external view returns (uint256);
 
-    function get_virtual_price() external view returns (uint256);
+    function decimals() external view returns (uint256);
 
-    function gamma() external view returns (uint256);
+    function localDecimals() external view returns (uint256);
 
-    function A() external view returns (uint256);
+    function token() external view returns (address);
 }
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract ARBTriCryptoOracle is ITOracle.IOracle {
+contract SGOracle is ITOracle.IOracle {
     string public _name;
     string public _symbol;
 
-    ICurvePool public immutable TRI_CRYPTO;
-    AggregatorV2V3Interface public immutable BTC_FEED;
-    AggregatorV2V3Interface public immutable ETH_FEED;
-    AggregatorV2V3Interface public immutable USDT_FEED;
-    AggregatorV2V3Interface public immutable WBTC_FEED;
-
-    uint256 public constant GAMMA0 = 28_000_000_000_000; // 2.8e-5
-    uint256 public constant A0 = 2 * 3 ** 3 * 10_000;
-    uint256 public constant DISCOUNT0 = 1_087_460_000_000_000; // 0.00108..
+    IStargatePool public immutable SG_POOL;
+    AggregatorV2V3Interface public immutable UNDERLYING;
 
     constructor(
         string memory __name,
         string memory __symbol,
-        ICurvePool pool,
-        AggregatorV2V3Interface btcFeed,
-        AggregatorV2V3Interface ethFeed,
-        AggregatorV2V3Interface usdtFeed,
-        AggregatorV2V3Interface wbtcFeed
+        IStargatePool pool,
+        AggregatorV2V3Interface _underlying
     ) {
         _name = __name;
         _symbol = __symbol;
-        TRI_CRYPTO = pool;
-        BTC_FEED = btcFeed;
-        ETH_FEED = ethFeed;
-        USDT_FEED = usdtFeed;
-        WBTC_FEED = wbtcFeed;
+        SG_POOL = pool;
+        UNDERLYING = _underlying;
     }
 
-    function decimals() external pure returns (uint8) {
-        return 18;
+    function decimals() external view returns (uint8) {
+        return UNDERLYING.decimals();
+    }
+
+    /// @notice Calculated the price of 1 LP token
+    /// @return _maxPrice the current value
+    /// @dev This function comes from the implementation in vyper that is on the bottom
+    function _get() internal view returns (uint256 _maxPrice) {
+        uint256 lpPrice = (SG_POOL.totalLiquidity() *
+            uint256(UNDERLYING.latestAnswer())) / SG_POOL.totalSupply();
+
+        return lpPrice;
     }
 
     /// @notice Get the latest exchange rate.
@@ -114,35 +104,5 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
     /// @return (string) A human readable name about this oracle.
     function name(bytes calldata data) external view returns (string memory) {
         return _name;
-    }
-
-    /// @notice Calculated the price of 1 LP token
-    /// @return _maxPrice the current value
-    /// @dev This function comes from the implementation in vyper that is on the bottom
-    function _get() internal view returns (uint256 _maxPrice) {
-        uint256 _vp = TRI_CRYPTO.get_virtual_price();
-
-        // Get the prices from chainlink and add 10 decimals
-        uint256 _btcPrice = uint256(BTC_FEED.latestAnswer()) * 1e10;
-        uint256 _wbtcPrice = uint256(WBTC_FEED.latestAnswer()) * 1e10;
-        uint256 _ethPrice = uint256(ETH_FEED.latestAnswer()) * 1e10;
-        uint256 _usdtPrice = uint256(USDT_FEED.latestAnswer()) * 1e10;
-
-        uint256 _minWbtcPrice = (_wbtcPrice < 1e18)
-            ? (_wbtcPrice * _btcPrice) / 1e18
-            : _btcPrice;
-
-        uint256 _basePrices = (_minWbtcPrice * _ethPrice * _usdtPrice);
-
-        _maxPrice = (3 * _vp * FixedPointMathLib.cbrt(_basePrices)) / 1 ether;
-
-        // ((A/A0) * (gamma/gamma0)**2) ** (1/3)
-        uint256 _g = (TRI_CRYPTO.gamma() * 1 ether) / GAMMA0;
-        uint256 _a = (TRI_CRYPTO.A() * 1 ether) / A0;
-        uint256 _discount = Math.max((_g ** 2 / 1 ether) * _a, 1e34); // handle qbrt nonconvergence
-        // if discount is small, we take an upper bound
-        _discount = (FixedPointMathLib.sqrt(_discount) * DISCOUNT0) / 1 ether;
-
-        _maxPrice -= (_maxPrice * _discount) / 1 ether;
     }
 }

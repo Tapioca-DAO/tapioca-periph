@@ -112,6 +112,26 @@ runTestMainnet(() => {
             ),
         );
     });
+
+    it('SGL ETH/USD LP', async () => {
+        const { deployer } = await loadFixture(register);
+
+        const seer = await (
+            await hre.ethers.getContractFactory('SGOracle')
+        ).deploy(
+            'sgETH/USD', // Name
+            'sgETH/USD', // Symbol
+            '0x101816545F6bd2b1076434B54383a1E633390A2E', // SG ETH/USD vault
+            '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // ETH feed
+        );
+
+        console.log(
+            hre.ethers.utils.formatUnits(
+                (await seer.peek('0x00')).rate,
+                await seer.decimals(),
+            ),
+        );
+    });
 });
 
 runTestArb(() => {
