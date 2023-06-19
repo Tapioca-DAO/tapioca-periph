@@ -238,29 +238,16 @@ contract MagnetarV2Storage {
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
     uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
 
-    uint16 internal constant SET_APPROVAL = 400;
-
     // ************** //
     // *** EVENTS *** //
     // ************** //
     event ApprovalForAll(address owner, address operator, bool approved);
 
-    // **************** //
-    // *** MODIFIERS *** //
-    // ***************** //
-    modifier allowed(address _from) {
-        _checkSender(_from);
-        _;
-    }
-
     // ************************ //
     // *** INTERNAL METHODS *** //
     // ************************ //
     function _checkSender(address _from) internal view {
-        require(
-            _from == msg.sender || isApprovedForAll[_from][msg.sender] == true,
-            "MagnetarV2: operator not approved"
-        );
+        require(_from == msg.sender, "MagnetarV2: operator not approved");
     }
 
     receive() external payable virtual {}

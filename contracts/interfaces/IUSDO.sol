@@ -4,7 +4,16 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 interface IUSDOBase {
+    struct IWithdrawParams {
+        bool withdraw;
+        uint256 withdrawLzFeeAmount;
+        bool withdrawOnOtherChain;
+        uint16 withdrawLzChainId;
+        bytes withdrawAdapterParams;
+    }
+
     struct IApproval {
+        bool permitAll;
         bool allowFailure;
         address target;
         bool permitBorrow;
@@ -25,7 +34,8 @@ interface IUSDOBase {
 
     struct ILendParams {
         bool repay;
-        uint256 amount;
+        uint256 depositAmount;
+        uint256 repayAmount;
         address marketHelper;
         address market;
         bool removeCollateral;
@@ -67,9 +77,11 @@ interface IUSDOBase {
         address _from,
         address _to,
         uint16 lzDstChainId,
+        address zroPaymentAddress,
         ILendParams calldata lendParams,
-        ISendOptions calldata options,
-        IApproval[] calldata approvals
+        IApproval[] calldata approvals,
+        IWithdrawParams calldata withdrawParams,
+        bytes calldata adapterParams
     ) external payable;
 
     function sendForLeverage(

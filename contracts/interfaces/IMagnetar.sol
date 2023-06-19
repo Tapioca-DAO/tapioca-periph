@@ -7,6 +7,11 @@ interface IMagnetar {
         uint256 borrowPart
     ) external view returns (uint256 amount);
 
+    function getBorrowPartForAmount(
+        address market,
+        uint256 amount
+    ) external view returns (uint256 part);
+
     function withdrawTo(
         address yieldBox,
         address from,

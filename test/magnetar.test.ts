@@ -2857,7 +2857,6 @@ describe('MagnetarV2', () => {
                     ),
                 ),
             ).to.be.revertedWith('SGL: min limit');
-
             await magnetar.removeAssetAndRepay(
                 wethUsdoSingularity.address,
                 wethBigBangMarket.address,

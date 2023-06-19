@@ -17,23 +17,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
-    /// @notice Update approval status for an operator
-    /// @param operator The address approved to perform actions on your behalf
-    /// @param approved True/False
-    function setApprovalForAll(address operator, bool approved) public {
-        // Checks
-        require(operator != address(0), "MagnetarV2: operator not set");
-        require(
-            operator != address(this),
-            "MagnetarV2: can't approve magnetar"
-        );
-
-        // Effects
-        isApprovedForAll[msg.sender][operator] = approved;
-
-        emit ApprovalForAll(msg.sender, operator, approved);
-    }
-
     function withdrawTo(
         IYieldBoxBase yieldBox,
         address from,
@@ -45,7 +28,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
-    ) external payable allowed(from) {
+    ) external payable {
         _withdrawTo(
             yieldBox,
             from,
@@ -69,7 +52,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bool deposit,
         bool withdraw,
         bytes memory withdrawData
-    ) external payable allowed(user) {
+    ) external payable {
         _depositAddCollateralAndBorrow(
             market,
             user,
@@ -89,7 +72,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 repayAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable allowed(user) {
+    ) external payable {
         _depositAndRepay(
             market,
             user,
@@ -109,7 +92,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bool deposit,
         bool withdraw,
         bool extractFromSender
-    ) external payable allowed(user) {
+    ) external payable {
         _depositRepayAndRemoveCollateral(
             market,
             user,
@@ -126,7 +109,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         ISingularity singularity,
         address user,
         uint256 fraction
-    ) external payable allowed(user) {
+    ) external payable {
         _removeAsset(singularity, user, fraction);
     }
 
@@ -138,7 +121,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 borrowAmount,
         bool deposit,
         bool extractFromSender
-    ) external payable allowed(user) {
+    ) external payable {
         _mintAndLend(
             singularity,
             bingBang,
@@ -156,7 +139,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 amount,
         bool deposit_,
         bool extractFromSender
-    ) external payable allowed(user) {
+    ) external payable {
         _depositAndAddAsset(
             singularity,
             user,
@@ -175,7 +158,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 collateralShare,
         bool withdraw,
         bytes calldata withdrawData
-    ) external payable allowed(user) {
+    ) external payable {
         _removeAssetAndRepay(
             singularity,
             bingBang,
@@ -473,7 +456,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
     function _removeAssetAndRepay(
         ISingularity singularity,
-        IMarket bingBang,
+        IMarket bigBang,
         address user,
         uint256 removeShare, //slightly greater than _repayAmount to cover the interest
         uint256 repayAmount,
@@ -484,7 +467,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
         //remove asset
-        uint256 bbAssetId = bingBang.assetId();
+        uint256 bbAssetId = bigBang.assetId();
         uint256 _removeAmount = yieldBox.toAmount(
             bbAssetId,
             removeShare,
@@ -493,7 +476,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         singularity.removeAsset(user, address(this), removeShare);
 
         //repay
-        uint256 repayed = bingBang.repay(
+        _setApprovalForYieldBox(bigBang, yieldBox);
+        uint256 repayed = bigBang.repay(
             address(this),
             user,
             false,
@@ -510,7 +494,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         //remove collateral
         if (collateralShare > 0) {
-            bingBang.removeCollateral(
+            bigBang.removeCollateral(
                 user,
                 withdraw ? address(this) : user,
                 collateralShare
@@ -529,6 +513,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 );
             }
         }
+        _revertYieldBoxApproval(bigBang, yieldBox);
     }
 
     function _withdrawTo(

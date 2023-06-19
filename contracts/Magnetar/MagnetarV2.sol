@@ -170,23 +170,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
     }
 
-    // ********************* //
-    // *** OWNER METHODS *** //
-    // ********************* //
-    /// @notice Update approval status for an operator
-    /// @param operator The address approved to perform actions on your behalf
-    /// @param approved True/False
-    function setApprovalForAll(address operator, bool approved) public {
-        _executeModule(
-            Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.setApprovalForAll.selector,
-                operator,
-                approved
-            )
-        );
-    }
-
     // ********************** //
     // *** PUBLIC METHODS *** //
     // ********************** //
@@ -216,13 +199,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 valAccumulator += _action.value;
             }
 
-            if (_action.id == SET_APPROVAL) {
-                (address operator, bool approved) = abi.decode(
-                    _action.call[4:],
-                    (address, bool)
-                );
-                setApprovalForAll(operator, approved);
-            }
             if (_action.id == PERMIT_ALL) {
                 _permit(
                     _action.target,
@@ -448,25 +424,38 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address from,
                     address to,
                     uint16 dstChainId,
+                    address zroPaymentAddress,
                     IUSDOBase.ILendParams memory lendParams,
-                    IUSDOBase.ISendOptions memory options,
-                    IUSDOBase.IApproval[] memory approvals
+                    IUSDOBase.IApproval[] memory approvals,
+                    IUSDOBase.IWithdrawParams memory withdrawParams,
+                    bytes memory adapterParams
                 ) = abi.decode(
                         _action.call[4:],
                         (
                             address,
                             address,
                             uint16,
+                            address,
                             (IUSDOBase.ILendParams),
-                            (IUSDOBase.ISendOptions),
-                            (IUSDOBase.IApproval[])
+                            (IUSDOBase.IApproval[]),
+                            (IUSDOBase.IWithdrawParams),
+                            bytes
                         )
                     );
                 _checkSender(from);
 
                 IUSDOBase(_action.target).sendAndLendOrRepay{
                     value: _action.value
-                }(msg.sender, to, dstChainId, lendParams, options, approvals);
+                }(
+                    msg.sender,
+                    to,
+                    dstChainId,
+                    zroPaymentAddress,
+                    lendParams,
+                    approvals,
+                    withdrawParams,
+                    adapterParams
+                );
             } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
                 TOFTSendToStrategyData memory data = abi.decode(
                     _action.call[4:],
