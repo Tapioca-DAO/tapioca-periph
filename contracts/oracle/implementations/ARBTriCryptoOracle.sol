@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {AggregatorInterface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol";
+import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
@@ -32,10 +32,10 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
     string public _symbol;
 
     ICurvePool public immutable TRI_CRYPTO;
-    AggregatorInterface public immutable BTC_FEED;
-    AggregatorInterface public immutable ETH_FEED;
-    AggregatorInterface public immutable USDT_FEED;
-    AggregatorInterface public immutable WBTC_FEED;
+    AggregatorV2V3Interface public immutable BTC_FEED;
+    AggregatorV2V3Interface public immutable ETH_FEED;
+    AggregatorV2V3Interface public immutable USDT_FEED;
+    AggregatorV2V3Interface public immutable WBTC_FEED;
 
     uint256 public constant GAMMA0 = 28_000_000_000_000; // 2.8e-5
     uint256 public constant A0 = 2 * 3 ** 3 * 10_000;
@@ -45,10 +45,10 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         string memory __name,
         string memory __symbol,
         ICurvePool pool,
-        AggregatorInterface btcFeed,
-        AggregatorInterface ethFeed,
-        AggregatorInterface usdtFeed,
-        AggregatorInterface wbtcFeed
+        AggregatorV2V3Interface btcFeed,
+        AggregatorV2V3Interface ethFeed,
+        AggregatorV2V3Interface usdtFeed,
+        AggregatorV2V3Interface wbtcFeed
     ) {
         _name = __name;
         _symbol = __symbol;
