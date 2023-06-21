@@ -575,7 +575,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bool withdrawCollateral
     ) private {
         require(withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
-        (, uint16 destChain, bytes32 receiver, bytes memory adapterParams) = abi
+        (bool withdrawOnOtherChain, uint16 destChain, bytes32 receiver, bytes memory adapterParams) = abi
             .decode(withdrawData, (bool, uint16, bytes32, bytes));
 
         uint256 gas = msg.value > 0 ? msg.value : address(this).balance;
@@ -583,7 +583,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             yieldBox,
             from,
             withdrawCollateral ? market.collateralId() : market.assetId(),
-            destChain,
+            withdrawOnOtherChain ? destChain : 0,
             receiver,
             amount,
             share,
