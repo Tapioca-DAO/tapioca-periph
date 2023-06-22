@@ -854,7 +854,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         SingularityInfo[] memory result = new SingularityInfo[](len);
 
         Rebase memory _totalAsset;
-        ISingularity.AccrueInfo memory _accrueInfo;
         for (uint256 i = 0; i < len; i++) {
             ISingularity sgl = markets[i];
 
@@ -867,16 +866,12 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             result[i].userAssetFraction = sgl.balanceOf(who); //
 
             (
-                uint64 interestPerSecond,
-                uint64 lastBlockAccrued,
-                uint128 feesEarnedFraction
-            ) = sgl.accrueInfo();
-            _accrueInfo = ISingularity.AccrueInfo(
-                interestPerSecond,
-                lastBlockAccrued,
-                feesEarnedFraction
-            );
+                ISingularity.AccrueInfo memory _accrueInfo,
+                uint256 _utilization
+            ) = sgl.getInterestDetails();
+            
             result[i].accrueInfo = _accrueInfo;
+            result[i].utilization = _utilization;
         }
 
         return result;

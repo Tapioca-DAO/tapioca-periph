@@ -53,6 +53,7 @@ contract MagnetarV2Storage {
         Rebase totalAsset;
         uint256 userAssetFraction;
         ISingularity.AccrueInfo accrueInfo;
+        uint256 utilization;
     }
     struct BigBangInfo {
         MarketInfo market;
