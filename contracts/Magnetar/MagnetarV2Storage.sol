@@ -57,6 +57,12 @@ contract MagnetarV2Storage {
     struct BigBangInfo {
         MarketInfo market;
         IBigBang.AccrueInfo accrueInfo;
+        uint256 minDebtRate;
+        uint256 maxDebtRate;
+        uint256 debtRateAgainstEthMarket;
+        address mainBBMarket;
+        uint256 mainBBDebtRate;
+        uint256 currentDebtRate;
     }
 
     // --- ACTIONS DATA ----

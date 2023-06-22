@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
+import "../interfaces/IPenrose.sol";
+
 /*
 
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -895,6 +897,15 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             (uint64 debtRate, uint64 lastAccrued) = bigBang.accrueInfo();
             _accrueInfo = IBigBang.AccrueInfo(debtRate, lastAccrued);
             result[i].accrueInfo = _accrueInfo;
+            result[i].minDebtRate = bigBang.minDebtRate();
+            result[i].maxDebtRate = bigBang.maxDebtRate();
+            result[i].debtRateAgainstEthMarket = bigBang
+                .debtRateAgainstEthMarket();
+            result[i].currentDebtRate = bigBang.getDebtRate();
+
+            IPenrose penrose = IPenrose(bigBang.penrose());
+            result[i].mainBBMarket = penrose.bigBangEthMarket();
+            result[i].mainBBDebtRate = penrose.bigBangEthDebtRate();
         }
 
         return result;
