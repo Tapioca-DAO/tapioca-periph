@@ -53,4 +53,12 @@ interface ISingularity is IMarket {
         uint256 amount,
         uint256 tokenId
     ) external view returns (uint256 share);
+
+    function getInterestDetails()
+        external
+        view
+        returns (
+            AccrueInfo memory _accrueInfo,
+            uint256 utilization
+        );
 }
