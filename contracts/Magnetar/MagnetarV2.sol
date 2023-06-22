@@ -899,13 +899,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             result[i].accrueInfo = _accrueInfo;
             result[i].minDebtRate = bigBang.minDebtRate();
             result[i].maxDebtRate = bigBang.maxDebtRate();
-            result[i].debtRateAgainstEthMarket = bigBang.debtRateAgainstEthMarket();
+            result[i].debtRateAgainstEthMarket = bigBang
+                .debtRateAgainstEthMarket();
             result[i].currentDebtRate = bigBang.getDebtRate();
 
             IPenrose penrose = IPenrose(bigBang.penrose());
             result[i].mainBBMarket = penrose.bigBangEthMarket();
             result[i].mainBBDebtRate = penrose.bigBangEthDebtRate();
-
         }
 
         return result;

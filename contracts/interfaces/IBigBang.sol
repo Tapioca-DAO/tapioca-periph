@@ -12,7 +12,6 @@ interface IBigBang {
         view
         returns (uint64 debtRate, uint64 lastAccrued);
 
-
     function minDebtRate() external view returns (uint256);
 
     function maxDebtRate() external view returns (uint256);
@@ -22,5 +21,4 @@ interface IBigBang {
     function penrose() external view returns (address);
 
     function getDebtRate() external view returns (uint256);
-    
 }
