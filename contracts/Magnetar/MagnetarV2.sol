@@ -574,15 +574,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperRemoveAssetData)
                 );
 
-                _executeModule(
-                    Module.Market,
-                    abi.encodeWithSelector(
-                        MagnetarMarketModule.removeAsset.selector,
-                        data.market,
-                        data.user,
-                        data.fraction
-                    )
-                );
+                 ISingularity(data.market).removeAsset(data.user, data.user, data.fraction);
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
                 HelperDepositRepayRemoveCollateral memory data = abi.decode(
                     _action.call[4:],
@@ -605,6 +597,20 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         data.extractFromSender
                     )
                 );
+            } else if (_action.id == MARKET_BUY_COLLATERAL) {
+                HelperBuyCollateral memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperBuyCollateral)
+                );
+
+                IMarket(data.market).buyCollateral(data.from, data.borrowAmount, data.supplyAmount, data.minAmountOut, address(data.swapper), data.dexData);
+            } else if (_action.id == MARKET_SELL_COLLATERAL) {
+                HelperSellCollateral memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperSellCollateral)
+                );
+
+                IMarket(data.market).sellCollateral(data.from, data.share, data.minAmountOut, address(data.swapper), data.dexData);
             } else {
                 revert("MagnetarV2: action not valid");
             }
@@ -869,7 +875,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 ISingularity.AccrueInfo memory _accrueInfo,
                 uint256 _utilization
             ) = sgl.getInterestDetails();
-            
+
             result[i].accrueInfo = _accrueInfo;
             result[i].utilization = _utilization;
         }
