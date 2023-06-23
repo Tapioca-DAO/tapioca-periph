@@ -9,6 +9,7 @@ import "../interfaces/IOracle.sol";
 import "../interfaces/ISingularity.sol";
 import "../interfaces/IBigBang.sol";
 import "../interfaces/ITapiocaOFT.sol";
+import "../interfaces/ISwapper.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
 //YIELDBOX
@@ -221,6 +222,25 @@ contract MagnetarV2Storage {
         bool extractFromSender;
     }
 
+    struct HelperBuyCollateral {
+        address market;
+        address from;
+        uint256 borrowAmount;
+        uint256 supplyAmount;
+        uint256 minAmountOut;
+        ISwapper swapper;
+        bytes dexData;
+    }
+
+    struct HelperSellCollateral {
+        address market;
+        address from;
+        uint256 share;
+        uint256 minAmountOut;
+        ISwapper swapper;
+        bytes dexData;
+    }
+
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
@@ -236,6 +256,8 @@ contract MagnetarV2Storage {
     uint16 internal constant MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW = 206;
     uint16 internal constant MARKET_REMOVE_ASSET = 207;
     uint16 internal constant MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL = 208;
+    uint16 internal constant MARKET_BUY_COLLATERAL = 209;
+    uint16 internal constant MARKET_SELL_COLLATERAL = 210;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;

@@ -57,8 +57,5 @@ interface ISingularity is IMarket {
     function getInterestDetails()
         external
         view
-        returns (
-            AccrueInfo memory _accrueInfo,
-            uint256 utilization
-        );
+        returns (AccrueInfo memory _accrueInfo, uint256 utilization);
 }

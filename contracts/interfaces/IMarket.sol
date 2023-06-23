@@ -75,4 +75,21 @@ interface IMarket {
     function penrose() external view returns (address);
 
     function owner() external view returns (address);
+
+    function buyCollateral(
+        address from,
+        uint256 borrowAmount,
+        uint256 supplyAmount,
+        uint256 minAmountOut,
+        address swapper,
+        bytes calldata dexData
+    ) external returns (uint256 amountOut);
+
+    function sellCollateral(
+        address from,
+        uint256 share,
+        uint256 minAmountOut,
+        address swapper,
+        bytes calldata dexData
+    ) external returns (uint256 amountOut);
 }
