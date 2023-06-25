@@ -574,7 +574,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperRemoveAssetData)
                 );
 
-                 ISingularity(data.market).removeAsset(data.user, data.user, data.fraction);
+                ISingularity(data.market).removeAsset(
+                    data.user,
+                    data.user,
+                    data.fraction
+                );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
                 HelperDepositRepayRemoveCollateral memory data = abi.decode(
                     _action.call[4:],
@@ -603,14 +607,27 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperBuyCollateral)
                 );
 
-                IMarket(data.market).buyCollateral(data.from, data.borrowAmount, data.supplyAmount, data.minAmountOut, address(data.swapper), data.dexData);
+                IMarket(data.market).buyCollateral(
+                    data.from,
+                    data.borrowAmount,
+                    data.supplyAmount,
+                    data.minAmountOut,
+                    address(data.swapper),
+                    data.dexData
+                );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
                 HelperSellCollateral memory data = abi.decode(
                     _action.call[4:],
                     (HelperSellCollateral)
                 );
 
-                IMarket(data.market).sellCollateral(data.from, data.share, data.minAmountOut, address(data.swapper), data.dexData);
+                IMarket(data.market).sellCollateral(
+                    data.from,
+                    data.share,
+                    data.minAmountOut,
+                    address(data.swapper),
+                    data.dexData
+                );
             } else {
                 revert("MagnetarV2: action not valid");
             }
