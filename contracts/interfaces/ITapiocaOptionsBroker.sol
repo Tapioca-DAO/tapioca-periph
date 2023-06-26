@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 interface ITapiocaOptionsBrokerCrossChain {
-     struct IApproval {
+    struct IApproval {
         bool permitAll;
         bool allowFailure;
         address target;
@@ -14,6 +14,21 @@ interface ITapiocaOptionsBrokerCrossChain {
         uint8 v;
         bytes32 r;
         bytes32 s;
+    }
+
+    struct IExerciseOptionsData {
+        address from;
+        address target;
+        uint256 paymentTokenAmount;
+        uint256 oTAPTokenID;
+        address paymentToken;
+        uint256 tapAmount;
+    }
+    struct IExerciseLZData {
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        uint256 extraGas;
+
     }
 
     function exerciseOption(
@@ -29,6 +44,7 @@ interface ITapiocaOptionsBrokerCrossChain {
         IApproval[] memory approvals
     ) external payable;
 }
+
 interface ITapiocaOptionsBroker {
     function exerciseOption(
         uint256 _oTAPTokenID,
