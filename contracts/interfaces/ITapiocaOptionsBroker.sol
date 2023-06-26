@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
+
 interface ITapiocaOptionsBrokerCrossChain {
     struct IApproval {
         bool permitAll;
@@ -31,6 +32,7 @@ interface ITapiocaOptionsBrokerCrossChain {
         uint256 extraGas;
     }
     struct IExerciseLZSendTapData {
+        bool withdraw;
         uint16 lzDstChainId;
         address to;
         uint256 amount;
@@ -40,7 +42,7 @@ interface ITapiocaOptionsBrokerCrossChain {
 
     function exerciseOption(
         IExerciseOptionsData calldata optionsData,
-        IExerciseLZData calldata lzData, 
+        IExerciseLZData calldata lzData,
         IExerciseLZSendTapData calldata tapSendData,
         IApproval[] calldata approvals
     ) external payable;
