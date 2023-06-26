@@ -33,6 +33,7 @@ interface ITapiocaOptionsBrokerCrossChain {
     }
     struct IExerciseLZSendTapData {
         bool withdraw;
+        address tapOftAddress;
         uint16 lzDstChainId;
         address to;
         uint256 amount;
