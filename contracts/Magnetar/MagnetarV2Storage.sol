@@ -10,6 +10,7 @@ import "../interfaces/ISingularity.sol";
 import "../interfaces/IBigBang.sol";
 import "../interfaces/ITapiocaOFT.sol";
 import "../interfaces/ISwapper.sol";
+import "../interfaces/ITapiocaOptionsBroker.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
 //YIELDBOX
@@ -251,7 +252,28 @@ contract MagnetarV2Storage {
         uint256 oTAPTokenID;
         address paymentToken;
         uint256 tapAmount;
+        ITapiocaOptionsBrokerCrossChain.IApproval[] approvals;
+    }
+
+    struct HelperMultiHopBuy {
+        address from;
+        uint256 collateralAmount;
+        uint256 borrowAmount;
+        IUSDOBase.ILeverageSwapData swapData;
+        IUSDOBase.ILeverageLZData lzData;
+        IUSDOBase.ILeverageExternalContractsData externalData;
+        bytes airdropAdapterParams;
         IUSDOBase.IApproval[] approvals;
+    }
+
+    struct HelperMultiHopSell {
+        address from;
+        uint256 share;
+        IUSDOBase.ILeverageSwapData swapData;
+        IUSDOBase.ILeverageLZData lzData;
+        IUSDOBase.ILeverageExternalContractsData externalData;
+        bytes airdropAdapterParams;
+        ITapiocaOFT.IApproval[] approvals;
     }
 
     // --- ACTIONS IDS ----
@@ -271,6 +293,8 @@ contract MagnetarV2Storage {
     uint16 internal constant MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL = 208;
     uint16 internal constant MARKET_BUY_COLLATERAL = 209;
     uint16 internal constant MARKET_SELL_COLLATERAL = 210;
+    uint16 internal constant MARKET_MULTIHOP_BUY = 211;
+    uint16 internal constant MARKET_MULTIHOP_SELL = 212;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;
@@ -281,7 +305,6 @@ contract MagnetarV2Storage {
     uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
 
     uint16 internal constant TAP_EXERCISE_OPTION = 400;
-
 
     // ************** //
     // *** EVENTS *** //

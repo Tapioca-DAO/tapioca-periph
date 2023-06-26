@@ -91,6 +91,17 @@ interface IUSDOBase {
         ILeverageSwapData calldata swapData,
         ILeverageExternalContractsData calldata externalData
     ) external payable;
+
+    function initMultiHopBuy(
+        address from,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
+        bytes calldata airdropAdapterParams,
+        IUSDOBase.IApproval[] memory approvals
+    ) external payable;
 }
 
 interface IUSDO is IUSDOBase, IERC20Metadata {}

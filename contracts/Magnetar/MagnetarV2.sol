@@ -10,6 +10,7 @@ import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
 import "../interfaces/IPenrose.sol";
+import "../interfaces/ITapiocaOptionsBroker.sol";
 
 /*
 
@@ -634,12 +635,48 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperExerciseOption)
                 );
 
-                IMarket(data.market).sellCollateral(
+                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption(
+                    data.from,
+                    data.paymentTokenAmount,
+                    data.lzDstChainId,
+                    data.zroPaymentAddress,
+                    data.extraGas,
+                    data.target,
+                    data.oTAPTokenID,
+                    data.paymentToken,
+                    data.tapAmount,
+                    data.approvals
+                );
+            } else if (_action.id == MARKET_MULTIHOP_BUY) {
+                HelperMultiHopBuy memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperMultiHopBuy)
+                );
+
+                IUSDOBase(_action.target).initMultiHopBuy(
+                    data.from,
+                    data.collateralAmount,
+                    data.borrowAmount,
+                    data.swapData,
+                    data.lzData,
+                    data.externalData,
+                    data.airdropAdapterParams,
+                    data.approvals
+                );
+            } else if (_action.id == MARKET_MULTIHOP_SELL) {
+                HelperMultiHopSell memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperMultiHopSell)
+                );
+
+                ITapiocaOFT(_action.target).initMultiSell(
                     data.from,
                     data.share,
-                    data.minAmountOut,
-                    address(data.swapper),
-                    data.dexData
+                    data.swapData,
+                    data.lzData,
+                    data.externalData,
+                    data.airdropAdapterParams,
+                    data.approvals
                 );
             } else {
                 revert("MagnetarV2: action not valid");
