@@ -241,6 +241,19 @@ contract MagnetarV2Storage {
         bytes dexData;
     }
 
+    struct HelperExerciseOption {
+        address from;
+        uint256 paymentTokenAmount;
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        uint256 extraGas;
+        address target;
+        uint256 oTAPTokenID;
+        address paymentToken;
+        uint256 tapAmount;
+        IUSDOBase.IApproval[] approvals;
+    }
+
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
@@ -266,6 +279,9 @@ contract MagnetarV2Storage {
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
     uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
+
+    uint16 internal constant TAP_EXERCISE_OPTION = 400;
+
 
     // ************** //
     // *** EVENTS *** //

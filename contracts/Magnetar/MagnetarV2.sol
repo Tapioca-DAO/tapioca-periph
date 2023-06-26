@@ -628,6 +628,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address(data.swapper),
                     data.dexData
                 );
+            } else if (_action.id == TAP_EXERCISE_OPTION) {
+                HelperExerciseOption memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperExerciseOption)
+                );
+
+                IMarket(data.market).sellCollateral(
+                    data.from,
+                    data.share,
+                    data.minAmountOut,
+                    address(data.swapper),
+                    data.dexData
+                );
             } else {
                 revert("MagnetarV2: action not valid");
             }
