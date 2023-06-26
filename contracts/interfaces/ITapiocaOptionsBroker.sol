@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
 interface ITapiocaOptionsBrokerCrossChain {
     struct IApproval {
         bool permitAll;
@@ -28,20 +29,20 @@ interface ITapiocaOptionsBrokerCrossChain {
         uint16 lzDstChainId;
         address zroPaymentAddress;
         uint256 extraGas;
-
+    }
+    struct IExerciseLZSendTapData {
+        uint16 lzDstChainId;
+        address to;
+        uint256 amount;
+        address zroPaymentAddress;
+        uint256 extraGas;
     }
 
     function exerciseOption(
-        address from,
-        uint256 paymentTokenAmount,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        uint256 extraGas,
-        address target,
-        uint256 oTAPTokenID,
-        address paymentToken,
-        uint256 tapAmount,
-        IApproval[] memory approvals
+        IExerciseOptionsData calldata optionsData,
+        IExerciseLZData calldata lzData, 
+        IExerciseLZSendTapData calldata tapSendData,
+        IApproval[] calldata approvals
     ) external payable;
 }
 

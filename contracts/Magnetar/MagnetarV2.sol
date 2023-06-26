@@ -636,15 +636,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 );
 
                 ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption(
-                    data.from,
-                    data.paymentTokenAmount,
-                    data.lzDstChainId,
-                    data.zroPaymentAddress,
-                    data.extraGas,
-                    data.target,
-                    data.oTAPTokenID,
-                    data.paymentToken,
-                    data.tapAmount,
+                    data.optionsData,
+                    data.lzData,
+                    data.tapSendData,
                     data.approvals
                 );
             } else if (_action.id == MARKET_MULTIHOP_BUY) {

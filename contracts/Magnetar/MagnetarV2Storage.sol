@@ -243,15 +243,9 @@ contract MagnetarV2Storage {
     }
 
     struct HelperExerciseOption {
-        address from;
-        uint256 paymentTokenAmount;
-        uint16 lzDstChainId;
-        address zroPaymentAddress;
-        uint256 extraGas;
-        address target;
-        uint256 oTAPTokenID;
-        address paymentToken;
-        uint256 tapAmount;
+        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData;
         ITapiocaOptionsBrokerCrossChain.IApproval[] approvals;
     }
 
