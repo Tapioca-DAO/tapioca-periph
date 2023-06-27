@@ -12,6 +12,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import LZEndpointMockArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-mocks/LZEndpointMock.json';
 import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
 import TapiocaOFTArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/TapiocaOFT.json';
+import BaseTOFTLeverageModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTLeverageModule.json';
+import BaseTOFTStrategyModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTStrategyModule.json';
+import BaseTOFTMarketModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTMarketModule.json';
+import BaseTOFTOptionsModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTOptionsModule.json';
 
 import {
     SGLCollateral__factory,
@@ -22,6 +26,7 @@ import {
     USDO__factory,
     USDOLeverageModule__factory,
     USDOMarketModule__factory,
+    USDOOptionsModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-Bar';
 import {
     ERC20WithoutStrategy__factory,
@@ -35,6 +40,10 @@ import {
 import {
     BaseTOFT,
     TapiocaOFT__factory,
+    BaseTOFTLeverageModule__factory,
+    BaseTOFTStrategyModule__factory,
+    BaseTOFTMarketModule__factory,
+    BaseTOFTOptionsModule__factory,
 } from 'tapioca-sdk/dist/typechain/TapiocaZ';
 import { ITapiocaOFT__factory } from '../typechain';
 
@@ -164,8 +173,12 @@ describe('MagnetarV2', () => {
             await liquidationQueue.init(LQ_META, wethUsdoSingularity.address);
 
             const payload = wethUsdoSingularity.interface.encodeFunctionData(
-                'setLiquidationQueue',
-                [liquidationQueue.address],
+                'setLiquidationQueueConfig',
+                [
+                    liquidationQueue.address,
+                    ethers.constants.AddressZero,
+                    ethers.constants.AddressZero,
+                ],
             );
 
             await (
@@ -340,6 +353,7 @@ describe('MagnetarV2', () => {
                 createWethUsd0Singularity,
                 deployCurveStableToUsdoBidder,
             } = await loadFixture(register);
+
 
             const {
                 singularitySrc,
@@ -788,8 +802,12 @@ describe('MagnetarV2', () => {
             await liquidationQueue.init(LQ_META, wethUsdoSingularity.address);
 
             const payload = wethUsdoSingularity.interface.encodeFunctionData(
-                'setLiquidationQueue',
-                [liquidationQueue.address],
+                'setLiquidationQueueConfig',
+                [
+                    liquidationQueue.address,
+                    ethers.constants.AddressZero,
+                    ethers.constants.AddressZero,
+                ],
             );
 
             await (
@@ -988,9 +1006,50 @@ describe('MagnetarV2', () => {
             await erc20Mock.updateMintLimit(BN(100e18));
 
             // Collateral
-            const collateralHost = await TapiocaOFTMock__factory.deploy(
+            const BaseTOFTLeverageModule__factory = (
+                (await ethers.getContractFactoryFromArtifact(
+                    BaseTOFTLeverageModuleArtifact,
+                )) as BaseTOFTLeverageModule__factory
+            ).connect(deployer);
+            const BaseTOFTStrategyModule__factory = (
+                (await ethers.getContractFactoryFromArtifact(
+                    BaseTOFTStrategyModuleArtifact,
+                )) as BaseTOFTStrategyModule__factory
+            ).connect(deployer);
+            const BaseTOFTMarketModule__factory = (
+                (await ethers.getContractFactoryFromArtifact(
+                    BaseTOFTMarketModuleArtifact,
+                )) as BaseTOFTMarketModule__factory
+            ).connect(deployer);
+            const BaseTOFTOptionsModule__factory = (
+                (await ethers.getContractFactoryFromArtifact(
+                    BaseTOFTOptionsModuleArtifact,
+                )) as BaseTOFTOptionsModule__factory
+            ).connect(deployer);
+
+            const leverageModuleHost =
+                await BaseTOFTLeverageModule__factory.deploy(
+                    lzEndpoint1.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'toftMock',
+                    18,
+                    1,
+                );
+            const strategyModuleHost =
+                await BaseTOFTStrategyModule__factory.deploy(
+                    lzEndpoint1.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'toftMock',
+                    18,
+                    1,
+                );
+
+            const marketModuleHost = await BaseTOFTMarketModule__factory.deploy(
                 lzEndpoint1.address,
-                false,
                 erc20Mock.address,
                 yieldBox.address,
                 'collateralMock',
@@ -999,29 +1058,136 @@ describe('MagnetarV2', () => {
                 1,
             );
 
+            const optionsModuleHost =
+                await BaseTOFTOptionsModule__factory.deploy(
+                    lzEndpoint1.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'toftMock',
+                    18,
+                    1,
+                );
+            const collateralHost = await TapiocaOFTMock__factory.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+                leverageModuleHost.address,
+                strategyModuleHost.address,
+                marketModuleHost.address,
+                optionsModuleHost.address,
+            );
+
+            const leverageModuleLinked =
+                await BaseTOFTLeverageModule__factory.deploy(
+                    lzEndpoint2.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'collateralMock',
+                    18,
+                    1,
+                );
+            const strategyModuleLinked =
+                await BaseTOFTStrategyModule__factory.deploy(
+                    lzEndpoint2.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'collateralMock',
+                    18,
+                    1,
+                );
+
+            const marketModuleLinked =
+                await BaseTOFTMarketModule__factory.deploy(
+                    lzEndpoint2.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'collateralMock',
+                    18,
+                    1,
+                );
+
+            const optionsModuleLinked =
+                await BaseTOFTOptionsModule__factory.deploy(
+                    lzEndpoint2.address,
+                    erc20Mock.address,
+                    yieldBox.address,
+                    'collateralMock',
+                    'collateralMock',
+                    18,
+                    1,
+                );
+
             const collateralLinked = await TapiocaOFTMock__factory.deploy(
                 lzEndpoint2.address,
-                false,
                 erc20Mock.address,
                 yieldBox.address,
                 'collateralMock',
                 'collateralMock',
                 18,
                 1,
+                leverageModuleLinked,
+                strategyModuleLinked,
+                marketModuleLinked,
+                optionsModuleLinked,
             );
 
             // Asset
             const USDO = new USDO__factory(deployer);
+            const USDOLeverageModule = new USDOLeverageModule__factory(
+                deployer,
+            );
+            const USDOMarketModule = new USDOMarketModule__factory(deployer);
+            const USDOOptionsModule = new USDOOptionsModule__factory(deployer);
+
+            const assetHost_leverage = await USDOLeverageModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
+            );
+            const assetHost_market = await USDOMarketModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
+            );
+            const assetHost_options = await USDOOptionsModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
+            );
             const assetHost = await USDO.deploy(
                 lzEndpoint1.address,
                 yieldBox.address,
                 deployer.address,
+                assetHost_leverage.address,
+                assetHost_market.address,
+                assetHost_options.address,
+            );
+
+            const assetLinked_leverage = await USDOLeverageModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
+            );
+            const assetLinked_market = await USDOMarketModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
+            );
+            const assetLinked_options = await USDOOptionsModule.deploy(
+                lzEndpoint1.address,
+                yieldBox.address,
             );
 
             const assetLinked = await USDO.deploy(
                 lzEndpoint2.address,
                 yieldBox.address,
                 deployer.address,
+                assetLinked_leverage.address,
+                assetLinked_market.address,
+                assetLinked_options.address,
             );
 
             // -------------------  Link TOFTs -------------------
@@ -1668,6 +1834,16 @@ describe('MagnetarV2', () => {
                 mintVal,
                 true,
                 true,
+                {
+                    lock: false,
+                    amount: 0,
+                    lockDuration: 0,
+                    target: ethers.constants.AddressZero,
+                },
+                {
+                    participate: false,
+                    target: ethers.constants.AddressZero,
+                },
             );
         });
 
@@ -1696,6 +1872,16 @@ describe('MagnetarV2', () => {
                     mintVal,
                     true,
                     false,
+                    {
+                        lock: false,
+                        lockDuration: 0,
+                        target: ethers.constants.AddressZero,
+                        amount: 0,
+                    },
+                    {
+                        participate: false,
+                        target: ethers.constants.AddressZero,
+                    },
                 ],
             );
 
@@ -3572,6 +3758,7 @@ async function setupUsd0Environment(
 
     const USDOLeverageModule = new USDOLeverageModule__factory(deployer);
     const USDOMarketModule = new USDOMarketModule__factory(deployer);
+    const USDOOptionsModule = new USDOOptionsModule__factory(deployer);
 
     const usdo_leverage_src = await USDOLeverageModule.deploy(
         lzEndpointSrc.address,
@@ -3581,15 +3768,21 @@ async function setupUsd0Environment(
         lzEndpointSrc.address,
         yieldBox.address,
     );
+    const usdo_options_src = await USDOOptionsModule.deploy(
+        lzEndpointSrc.address,
+        yieldBox.address,
+    );
 
     //deploy usd0 tokens
     const USDO = new USDO__factory(deployer);
+
     const usd0Src = await USDO.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
         deployer.address,
         usdo_leverage_src.address,
         usdo_market_src.address,
+        usdo_options_src.address,
     );
 
     const usd0SrcStrategy = await createTokenEmptyStrategy(
@@ -3618,6 +3811,10 @@ async function setupUsd0Environment(
         lzEndpointDst.address,
         yieldBox.address,
     );
+    const usdo_options_dst = await USDOOptionsModule.deploy(
+        lzEndpointDst.address,
+        yieldBox.address,
+    );
 
     const usd0Dst = await USDO.deploy(
         lzEndpointDst.address,
@@ -3625,6 +3822,7 @@ async function setupUsd0Environment(
         deployer.address,
         usdo_leverage_dst.address,
         usdo_market_dst.address,
+        usdo_options_dst.address,
     );
 
     const usd0DstStrategy = await createTokenEmptyStrategy(
