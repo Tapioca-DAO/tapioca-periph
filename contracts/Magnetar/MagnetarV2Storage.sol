@@ -201,6 +201,8 @@ contract MagnetarV2Storage {
         uint256 amount;
         bool deposit;
         bool extractFromSender;
+        ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
+        ITapiocaOptionsBroker.IOptionsParticipateData participateData;
     }
 
     struct HelperBorrowData {
