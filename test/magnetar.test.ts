@@ -354,7 +354,6 @@ describe('MagnetarV2', () => {
                 deployCurveStableToUsdoBidder,
             } = await loadFixture(register);
 
-
             const {
                 singularitySrc,
                 singularityDst,
