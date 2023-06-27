@@ -57,9 +57,9 @@ interface IMagnetar {
 
     function depositAndAddAsset(
         address singularity,
-        address _user,
-        uint256 _amount,
-        bool deposit_,
+        address user,
+        uint256 amount,
+        bool deposit,
         bool extractFromSender
     ) external payable;
 

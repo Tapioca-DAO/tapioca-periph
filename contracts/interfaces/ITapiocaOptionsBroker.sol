@@ -49,9 +49,20 @@ interface ITapiocaOptionsBrokerCrossChain {
 }
 
 interface ITapiocaOptionsBroker {
+    struct IOptionsParticipateData {
+        bool participate;
+        address target;
+    }
+
+    function oTAP() external view returns (address);
+
     function exerciseOption(
-        uint256 _oTAPTokenID,
-        address _paymentToken,
-        uint256 _tapAmount
+        uint256 oTAPTokenID,
+        address paymentToken,
+        uint256 tapAmount
     ) external;
+
+    function participate(
+        uint256 tOLPTokenID
+    ) external returns (uint256 oTAPTokenID);
 }

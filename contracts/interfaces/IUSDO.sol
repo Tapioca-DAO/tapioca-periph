@@ -3,6 +3,9 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import "./ITapiocaOptionsBroker.sol";
+import "./ITapiocaOptionLiquidityProvision.sol";
+
 interface IUSDOBase {
     struct IWithdrawParams {
         bool withdraw;
@@ -40,6 +43,8 @@ interface IUSDOBase {
         address market;
         bool removeCollateral;
         uint256 removeCollateralShare;
+        ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
+        ITapiocaOptionsBroker.IOptionsParticipateData participateData;
     }
 
     struct ISendOptions {
