@@ -813,7 +813,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         address user,
         uint256 amount,
         bool deposit,
-        bool extractFromSender
+        bool extractFromSender,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
     ) external payable {
         _executeModule(
             Module.Market,
@@ -823,7 +825,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 user,
                 amount,
                 deposit,
-                extractFromSender
+                extractFromSender,
+                lockData,
+                participateData
             )
         );
     }
