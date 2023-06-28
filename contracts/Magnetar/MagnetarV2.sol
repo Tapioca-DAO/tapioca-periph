@@ -68,6 +68,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         return _bigBangMarketInfo(who, markets);
     }
 
+    /// @notice Calculate the collateral amount off the shares.
+    /// @param market the Singularity or BigBang address
+    /// @param share The shares.
+    /// @return amount The amount.
+    function getCollateralAmountForShare(
+        IMarket market,
+        uint256 share
+    ) public view returns (uint256 amount) {
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        return yieldBox.toAmount(market.collateralId(), share, false);
+    }
+
     /// @notice Calculate the collateral shares that are needed for `borrowPart`,
     /// taking the current exchange rate into account.
     /// @param market the Singularity or BigBang address

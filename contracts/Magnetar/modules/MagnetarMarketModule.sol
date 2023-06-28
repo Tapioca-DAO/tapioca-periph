@@ -483,6 +483,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         if (participateData.participate) {
+            require(tOLPTokenId != 0, "Magnetar: tOLPTokenId 0");
             IERC721(lockData.target).approve(
                 participateData.target,
                 tOLPTokenId

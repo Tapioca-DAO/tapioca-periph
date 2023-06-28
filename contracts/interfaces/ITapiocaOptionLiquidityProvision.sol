@@ -9,6 +9,12 @@ interface ITapiocaOptionLiquidityProvision {
         uint128 amount;
     }
 
+    struct IOptionsUnlockData {
+        bool unlock;
+        address target;
+        uint256 tokenId;
+    }
+
     function yieldBox() external view returns (address);
 
     function activeSingularities(
@@ -28,4 +34,10 @@ interface ITapiocaOptionLiquidityProvision {
         uint128 lockDuration,
         uint128 amount
     ) external returns (uint256 tokenId);
+
+    function unlock(
+        uint256 tokenId,
+        address singularity,
+        address to
+    ) external returns (uint256 sharesOut);
 }

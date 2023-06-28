@@ -3,6 +3,8 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import "./IMarket.sol";
+import "./ISingularity.sol";
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
 
@@ -33,6 +35,8 @@ interface IUSDOBase {
         uint256 share;
         address marketHelper;
         address market;
+        ITapiocaOptionsBroker.IOptionsExitData exitData;
+        ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlock;
     }
 
     struct ILendParams {
