@@ -54,6 +54,12 @@ interface ITapiocaOptionsBroker {
         address target;
     }
 
+    struct IOptionsExitData {
+        bool exit;
+        address target;
+        uint256 oTAPTokenID;
+    }
+
     function oTAP() external view returns (address);
 
     function exerciseOption(
@@ -65,4 +71,6 @@ interface ITapiocaOptionsBroker {
     function participate(
         uint256 tOLPTokenID
     ) external returns (uint256 oTAPTokenID);
+
+    function exitPosition(uint256 oTAPTokenID) external;
 }

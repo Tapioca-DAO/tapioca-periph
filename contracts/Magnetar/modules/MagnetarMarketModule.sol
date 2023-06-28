@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 //TAPIOCA
 import "../../interfaces/IYieldBoxBase.sol";
+import "../../interfaces/ITapiocaOptions.sol";
 
 import "../MagnetarV2Storage.sol";
 
@@ -147,25 +148,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function removeAssetAndRepay(
-        ISingularity singularity,
-        IMarket bingBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
-        _removeAssetAndRepay(
-            singularity,
-            bingBang,
-            user,
-            removeShare,
-            repayAmount,
-            collateralShare,
-            withdraw,
-            withdrawData
-        );
+        _removeAssetAndRepay(user, externalData, removeAndRepayData);
     }
 
     // *********************** //
@@ -480,85 +467,186 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     lockData.amount
                 );
             _revertYieldBoxApproval(lockData.target, yieldBox);
-        }
 
-        if (participateData.participate) {
-            IERC721(lockData.target).approve(
-                participateData.target,
-                tOLPTokenId
-            );
-            uint256 oTAPTokenId = ITapiocaOptionsBroker(participateData.target)
-                .participate(tOLPTokenId);
+            if (participateData.participate) {
+                require(tOLPTokenId != 0, "Magnetar: tOLPTokenId 0");
+                IERC721(lockData.target).approve(
+                    participateData.target,
+                    tOLPTokenId
+                );
+                uint256 oTAPTokenId = ITapiocaOptionsBroker(
+                    participateData.target
+                ).participate(tOLPTokenId);
 
-            address oTapAddress = ITapiocaOptionsBroker(participateData.target)
-                .oTAP();
-            IERC721(oTapAddress).approve(address(this), oTAPTokenId);
-            IERC721(oTapAddress).safeTransferFrom(
-                address(this),
-                user,
-                oTAPTokenId,
-                "0x"
-            );
+                address oTapAddress = ITapiocaOptionsBroker(
+                    participateData.target
+                ).oTAP();
+                IERC721(oTapAddress).approve(address(this), oTAPTokenId);
+                IERC721(oTapAddress).safeTransferFrom(
+                    address(this),
+                    user,
+                    oTAPTokenId,
+                    "0x"
+                );
+            }
         }
 
         _revertYieldBoxApproval(address(singularity), yieldBox);
     }
 
     function _removeAssetAndRepay(
-        ISingularity singularity,
-        IMarket bigBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) private {
+        IMarket bigBang = IMarket(externalData.bigBang);
+        ISingularity singularity = ISingularity(externalData.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
-        //remove asset
-        uint256 bbAssetId = bigBang.assetId();
-        uint256 _removeAmount = yieldBox.toAmount(
-            bbAssetId,
-            removeShare,
-            false
-        );
-        singularity.removeAsset(user, address(this), removeShare);
-
-        //repay
-        _setApprovalForYieldBox(address(bigBang), yieldBox);
-        uint256 repayed = bigBang.repay(
-            address(this),
-            user,
-            false,
-            repayAmount
-        );
-        if (repayed < _removeAmount) {
-            yieldBox.transfer(
-                address(this),
-                user,
-                bbAssetId,
-                yieldBox.toShare(bbAssetId, _removeAmount - repayed, false)
+        // tOB exit position
+        if (removeAndRepayData.exitData.exit) {
+            require(
+                removeAndRepayData.exitData.oTAPTokenID > 0,
+                "Magnetar: oTAPTokenID 0"
             );
+
+            address oTapAddress = ITapiocaOptionsBroker(
+                removeAndRepayData.exitData.target
+            ).oTAP();
+            (, ITapiocaOptions.TapOption memory oTAPPosition) = ITapiocaOptions(
+                oTapAddress
+            ).attributes(removeAndRepayData.exitData.oTAPTokenID);
+
+            address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(
+                removeAndRepayData.exitData.oTAPTokenID
+            );
+            require(
+                ownerOfTapTokenId == user || ownerOfTapTokenId == address(this),
+                "Magnetar: oTAPTokenID owner mismatch"
+            );
+            if (ownerOfTapTokenId == user) {
+                IERC721(oTapAddress).safeTransferFrom(
+                    user,
+                    address(this),
+                    removeAndRepayData.exitData.oTAPTokenID,
+                    "0x"
+                );
+            }
+            ITapiocaOptionsBroker(removeAndRepayData.exitData.target)
+                .exitPosition(removeAndRepayData.exitData.oTAPTokenID);
+
+            if (!removeAndRepayData.unlockData.unlock) {
+                IERC721(oTapAddress).safeTransferFrom(
+                    address(this),
+                    user,
+                    removeAndRepayData.exitData.oTAPTokenID,
+                    "0x"
+                );
+            } else {
+                ITapiocaOptionLiquidityProvision(
+                    removeAndRepayData.unlockData.target
+                ).unlock(oTAPPosition.tOLP, externalData.singularity, user);
+            }
         }
 
-        //remove collateral
-        if (collateralShare > 0) {
-            bigBang.removeCollateral(
+        //remove asset from SGL
+        uint256 _removeAmount = 0;
+        if (removeAndRepayData.removeAssetFromSGL) {
+            _removeAmount = yieldBox.toAmount(
+                singularity.assetId(),
+                removeAndRepayData.removeShare,
+                false
+            );
+
+            address removeAssetTo = removeAndRepayData
+                .assetWithdrawData
+                .withdraw || removeAndRepayData.repayAssetOnBB
+                ? address(this)
+                : user;
+            uint256 removedShare = singularity.removeAsset(
                 user,
-                withdraw ? address(this) : user,
-                collateralShare
+                removeAssetTo,
+                removeAndRepayData.removeShare
             );
 
             //withdraw
-            if (withdraw) {
+            if (removeAndRepayData.assetWithdrawData.withdraw) {
+                bytes memory withdrawAssetBytes = abi.encode(
+                    removeAndRepayData.assetWithdrawData.withdrawOnOtherChain,
+                    removeAndRepayData.assetWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(user),
+                    removeAndRepayData.assetWithdrawData.withdrawAdapterParams
+                );
                 _withdraw(
                     address(this),
-                    withdrawData,
+                    withdrawAssetBytes,
                     singularity,
                     yieldBox,
                     0,
-                    collateralShare,
+                    removedShare,
+                    true
+                );
+            }
+        }
+
+        //repay on BB
+        if (
+            !removeAndRepayData.assetWithdrawData.withdraw &&
+            removeAndRepayData.repayAssetOnBB
+        ) {
+            _setApprovalForYieldBox(address(bigBang), yieldBox);
+            uint256 repayed = bigBang.repay(
+                address(this),
+                user,
+                false,
+                removeAndRepayData.repayAmount
+            );
+            if (repayed < _removeAmount) {
+                yieldBox.transfer(
+                    address(this),
+                    user,
+                    bigBang.assetId(),
+                    yieldBox.toShare(
+                        bigBang.assetId(),
+                        _removeAmount - repayed,
+                        false
+                    )
+                );
+            }
+        }
+
+        //remove collateral from BB
+        if (removeAndRepayData.removeCollateralFromBB) {
+            address removeCollateralTo = removeAndRepayData
+                .collateralWithdrawData
+                .withdraw
+                ? address(this)
+                : user;
+            bigBang.removeCollateral(
+                user,
+                removeCollateralTo,
+                removeAndRepayData.collateralShare
+            );
+
+            //withdraw
+            if (removeAndRepayData.collateralWithdrawData.withdraw) {
+                bytes memory withdrawCollateralBytes = abi.encode(
+                    removeAndRepayData
+                        .collateralWithdrawData
+                        .withdrawOnOtherChain,
+                    removeAndRepayData.collateralWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(user),
+                    removeAndRepayData
+                        .collateralWithdrawData
+                        .withdrawAdapterParams
+                );
+                _withdraw(
+                    address(this),
+                    withdrawCollateralBytes,
+                    singularity,
+                    yieldBox,
+                    0,
+                    removeAndRepayData.collateralShare,
                     true
                 );
             }

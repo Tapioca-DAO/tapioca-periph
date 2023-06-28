@@ -3,10 +3,13 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import "./IMarket.sol";
+import "./ISingularity.sol";
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
 
 interface IUSDOBase {
+    //common data
     struct IWithdrawParams {
         bool withdraw;
         uint256 withdrawLzFeeAmount;
@@ -29,13 +32,32 @@ interface IUSDOBase {
         bytes32 s;
     }
 
-    struct IRemoveParams {
-        uint256 share;
-        address marketHelper;
-        address market;
+    struct ISendOptions {
+        uint256 extraGasLimit;
+        address zroPaymentAddress;
     }
 
-    struct ILendParams {
+    // remove and repay
+    struct IRemoveAndRepayExternalContracts {
+        address magnetar;
+        address singularity;
+        address bigBang;
+    }
+    struct IRemoveAndRepay {
+        bool removeAssetFromSGL;
+        uint256 removeShare; //slightly greater than repayAmount to cover the interest
+        bool repayAssetOnBB;
+        uint256 repayAmount; // on BB
+        bool removeCollateralFromBB;
+        uint256 collateralShare; // from BB
+        ITapiocaOptionsBroker.IOptionsExitData exitData;
+        ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
+        IWithdrawParams assetWithdrawData;
+        IWithdrawParams collateralWithdrawData;
+    }
+
+    // lend or repay
+    struct ILendOrRepayParams {
         bool repay;
         uint256 depositAmount;
         uint256 repayAmount;
@@ -47,11 +69,7 @@ interface IUSDOBase {
         ITapiocaOptionsBroker.IOptionsParticipateData participateData;
     }
 
-    struct ISendOptions {
-        uint256 extraGasLimit;
-        address zroPaymentAddress;
-    }
-
+    //leverage data
     struct ILeverageLZData {
         uint256 srcExtraGasLimit;
         uint16 lzSrcChainId;
@@ -83,9 +101,9 @@ interface IUSDOBase {
         address _to,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        ILendParams calldata lendParams,
+        ILendOrRepayParams calldata lendParams,
         IApproval[] calldata approvals,
-        IWithdrawParams calldata withdrawParams,
+        IWithdrawParams calldata withdrawParams, //collateral remove data
         bytes calldata adapterParams
     ) external payable;
 

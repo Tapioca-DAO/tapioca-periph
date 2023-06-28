@@ -68,6 +68,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         return _bigBangMarketInfo(who, markets);
     }
 
+    /// @notice Calculate the collateral amount off the shares.
+    /// @param market the Singularity or BigBang address
+    /// @param share The shares.
+    /// @return amount The amount.
+    function getCollateralAmountForShare(
+        IMarket market,
+        uint256 share
+    ) public view returns (uint256 amount) {
+        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        return yieldBox.toAmount(market.collateralId(), share, false);
+    }
+
     /// @notice Calculate the collateral shares that are needed for `borrowPart`,
     /// taking the current exchange rate into account.
     /// @param market the Singularity or BigBang address
@@ -428,7 +440,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address to,
                     uint16 dstChainId,
                     address zroPaymentAddress,
-                    IUSDOBase.ILendParams memory lendParams,
+                    IUSDOBase.ILendOrRepayParams memory lendParams,
                     IUSDOBase.IApproval[] memory approvals,
                     IUSDOBase.IWithdrawParams memory withdrawParams,
                     bytes memory adapterParams
@@ -439,7 +451,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             address,
                             uint16,
                             address,
-                            (IUSDOBase.ILendParams),
+                            (IUSDOBase.ILendOrRepayParams),
                             (IUSDOBase.IApproval[]),
                             (IUSDOBase.IWithdrawParams),
                             bytes
@@ -835,27 +847,17 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     }
 
     function removeAssetAndRepay(
-        ISingularity singularity,
-        IMarket bingBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
                 MagnetarMarketModule.removeAssetAndRepay.selector,
-                singularity,
-                bingBang,
                 user,
-                removeShare,
-                repayAmount,
-                collateralShare,
-                withdraw,
-                withdrawData
+                externalData,
+                removeAndRepayData
             )
         );
     }

@@ -3027,31 +3027,92 @@ describe('MagnetarV2', () => {
 
             await expect(
                 magnetar.removeAssetAndRepay(
-                    wethUsdoSingularity.address,
-                    wethBigBangMarket.address,
                     deployer.address,
-                    fraction,
-                    fraction,
-                    totalBingBangCollateral,
-                    true,
-                    encodeMagnetarWithdrawData(
-                        false,
-                        0,
-                        deployer.address,
-                        '0x00',
-                    ),
+                    {
+                        magnetar: magnetar.address,
+                        singularity: wethUsdoSingularity.address,
+                        bigBang: wethBigBangMarket.address,
+                    },
+                    {
+                        removeAssetFromSGL: true,
+                        removeShare: fraction,
+                        repayAssetOnBB: true,
+                        repayAmount: fraction,
+                        removeCollateralFromBB: true,
+                        collateralShare: totalBingBangCollateral,
+                        exitData: {
+                            exit: false,
+                            oTAPTokenID: 0,
+                            target: ethers.constants.AddressZero,
+                        },
+                        unlockData: {
+                            unlock: false,
+                            target: ethers.constants.AddressZero,
+                            tokenId: 0,
+                        },
+                        assetWithdrawData: {
+                            withdraw: false,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            withdrawLzChainId: 0,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                        },
+                        collateralWithdrawData: {
+                            withdraw: false,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            withdrawLzChainId: 0,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                        },
+                    },
                 ),
             ).to.be.revertedWith('SGL: min limit');
+
             await magnetar.removeAssetAndRepay(
-                wethUsdoSingularity.address,
-                wethBigBangMarket.address,
                 deployer.address,
-                fraction.div(2),
-                await yieldBox.toAmount(usdoAssetId, fraction.div(3), false),
-                totalBingBangCollateral.div(5),
-                true,
-                encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
+                {
+                    magnetar: magnetar.address,
+                    singularity: wethUsdoSingularity.address,
+                    bigBang: wethBigBangMarket.address,
+                },
+                {
+                    removeAssetFromSGL: true,
+                    removeShare: fraction.div(2),
+                    repayAssetOnBB: true,
+                    repayAmount: await yieldBox.toAmount(
+                        usdoAssetId,
+                        fraction.div(3),
+                        false,
+                    ),
+                    removeCollateralFromBB: true,
+                    collateralShare: totalBingBangCollateral.div(5),
+                    exitData: {
+                        exit: false,
+                        oTAPTokenID: 0,
+                        target: ethers.constants.AddressZero,
+                    },
+                    unlockData: {
+                        unlock: false,
+                        target: ethers.constants.AddressZero,
+                        tokenId: 0,
+                    },
+                    assetWithdrawData: {
+                        withdraw: false,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawLzChainId: 0,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                    },
+                    collateralWithdrawData: {
+                        withdraw: true,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawLzChainId: 0,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                    },
+                },
             );
+
             const wethBalanceAfter = await weth.balanceOf(deployer.address);
 
             expect(wethBalanceBefore.eq(0)).to.be.true;
@@ -3162,14 +3223,48 @@ describe('MagnetarV2', () => {
                 await wethBigBangMarket.userCollateralShare(deployer.address);
 
             await magnetar.removeAssetAndRepay(
-                wethUsdoSingularity.address,
-                wethBigBangMarket.address,
                 deployer.address,
-                fraction.div(2),
-                await yieldBox.toAmount(usdoAssetId, fraction.div(3), false),
-                totalBingBangCollateral.div(5),
-                false,
-                encodeMagnetarWithdrawData(false, 0, deployer.address, '0x00'),
+                {
+                    magnetar: magnetar.address,
+                    singularity: wethUsdoSingularity.address,
+                    bigBang: wethBigBangMarket.address,
+                },
+                {
+                    removeAssetFromSGL: true,
+                    removeShare: fraction.div(2),
+                    repayAssetOnBB: true,
+                    repayAmount: await yieldBox.toAmount(
+                        usdoAssetId,
+                        fraction.div(3),
+                        false,
+                    ),
+                    removeCollateralFromBB: true,
+                    collateralShare: totalBingBangCollateral.div(5),
+                    exitData: {
+                        exit: false,
+                        oTAPTokenID: 0,
+                        target: ethers.constants.AddressZero,
+                    },
+                    unlockData: {
+                        unlock: false,
+                        target: ethers.constants.AddressZero,
+                        tokenId: 0,
+                    },
+                    assetWithdrawData: {
+                        withdraw: false,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawLzChainId: 0,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                    },
+                    collateralWithdrawData: {
+                        withdraw: false,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawLzChainId: 0,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                    },
+                },
             );
             const wethCollateralAfter =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
