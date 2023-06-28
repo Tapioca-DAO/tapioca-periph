@@ -516,14 +516,22 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             (, ITapiocaOptions.TapOption memory oTAPPosition) = ITapiocaOptions(
                 oTapAddress
             ).attributes(removeAndRepayData.exitData.oTAPTokenID);
-            // tOLPTokenId = oTAPPosition.tOLP;
 
-            IERC721(oTapAddress).safeTransferFrom(
-                user,
-                address(this),
-                removeAndRepayData.exitData.oTAPTokenID,
-                "0x"
+            address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(
+                removeAndRepayData.exitData.oTAPTokenID
             );
+            require(
+                ownerOfTapTokenId == user || ownerOfTapTokenId == address(this),
+                "Magnetar: oTAPTokenID owner mismatch"
+            );
+            if (ownerOfTapTokenId == user) {
+                IERC721(oTapAddress).safeTransferFrom(
+                    user,
+                    address(this),
+                    removeAndRepayData.exitData.oTAPTokenID,
+                    "0x"
+                );
+            }
             ITapiocaOptionsBroker(removeAndRepayData.exitData.target)
                 .exitPosition(removeAndRepayData.exitData.oTAPTokenID);
 
