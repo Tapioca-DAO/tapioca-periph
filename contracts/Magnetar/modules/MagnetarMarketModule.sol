@@ -536,10 +536,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 .exitPosition(removeAndRepayData.exitData.oTAPTokenID);
 
             if (!removeAndRepayData.unlockData.unlock) {
-                IERC721(oTapAddress).approve(
-                    address(this),
-                    removeAndRepayData.exitData.oTAPTokenID
-                );
                 IERC721(oTapAddress).safeTransferFrom(
                     address(this),
                     user,
@@ -547,18 +543,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     "0x"
                 );
             } else {
-                (uint256 sglAssetId, , ) = ITapiocaOptionLiquidityProvision(
-                    removeAndRepayData.unlockData.target
-                ).activeSingularities(externalData.singularity);
-                uint256 unlockedShares = ITapiocaOptionLiquidityProvision(
+                ITapiocaOptionLiquidityProvision(
                     removeAndRepayData.unlockData.target
                 ).unlock(oTAPPosition.tOLP, externalData.singularity, user);
-                yieldBox.transfer(
-                    address(this),
-                    user,
-                    sglAssetId,
-                    unlockedShares
-                );
             }
         }
 
