@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 //TAPIOCA
 import "../../interfaces/IYieldBoxBase.sol";
+import "../../interfaces/ITapiocaOptions.sol";
 
 import "../MagnetarV2Storage.sol";
 
@@ -466,26 +467,28 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     lockData.amount
                 );
             _revertYieldBoxApproval(lockData.target, yieldBox);
-        }
 
-        if (participateData.participate) {
-            require(tOLPTokenId != 0, "Magnetar: tOLPTokenId 0");
-            IERC721(lockData.target).approve(
-                participateData.target,
-                tOLPTokenId
-            );
-            uint256 oTAPTokenId = ITapiocaOptionsBroker(participateData.target)
-                .participate(tOLPTokenId);
+            if (participateData.participate) {
+                require(tOLPTokenId != 0, "Magnetar: tOLPTokenId 0");
+                IERC721(lockData.target).approve(
+                    participateData.target,
+                    tOLPTokenId
+                );
+                uint256 oTAPTokenId = ITapiocaOptionsBroker(
+                    participateData.target
+                ).participate(tOLPTokenId);
 
-            address oTapAddress = ITapiocaOptionsBroker(participateData.target)
-                .oTAP();
-            IERC721(oTapAddress).approve(address(this), oTAPTokenId);
-            IERC721(oTapAddress).safeTransferFrom(
-                address(this),
-                user,
-                oTAPTokenId,
-                "0x"
-            );
+                address oTapAddress = ITapiocaOptionsBroker(
+                    participateData.target
+                ).oTAP();
+                IERC721(oTapAddress).approve(address(this), oTAPTokenId);
+                IERC721(oTapAddress).safeTransferFrom(
+                    address(this),
+                    user,
+                    oTAPTokenId,
+                    "0x"
+                );
+            }
         }
 
         _revertYieldBoxApproval(address(singularity), yieldBox);
@@ -500,25 +503,62 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         ISingularity singularity = ISingularity(externalData.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
-        uint256 bbAssetId = bigBang.assetId();
-        uint256 sglAssetId = singularity.assetId();
-        require(bbAssetId == sglAssetId, "Magnetar: assets mismatch");
-
         // tOB exit position
         if (removeAndRepayData.exitData.exit) {
-            //TODO: add code
-        }
+            require(
+                removeAndRepayData.exitData.oTAPTokenID > 0,
+                "Magnetar: oTAPTokenID 0"
+            );
 
-        // tOLP unlock
-        if (removeAndRepayData.unlockData.unlock) {
-            //TODO: add code
+            address oTapAddress = ITapiocaOptionsBroker(
+                removeAndRepayData.exitData.target
+            ).oTAP();
+            (, ITapiocaOptions.TapOption memory oTAPPosition) = ITapiocaOptions(
+                oTapAddress
+            ).attributes(removeAndRepayData.exitData.oTAPTokenID);
+            // tOLPTokenId = oTAPPosition.tOLP;
+
+            IERC721(oTapAddress).safeTransferFrom(
+                user,
+                address(this),
+                removeAndRepayData.exitData.oTAPTokenID,
+                "0x"
+            );
+            ITapiocaOptionsBroker(removeAndRepayData.exitData.target)
+                .exitPosition(removeAndRepayData.exitData.oTAPTokenID);
+
+            if (!removeAndRepayData.unlockData.unlock) {
+                IERC721(oTapAddress).approve(
+                    address(this),
+                    removeAndRepayData.exitData.oTAPTokenID
+                );
+                IERC721(oTapAddress).safeTransferFrom(
+                    address(this),
+                    user,
+                    removeAndRepayData.exitData.oTAPTokenID,
+                    "0x"
+                );
+            } else {
+                (uint256 sglAssetId, , ) = ITapiocaOptionLiquidityProvision(
+                    removeAndRepayData.unlockData.target
+                ).activeSingularities(externalData.singularity);
+                uint256 unlockedShares = ITapiocaOptionLiquidityProvision(
+                    removeAndRepayData.unlockData.target
+                ).unlock(oTAPPosition.tOLP, externalData.singularity, user);
+                yieldBox.transfer(
+                    address(this),
+                    user,
+                    sglAssetId,
+                    unlockedShares
+                );
+            }
         }
 
         //remove asset from SGL
         uint256 _removeAmount = 0;
         if (removeAndRepayData.removeAssetFromSGL) {
             _removeAmount = yieldBox.toAmount(
-                sglAssetId,
+                singularity.assetId(),
                 removeAndRepayData.removeShare,
                 false
             );
@@ -570,8 +610,12 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 yieldBox.transfer(
                     address(this),
                     user,
-                    bbAssetId,
-                    yieldBox.toShare(bbAssetId, _removeAmount - repayed, false)
+                    bigBang.assetId(),
+                    yieldBox.toShare(
+                        bigBang.assetId(),
+                        _removeAmount - repayed,
+                        false
+                    )
                 );
             }
         }
