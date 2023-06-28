@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
+import {IUSDOBase} from "./IUSDO.sol";
 
 interface IMagnetar {
     function getAmountForBorrowPart(
@@ -69,14 +70,9 @@ interface IMagnetar {
     ) external payable;
 
     function removeAssetAndRepay(
-        address singularity,
-        address bingBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable;
 
     function depositAddCollateralAndBorrow(

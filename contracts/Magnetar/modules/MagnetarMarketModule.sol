@@ -147,25 +147,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function removeAssetAndRepay(
-        ISingularity singularity,
-        IMarket bingBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
-        _removeAssetAndRepay(
-            singularity,
-            bingBang,
-            user,
-            removeShare,
-            repayAmount,
-            collateralShare,
-            withdraw,
-            withdrawData
-        );
+        _removeAssetAndRepay(user, externalData, removeAndRepayData);
     }
 
     // *********************** //
@@ -506,60 +492,122 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function _removeAssetAndRepay(
-        ISingularity singularity,
-        IMarket bigBang,
         address user,
-        uint256 removeShare, //slightly greater than _repayAmount to cover the interest
-        uint256 repayAmount,
-        uint256 collateralShare,
-        bool withdraw,
-        bytes calldata withdrawData
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) private {
+        IMarket bigBang = IMarket(externalData.bigBang);
+        ISingularity singularity = ISingularity(externalData.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
-        //remove asset
         uint256 bbAssetId = bigBang.assetId();
-        uint256 _removeAmount = yieldBox.toAmount(
-            bbAssetId,
-            removeShare,
-            false
-        );
-        singularity.removeAsset(user, address(this), removeShare);
+        uint256 sglAssetId = singularity.assetId();
+        require(bbAssetId == sglAssetId, "Magnetar: assets mismatch");
 
-        //repay
-        _setApprovalForYieldBox(address(bigBang), yieldBox);
-        uint256 repayed = bigBang.repay(
-            address(this),
-            user,
-            false,
-            repayAmount
-        );
-        if (repayed < _removeAmount) {
-            yieldBox.transfer(
-                address(this),
-                user,
-                bbAssetId,
-                yieldBox.toShare(bbAssetId, _removeAmount - repayed, false)
-            );
+        // tOB exit position
+        if (removeAndRepayData.exitData.exit) {
+            //TODO: add code
         }
 
-        //remove collateral
-        if (collateralShare > 0) {
-            bigBang.removeCollateral(
+        // tOLP unlock
+        if (removeAndRepayData.unlockData.unlock) {
+            //TODO: add code
+        }
+
+        //remove asset from SGL
+        uint256 _removeAmount = 0;
+        if (removeAndRepayData.removeAssetFromSGL) {
+            _removeAmount = yieldBox.toAmount(
+                sglAssetId,
+                removeAndRepayData.removeShare,
+                false
+            );
+
+            address removeAssetTo = removeAndRepayData
+                .assetWithdrawData
+                .withdraw || removeAndRepayData.repayAssetOnBB
+                ? address(this)
+                : user;
+            uint256 removedShare = singularity.removeAsset(
                 user,
-                withdraw ? address(this) : user,
-                collateralShare
+                removeAssetTo,
+                removeAndRepayData.removeShare
             );
 
             //withdraw
-            if (withdraw) {
+            if (removeAndRepayData.assetWithdrawData.withdraw) {
+                bytes memory withdrawAssetBytes = abi.encode(
+                    removeAndRepayData.assetWithdrawData.withdrawOnOtherChain,
+                    removeAndRepayData.assetWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(user),
+                    removeAndRepayData.assetWithdrawData.withdrawAdapterParams
+                );
                 _withdraw(
                     address(this),
-                    withdrawData,
+                    withdrawAssetBytes,
                     singularity,
                     yieldBox,
                     0,
-                    collateralShare,
+                    removedShare,
+                    true
+                );
+            }
+        }
+
+        //repay on BB
+        if (
+            !removeAndRepayData.assetWithdrawData.withdraw &&
+            removeAndRepayData.repayAssetOnBB
+        ) {
+            _setApprovalForYieldBox(address(bigBang), yieldBox);
+            uint256 repayed = bigBang.repay(
+                address(this),
+                user,
+                false,
+                removeAndRepayData.repayAmount
+            );
+            if (repayed < _removeAmount) {
+                yieldBox.transfer(
+                    address(this),
+                    user,
+                    bbAssetId,
+                    yieldBox.toShare(bbAssetId, _removeAmount - repayed, false)
+                );
+            }
+        }
+
+        //remove collateral from BB
+        if (removeAndRepayData.removeCollateralFromBB) {
+            address removeCollateralTo = removeAndRepayData
+                .collateralWithdrawData
+                .withdraw
+                ? address(this)
+                : user;
+            bigBang.removeCollateral(
+                user,
+                removeCollateralTo,
+                removeAndRepayData.collateralShare
+            );
+
+            //withdraw
+            if (removeAndRepayData.collateralWithdrawData.withdraw) {
+                bytes memory withdrawCollateralBytes = abi.encode(
+                    removeAndRepayData
+                        .collateralWithdrawData
+                        .withdrawOnOtherChain,
+                    removeAndRepayData.collateralWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(user),
+                    removeAndRepayData
+                        .collateralWithdrawData
+                        .withdrawAdapterParams
+                );
+                _withdraw(
+                    address(this),
+                    withdrawCollateralBytes,
+                    singularity,
+                    yieldBox,
+                    0,
+                    removeAndRepayData.collateralShare,
                     true
                 );
             }

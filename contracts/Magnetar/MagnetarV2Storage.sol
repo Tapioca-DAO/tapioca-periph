@@ -128,7 +128,7 @@ contract MagnetarV2Storage {
         address from;
         address to;
         uint16 lzDstChainId;
-        IUSDOBase.ILendParams lendParams;
+        IUSDOBase.ILendOrRepayParams lendParams;
         IUSDOBase.ISendOptions options;
         IUSDOBase.IApproval[] approvals;
     }
