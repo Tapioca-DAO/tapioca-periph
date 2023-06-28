@@ -10,6 +10,7 @@ import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
 import "../interfaces/IPenrose.sol";
+import "../interfaces/ITapiocaOptionsBroker.sol";
 
 /*
 
@@ -525,7 +526,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         data.from,
                         data.amount,
                         data.deposit,
-                        false
+                        false,
+                        data.lockData,
+                        data.participateData
                     )
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
@@ -574,7 +577,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperRemoveAssetData)
                 );
 
-                 ISingularity(data.market).removeAsset(data.user, data.user, data.fraction);
+                ISingularity(data.market).removeAsset(
+                    data.user,
+                    data.user,
+                    data.fraction
+                );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
                 HelperDepositRepayRemoveCollateral memory data = abi.decode(
                     _action.call[4:],
@@ -603,14 +610,70 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     (HelperBuyCollateral)
                 );
 
-                IMarket(data.market).buyCollateral(data.from, data.borrowAmount, data.supplyAmount, data.minAmountOut, address(data.swapper), data.dexData);
+                IMarket(data.market).buyCollateral(
+                    data.from,
+                    data.borrowAmount,
+                    data.supplyAmount,
+                    data.minAmountOut,
+                    address(data.swapper),
+                    data.dexData
+                );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
                 HelperSellCollateral memory data = abi.decode(
                     _action.call[4:],
                     (HelperSellCollateral)
                 );
 
-                IMarket(data.market).sellCollateral(data.from, data.share, data.minAmountOut, address(data.swapper), data.dexData);
+                IMarket(data.market).sellCollateral(
+                    data.from,
+                    data.share,
+                    data.minAmountOut,
+                    address(data.swapper),
+                    data.dexData
+                );
+            } else if (_action.id == TAP_EXERCISE_OPTION) {
+                HelperExerciseOption memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperExerciseOption)
+                );
+
+                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption(
+                    data.optionsData,
+                    data.lzData,
+                    data.tapSendData,
+                    data.approvals
+                );
+            } else if (_action.id == MARKET_MULTIHOP_BUY) {
+                HelperMultiHopBuy memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperMultiHopBuy)
+                );
+
+                IUSDOBase(_action.target).initMultiHopBuy(
+                    data.from,
+                    data.collateralAmount,
+                    data.borrowAmount,
+                    data.swapData,
+                    data.lzData,
+                    data.externalData,
+                    data.airdropAdapterParams,
+                    data.approvals
+                );
+            } else if (_action.id == MARKET_MULTIHOP_SELL) {
+                HelperMultiHopSell memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperMultiHopSell)
+                );
+
+                ITapiocaOFT(_action.target).initMultiSell(
+                    data.from,
+                    data.share,
+                    data.swapData,
+                    data.lzData,
+                    data.externalData,
+                    data.airdropAdapterParams,
+                    data.approvals
+                );
             } else {
                 revert("MagnetarV2: action not valid");
             }
@@ -752,7 +815,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         address user,
         uint256 amount,
         bool deposit,
-        bool extractFromSender
+        bool extractFromSender,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
     ) external payable {
         _executeModule(
             Module.Market,
@@ -762,7 +827,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 user,
                 amount,
                 deposit,
-                extractFromSender
+                extractFromSender,
+                lockData,
+                participateData
             )
         );
     }

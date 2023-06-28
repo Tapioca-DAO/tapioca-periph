@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "./IMarket.sol";
+import {IUSDOBase} from "./IUSDO.sol";
 
 interface ISingularity is IMarket {
     struct AccrueInfo {
@@ -58,4 +59,21 @@ interface ISingularity is IMarket {
         external
         view
         returns (AccrueInfo memory _accrueInfo, uint256 utilization);
+
+    function multiHopBuyCollateral(
+        address from,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
+    ) external payable;
+
+    function multiHopSellCollateral(
+        address from,
+        uint256 share,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
+    ) external payable;
 }

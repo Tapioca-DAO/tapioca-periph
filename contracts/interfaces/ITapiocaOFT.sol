@@ -132,7 +132,17 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         address zroPaymentAddress,
         ITapiocaOFT.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        ITapiocaOFT.IApproval[] calldata approvals,
+        IApproval[] calldata approvals,
         bytes calldata adapterParams
+    ) external payable;
+
+    function initMultiSell(
+        address from,
+        uint256 share,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
+        bytes calldata airdropAdapterParams,
+        IApproval[] calldata approvals
     ) external payable;
 }

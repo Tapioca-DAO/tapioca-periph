@@ -7,6 +7,7 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 //OZ
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 //TAPIOCA
 import "../../interfaces/IYieldBoxBase.sol";
@@ -129,15 +130,19 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         IMarket singularity,
         address user,
         uint256 amount,
-        bool deposit_,
-        bool extractFromSender
+        bool deposit,
+        bool extractFromSender,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
     ) external payable {
         _depositAndAddAsset(
             singularity,
             user,
             amount,
-            deposit_,
-            extractFromSender
+            deposit,
+            extractFromSender,
+            lockData,
+            participateData
         );
     }
 
@@ -212,7 +217,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         //add collateral
         if (collateralAmount > 0) {
-            _setApprovalForYieldBox(market, yieldBox);
+            _setApprovalForYieldBox(address(market), yieldBox);
             market.addCollateral(
                 deposit ? address(this) : user,
                 user,
@@ -240,7 +245,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             }
         }
 
-        _revertYieldBoxApproval(market, yieldBox);
+        _revertYieldBoxApproval(address(market), yieldBox);
     }
 
     function _depositAndRepay(
@@ -275,14 +280,14 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         //repay
         if (repayAmount > 0) {
-            _setApprovalForYieldBox(market, yieldBox);
+            _setApprovalForYieldBox(address(market), yieldBox);
             market.repay(
                 deposit ? address(this) : user,
                 user,
                 false,
                 repayAmount
             );
-            _revertYieldBoxApproval(market, yieldBox);
+            _revertYieldBoxApproval(address(market), yieldBox);
         }
     }
 
@@ -371,7 +376,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         if (collateralAmount > 0) {
             //add collateral to BingBang
-            _setApprovalForYieldBox(bingBang, yieldBox);
+            _setApprovalForYieldBox(address(bingBang), yieldBox);
             bingBang.addCollateral(
                 address(this),
                 user,
@@ -392,37 +397,39 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 borrowAmount,
                 false
             );
-            _setApprovalForYieldBox(singularity, yieldBox);
+            _setApprovalForYieldBox(address(singularity), yieldBox);
             singularity.addAsset(user, user, false, borrowShare);
-            _revertYieldBoxApproval(singularity, yieldBox);
+            _revertYieldBoxApproval(address(singularity), yieldBox);
         }
-        _revertYieldBoxApproval(bingBang, yieldBox);
+        _revertYieldBoxApproval(address(bingBang), yieldBox);
     }
 
     function _depositAndAddAsset(
         IMarket singularity,
-        address _user,
-        uint256 _amount,
+        address user,
+        uint256 amount,
         bool deposit_,
-        bool extractFromSender
+        bool extractFromSender,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
     ) private {
         uint256 assetId = singularity.assetId();
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
         (, address assetAddress, , ) = yieldBox.assets(assetId);
 
-        uint256 _share = yieldBox.toShare(assetId, _amount, false);
+        uint256 _share = yieldBox.toShare(assetId, amount, false);
         if (deposit_) {
             if (!extractFromSender) {
-                _checkSender(_user);
+                _checkSender(user);
             }
             //deposit into the yieldbox
             _extractTokens(
-                extractFromSender ? msg.sender : _user,
+                extractFromSender ? msg.sender : user,
                 assetAddress,
-                _amount
+                amount
             );
-            IERC20(assetAddress).approve(address(yieldBox), _amount);
+            IERC20(assetAddress).approve(address(yieldBox), amount);
             yieldBox.depositAsset(
                 assetId,
                 address(this),
@@ -433,9 +440,68 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         }
 
         //add asset
-        _setApprovalForYieldBox(singularity, yieldBox);
-        singularity.addAsset(address(this), _user, false, _share);
-        _setApprovalForYieldBox(singularity, yieldBox);
+        // address addAssetTo = lockData.lock ? address(this) : user;
+        _setApprovalForYieldBox(address(singularity), yieldBox);
+        uint256 fraction = singularity.addAsset(
+            address(this),
+            user,
+            false,
+            _share
+        );
+
+        //lock
+        uint256 tOLPTokenId = 0;
+        if (lockData.lock) {
+            // retrieve and deposit SGLAssetId registered in tOLP
+            (uint256 sglAssetId, , ) = ITapiocaOptionLiquidityProvision(
+                lockData.target
+            ).activeSingularities(address(singularity));
+            IERC20(address(singularity)).safeTransferFrom(
+                user,
+                address(this),
+                fraction
+            );
+            IERC20(address(singularity)).approve(address(yieldBox), fraction);
+            yieldBox.depositAsset(
+                sglAssetId,
+                address(this),
+                address(this),
+                fraction,
+                0
+            );
+
+            _setApprovalForYieldBox(lockData.target, yieldBox);
+            address lockTo = participateData.participate ? address(this) : user;
+            tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target)
+                .lock(
+                    lockTo,
+                    address(singularity),
+                    lockData.lockDuration,
+                    lockData.amount
+                );
+            _revertYieldBoxApproval(lockData.target, yieldBox);
+        }
+
+        if (participateData.participate) {
+            IERC721(lockData.target).approve(
+                participateData.target,
+                tOLPTokenId
+            );
+            uint256 oTAPTokenId = ITapiocaOptionsBroker(participateData.target)
+                .participate(tOLPTokenId);
+
+            address oTapAddress = ITapiocaOptionsBroker(participateData.target)
+                .oTAP();
+            IERC721(oTapAddress).approve(address(this), oTAPTokenId);
+            IERC721(oTapAddress).safeTransferFrom(
+                address(this),
+                user,
+                oTAPTokenId,
+                "0x"
+            );
+        }
+
+        _revertYieldBoxApproval(address(singularity), yieldBox);
     }
 
     function _removeAssetAndRepay(
@@ -460,7 +526,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         singularity.removeAsset(user, address(this), removeShare);
 
         //repay
-        _setApprovalForYieldBox(bigBang, yieldBox);
+        _setApprovalForYieldBox(address(bigBang), yieldBox);
         uint256 repayed = bigBang.repay(
             address(this),
             user,
@@ -497,7 +563,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 );
             }
         }
-        _revertYieldBoxApproval(bigBang, yieldBox);
+        _revertYieldBoxApproval(address(bigBang), yieldBox);
     }
 
     function _withdrawTo(
@@ -582,28 +648,28 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function _setApprovalForYieldBox(
-        IMarket market,
+        address target,
         IYieldBoxBase yieldBox
     ) private {
         bool isApproved = yieldBox.isApprovedForAll(
             address(this),
-            address(market)
+            address(target)
         );
         if (!isApproved) {
-            yieldBox.setApprovalForAll(address(market), true);
+            yieldBox.setApprovalForAll(address(target), true);
         }
     }
 
     function _revertYieldBoxApproval(
-        IMarket market,
+        address target,
         IYieldBoxBase yieldBox
     ) private {
         bool isApproved = yieldBox.isApprovedForAll(
             address(this),
-            address(market)
+            address(target)
         );
         if (isApproved) {
-            yieldBox.setApprovalForAll(address(market), false);
+            yieldBox.setApprovalForAll(address(target), false);
         }
     }
 

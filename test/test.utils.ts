@@ -25,6 +25,7 @@ import {
     SGLLeverage__factory,
     USDOLeverageModule__factory,
     USDOMarketModule__factory,
+    USDOOptionsModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -525,8 +526,12 @@ async function registerLiquidationQueue(
     log('LiquidationQueue initialized', staging);
 
     const payload = singularity.interface.encodeFunctionData(
-        'setLiquidationQueue',
-        [liquidationQueue.address],
+        'setLiquidationQueueConfig',
+        [
+            liquidationQueue.address,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
+        ],
     );
 
     await (
@@ -569,6 +574,12 @@ async function registerUsd0Contract(
         yieldBox,
     );
 
+    const USDOOptionsModule = new USDOOptionsModule__factory(owner);
+    const usdo_options = await USDOOptionsModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+    );
+
     const USDO = new USDO__factory(owner);
     const usd0 = await USDO.deploy(
         lzEndpointContract.address,
@@ -576,6 +587,7 @@ async function registerUsd0Contract(
         owner.address,
         usdo_leverage.address,
         usdo_market.address,
+        usdo_options.address,
     );
     log(
         `Deployed UDS0 ${usd0.address} with args [${lzEndpointContract.address},${yieldBox}]`,
@@ -920,8 +932,12 @@ async function createWethUsd0Singularity(
     log('LiquidationQueue initialized');
 
     const payload = wethUsdoSingularity.interface.encodeFunctionData(
-        'setLiquidationQueue',
-        [liquidationQueue.address],
+        'setLiquidationQueueConfig',
+        [
+            liquidationQueue.address,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
+        ],
     );
 
     await (

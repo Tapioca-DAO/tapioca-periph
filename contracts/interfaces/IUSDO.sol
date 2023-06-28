@@ -3,6 +3,9 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+import "./ITapiocaOptionsBroker.sol";
+import "./ITapiocaOptionLiquidityProvision.sol";
+
 interface IUSDOBase {
     struct IWithdrawParams {
         bool withdraw;
@@ -40,6 +43,8 @@ interface IUSDOBase {
         address market;
         bool removeCollateral;
         uint256 removeCollateralShare;
+        ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
+        ITapiocaOptionsBroker.IOptionsParticipateData participateData;
     }
 
     struct ISendOptions {
@@ -90,6 +95,17 @@ interface IUSDOBase {
         ILeverageLZData calldata lzData,
         ILeverageSwapData calldata swapData,
         ILeverageExternalContractsData calldata externalData
+    ) external payable;
+
+    function initMultiHopBuy(
+        address from,
+        uint256 collateralAmount,
+        uint256 borrowAmount,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
+        bytes calldata airdropAdapterParams,
+        IUSDOBase.IApproval[] memory approvals
     ) external payable;
 }
 

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "./ITapiocaOptionsBroker.sol";
+import "./ITapiocaOptionLiquidityProvision.sol";
+
 interface IMagnetar {
     function getAmountForBorrowPart(
         address market,
@@ -57,10 +60,12 @@ interface IMagnetar {
 
     function depositAndAddAsset(
         address singularity,
-        address _user,
-        uint256 _amount,
-        bool deposit_,
-        bool extractFromSender
+        address user,
+        uint256 amount,
+        bool deposit,
+        bool extractFromSender,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
     ) external payable;
 
     function removeAssetAndRepay(
