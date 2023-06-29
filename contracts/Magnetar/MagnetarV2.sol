@@ -615,9 +615,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         data.depositAmount,
                         data.repayAmount,
                         data.collateralAmount,
-                        data.deposit,
-                        data.withdraw,
-                        data.extractFromSender
+                        data.extractFromSender,
+                        data.withdrawCollateralParams
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {

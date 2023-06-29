@@ -222,9 +222,8 @@ contract MagnetarV2Storage {
         uint256 depositAmount;
         uint256 repayAmount;
         uint256 collateralAmount;
-        bool deposit;
-        bool withdraw;
         bool extractFromSender;
+        ICommonData.IWithdrawParams withdrawCollateralParams;
     }
 
     struct HelperBuyCollateral {
