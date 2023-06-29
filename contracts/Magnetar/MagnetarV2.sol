@@ -9,8 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
-import "../interfaces/IPenrose.sol";
-import "../interfaces/ITapiocaOptionsBroker.sol";
+
 
 /*
 
