@@ -2700,13 +2700,20 @@ describe('MagnetarV2', () => {
                 );
             await magnetar
                 .connect(eoa1)
-                .depositAndRepay(
+                .depositRepayAndRemoveCollateral(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     userBorrowPart.mul(2),
                     userBorrowPart,
+                    0,
                     true,
-                    true,
+                    {
+                        withdraw: false,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
         });
 
@@ -2802,8 +2809,13 @@ describe('MagnetarV2', () => {
                     userBorrowPart,
                     collateralAmount,
                     true,
-                    true,
-                    true,
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
             const usdcBalanceAfter = await usdc.balanceOf(eoa1.address);
             expect(usdcBalanceAfter.gt(usdcBalanceBefore)).to.be.true;

@@ -771,37 +771,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    function depositAndRepay(
-        IMarket market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        bool deposit,
-        bool extractFromSender
-    ) external payable {
-        _executeModule(
-            Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.depositAndRepay.selector,
-                market,
-                user,
-                depositAmount,
-                repayAmount,
-                deposit,
-                extractFromSender
-            )
-        );
-    }
-
     function depositRepayAndRemoveCollateral(
         IMarket market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,
         uint256 collateralAmount,
-        bool deposit,
-        bool withdraw,
-        bool extractFromSender
+        bool extractFromSender,
+        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
         _executeModule(
             Module.Market,
@@ -812,9 +789,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 depositAmount,
                 repayAmount,
                 collateralAmount,
-                deposit,
-                withdraw,
-                extractFromSender
+                extractFromSender,
+                withdrawCollateralParams
             )
         );
     }
