@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
+import "./ICommonData.sol";
 import {IUSDOBase} from "./IUSDO.sol";
 
 interface IMagnetar {
@@ -36,7 +37,7 @@ interface IMagnetar {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable;
 
     function mintAndLend(

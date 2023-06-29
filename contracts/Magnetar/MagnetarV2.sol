@@ -404,9 +404,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 lzDstChainId,
                     bytes memory airdropAdapterParams,
                     ITapiocaOFT.IBorrowParams memory borrowParams,
-                    ITapiocaOFT.IWithdrawParams memory withdrawParams,
-                    ITapiocaOFT.ISendOptions memory options,
-                    ITapiocaOFT.IApproval[] memory approvals
+                    ICommonData.IWithdrawParams memory withdrawParams,
+                    ICommonData.ISendOptions memory options,
+                    ICommonData.IApproval[] memory approvals
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -415,9 +415,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             bytes,
                             ITapiocaOFT.IBorrowParams,
-                            ITapiocaOFT.IWithdrawParams,
-                            ITapiocaOFT.ISendOptions,
-                            ITapiocaOFT.IApproval[]
+                            ICommonData.IWithdrawParams,
+                            ICommonData.ISendOptions,
+                            ICommonData.IApproval[]
                         )
                     );
                 _checkSender(from);
@@ -441,8 +441,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 dstChainId,
                     address zroPaymentAddress,
                     IUSDOBase.ILendOrRepayParams memory lendParams,
-                    IUSDOBase.IApproval[] memory approvals,
-                    IUSDOBase.IWithdrawParams memory withdrawParams,
+                    ICommonData.IApproval[] memory approvals,
+                    ICommonData.IWithdrawParams memory withdrawParams,
                     bytes memory adapterParams
                 ) = abi.decode(
                         _action.call[4:],
@@ -452,8 +452,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             address,
                             (IUSDOBase.ILendOrRepayParams),
-                            (IUSDOBase.IApproval[]),
-                            (IUSDOBase.IWithdrawParams),
+                            (ICommonData.IApproval[]),
+                            (ICommonData.IWithdrawParams),
                             bytes
                         )
                     );
@@ -778,7 +778,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
         _executeModule(
             Module.Market,

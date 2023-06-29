@@ -119,9 +119,9 @@ contract MagnetarV2Storage {
         uint16 lzDstChainId;
         bytes airdropAdapterParams;
         ITapiocaOFT.IBorrowParams borrowParams;
-        ITapiocaOFT.IWithdrawParams withdrawParams;
-        ITapiocaOFT.ISendOptions options;
-        ITapiocaOFT.IApproval[] approvals;
+        ICommonData.IWithdrawParams withdrawParams;
+        ICommonData.ISendOptions options;
+        ICommonData.IApproval[] approvals;
     }
 
     struct TOFTSendAndLendData {
@@ -129,8 +129,8 @@ contract MagnetarV2Storage {
         address to;
         uint16 lzDstChainId;
         IUSDOBase.ILendOrRepayParams lendParams;
-        IUSDOBase.ISendOptions options;
-        IUSDOBase.IApproval[] approvals;
+        ICommonData.ISendOptions options;
+        ICommonData.IApproval[] approvals;
     }
 
     struct TOFTSendToStrategyData {
@@ -140,7 +140,7 @@ contract MagnetarV2Storage {
         uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
-        ITapiocaOFT.ISendOptions options;
+        ICommonData.ISendOptions options;
     }
 
     struct TOFTRetrieveFromStrategyData {
@@ -261,7 +261,7 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageLZData lzData;
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
-        IUSDOBase.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     struct HelperMultiHopSell {
@@ -271,7 +271,7 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageLZData lzData;
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
-        ITapiocaOFT.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     struct HelperMarketRemoveAndRepayAsset {
@@ -288,7 +288,7 @@ contract MagnetarV2Storage {
         bytes adapterParams;
         IUSDOBase.IRemoveAndRepayExternalContracts externalData;
         IUSDOBase.IRemoveAndRepay removeAndRepayData;
-        IUSDOBase.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     // --- ACTIONS IDS ----

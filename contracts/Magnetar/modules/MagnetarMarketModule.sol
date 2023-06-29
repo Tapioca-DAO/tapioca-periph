@@ -74,7 +74,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
         _depositRepayAndRemoveCollateral(
             market,
@@ -222,7 +222,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) private {
         IMarket marketInterface = IMarket(market);
         IYieldBoxBase yieldBox = IYieldBoxBase(marketInterface.yieldBox());
