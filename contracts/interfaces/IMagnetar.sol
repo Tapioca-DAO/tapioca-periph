@@ -29,24 +29,14 @@ interface IMagnetar {
         uint256 gas
     ) external payable;
 
-    function depositAndRepay(
-        address market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        bool deposit,
-        bool extractFromSender
-    ) external payable;
-
     function depositRepayAndRemoveCollateral(
-        address market,
+        IMarket market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,
         uint256 collateralAmount,
-        bool deposit,
-        bool withdraw,
-        bool extractFromSender
+        bool extractFromSender,
+        IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
     ) external payable;
 
     function mintAndLend(
