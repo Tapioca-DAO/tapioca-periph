@@ -125,6 +125,17 @@ interface IUSDOBase {
         bytes calldata airdropAdapterParams,
         IUSDOBase.IApproval[] memory approvals
     ) external payable;
+
+    function removeAsset(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        address zroPaymentAddress,
+        bytes calldata adapterParams,
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
+        IUSDOBase.IApproval[] calldata approvals
+    ) external payable;
 }
 
 interface IUSDO is IUSDOBase, IERC20Metadata {}

@@ -274,6 +274,23 @@ contract MagnetarV2Storage {
         ITapiocaOFT.IApproval[] approvals;
     }
 
+    struct HelperMarketRemoveAndRepayAsset {
+        address user;
+        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+    }
+
+    struct HelperTOFTRemoveAndRepayAsset {
+        address from;
+        address to;
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        bytes adapterParams;
+        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+        IUSDOBase.IApproval[] approvals;
+    }
+
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
@@ -301,6 +318,7 @@ contract MagnetarV2Storage {
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
     uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
+    uint16 internal constant TOFT_REMOVE_AND_REPAY = 307;
 
     uint16 internal constant TAP_EXERCISE_OPTION = 400;
 

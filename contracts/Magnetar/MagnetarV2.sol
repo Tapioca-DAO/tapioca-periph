@@ -584,15 +584,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
-                HelperRemoveAssetData memory data = abi.decode(
+                HelperMarketRemoveAndRepayAsset memory data = abi.decode(
                     _action.call[4:],
-                    (HelperRemoveAssetData)
+                    (HelperMarketRemoveAndRepayAsset)
                 );
 
-                ISingularity(data.market).removeAsset(
-                    data.user,
-                    data.user,
-                    data.fraction
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule.removeAssetAndRepay.selector,
+                        data.user,
+                        data.externalData,
+                        data.removeAndRepayData
+                    )
                 );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
                 HelperDepositRepayRemoveCollateral memory data = abi.decode(
@@ -671,19 +675,36 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.airdropAdapterParams,
                     data.approvals
                 );
-            } else if (_action.id == MARKET_MULTIHOP_SELL) {
-                HelperMultiHopSell memory data = abi.decode(
+            } else if (_action.id == MARKET_MULTIHOP_BUY) {
+                HelperMultiHopBuy memory data = abi.decode(
                     _action.call[4:],
-                    (HelperMultiHopSell)
+                    (HelperMultiHopBuy)
                 );
 
-                ITapiocaOFT(_action.target).initMultiSell(
+                IUSDOBase(_action.target).initMultiHopBuy(
                     data.from,
-                    data.share,
+                    data.collateralAmount,
+                    data.borrowAmount,
                     data.swapData,
                     data.lzData,
                     data.externalData,
                     data.airdropAdapterParams,
+                    data.approvals
+                );
+            } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
+                HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperTOFTRemoveAndRepayAsset)
+                );
+
+                IUSDOBase(_action.target).removeAsset(
+                    data.from,
+                    data.to,
+                    data.lzDstChainId,
+                    data.zroPaymentAddress,
+                    data.adapterParams,
+                    data.externalData,
+                    data.removeAndRepayData,
                     data.approvals
                 );
             } else {
