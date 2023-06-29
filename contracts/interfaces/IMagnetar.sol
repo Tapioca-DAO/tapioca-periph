@@ -4,7 +4,6 @@ pragma solidity ^0.8.18;
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
 import {IUSDOBase} from "./IUSDO.sol";
-import "./IMarket.sol";
 
 interface IMagnetar {
     function getAmountForBorrowPart(
@@ -31,7 +30,7 @@ interface IMagnetar {
     ) external payable;
 
     function depositRepayAndRemoveCollateral(
-        IMarket market,
+        address market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,

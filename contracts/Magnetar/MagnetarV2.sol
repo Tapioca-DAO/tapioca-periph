@@ -772,7 +772,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     }
 
     function depositRepayAndRemoveCollateral(
-        IMarket market,
+        address market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,

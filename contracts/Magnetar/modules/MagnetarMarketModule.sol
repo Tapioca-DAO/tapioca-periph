@@ -68,7 +68,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function depositRepayAndRemoveCollateral(
-        IMarket market,
+        address market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,
@@ -216,7 +216,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     }
 
     function _depositRepayAndRemoveCollateral(
-        IMarket market,
+        address market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,
@@ -224,9 +224,10 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         bool extractFromSender,
         IUSDOBase.IWithdrawParams calldata withdrawCollateralParams
     ) private {
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IMarket marketInterface = IMarket(market);
+        IYieldBoxBase yieldBox = IYieldBoxBase(marketInterface.yieldBox());
 
-        uint256 assetId = market.assetId();
+        uint256 assetId = marketInterface.assetId();
         (, address assetAddress, , ) = yieldBox.assets(assetId);
 
         //deposit into the yieldbox
@@ -248,14 +249,14 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         //repay
         if (repayAmount > 0) {
-            _setApprovalForYieldBox(address(market), yieldBox);
-            market.repay(
+            _setApprovalForYieldBox(market, yieldBox);
+            marketInterface.repay(
                 depositAmount > 0 ? address(this) : user,
                 user,
                 false,
                 repayAmount
             );
-            _revertYieldBoxApproval(address(market), yieldBox);
+            _revertYieldBoxApproval(market, yieldBox);
         }
 
         //remove collateral
@@ -265,11 +266,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 ? address(this)
                 : user;
             uint256 collateralShare = yieldBox.toShare(
-                market.collateralId(),
+                marketInterface.collateralId(),
                 collateralAmount,
                 false
             );
-            market.removeCollateral(
+            marketInterface.removeCollateral(
                 user,
                 collateralWithdrawReceiver,
                 collateralShare
@@ -280,7 +281,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 _withdrawTo(
                     yieldBox,
                     collateralWithdrawReceiver,
-                    market.collateralId(),
+                    marketInterface.collateralId(),
                     withdrawCollateralParams.withdrawLzChainId,
                     LzLib.addressToBytes32(user),
                     collateralAmount,
