@@ -12,6 +12,8 @@ import "../interfaces/ITapiocaOFT.sol";
 import "../interfaces/ISwapper.sol";
 import "../interfaces/ITapiocaOptionsBroker.sol";
 import "../interfaces/ITapiocaOptionLiquidityProvision.sol";
+import "../interfaces/IPenrose.sol";
+import "../interfaces/ITapiocaOptionsBroker.sol";
 
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
@@ -119,9 +121,9 @@ contract MagnetarV2Storage {
         uint16 lzDstChainId;
         bytes airdropAdapterParams;
         ITapiocaOFT.IBorrowParams borrowParams;
-        ITapiocaOFT.IWithdrawParams withdrawParams;
-        ITapiocaOFT.ISendOptions options;
-        ITapiocaOFT.IApproval[] approvals;
+        ICommonData.IWithdrawParams withdrawParams;
+        ICommonData.ISendOptions options;
+        ICommonData.IApproval[] approvals;
     }
 
     struct TOFTSendAndLendData {
@@ -129,8 +131,8 @@ contract MagnetarV2Storage {
         address to;
         uint16 lzDstChainId;
         IUSDOBase.ILendOrRepayParams lendParams;
-        IUSDOBase.ISendOptions options;
-        IUSDOBase.IApproval[] approvals;
+        ICommonData.ISendOptions options;
+        ICommonData.IApproval[] approvals;
     }
 
     struct TOFTSendToStrategyData {
@@ -140,7 +142,7 @@ contract MagnetarV2Storage {
         uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
-        ITapiocaOFT.ISendOptions options;
+        ICommonData.ISendOptions options;
     }
 
     struct TOFTRetrieveFromStrategyData {
@@ -222,9 +224,8 @@ contract MagnetarV2Storage {
         uint256 depositAmount;
         uint256 repayAmount;
         uint256 collateralAmount;
-        bool deposit;
-        bool withdraw;
         bool extractFromSender;
+        ICommonData.IWithdrawParams withdrawCollateralParams;
     }
 
     struct HelperBuyCollateral {
@@ -250,7 +251,7 @@ contract MagnetarV2Storage {
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData;
-        ITapiocaOptionsBrokerCrossChain.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     struct HelperMultiHopBuy {
@@ -261,7 +262,7 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageLZData lzData;
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
-        IUSDOBase.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     struct HelperMultiHopSell {
@@ -271,7 +272,24 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageLZData lzData;
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
-        ITapiocaOFT.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
+    }
+
+    struct HelperMarketRemoveAndRepayAsset {
+        address user;
+        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+    }
+
+    struct HelperTOFTRemoveAndRepayAsset {
+        address from;
+        address to;
+        uint16 lzDstChainId;
+        address zroPaymentAddress;
+        bytes adapterParams;
+        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+        ICommonData.IApproval[] approvals;
     }
 
     // --- ACTIONS IDS ----
@@ -301,6 +319,7 @@ contract MagnetarV2Storage {
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
     uint16 internal constant TOFT_RETRIEVE_FROM_STRATEGY = 306;
+    uint16 internal constant TOFT_REMOVE_AND_REPAY = 307;
 
     uint16 internal constant TAP_EXERCISE_OPTION = 400;
 

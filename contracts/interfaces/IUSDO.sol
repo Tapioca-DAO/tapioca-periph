@@ -7,36 +7,9 @@ import "./IMarket.sol";
 import "./ISingularity.sol";
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
+import "./ICommonData.sol";
 
 interface IUSDOBase {
-    //common data
-    struct IWithdrawParams {
-        bool withdraw;
-        uint256 withdrawLzFeeAmount;
-        bool withdrawOnOtherChain;
-        uint16 withdrawLzChainId;
-        bytes withdrawAdapterParams;
-    }
-
-    struct IApproval {
-        bool permitAll;
-        bool allowFailure;
-        address target;
-        bool permitBorrow;
-        address owner;
-        address spender;
-        uint256 value;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    struct ISendOptions {
-        uint256 extraGasLimit;
-        address zroPaymentAddress;
-    }
-
     // remove and repay
     struct IRemoveAndRepayExternalContracts {
         address magnetar;
@@ -52,8 +25,8 @@ interface IUSDOBase {
         uint256 collateralShare; // from BB
         ITapiocaOptionsBroker.IOptionsExitData exitData;
         ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
-        IWithdrawParams assetWithdrawData;
-        IWithdrawParams collateralWithdrawData;
+        ICommonData.IWithdrawParams assetWithdrawData;
+        ICommonData.IWithdrawParams collateralWithdrawData;
     }
 
     // lend or repay
@@ -102,8 +75,8 @@ interface IUSDOBase {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         ILendOrRepayParams calldata lendParams,
-        IApproval[] calldata approvals,
-        IWithdrawParams calldata withdrawParams, //collateral remove data
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IWithdrawParams calldata withdrawParams, //collateral remove data
         bytes calldata adapterParams
     ) external payable;
 
@@ -123,7 +96,18 @@ interface IUSDOBase {
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData,
         bytes calldata airdropAdapterParams,
-        IUSDOBase.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals
+    ) external payable;
+
+    function removeAsset(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        address zroPaymentAddress,
+        bytes calldata adapterParams,
+        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 }
 

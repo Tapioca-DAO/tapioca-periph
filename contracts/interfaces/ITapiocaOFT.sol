@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import "./ISendFrom.sol";
 import {IUSDOBase} from "./IUSDO.sol";
+import "./ICommonData.sol";
 
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);
@@ -24,33 +25,6 @@ interface ITapiocaOFTBase {
 
 /// @dev used for generic TOFTs
 interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
-    struct ISendOptions {
-        uint256 extraGasLimit;
-        address zroPaymentAddress;
-    }
-
-    struct IApproval {
-        bool permitAll;
-        bool allowFailure;
-        address target;
-        bool permitBorrow;
-        address owner;
-        address spender;
-        uint256 value;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    struct IWithdrawParams {
-        bool withdraw;
-        uint256 withdrawLzFeeAmount;
-        bool withdrawOnOtherChain;
-        uint16 withdrawLzChainId;
-        bytes withdrawAdapterParams;
-    }
-
     struct IRemoveParams {
         uint256 share;
         address marketHelper;
@@ -92,9 +66,9 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
         IBorrowParams calldata borrowParams,
-        IWithdrawParams calldata withdrawParams,
-        ISendOptions calldata options,
-        IApproval[] calldata approvals
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        ICommonData.ISendOptions calldata options,
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 
     function sendToStrategy(
@@ -104,7 +78,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ISendOptions calldata options
+        ICommonData.ISendOptions calldata options
     ) external payable;
 
     function retrieveFromStrategy(
@@ -130,9 +104,9 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         address to,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable;
 
@@ -143,6 +117,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData,
         bytes calldata airdropAdapterParams,
-        IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 }

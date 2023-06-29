@@ -9,9 +9,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
-import "../interfaces/IPenrose.sol";
-import "../interfaces/ITapiocaOptionsBroker.sol";
-
 /*
 
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -404,9 +401,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 lzDstChainId,
                     bytes memory airdropAdapterParams,
                     ITapiocaOFT.IBorrowParams memory borrowParams,
-                    ITapiocaOFT.IWithdrawParams memory withdrawParams,
-                    ITapiocaOFT.ISendOptions memory options,
-                    ITapiocaOFT.IApproval[] memory approvals
+                    ICommonData.IWithdrawParams memory withdrawParams,
+                    ICommonData.ISendOptions memory options,
+                    ICommonData.IApproval[] memory approvals
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -415,9 +412,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             bytes,
                             ITapiocaOFT.IBorrowParams,
-                            ITapiocaOFT.IWithdrawParams,
-                            ITapiocaOFT.ISendOptions,
-                            ITapiocaOFT.IApproval[]
+                            ICommonData.IWithdrawParams,
+                            ICommonData.ISendOptions,
+                            ICommonData.IApproval[]
                         )
                     );
                 _checkSender(from);
@@ -441,8 +438,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 dstChainId,
                     address zroPaymentAddress,
                     IUSDOBase.ILendOrRepayParams memory lendParams,
-                    IUSDOBase.IApproval[] memory approvals,
-                    IUSDOBase.IWithdrawParams memory withdrawParams,
+                    ICommonData.IApproval[] memory approvals,
+                    ICommonData.IWithdrawParams memory withdrawParams,
                     bytes memory adapterParams
                 ) = abi.decode(
                         _action.call[4:],
@@ -452,8 +449,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             address,
                             (IUSDOBase.ILendOrRepayParams),
-                            (IUSDOBase.IApproval[]),
-                            (IUSDOBase.IWithdrawParams),
+                            (ICommonData.IApproval[]),
+                            (ICommonData.IWithdrawParams),
                             bytes
                         )
                     );
@@ -584,15 +581,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
-                HelperRemoveAssetData memory data = abi.decode(
+                HelperMarketRemoveAndRepayAsset memory data = abi.decode(
                     _action.call[4:],
-                    (HelperRemoveAssetData)
+                    (HelperMarketRemoveAndRepayAsset)
                 );
 
-                ISingularity(data.market).removeAsset(
-                    data.user,
-                    data.user,
-                    data.fraction
+                _executeModule(
+                    Module.Market,
+                    abi.encodeWithSelector(
+                        MagnetarMarketModule.removeAssetAndRepay.selector,
+                        data.user,
+                        data.externalData,
+                        data.removeAndRepayData
+                    )
                 );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
                 HelperDepositRepayRemoveCollateral memory data = abi.decode(
@@ -611,9 +612,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         data.depositAmount,
                         data.repayAmount,
                         data.collateralAmount,
-                        data.deposit,
-                        data.withdraw,
-                        data.extractFromSender
+                        data.extractFromSender,
+                        data.withdrawCollateralParams
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
@@ -671,19 +671,36 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.airdropAdapterParams,
                     data.approvals
                 );
-            } else if (_action.id == MARKET_MULTIHOP_SELL) {
-                HelperMultiHopSell memory data = abi.decode(
+            } else if (_action.id == MARKET_MULTIHOP_BUY) {
+                HelperMultiHopBuy memory data = abi.decode(
                     _action.call[4:],
-                    (HelperMultiHopSell)
+                    (HelperMultiHopBuy)
                 );
 
-                ITapiocaOFT(_action.target).initMultiSell(
+                IUSDOBase(_action.target).initMultiHopBuy(
                     data.from,
-                    data.share,
+                    data.collateralAmount,
+                    data.borrowAmount,
                     data.swapData,
                     data.lzData,
                     data.externalData,
                     data.airdropAdapterParams,
+                    data.approvals
+                );
+            } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
+                HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
+                    _action.call[4:],
+                    (HelperTOFTRemoveAndRepayAsset)
+                );
+
+                IUSDOBase(_action.target).removeAsset(
+                    data.from,
+                    data.to,
+                    data.lzDstChainId,
+                    data.zroPaymentAddress,
+                    data.adapterParams,
+                    data.externalData,
+                    data.removeAndRepayData,
                     data.approvals
                 );
             } else {
@@ -750,37 +767,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    function depositAndRepay(
-        IMarket market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        bool deposit,
-        bool extractFromSender
-    ) external payable {
-        _executeModule(
-            Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.depositAndRepay.selector,
-                market,
-                user,
-                depositAmount,
-                repayAmount,
-                deposit,
-                extractFromSender
-            )
-        );
-    }
-
     function depositRepayAndRemoveCollateral(
-        IMarket market,
+        address market,
         address user,
         uint256 depositAmount,
         uint256 repayAmount,
         uint256 collateralAmount,
-        bool deposit,
-        bool withdraw,
-        bool extractFromSender
+        bool extractFromSender,
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
         _executeModule(
             Module.Market,
@@ -791,9 +785,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 depositAmount,
                 repayAmount,
                 collateralAmount,
-                deposit,
-                withdraw,
-                extractFromSender
+                extractFromSender,
+                withdrawCollateralParams
             )
         );
     }

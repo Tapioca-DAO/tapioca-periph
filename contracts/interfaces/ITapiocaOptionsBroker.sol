@@ -2,22 +2,9 @@
 pragma solidity ^0.8.18;
 
 import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
+import "./ICommonData.sol";
 
 interface ITapiocaOptionsBrokerCrossChain {
-    struct IApproval {
-        bool permitAll;
-        bool allowFailure;
-        address target;
-        bool permitBorrow;
-        address owner;
-        address spender;
-        uint256 value;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
     struct IExerciseOptionsData {
         address from;
         address target;
@@ -44,7 +31,7 @@ interface ITapiocaOptionsBrokerCrossChain {
         IExerciseOptionsData calldata optionsData,
         IExerciseLZData calldata lzData,
         IExerciseLZSendTapData calldata tapSendData,
-        IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 }
 
