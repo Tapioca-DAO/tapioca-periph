@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
 import {IUSDOBase} from "./IUSDO.sol";
+import "./IMarket.sol";
 
 interface IMagnetar {
     function getAmountForBorrowPart(
