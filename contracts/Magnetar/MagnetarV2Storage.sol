@@ -250,7 +250,7 @@ contract MagnetarV2Storage {
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData;
-        ITapiocaOptionsBrokerCrossChain.IApproval[] approvals;
+        ICommonData.IApproval[] approvals;
     }
 
     struct HelperMultiHopBuy {
