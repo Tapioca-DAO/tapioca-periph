@@ -17,7 +17,7 @@ interface IMagnetar {
         uint256 amount
     ) external view returns (uint256 part);
 
-    function withdrawTo(
+    function withdrawToChain(
         address yieldBox,
         address from,
         uint256 assetId,
@@ -30,7 +30,17 @@ interface IMagnetar {
         uint256 gas
     ) external payable;
 
-    function depositRepayAndRemoveCollateral(
+    function mintFromBBAndLendOnSGL(
+        address user,
+        uint256 lendAmount,
+        IUSDOBase.IMintData calldata mintData,
+        ICommonData.IDepositData calldata depositData,
+        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ICommonData.ICommonExternalContracts calldata externalContracts
+    ) external payable;
+
+    function depositRepayAndRemoveCollateralFromMarket(
         address market,
         address user,
         uint256 depositAmount,
@@ -40,33 +50,13 @@ interface IMagnetar {
         ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable;
 
-    function mintAndLend(
-        address singularity,
-        address bingBang,
+    function exitPositionAndRemoveCollateral(
         address user,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool deposit,
-        bool extractFromSender
-    ) external payable;
-
-    function depositAndAddAsset(
-        address singularity,
-        address user,
-        uint256 amount,
-        bool deposit,
-        bool extractFromSender,
-        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
-    ) external payable;
-
-    function removeAssetAndRepay(
-        address user,
-        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable;
 
-    function depositAddCollateralAndBorrow(
+    function depositAddCollateralAndBorrowFromMarket(
         address market,
         address user,
         uint256 collateralAmount,

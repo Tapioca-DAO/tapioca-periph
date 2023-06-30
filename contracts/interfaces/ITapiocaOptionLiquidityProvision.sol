@@ -7,6 +7,7 @@ interface ITapiocaOptionLiquidityProvision {
         address target;
         uint128 lockDuration;
         uint128 amount;
+        uint256 fraction;
     }
 
     struct IOptionsUnlockData {

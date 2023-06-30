@@ -347,7 +347,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
-                        MagnetarMarketModule.withdrawTo.selector,
+                        MagnetarMarketModule.withdrawToChain.selector,
                         yieldBox,
                         from,
                         assetId,
@@ -530,14 +530,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
-                        MagnetarMarketModule.depositAndAddAsset.selector,
-                        data.market,
-                        data.from,
-                        data.amount,
-                        data.deposit,
-                        false,
+                        MagnetarMarketModule.mintFromBBAndLendOnSGL.selector,
+                        data.user,
+                        data.lendAmount,
+                        data.mintData,
+                        data.depositData,
                         data.lockData,
-                        data.participateData
+                        data.participateData,
+                        data.externalContracts
                     )
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
@@ -568,7 +568,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     Module.Market,
                     abi.encodeWithSelector(
                         MagnetarMarketModule
-                            .depositAddCollateralAndBorrow
+                            .depositAddCollateralAndBorrowFromMarket
                             .selector,
                         market,
                         user,
@@ -589,7 +589,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
-                        MagnetarMarketModule.removeAssetAndRepay.selector,
+                        MagnetarMarketModule
+                            .exitPositionAndRemoveCollateral
+                            .selector,
                         data.user,
                         data.externalData,
                         data.removeAndRepayData
@@ -605,7 +607,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     Module.Market,
                     abi.encodeWithSelector(
                         MagnetarMarketModule
-                            .depositRepayAndRemoveCollateral
+                            .depositRepayAndRemoveCollateralFromMarket
                             .selector,
                         data.market,
                         data.user,
@@ -711,7 +713,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
     }
 
-    function withdrawTo(
+    function withdrawToChain(
         IYieldBoxBase yieldBox,
         address from,
         uint256 assetId,
@@ -726,7 +728,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                MagnetarMarketModule.withdrawTo.selector,
+                MagnetarMarketModule.withdrawToChain.selector,
                 yieldBox,
                 from,
                 assetId,
@@ -741,7 +743,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    function depositAddCollateralAndBorrow(
+    function depositAddCollateralAndBorrowFromMarket(
         IMarket market,
         address user,
         uint256 collateralAmount,
@@ -754,7 +756,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                MagnetarMarketModule.depositAddCollateralAndBorrow.selector,
+                MagnetarMarketModule
+                    .depositAddCollateralAndBorrowFromMarket
+                    .selector,
                 market,
                 user,
                 collateralAmount,
@@ -767,7 +771,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    function depositRepayAndRemoveCollateral(
+    function depositRepayAndRemoveCollateralFromMarket(
         address market,
         address user,
         uint256 depositAmount,
@@ -779,7 +783,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                MagnetarMarketModule.depositRepayAndRemoveCollateral.selector,
+                MagnetarMarketModule
+                    .depositRepayAndRemoveCollateralFromMarket
+                    .selector,
                 market,
                 user,
                 depositAmount,
@@ -791,63 +797,39 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    function mintAndLend(
-        ISingularity singularity,
-        IMarket bingBang,
+    function mintFromBBAndLendOnSGL(
         address user,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool deposit,
-        bool extractFromSender
-    ) external payable {
-        _executeModule(
-            Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.mintAndLend.selector,
-                singularity,
-                bingBang,
-                user,
-                collateralAmount,
-                borrowAmount,
-                deposit,
-                extractFromSender
-            )
-        );
-    }
-
-    function depositAndAddAsset(
-        IMarket singularity,
-        address user,
-        uint256 amount,
-        bool deposit,
-        bool extractFromSender,
+        uint256 lendAmount,
+        IUSDOBase.IMintData calldata mintData,
+        ICommonData.IDepositData calldata depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData
+        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ICommonData.ICommonExternalContracts calldata externalContracts
     ) external payable {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                MagnetarMarketModule.depositAndAddAsset.selector,
-                singularity,
+                MagnetarMarketModule.mintFromBBAndLendOnSGL.selector,
                 user,
-                amount,
-                deposit,
-                extractFromSender,
+                lendAmount,
+                mintData,
+                depositData,
                 lockData,
-                participateData
+                participateData,
+                externalContracts
             )
         );
     }
 
-    function removeAssetAndRepay(
+    function exitPositionAndRemoveCollateral(
         address user,
-        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                MagnetarMarketModule.removeAssetAndRepay.selector,
+                MagnetarMarketModule.exitPositionAndRemoveCollateral.selector,
                 user,
                 externalData,
                 removeAndRepayData
