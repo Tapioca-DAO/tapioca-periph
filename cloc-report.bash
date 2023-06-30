@@ -1,0 +1,1 @@
+cloc ./contracts/Magnetar/**/*.sol ./contracts/Multicall/**/*.sol ./contracts/oracle/implementations/**/*.sol ./contracts/oracle/implementations/**/*.sol ./contracts/oracle/Seer.sol ./contracts/Swapper/*.sol  ./contracts/TapiocaDeployer/TapiocaDeployer.sol --hide-rate  --by-file --csv --quiet > cloc-report.csv
