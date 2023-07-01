@@ -771,8 +771,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param borrowAmount the borrow amount
     /// @param extractFromSender extracts collateral tokens from sender or from the user
     /// @param deposit true/false flag for the deposit to YieldBox step
-    /// @param withdraw true/false flag for the withdraw step
-    /// @param withdrawData necesasry data for the same chain or the cross-chain withdrawal
+    /// @param withdrawParams necessary data for the same chain or the cross-chain withdrawal
     function depositAddCollateralAndBorrowFromMarket(
         IMarket market,
         address user,
@@ -780,8 +779,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        ICommonData.IWithdrawParams calldata withdrawParams
     ) external payable {
         _executeModule(
             Module.Market,
@@ -795,8 +793,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 borrowAmount,
                 extractFromSender,
                 deposit,
-                withdraw,
-                withdrawData
+                withdrawParams
             )
         );
     }
