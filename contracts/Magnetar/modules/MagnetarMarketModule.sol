@@ -180,7 +180,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // performs .borrow on market
         // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
         if (borrowAmount > 0) {
-            address borrowReceiver = withdrawParams.withdraw ? address(this) : user;
+            address borrowReceiver = withdrawParams.withdraw
+                ? address(this)
+                : user;
             market.borrow(user, borrowReceiver, borrowAmount);
 
             if (withdrawParams.withdraw) {
