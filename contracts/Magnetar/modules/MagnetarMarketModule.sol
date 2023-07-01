@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 //TAPIOCA
 import "../../interfaces/IYieldBoxBase.sol";
-import "../../interfacwithdrawToChaines/ITapiocaOptions.sol";
+import "../../interfaces/ITapiocaOptions.sol";
 
 import "../MagnetarV2Storage.sol";
 
