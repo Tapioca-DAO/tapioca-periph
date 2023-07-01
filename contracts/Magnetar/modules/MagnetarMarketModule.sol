@@ -52,8 +52,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        ICommonData.IWithdrawParams calldata withdrawParams
     ) external payable {
         _depositAddCollateralAndBorrowFromMarket(
             market,
@@ -62,8 +61,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             borrowAmount,
             extractFromSender,
             deposit,
-            withdraw,
-            withdrawData
+            withdrawParams
         );
     }
 
@@ -129,8 +127,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        ICommonData.IWithdrawParams calldata withdrawParams
     ) private {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -183,13 +180,21 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // performs .borrow on market
         // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
         if (borrowAmount > 0) {
-            address borrowReceiver = withdraw ? address(this) : user;
+            address borrowReceiver = withdrawParams.withdraw
+                ? address(this)
+                : user;
             market.borrow(user, borrowReceiver, borrowAmount);
 
-            if (withdraw) {
+            if (withdrawParams.withdraw) {
+                bytes memory withdrawAssetBytes = abi.encode(
+                    withdrawParams.withdrawOnOtherChain,
+                    withdrawParams.withdrawLzChainId,
+                    LzLib.addressToBytes32(user),
+                    withdrawParams.withdrawAdapterParams
+                );
                 _withdraw(
                     borrowReceiver,
-                    withdrawData,
+                    withdrawAssetBytes,
                     market,
                     yieldBox,
                     borrowAmount,

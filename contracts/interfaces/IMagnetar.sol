@@ -63,7 +63,6 @@ interface IMagnetar {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        bool withdraw,
-        bytes memory withdrawData
+        ICommonData.IWithdrawParams memory withdrawParams
     ) external payable;
 }
