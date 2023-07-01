@@ -11,11 +11,13 @@ import "./ICommonData.sol";
 
 interface IUSDOBase {
     // remove and repay
-    struct IRemoveAndRepayExternalContracts {
+    struct ILeverageExternalContractsData {
+        address swapper;
         address magnetar;
-        address singularity;
-        address bigBang;
+        address tOft;
+        address srcMarket;
     }
+
     struct IRemoveAndRepay {
         bool removeAssetFromSGL;
         uint256 removeShare; //slightly greater than repayAmount to cover the interest
@@ -58,11 +60,11 @@ interface IUSDOBase {
         uint256 amountOutMin;
         bytes data;
     }
-    struct ILeverageExternalContractsData {
-        address swapper;
-        address magnetar;
-        address tOft;
-        address srcMarket;
+
+    struct IMintData {
+        bool mint;
+        uint256 mintAmount;
+        ICommonData.IDepositData collateralDepositData;
     }
 
     function mint(address _to, uint256 _amount) external;
@@ -105,7 +107,7 @@ interface IUSDOBase {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes calldata adapterParams,
-        IUSDOBase.IRemoveAndRepayExternalContracts calldata externalData,
+        ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
         ICommonData.IApproval[] calldata approvals
     ) external payable;

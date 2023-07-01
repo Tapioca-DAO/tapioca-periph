@@ -198,13 +198,13 @@ contract MagnetarV2Storage {
     }
 
     struct HelperLendData {
-        address market;
-        address from;
-        uint256 amount;
-        bool deposit;
-        bool extractFromSender;
+        address user;
+        uint256 lendAmount;
+        IUSDOBase.IMintData mintData;
+        ICommonData.IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionsBroker.IOptionsParticipateData participateData;
+        ICommonData.ICommonExternalContracts externalContracts;
     }
 
     struct HelperBorrowData {
@@ -277,7 +277,7 @@ contract MagnetarV2Storage {
 
     struct HelperMarketRemoveAndRepayAsset {
         address user;
-        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        ICommonData.ICommonExternalContracts externalData;
         IUSDOBase.IRemoveAndRepay removeAndRepayData;
     }
 
@@ -287,7 +287,7 @@ contract MagnetarV2Storage {
         uint16 lzDstChainId;
         address zroPaymentAddress;
         bytes adapterParams;
-        IUSDOBase.IRemoveAndRepayExternalContracts externalData;
+        ICommonData.ICommonExternalContracts externalData;
         IUSDOBase.IRemoveAndRepay removeAndRepayData;
         ICommonData.IApproval[] approvals;
     }

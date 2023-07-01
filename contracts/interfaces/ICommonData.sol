@@ -28,4 +28,16 @@ interface ICommonData {
         bytes32 r;
         bytes32 s;
     }
+
+    struct ICommonExternalContracts {
+        address magnetar;
+        address singularity;
+        address bigBang;
+    }
+
+    struct IDepositData {
+        bool deposit;
+        uint256 amount;
+        bool extractFromSender;
+    }
 }

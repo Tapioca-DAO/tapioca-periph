@@ -266,7 +266,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
             const borrowFn = magnetar.interface.encodeFunctionData(
-                'depositAddCollateralAndBorrow',
+                'depositAddCollateralAndBorrowFromMarket',
                 [
                     wethUsdoSingularity.address,
                     deployer.address,
@@ -319,7 +319,7 @@ describe('MagnetarV2', () => {
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
             const receiverSplit = deployer.address.split('0x');
-            await magnetar.withdrawTo(
+            await magnetar.withdrawToChain(
                 yieldBox.address,
                 deployer.address,
                 usdoAssetId,
@@ -1827,21 +1827,43 @@ describe('MagnetarV2', () => {
             weth.freeMint(mintVal);
 
             await weth.approve(magnetar.address, mintVal);
-            await magnetar.depositAndAddAsset(
-                wethUsdcSingularity.address,
+            await wethUsdcSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
+            await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
                 mintVal,
-                true,
-                true,
+                {
+                    mint: false,
+                    mintAmount: 0,
+                    collateralDepositData: {
+                        deposit: false,
+                        amount: 0,
+                        extractFromSender: false,
+                    },
+                },
+                {
+                    deposit: true,
+                    amount: mintVal,
+                    extractFromSender: true,
+                },
                 {
                     lock: false,
                     amount: 0,
                     lockDuration: 0,
                     target: ethers.constants.AddressZero,
+                    fraction: 0,
                 },
                 {
                     participate: false,
                     target: ethers.constants.AddressZero,
+                    tOLPTokenId: 0,
+                },
+                {
+                    singularity: wethUsdcSingularity.address,
+                    magnetar: magnetar.address,
+                    bigBang: ethers.constants.AddressZero,
                 },
             );
         });
@@ -1863,23 +1885,45 @@ describe('MagnetarV2', () => {
             weth.freeMint(mintVal);
 
             await weth.approve(magnetar.address, ethers.constants.MaxUint256);
+            await wethUsdcSingularity.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             const lendFn = magnetar.interface.encodeFunctionData(
-                'depositAndAddAsset',
+                'mintFromBBAndLendOnSGL',
                 [
-                    wethUsdcSingularity.address,
                     deployer.address,
                     mintVal,
-                    true,
-                    false,
+                    {
+                        mint: false,
+                        mintAmount: 0,
+                        collateralDepositData: {
+                            deposit: false,
+                            amount: 0,
+                            extractFromSender: false,
+                        },
+                    },
+                    {
+                        deposit: true,
+                        amount: mintVal,
+                        extractFromSender: false,
+                    },
                     {
                         lock: false,
+                        amount: 0,
                         lockDuration: 0,
                         target: ethers.constants.AddressZero,
-                        amount: 0,
+                        fraction: 0,
                     },
                     {
                         participate: false,
                         target: ethers.constants.AddressZero,
+                        tOLPTokenId: 0,
+                    },
+                    {
+                        singularity: wethUsdcSingularity.address,
+                        magnetar: magnetar.address,
+                        bigBang: ethers.constants.AddressZero,
                     },
                 ],
             );
@@ -2350,7 +2394,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
             const borrowFn = magnetar.interface.encodeFunctionData(
-                'depositAddCollateralAndBorrow',
+                'depositAddCollateralAndBorrowFromMarket',
                 [
                     wethUsdcSingularity.address,
                     eoa1.address,
@@ -2427,7 +2471,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2481,7 +2525,7 @@ describe('MagnetarV2', () => {
 
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2534,7 +2578,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2603,7 +2647,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2669,7 +2713,7 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2700,7 +2744,7 @@ describe('MagnetarV2', () => {
                 );
             await magnetar
                 .connect(eoa1)
-                .depositRepayAndRemoveCollateral(
+                .depositRepayAndRemoveCollateralFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     userBorrowPart.mul(2),
@@ -2759,7 +2803,7 @@ describe('MagnetarV2', () => {
 
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrow(
+                .depositAddCollateralAndBorrowFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     usdcMintVal,
@@ -2802,7 +2846,7 @@ describe('MagnetarV2', () => {
 
             await magnetar
                 .connect(eoa1)
-                .depositRepayAndRemoveCollateral(
+                .depositRepayAndRemoveCollateralFromMarket(
                     wethUsdcSingularity.address,
                     eoa1.address,
                     userBorrowPart.mul(2),
@@ -2897,14 +2941,41 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
-            await magnetar.mintAndLend(
-                wethUsdoSingularity.address,
-                wethBigBangMarket.address,
+
+            await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
-                wethMintVal,
                 borrowAmount,
-                true,
-                true,
+                {
+                    mint: true,
+                    mintAmount: borrowAmount,
+                    collateralDepositData: {
+                        deposit: true,
+                        amount: wethMintVal,
+                        extractFromSender: true,
+                    },
+                },
+                {
+                    deposit: false,
+                    amount: 0,
+                    extractFromSender: false,
+                },
+                {
+                    lock: false,
+                    amount: 0,
+                    lockDuration: 0,
+                    target: ethers.constants.AddressZero,
+                    fraction: 0,
+                },
+                {
+                    participate: false,
+                    target: ethers.constants.AddressZero,
+                    tOLPTokenId: 0,
+                },
+                {
+                    singularity: wethUsdoSingularity.address,
+                    magnetar: magnetar.address,
+                    bigBang: wethBigBangMarket.address,
+                },
             );
 
             const bingBangCollateralShare =
@@ -3007,14 +3078,40 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
 
-            await magnetar.mintAndLend(
-                wethUsdoSingularity.address,
-                wethBigBangMarket.address,
+            await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
-                wethMintVal,
                 borrowAmount,
-                true,
-                true,
+                {
+                    mint: true,
+                    mintAmount: borrowAmount,
+                    collateralDepositData: {
+                        deposit: true,
+                        amount: wethMintVal,
+                        extractFromSender: true,
+                    },
+                },
+                {
+                    deposit: false,
+                    amount: 0,
+                    extractFromSender: false,
+                },
+                {
+                    lock: false,
+                    amount: 0,
+                    lockDuration: 0,
+                    target: ethers.constants.AddressZero,
+                    fraction: 0,
+                },
+                {
+                    participate: false,
+                    target: ethers.constants.AddressZero,
+                    tOLPTokenId: 0,
+                },
+                {
+                    singularity: wethUsdoSingularity.address,
+                    magnetar: magnetar.address,
+                    bigBang: wethBigBangMarket.address,
+                },
             );
 
             await usd0.approve(yieldBox.address, ethers.constants.MaxUint256);
@@ -3038,7 +3135,7 @@ describe('MagnetarV2', () => {
                 await wethBigBangMarket.userCollateralShare(deployer.address);
 
             await expect(
-                magnetar.removeAssetAndRepay(
+                magnetar.exitPositionAndRemoveCollateral(
                     deployer.address,
                     {
                         magnetar: magnetar.address,
@@ -3080,7 +3177,7 @@ describe('MagnetarV2', () => {
                 ),
             ).to.be.revertedWith('SGL: min limit');
 
-            await magnetar.removeAssetAndRepay(
+            await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
                 {
                     magnetar: magnetar.address,
@@ -3203,14 +3300,40 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
 
-            await magnetar.mintAndLend(
-                wethUsdoSingularity.address,
-                wethBigBangMarket.address,
+            await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
-                wethMintVal,
                 borrowAmount,
-                true,
-                true,
+                {
+                    mint: true,
+                    mintAmount: borrowAmount,
+                    collateralDepositData: {
+                        deposit: true,
+                        amount: wethMintVal,
+                        extractFromSender: true,
+                    },
+                },
+                {
+                    deposit: false,
+                    amount: 0,
+                    extractFromSender: false,
+                },
+                {
+                    lock: false,
+                    amount: 0,
+                    lockDuration: 0,
+                    target: ethers.constants.AddressZero,
+                    fraction: 0,
+                },
+                {
+                    participate: false,
+                    target: ethers.constants.AddressZero,
+                    tOLPTokenId: 0,
+                },
+                {
+                    singularity: wethUsdoSingularity.address,
+                    magnetar: magnetar.address,
+                    bigBang: wethBigBangMarket.address,
+                },
             );
 
             await usd0.approve(yieldBox.address, ethers.constants.MaxUint256);
@@ -3234,7 +3357,7 @@ describe('MagnetarV2', () => {
             const totalBingBangCollateral =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
 
-            await magnetar.removeAssetAndRepay(
+            await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
                 {
                     magnetar: magnetar.address,

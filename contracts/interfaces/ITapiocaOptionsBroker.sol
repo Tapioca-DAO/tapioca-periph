@@ -39,6 +39,7 @@ interface ITapiocaOptionsBroker {
     struct IOptionsParticipateData {
         bool participate;
         address target;
+        uint256 tOLPTokenId;
     }
 
     struct IOptionsExitData {
