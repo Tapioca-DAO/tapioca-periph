@@ -548,8 +548,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint256 borrowAmount,
                     ,
                     bool deposit,
-                    bool withdraw,
-                    bytes memory withdrawData
+                    ICommonData.IWithdrawParams memory withdrawParams
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -559,8 +558,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint256,
                             bool,
                             bool,
-                            bool,
-                            bytes
+                            ICommonData.IWithdrawParams
                         )
                     );
 
@@ -576,8 +574,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         borrowAmount,
                         false,
                         deposit,
-                        withdraw,
-                        withdrawData
+                        withdrawParams
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
