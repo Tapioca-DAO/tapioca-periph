@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 //TAPIOCA
 import "../../interfaces/IYieldBoxBase.sol";
-import "../../interfaces/ITapiocaOptions.sol";
+import "../../interfacwithdrawToChaines/ITapiocaOptions.sol";
 
 import "../MagnetarV2Storage.sol";
 
@@ -135,24 +135,26 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
-
         (, address collateralAddress, , ) = yieldBox.assets(collateralId);
 
-        //deposit into the yieldbox
         uint256 _share = yieldBox.toShare(
             collateralId,
             collateralAmount,
             false
         );
+        //deposit to YieldBox
         if (deposit) {
             if (!extractFromSender) {
                 _checkSender(user);
             }
+            // transfers tokens from sender or from the user to this contract
             _extractTokens(
                 extractFromSender ? msg.sender : user,
                 collateralAddress,
                 collateralAmount
             );
+
+            // deposit to YieldBox
             IERC20(collateralAddress).approve(
                 address(yieldBox),
                 collateralAmount
@@ -166,7 +168,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             );
         }
 
-        //add collateral
+        // performs .addCollateral on market
         if (collateralAmount > 0) {
             _setApprovalForYieldBox(address(market), yieldBox);
             market.addCollateral(
@@ -178,7 +180,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             );
         }
 
-        //borrow
+        // performs .borrow on market
+        // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
         if (borrowAmount > 0) {
             address borrowReceiver = withdraw ? address(this) : user;
             market.borrow(user, borrowReceiver, borrowAmount);
@@ -214,7 +217,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 assetId = marketInterface.assetId();
         (, address assetAddress, , ) = yieldBox.assets(assetId);
 
-        //deposit into the yieldbox
+        // deposit to YieldBox
         if (depositAmount > 0) {
             _extractTokens(
                 extractFromSender ? msg.sender : user,
@@ -231,7 +234,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             );
         }
 
-        //repay
+        // performs a repay operation for the specified market
         if (repayAmount > 0) {
             _setApprovalForYieldBox(market, yieldBox);
             marketInterface.repay(
@@ -243,7 +246,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             _revertYieldBoxApproval(market, yieldBox);
         }
 
-        //remove collateral
+        // performs a removeCollateral operation on the market
+        // if `withdrawCollateralParams.withdraw` it uses `withdrawTo` to withdraw collateral on the same chain or to another one
         if (collateralAmount > 0) {
             address collateralWithdrawReceiver = withdrawCollateralParams
                 .withdraw
@@ -400,7 +404,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         //      - transfer `fraction` from user to `address(this)
         //      - deposits `fraction` to YB for `address(this)`
         //      - performs tOLP.lock
-
         uint256 tOLPTokenId = 0;
         if (lockData.lock) {
             if (lockData.fraction > 0) {
@@ -491,7 +494,10 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         ISingularity singularity = ISingularity(externalData.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
-        // tOB exit position
+        // if `removeAndRepayData.exitData.exit` the following operations are performed
+        //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
+        //      - tOB.exitPosition
+        //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
         uint256 tOLPId = 0;
         if (removeAndRepayData.exitData.exit) {
             require(
@@ -536,6 +542,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             }
         }
 
+        // performs a tOLP.unlock operation
         if (removeAndRepayData.unlockData.unlock) {
             if (removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
@@ -551,7 +558,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             ).unlock(tOLPId, externalData.singularity, user);
         }
 
-        //remove asset from SGL
+        // if `removeAndRepayData.removeAssetFromSGL` performs the follow operations:
+        //      - removeAsset from SGL
+        //      - if `removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
         uint256 _removeAmount = 0;
         if (removeAndRepayData.removeAssetFromSGL) {
             _removeAmount = yieldBox.toAmount(
@@ -591,7 +600,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             }
         }
 
-        //repay on BB
+        // performs a BigBang repay operation
         if (
             !removeAndRepayData.assetWithdrawData.withdraw &&
             removeAndRepayData.repayAssetOnBB
@@ -603,6 +612,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 false,
                 removeAndRepayData.repayAmount
             );
+            // transfer excess amount to the user
             if (repayed < _removeAmount) {
                 yieldBox.transfer(
                     address(this),
@@ -617,7 +627,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             }
         }
 
-        //remove collateral from BB
+        // performs a BigBang removeCollateral operation
+        // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (removeAndRepayData.removeCollateralFromBB) {
             address removeCollateralTo = removeAndRepayData
                 .collateralWithdrawData
@@ -668,6 +679,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         address payable refundAddress,
         uint256 gas
     ) private {
+        // perform a same chain withdrawal
         if (dstChainId == 0) {
             yieldBox.withdraw(
                 assetId,
@@ -678,7 +690,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             );
             return;
         }
+        // perform a cross chain withdrawal
         (, address asset, , ) = yieldBox.assets(assetId);
+        // make sure the asset supports a cross chain operation
         try
             IERC165(address(asset)).supportsInterface(
                 type(ISendFrom).interfaceId
@@ -687,7 +701,10 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             return;
         }
 
+        // withdraw from YieldBox
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
+
+        // build LZ params
         bytes memory _adapterParams;
         ISendFrom.LzCallParams memory callParams = ISendFrom.LzCallParams({
             refundAddress: msg.value > 0 ? refundAddress : payable(this),
@@ -696,6 +713,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 ? adapterParams
                 : _adapterParams
         });
+
+        // sends the asset to another layer
         ISendFrom(address(asset)).sendFrom{value: gas}(
             address(this),
             dstChainId,

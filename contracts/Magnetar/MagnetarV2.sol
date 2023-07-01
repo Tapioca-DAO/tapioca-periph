@@ -713,6 +713,21 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
     }
 
+    /// @notice performs a withdraw operation
+    /// @dev it can withdraw on the current chain or it can send it to another one
+    ///     - if `dstChainId` is 0 performs a same-chain withdrawal
+    ///          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
+    ///     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
+    /// @param yieldBox the YieldBox address
+    /// @param from user to withdraw from
+    /// @param assetId the YieldBox asset id to withdraw
+    /// @param dstChainId LZ chain id to withdraw to
+    /// @param receiver the receiver on the destination chain
+    /// @param amount the amount to withdraw
+    /// @param share the share to withdraw
+    /// @param adapterParams LZ adapter params
+    /// @param refundAddress the LZ refund address which receives the gas not used in the process
+    /// @param gas the amount of gas to use for sending the asset to another layer
     function withdrawToChain(
         IYieldBoxBase yieldBox,
         address from,
@@ -743,6 +758,21 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
+    /// @notice helper for deposit to YieldBox, add collateral to a market, borrom from the same market and withdraw
+    /// @dev all operations are optional:
+    ///         - if `deposit` is false it will skip the deposit to YieldBox step
+    ///         - if `withdraw` is false it will skip the withdraw step
+    ///         - if `collateralAmount == 0` it will skip the add collateral step
+    ///         - if `borrowAmount == 0` it will skip the borrow step
+    ///     - the amount deposited to YieldBox is `collateralAmount`
+    /// @param market the SGL/BigBang market
+    /// @param user the user to perform the action for
+    /// @param collateralAmount the collateral amount to add
+    /// @param borrowAmount the borrow amount
+    /// @param extractFromSender extracts collateral tokens from sender or from the user
+    /// @param deposit true/false flag for the deposit to YieldBox step
+    /// @param withdraw true/false flag for the withdraw step
+    /// @param withdrawData necesasry data for the same chain or the cross-chain withdrawal
     function depositAddCollateralAndBorrowFromMarket(
         IMarket market,
         address user,
@@ -771,6 +801,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
+    /// @notice helper for deposit asset to YieldBox, repay on a market, remove collateral and withdraw
+    /// @dev all steps are optional:
+    ///         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
+    ///         - if `repayAmount` is 0, the repay step is skipped
+    ///         - if `collateralAmount` is 0, the add collateral step is skipped
+    /// @param market the SGL/BigBang market
+    /// @param user the user to perform the action for
+    /// @param depositAmount the amount to deposit to YieldBox
+    /// @param repayAmount the amount to repay to the market
+    /// @param collateralAmount the amount to withdraw from the market
+    /// @param extractFromSender extracts collateral tokens from sender or from the user
+    /// @param withdrawCollateralParams withdraw specific params
     function depositRepayAndRemoveCollateralFromMarket(
         address market,
         address user,
@@ -797,6 +839,22 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
+    /// @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+    /// @dev all steps are optional:
+    ///         - if `mintData.mint` is false, the mint operation on BB is skipped
+    ///             - add BB collateral to YB, add collateral on BB and borrow from BB are part of the mint operation
+    ///         - if `depositData.deposit` is false, the asset deposit to YB is skipped
+    ///         - if `lendAmount == 0` the addAsset operation on SGL is skipped
+    ///             - if `mintData.mint` is true, `lendAmount` will be automatically filled with the minted value
+    ///         - if `lockData.lock` is false, the tOLP lock operation is skipped
+    ///         - if `participateData.participate` is false, the tOB participate operation is skipped
+    /// @param user the user to perform the operation for
+    /// @param lendAmount the amount to lend on SGL
+    /// @param mintData the data needed to mint on BB
+    /// @param depositData the data needed for asset deposit on YieldBox
+    /// @param lockData the data needed to lock on TapiocaOptionLiquidityProvision
+    /// @param participateData the data needed to perform a participate operation on TapiocaOptionsBroker
+    /// @param externalContracts the contracts' addresses used in all the operations performed by the helper
     function mintFromBBAndLendOnSGL(
         address user,
         uint256 lendAmount,
@@ -821,6 +879,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
+    /// @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
+    /// @dev all steps are optional:
+    ///         - if `removeAndRepayData.exitData.exit` is false, the exit operation is skipped
+    ///         - if `removeAndRepayData.unlockData.unlock` is false, the unlock operation is skipped
+    ///         - if `removeAndRepayData.removeAssetFromSGL` is false, the removeAsset operation is skipped
+    ///         - if `!removeAndRepayData.assetWithdrawData.withdraw && removeAndRepayData.repayAssetOnBB`, the repay operation is performed
+    ///         - if `removeAndRepayData.removeCollateralFromBB` is false, the rmeove collateral is skipped
+    ///     - the helper can either stop at the remove asset from SGL step or it can continue until is removes & withdraws collateral from BB
+    ///         - removed asset can be withdrawn by providing `removeAndRepayData.assetWithdrawData`
+    ///     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
     function exitPositionAndRemoveCollateral(
         address user,
         ICommonData.ICommonExternalContracts calldata externalData,
