@@ -221,7 +221,6 @@ describe('MagnetarV2', () => {
             await yieldBox.setApprovalForAll(magnetar.address, true);
             await weth.approve(yieldBox.address, ethers.constants.MaxUint256);
             await weth.approve(magnetar.address, ethers.constants.MaxUint256);
-
             await wethUsdoSingularity.approve(
                 magnetar.address,
                 ethers.constants.MaxUint256,
@@ -274,8 +273,13 @@ describe('MagnetarV2', () => {
                     0,
                     true,
                     true,
-                    false,
-                    encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
+                    {
+                        withdraw: false,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 ],
             );
 
@@ -2402,8 +2406,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    true,
-                    encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 ],
             );
 
@@ -2478,8 +2487,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    false,
-                    ethers.utils.toUtf8Bytes(''),
+                    {
+                        withdraw: false,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
         });
 
@@ -2532,8 +2546,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    true,
-                    encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
         });
 
@@ -2585,8 +2604,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    false,
-                    ethers.utils.toUtf8Bytes(''),
+                    {
+                        withdraw: false,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
         });
 
@@ -2654,19 +2678,16 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     false,
-                    true,
-                    ethers.utils.defaultAbiCoder.encode(
-                        ['bool', 'uint16', 'bytes32', 'bytes'],
-                        [
-                            false,
-                            0,
-                            '0x00000000000000000000000022076fba2ea9650a028aa499d0444c4aa9af1bf8',
-                            ethers.utils.solidityPack(
-                                ['uint16', 'uint256'],
-                                [1, 1000000],
-                            ),
-                        ],
-                    ),
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.solidityPack(
+                            ['uint16', 'uint256'],
+                            [1, 1000000],
+                        ),
+                    },
                 );
         });
     });
@@ -2720,8 +2741,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    true,
-                    encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
 
             const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
@@ -2810,8 +2836,13 @@ describe('MagnetarV2', () => {
                     borrowAmount,
                     true,
                     true,
-                    true,
-                    encodeMagnetarWithdrawData(false, 0, eoa1.address, '0x00'),
+                    {
+                        withdraw: true,
+                        withdrawLzFeeAmount: 0,
+                        withdrawOnOtherChain: false,
+                        withdrawLzChainId: 0,
+                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    },
                 );
 
             const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
