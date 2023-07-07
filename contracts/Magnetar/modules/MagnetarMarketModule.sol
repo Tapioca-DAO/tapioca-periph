@@ -635,17 +635,17 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // performs a BigBang removeCollateral operation
         // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (removeAndRepayData.removeCollateralFromBB) {
-            uint256 collateralShare = yieldBox.toShare(bigBang.collateralId(), removeAndRepayData.collateralAmount, false);
+            uint256 collateralShare = yieldBox.toShare(
+                bigBang.collateralId(),
+                removeAndRepayData.collateralAmount,
+                false
+            );
             address removeCollateralTo = removeAndRepayData
                 .collateralWithdrawData
                 .withdraw
                 ? address(this)
                 : user;
-            bigBang.removeCollateral(
-                user,
-                removeCollateralTo,
-                collateralShare
-            );
+            bigBang.removeCollateral(user, removeCollateralTo, collateralShare);
 
             //withdraw
             if (removeAndRepayData.collateralWithdrawData.withdraw) {
