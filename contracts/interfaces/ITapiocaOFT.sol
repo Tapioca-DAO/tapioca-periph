@@ -26,7 +26,7 @@ interface ITapiocaOFTBase {
 /// @dev used for generic TOFTs
 interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     struct IRemoveParams {
-        uint256 share;
+        uint256 amount;
         address marketHelper;
         address market;
     }
