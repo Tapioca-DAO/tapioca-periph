@@ -566,11 +566,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // if `removeAndRepayData.removeAssetFromSGL` performs the follow operations:
         //      - removeAsset from SGL
         //      - if `removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
-        uint256 _removeAmount = 0;
+        uint256 _removeAmount = removeAndRepayData.removeAmount;
         if (removeAndRepayData.removeAssetFromSGL) {
-            _removeAmount = yieldBox.toAmount(
+            uint256 share = yieldBox.toShare(
                 singularity.assetId(),
-                removeAndRepayData.removeShare,
+                _removeAmount,
                 false
             );
 
@@ -582,7 +582,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             uint256 removedShare = singularity.removeAsset(
                 user,
                 removeAssetTo,
-                removeAndRepayData.removeShare
+                share
             );
 
             //withdraw
@@ -635,6 +635,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // performs a BigBang removeCollateral operation
         // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (removeAndRepayData.removeCollateralFromBB) {
+            uint256 collateralShare = yieldBox.toShare(bigBang.collateralId(), removeAndRepayData.collateralAmount, false);
             address removeCollateralTo = removeAndRepayData
                 .collateralWithdrawData
                 .withdraw
@@ -643,7 +644,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             bigBang.removeCollateral(
                 user,
                 removeCollateralTo,
-                removeAndRepayData.collateralShare
+                collateralShare
             );
 
             //withdraw
@@ -664,7 +665,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     singularity,
                     yieldBox,
                     0,
-                    removeAndRepayData.collateralShare,
+                    collateralShare,
                     true
                 );
             }

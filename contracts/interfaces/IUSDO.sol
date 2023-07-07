@@ -20,11 +20,11 @@ interface IUSDOBase {
 
     struct IRemoveAndRepay {
         bool removeAssetFromSGL;
-        uint256 removeShare; //slightly greater than repayAmount to cover the interest
+        uint256 removeAmount; //slightly greater than repayAmount to cover the interest
         bool repayAssetOnBB;
         uint256 repayAmount; // on BB
         bool removeCollateralFromBB;
-        uint256 collateralShare; // from BB
+        uint256 collateralAmount; // from BB
         ITapiocaOptionsBroker.IOptionsExitData exitData;
         ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
         ICommonData.IWithdrawParams assetWithdrawData;
