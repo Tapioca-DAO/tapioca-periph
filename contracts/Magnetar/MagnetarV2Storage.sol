@@ -326,7 +326,11 @@ contract MagnetarV2Storage {
     // ************** //
     // *** EVENTS *** //
     // ************** //
-    event ApprovalForAll(address owner, address operator, bool approved);
+    event ApprovalForAll(
+        address indexed owner,
+        address indexed operator,
+        bool approved
+    );
 
     // ************************ //
     // *** INTERNAL METHODS *** //

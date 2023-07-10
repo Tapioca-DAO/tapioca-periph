@@ -47,8 +47,11 @@ contract SGOracle is ITOracle.IOracle {
     /// @return _maxPrice the current value
     /// @dev This function comes from the implementation in vyper that is on the bottom
     function _get() internal view returns (uint256 _maxPrice) {
+        require(SG_POOL.totalSupply() > 0, "SGOracle: supply 0");
+
+        uint256 underlyingPrice = _assurePrice(UNDERLYING);
         uint256 lpPrice = (SG_POOL.totalLiquidity() *
-            uint256(UNDERLYING.latestAnswer())) / SG_POOL.totalSupply();
+            uint256(underlyingPrice)) / SG_POOL.totalSupply();
 
         return lpPrice;
     }
@@ -99,5 +102,16 @@ contract SGOracle is ITOracle.IOracle {
     /// @return (string) A human readable name about this oracle.
     function name(bytes calldata) external view returns (string memory) {
         return _name;
+    }
+
+    function _assurePrice(
+        AggregatorV2V3Interface feed
+    ) private view returns (uint256 _price) {
+        (uint80 roundId, int256 answer, , uint256 updatedAt, ) = feed
+            .latestRoundData();
+        require(answer > 0, "SGOracle: feed price 0");
+        require(updatedAt > 0, "SGOracle: stale price");
+        require(roundId > 0, "SGOracle: stale round");
+        return uint256(answer);
     }
 }

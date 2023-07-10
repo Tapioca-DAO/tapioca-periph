@@ -144,14 +144,17 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             if (!extractFromSender) {
                 _checkSender(user);
             }
+
             // transfers tokens from sender or from the user to this contract
-            _extractTokens(
+            collateralAmount = _extractTokens(
                 extractFromSender ? msg.sender : user,
                 collateralAddress,
                 collateralAmount
             );
+            _share = yieldBox.toShare(collateralId, collateralAmount, false);
 
             // deposit to YieldBox
+            IERC20(collateralAddress).approve(address(yieldBox), 0);
             IERC20(collateralAddress).approve(
                 address(yieldBox),
                 collateralAmount
@@ -224,11 +227,12 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         // deposit to YieldBox
         if (depositAmount > 0) {
-            _extractTokens(
+            depositAmount = _extractTokens(
                 extractFromSender ? msg.sender : user,
                 assetAddress,
                 depositAmount
             );
+            IERC20(assetAddress).approve(address(yieldBox), 0);
             IERC20(assetAddress).approve(address(yieldBox), depositAmount);
             yieldBox.depositAsset(
                 assetId,
@@ -290,8 +294,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     function _mintFromBBAndLendOnSGL(
         address user,
         uint256 lendAmount,
-        IUSDOBase.IMintData calldata mintData,
-        ICommonData.IDepositData calldata depositData,
+        IUSDOBase.IMintData memory mintData,
+        ICommonData.IDepositData memory depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
         ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts
@@ -326,14 +330,20 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 if (!mintData.collateralDepositData.extractFromSender) {
                     _checkSender(user);
                 }
-                _extractTokens(
+                mintData.collateralDepositData.amount = _extractTokens(
                     mintData.collateralDepositData.extractFromSender
                         ? msg.sender
                         : user,
                     bbCollateralAddress,
                     mintData.collateralDepositData.amount
                 );
+                bbCollateralShare = yieldBox.toShare(
+                    bbCollateralId,
+                    mintData.collateralDepositData.amount,
+                    false
+                );
 
+                IERC20(bbCollateralAddress).approve(address(yieldBox), 0);
                 IERC20(bbCollateralAddress).approve(
                     address(yieldBox),
                     mintData.collateralDepositData.amount
@@ -375,12 +385,13 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 _checkSender(user);
             }
 
-            _extractTokens(
+            depositData.amount = _extractTokens(
                 depositData.extractFromSender ? msg.sender : user,
                 sglAssetAddress,
                 depositData.amount
             );
 
+            IERC20(sglAssetAddress).approve(address(yieldBox), 0);
             IERC20(sglAssetAddress).approve(
                 address(yieldBox),
                 depositData.amount
@@ -418,11 +429,13 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             (uint256 tOLPSglAssetId, , ) = ITapiocaOptionLiquidityProvision(
                 lockData.target
             ).activeSingularities(address(singularity));
+            require(fraction > 0, "Magnetar: fraction 0");
             IERC20(address(singularity)).safeTransferFrom(
                 user,
                 address(this),
                 fraction
             );
+            IERC20(address(singularity)).approve(address(yieldBox), 0);
             IERC20(address(singularity)).approve(address(yieldBox), fraction);
             yieldBox.depositAsset(
                 tOLPSglAssetId,
@@ -792,7 +805,11 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         address _from,
         address _token,
         uint256 _amount
-    ) private {
+    ) private returns (uint256) {
+        uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         IERC20(_token).safeTransferFrom(_from, address(this), _amount);
+        uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
+        require(balanceAfter > balanceBefore, "Magnetar: transfer failed");
+        return balanceAfter - balanceBefore;
     }
 }

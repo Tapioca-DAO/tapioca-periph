@@ -118,10 +118,10 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         uint256 _vp = TRI_CRYPTO.get_virtual_price();
 
         // Get the prices from chainlink and add 10 decimals
-        uint256 _btcPrice = uint256(BTC_FEED.latestAnswer()) * 1e10;
-        uint256 _wbtcPrice = uint256(WBTC_FEED.latestAnswer()) * 1e10;
-        uint256 _ethPrice = uint256(ETH_FEED.latestAnswer()) * 1e10;
-        uint256 _usdtPrice = uint256(USDT_FEED.latestAnswer()) * 1e10;
+        uint256 _btcPrice = _assurePrice(BTC_FEED) * 1e10;
+        uint256 _wbtcPrice = _assurePrice(WBTC_FEED) * 1e10;
+        uint256 _ethPrice = _assurePrice(ETH_FEED) * 1e10;
+        uint256 _usdtPrice = _assurePrice(USDT_FEED) * 1e10;
 
         uint256 _minWbtcPrice = (_wbtcPrice < 1e18)
             ? (_wbtcPrice * _btcPrice) / 1e18
@@ -139,5 +139,16 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         _discount = (FixedPointMathLib.sqrt(_discount) * DISCOUNT0) / 1 ether;
 
         _maxPrice -= (_maxPrice * _discount) / 1 ether;
+    }
+
+    function _assurePrice(
+        AggregatorV2V3Interface feed
+    ) private view returns (uint256 _price) {
+        (uint80 roundId, int256 answer, , uint256 updatedAt, ) = feed
+            .latestRoundData();
+        require(answer > 0, "ARBTriCryptoOracle: feed price 0");
+        require(updatedAt > 0, "ARBTriCryptoOracle: stale price");
+        require(roundId > 0, "ARBTriCryptoOracle: stale round");
+        return uint256(answer);
     }
 }

@@ -383,9 +383,7 @@ describe('MagnetarV2', () => {
                 [1, 2250000],
             );
 
-            const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(
-                100,
-            );
+            const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(10);
             await usd0Dst.mint(deployer.address, usdoAmount);
 
             await usd0Dst.setUseCustomAdapterParams(true);
@@ -3165,6 +3163,12 @@ describe('MagnetarV2', () => {
             const totalBingBangCollateral =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
 
+            const totalBingBangCollateralAmount = await yieldBox.toAmount(
+                await wethBigBangMarket.collateralId(),
+                totalBingBangCollateral,
+                false,
+            );
+
             await expect(
                 magnetar.exitPositionAndRemoveCollateral(
                     deployer.address,
@@ -3175,11 +3179,11 @@ describe('MagnetarV2', () => {
                     },
                     {
                         removeAssetFromSGL: true,
-                        removeShare: fraction,
+                        removeAmount: fractionAmount,
                         repayAssetOnBB: true,
-                        repayAmount: fraction,
+                        repayAmount: fractionAmount,
                         removeCollateralFromBB: true,
-                        collateralShare: totalBingBangCollateral,
+                        collateralAmount: totalBingBangCollateralAmount,
                         exitData: {
                             exit: false,
                             oTAPTokenID: 0,
@@ -3217,7 +3221,7 @@ describe('MagnetarV2', () => {
                 },
                 {
                     removeAssetFromSGL: true,
-                    removeShare: fraction.div(2),
+                    removeAmount: fractionAmount.div(2),
                     repayAssetOnBB: true,
                     repayAmount: await yieldBox.toAmount(
                         usdoAssetId,
@@ -3225,7 +3229,7 @@ describe('MagnetarV2', () => {
                         false,
                     ),
                     removeCollateralFromBB: true,
-                    collateralShare: totalBingBangCollateral.div(5),
+                    collateralAmount: totalBingBangCollateralAmount.div(5),
                     exitData: {
                         exit: false,
                         oTAPTokenID: 0,
@@ -3387,6 +3391,11 @@ describe('MagnetarV2', () => {
             );
             const totalBingBangCollateral =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
+            const totalBingBangCollateralAmount = await yieldBox.toAmount(
+                await wethBigBangMarket.collateralId(),
+                totalBingBangCollateral,
+                false,
+            );
 
             await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
@@ -3397,7 +3406,7 @@ describe('MagnetarV2', () => {
                 },
                 {
                     removeAssetFromSGL: true,
-                    removeShare: fraction.div(2),
+                    removeAmount: fractionAmount.div(2),
                     repayAssetOnBB: true,
                     repayAmount: await yieldBox.toAmount(
                         usdoAssetId,
@@ -3405,7 +3414,7 @@ describe('MagnetarV2', () => {
                         false,
                     ),
                     removeCollateralFromBB: true,
-                    collateralShare: totalBingBangCollateral.div(5),
+                    collateralAmount: totalBingBangCollateralAmount.div(5),
                     exitData: {
                         exit: false,
                         oTAPTokenID: 0,

@@ -72,7 +72,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function getCollateralAmountForShare(
         IMarket market,
         uint256 share
-    ) public view returns (uint256 amount) {
+    ) external view returns (uint256 amount) {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
         return yieldBox.toAmount(market.collateralId(), share, false);
     }
@@ -87,7 +87,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         uint256 borrowPart,
         uint256 liquidationMultiplierPrecision,
         uint256 exchangeRatePrecision
-    ) public view returns (uint256 collateralShares) {
+    ) external view returns (uint256 collateralShares) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
             .totalBorrow();
@@ -113,7 +113,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function getAmountForBorrowPart(
         IMarket market,
         uint256 borrowPart
-    ) public view returns (uint256 amount) {
+    ) external view returns (uint256 amount) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
             .totalBorrow();
@@ -129,7 +129,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function getBorrowPartForAmount(
         IMarket market,
         uint256 amount
-    ) public view returns (uint256 part) {
+    ) external view returns (uint256 part) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market
             .totalBorrow();
@@ -146,7 +146,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function getAmountForAssetFraction(
         ISingularity singularity,
         uint256 fraction
-    ) public view returns (uint256 amount) {
+    ) external view returns (uint256 amount) {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity
             .totalAsset();
 
@@ -167,7 +167,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function getFractionForAmount(
         ISingularity singularity,
         uint256 amount
-    ) public view returns (uint256 fraction) {
+    ) external view returns (uint256 fraction) {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity
             .totalAsset();
         (uint128 totalBorrowElastic, ) = singularity.totalBorrow();
@@ -899,6 +899,17 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
+    // ********************* //
+    // *** OWNER METHODS *** //
+    // ********************* //
+    /// @notice rescues unused ETH from the contract
+    /// @param amount the amount to rescue
+    /// @param to the recipient
+    function rescueEth(uint256 amount, address to) external onlyOwner {
+        (bool success, ) = to.call{value: amount}("");
+        require(success, "Magnetar: transfer failed.");
+    }
+
     // ********************** //
     // *** PRIVATE METHODS *** //
     // *********************** //
@@ -1038,6 +1049,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             _checkSender(permitData.owner);
         }
 
+        require(target.code.length > 0, "Magnetar: no contract");
         (bool success, bytes memory returnData) = target.call(actionCalldata);
         if (!success && !allowFailure) {
             _getRevertMsg(returnData);

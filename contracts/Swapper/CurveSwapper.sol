@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ICurvePool.sol";
 import "./BaseSwapper.sol";
@@ -28,11 +29,6 @@ contract CurveSwapper is BaseSwapper {
     ICurvePool public curvePool;
     IYieldBox public immutable yieldBox;
 
-    /// *** ERRORS ***
-    /// ***  ***
-    error Undefined();
-    error NotImplemented();
-
     constructor(
         ICurvePool _curvePool,
         IYieldBox _yieldBox
@@ -50,7 +46,7 @@ contract CurveSwapper is BaseSwapper {
         override
         returns (bytes memory)
     {
-        revert Undefined();
+        revert("CurveSwapper: not implemented");
     }
 
     /// @notice Computes amount out for amount in
@@ -80,7 +76,7 @@ contract CurveSwapper is BaseSwapper {
         SwapData calldata,
         bytes calldata
     ) external pure returns (uint256) {
-        revert NotImplemented();
+        revert("CurveSwapper: not implemented");
     }
 
     /// *** PUBLIC METHODS ***
@@ -96,7 +92,12 @@ contract CurveSwapper is BaseSwapper {
         uint256 amountOutMin,
         address to,
         bytes memory data
-    ) external override returns (uint256 amountOut, uint256 shareOut) {
+    )
+        external
+        override
+        nonReentrant
+        returns (uint256 amountOut, uint256 shareOut)
+    {
         // Get Curve tokens' indexes & addresses
         uint256[] memory tokenIndexes = abi.decode(data, (uint256[]));
         address tokenIn = curvePool.coins(tokenIndexes[0]);
@@ -127,6 +128,7 @@ contract CurveSwapper is BaseSwapper {
             amountIn,
             amountOutMin
         );
+        require(amountOut > 0, "CurveSwapper: amountOut is 0");
         if (swapData.yieldBoxData.depositToYb) {
             _safeApprove(tokenOut, address(yieldBox), amountOut);
             (, shareOut) = yieldBox.depositAsset(
