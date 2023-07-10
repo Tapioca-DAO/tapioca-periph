@@ -46,6 +46,7 @@ contract Multicall3 is Ownable {
             Result memory result = returnData[i];
             calli = calls[i];
 
+            require(calli.target.code.length > 0, "Multicall: no contract");
             (result.success, result.returnData) = calli.target.call(
                 calli.callData
             );

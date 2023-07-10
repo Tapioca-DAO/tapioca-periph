@@ -16,7 +16,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     error AddressNotValid();
 
     modifier validAddress(address _addr) {
-        if (_addr == address(0)) revert AddressNotValid();
+        require(_addr != address(0), "Swapper: address not valid");
         _;
     }
 
@@ -96,6 +96,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     }
 
     function _safeApprove(address token, address to, uint256 value) internal {
+        require(token.code.length > 0, "Swapper: no contract");
         (bool success, bytes memory data) = token.call(
             abi.encodeWithSelector(0x095ea7b3, to, value)
         );
@@ -159,8 +160,13 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
             );
             return amount;
         }
+
+        require(amount > 0, "Swapper: amount is 0");
+        uint256 balanceBefore = IERC20(token).balanceOf(address(this));
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        return amount;
+        uint256 balanceAfter = IERC20(token).balanceOf(address(this));
+        require(balanceAfter > balanceBefore, "Swapper: transfer failed");
+        return balanceAfter - balanceBefore;
     }
 
     function _createPath(
