@@ -218,16 +218,6 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
-    struct HelperDepositRepayRemoveCollateral {
-        address market;
-        address user;
-        uint256 depositAmount;
-        uint256 repayAmount;
-        uint256 collateralAmount;
-        bool extractFromSender;
-        ICommonData.IWithdrawParams withdrawCollateralParams;
-    }
-
     struct HelperBuyCollateral {
         address market;
         address from;
@@ -273,12 +263,6 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
         ICommonData.IApproval[] approvals;
-    }
-
-    struct HelperMarketRemoveAndRepayAsset {
-        address user;
-        ICommonData.ICommonExternalContracts externalData;
-        IUSDOBase.IRemoveAndRepay removeAndRepayData;
     }
 
     struct HelperTOFTRemoveAndRepayAsset {

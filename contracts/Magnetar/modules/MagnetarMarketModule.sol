@@ -592,7 +592,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 .withdraw || removeAndRepayData.repayAssetOnBB
                 ? address(this)
                 : user;
-            uint256 removedShare = singularity.removeAsset(
+            singularity.removeAsset(
                 user,
                 removeAssetTo,
                 share
@@ -611,9 +611,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     withdrawAssetBytes,
                     singularity,
                     yieldBox,
-                    0,
-                    removedShare,
-                    true
+                    _removeAmount,
+                    share,
+                    false
                 );
             }
         }
