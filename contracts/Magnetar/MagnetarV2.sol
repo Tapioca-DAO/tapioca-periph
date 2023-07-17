@@ -1025,7 +1025,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             result[i].minimumInterestPerSecond = sgl.minimumInterestPerSecond();
             result[i].maximumInterestPerSecond = sgl.maximumInterestPerSecond();
             result[i].interestElasticity = sgl.interestElasticity();
-            result[i].startingInterestPerSecond = sgl.startingInterestPerSecond();
+            result[i].startingInterestPerSecond = sgl
+                .startingInterestPerSecond();
         }
 
         return result;
