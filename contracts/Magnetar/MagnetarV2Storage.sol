@@ -53,6 +53,7 @@ contract MagnetarV2Storage {
         address yieldBoxAssetContractAddress;
         address yieldBoxAssetStrategyAddress;
         uint256 yieldBoxAssetTokenId;
+        uint256 collateralizationRate;
     }
     struct SingularityInfo {
         MarketInfo market;
@@ -60,6 +61,12 @@ contract MagnetarV2Storage {
         uint256 userAssetFraction;
         ISingularity.AccrueInfo accrueInfo;
         uint256 utilization;
+        uint256 minimumTargetUtilization;
+        uint256 maximumTargetUtilization;
+        uint256 minimumInterestPerSecond;
+        uint256 maximumInterestPerSecond;
+        uint256 interestElasticity;
+        uint256 startingInterestPerSecond;
     }
     struct BigBangInfo {
         MarketInfo market;

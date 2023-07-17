@@ -967,6 +967,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();
+        info.collateralizationRate = market.collateralizationRate();
 
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -1019,6 +1020,12 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
             result[i].accrueInfo = _accrueInfo;
             result[i].utilization = _utilization;
+            result[i].minimumTargetUtilization = sgl.minimumTargetUtilization();
+            result[i].maximumTargetUtilization = sgl.maximumTargetUtilization();
+            result[i].minimumInterestPerSecond = sgl.minimumInterestPerSecond();
+            result[i].maximumInterestPerSecond = sgl.maximumInterestPerSecond();
+            result[i].interestElasticity = sgl.interestElasticity();
+            result[i].startingInterestPerSecond = sgl.startingInterestPerSecond();
         }
 
         return result;
