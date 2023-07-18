@@ -640,31 +640,61 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
-                HelperBuyCollateral memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperBuyCollateral)
-                );
+                (
+                    address market,
+                    address from,
+                    uint256 borrowAmount,
+                    uint256 supplyAmount,
+                    uint256 minAmountOut,
+                    address swapper,
+                    bytes memory dexData
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint256,
+                            uint256,
+                            address,
+                            bytes
+                        )
+                    );
 
-                IMarket(data.market).buyCollateral(
-                    data.from,
-                    data.borrowAmount,
-                    data.supplyAmount,
-                    data.minAmountOut,
-                    address(data.swapper),
-                    data.dexData
+                IMarket(market).buyCollateral(
+                    from,
+                    borrowAmount,
+                    supplyAmount,
+                    minAmountOut,
+                    swapper,
+                    dexData
                 );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
-                HelperSellCollateral memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperSellCollateral)
-                );
+                (
+                    address market,
+                    address from,
+                    uint256 share,
+                    uint256 minAmountOut,
+                    address swapper,
+                    bytes memory dexData
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint256,
+                            address,
+                            bytes
+                        )
+                    );
 
-                IMarket(data.market).sellCollateral(
-                    data.from,
-                    data.share,
-                    data.minAmountOut,
-                    address(data.swapper),
-                    data.dexData
+                IMarket(market).sellCollateral(
+                    from,
+                    share,
+                    minAmountOut,
+                    swapper,
+                    dexData
                 );
             } else if (_action.id == TAP_EXERCISE_OPTION) {
                 HelperExerciseOption memory data = abi.decode(

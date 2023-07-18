@@ -225,25 +225,6 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
-    struct HelperBuyCollateral {
-        address market;
-        address from;
-        uint256 borrowAmount;
-        uint256 supplyAmount;
-        uint256 minAmountOut;
-        ISwapper swapper;
-        bytes dexData;
-    }
-
-    struct HelperSellCollateral {
-        address market;
-        address from;
-        uint256 share;
-        uint256 minAmountOut;
-        ISwapper swapper;
-        bytes dexData;
-    }
-
     struct HelperExerciseOption {
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
