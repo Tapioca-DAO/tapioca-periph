@@ -76,6 +76,8 @@ interface IMarket {
 
     function owner() external view returns (address);
 
+    function collateralizationRate() external view returns (uint256);
+
     function buyCollateral(
         address from,
         uint256 borrowAmount,

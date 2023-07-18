@@ -39,7 +39,7 @@ interface IUSDOBase {
         address marketHelper;
         address market;
         bool removeCollateral;
-        uint256 removeCollateralShare;
+        uint256 removeCollateralAmount;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionsBroker.IOptionsParticipateData participateData;
     }

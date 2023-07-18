@@ -52,7 +52,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     viaIR: true,
                     optimizer: {
                         enabled: true,
-                        runs: 300,
+                        runs: 20,
                     },
                 },
             },

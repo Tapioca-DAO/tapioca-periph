@@ -578,10 +578,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
-                HelperMarketRemoveAndRepayAsset memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperMarketRemoveAndRepayAsset)
-                );
+                (
+                    address user,
+                    ICommonData.ICommonExternalContracts memory externalData,
+                    IUSDOBase.IRemoveAndRepay memory removeAndRepayData
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            ICommonData.ICommonExternalContracts,
+                            IUSDOBase.IRemoveAndRepay
+                        )
+                    );
 
                 _executeModule(
                     Module.Market,
@@ -589,16 +597,32 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         MagnetarMarketModule
                             .exitPositionAndRemoveCollateral
                             .selector,
-                        data.user,
-                        data.externalData,
-                        data.removeAndRepayData
+                        user,
+                        externalData,
+                        removeAndRepayData
                     )
                 );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
-                HelperDepositRepayRemoveCollateral memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperDepositRepayRemoveCollateral)
-                );
+                (
+                    address market,
+                    address user,
+                    uint256 depositAmount,
+                    uint256 repayAmount,
+                    uint256 collateralAmount,
+                    bool extractFromSender,
+                    ICommonData.IWithdrawParams memory withdrawCollateralParams
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint256,
+                            uint256,
+                            bool,
+                            ICommonData.IWithdrawParams
+                        )
+                    );
 
                 _executeModule(
                     Module.Market,
@@ -606,41 +630,71 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         MagnetarMarketModule
                             .depositRepayAndRemoveCollateralFromMarket
                             .selector,
-                        data.market,
-                        data.user,
-                        data.depositAmount,
-                        data.repayAmount,
-                        data.collateralAmount,
-                        data.extractFromSender,
-                        data.withdrawCollateralParams
+                        market,
+                        user,
+                        depositAmount,
+                        repayAmount,
+                        collateralAmount,
+                        extractFromSender,
+                        withdrawCollateralParams
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
-                HelperBuyCollateral memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperBuyCollateral)
-                );
+                (
+                    address market,
+                    address from,
+                    uint256 borrowAmount,
+                    uint256 supplyAmount,
+                    uint256 minAmountOut,
+                    address swapper,
+                    bytes memory dexData
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint256,
+                            uint256,
+                            address,
+                            bytes
+                        )
+                    );
 
-                IMarket(data.market).buyCollateral(
-                    data.from,
-                    data.borrowAmount,
-                    data.supplyAmount,
-                    data.minAmountOut,
-                    address(data.swapper),
-                    data.dexData
+                IMarket(market).buyCollateral(
+                    from,
+                    borrowAmount,
+                    supplyAmount,
+                    minAmountOut,
+                    swapper,
+                    dexData
                 );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
-                HelperSellCollateral memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperSellCollateral)
-                );
+                (
+                    address market,
+                    address from,
+                    uint256 share,
+                    uint256 minAmountOut,
+                    address swapper,
+                    bytes memory dexData
+                ) = abi.decode(
+                        _action.call[4:],
+                        (
+                            address,
+                            address,
+                            uint256,
+                            uint256,
+                            address,
+                            bytes
+                        )
+                    );
 
-                IMarket(data.market).sellCollateral(
-                    data.from,
-                    data.share,
-                    data.minAmountOut,
-                    address(data.swapper),
-                    data.dexData
+                IMarket(market).sellCollateral(
+                    from,
+                    share,
+                    minAmountOut,
+                    swapper,
+                    dexData
                 );
             } else if (_action.id == TAP_EXERCISE_OPTION) {
                 HelperExerciseOption memory data = abi.decode(
@@ -943,6 +997,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();
+        info.collateralizationRate = market.collateralizationRate();
 
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -995,6 +1050,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
             result[i].accrueInfo = _accrueInfo;
             result[i].utilization = _utilization;
+            result[i].minimumTargetUtilization = sgl.minimumTargetUtilization();
+            result[i].maximumTargetUtilization = sgl.maximumTargetUtilization();
+            result[i].minimumInterestPerSecond = sgl.minimumInterestPerSecond();
+            result[i].maximumInterestPerSecond = sgl.maximumInterestPerSecond();
+            result[i].interestElasticity = sgl.interestElasticity();
+            result[i].startingInterestPerSecond = sgl
+                .startingInterestPerSecond();
         }
 
         return result;

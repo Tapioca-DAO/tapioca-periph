@@ -53,6 +53,7 @@ contract MagnetarV2Storage {
         address yieldBoxAssetContractAddress;
         address yieldBoxAssetStrategyAddress;
         uint256 yieldBoxAssetTokenId;
+        uint256 collateralizationRate;
     }
     struct SingularityInfo {
         MarketInfo market;
@@ -60,6 +61,12 @@ contract MagnetarV2Storage {
         uint256 userAssetFraction;
         ISingularity.AccrueInfo accrueInfo;
         uint256 utilization;
+        uint256 minimumTargetUtilization;
+        uint256 maximumTargetUtilization;
+        uint256 minimumInterestPerSecond;
+        uint256 maximumInterestPerSecond;
+        uint256 interestElasticity;
+        uint256 startingInterestPerSecond;
     }
     struct BigBangInfo {
         MarketInfo market;
@@ -218,35 +225,6 @@ contract MagnetarV2Storage {
         bytes withdrawData;
     }
 
-    struct HelperDepositRepayRemoveCollateral {
-        address market;
-        address user;
-        uint256 depositAmount;
-        uint256 repayAmount;
-        uint256 collateralAmount;
-        bool extractFromSender;
-        ICommonData.IWithdrawParams withdrawCollateralParams;
-    }
-
-    struct HelperBuyCollateral {
-        address market;
-        address from;
-        uint256 borrowAmount;
-        uint256 supplyAmount;
-        uint256 minAmountOut;
-        ISwapper swapper;
-        bytes dexData;
-    }
-
-    struct HelperSellCollateral {
-        address market;
-        address from;
-        uint256 share;
-        uint256 minAmountOut;
-        ISwapper swapper;
-        bytes dexData;
-    }
-
     struct HelperExerciseOption {
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
@@ -273,12 +251,6 @@ contract MagnetarV2Storage {
         IUSDOBase.ILeverageExternalContractsData externalData;
         bytes airdropAdapterParams;
         ICommonData.IApproval[] approvals;
-    }
-
-    struct HelperMarketRemoveAndRepayAsset {
-        address user;
-        ICommonData.ICommonExternalContracts externalData;
-        IUSDOBase.IRemoveAndRepay removeAndRepayData;
     }
 
     struct HelperTOFTRemoveAndRepayAsset {

@@ -60,6 +60,18 @@ interface ISingularity is IMarket {
         view
         returns (AccrueInfo memory _accrueInfo, uint256 utilization);
 
+    function minimumTargetUtilization() external view returns (uint256);
+
+    function maximumTargetUtilization() external view returns (uint256);
+
+    function minimumInterestPerSecond() external view returns (uint256);
+
+    function maximumInterestPerSecond() external view returns (uint256);
+
+    function interestElasticity() external view returns (uint256);
+
+    function startingInterestPerSecond() external view returns (uint256);
+
     function multiHopBuyCollateral(
         address from,
         uint256 collateralAmount,
