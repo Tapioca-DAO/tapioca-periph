@@ -76,6 +76,7 @@ interface ISingularity is IMarket {
         address from,
         uint256 collateralAmount,
         uint256 borrowAmount,
+        bool useAirdroppedFunds,
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
@@ -84,6 +85,7 @@ interface ISingularity is IMarket {
     function multiHopSellCollateral(
         address from,
         uint256 share,
+        bool useAirdroppedFunds,
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
