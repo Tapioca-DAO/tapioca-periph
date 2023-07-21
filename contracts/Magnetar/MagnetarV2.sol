@@ -649,16 +649,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     bytes memory dexData
                 ) = abi.decode(
                         _action.call[4:],
-                        (
-                            address,
-                            uint256,
-                            uint256,
-                            uint256,
-                            address,
-                            bytes
-                        )
+                        (address, uint256, uint256, uint256, address, bytes)
                     );
-
 
                 IMarket(_action.target).buyCollateral(
                     from,
@@ -679,7 +671,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         _action.call[4:],
                         (address, uint256, uint256, address, bytes)
                     );
-
 
                 IMarket(_action.target).sellCollateral(
                     from,
