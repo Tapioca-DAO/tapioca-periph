@@ -641,7 +641,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
                 (
-                    address market,
                     address from,
                     uint256 borrowAmount,
                     uint256 supplyAmount,
@@ -652,7 +651,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         _action.call[4:],
                         (
                             address,
-                            address,
                             uint256,
                             uint256,
                             uint256,
@@ -661,7 +659,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         )
                     );
 
-                IMarket(market).buyCollateral(
+
+                IMarket(_action.target).buyCollateral(
                     from,
                     borrowAmount,
                     supplyAmount,
@@ -671,7 +670,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
                 (
-                    address market,
                     address from,
                     uint256 share,
                     uint256 minAmountOut,
@@ -679,17 +677,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     bytes memory dexData
                 ) = abi.decode(
                         _action.call[4:],
-                        (
-                            address,
-                            address,
-                            uint256,
-                            uint256,
-                            address,
-                            bytes
-                        )
+                        (address, uint256, uint256, address, bytes)
                     );
 
-                IMarket(market).sellCollateral(
+
+                IMarket(_action.target).sellCollateral(
                     from,
                     share,
                     minAmountOut,
