@@ -26,7 +26,7 @@ interface IPenrose {
 
     function bigBangEthDebtRate() external view returns (uint256);
 
-    function swappers(ISwapper swapper) external view returns (bool);
+    function swappers(uint16 lzChainId, ISwapper swapper) external view returns (bool);
 
     function yieldBox() external view returns (address payable);
 
