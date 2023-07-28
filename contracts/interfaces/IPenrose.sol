@@ -26,7 +26,10 @@ interface IPenrose {
 
     function bigBangEthDebtRate() external view returns (uint256);
 
-    function swappers(uint16 lzChainId, ISwapper swapper) external view returns (bool);
+    function swappers(
+        uint16 lzChainId,
+        ISwapper swapper
+    ) external view returns (bool);
 
     function yieldBox() external view returns (address payable);
 
@@ -45,4 +48,6 @@ interface IPenrose {
     function wethAssetId() external view returns (uint256);
 
     function isMarketRegistered(address market) external view returns (bool);
+
+    function hostLzChainId() external view returns (uint16);
 }
