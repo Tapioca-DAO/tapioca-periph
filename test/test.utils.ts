@@ -189,6 +189,7 @@ async function registerPenrose(
         yieldBox,
         tapAddress,
         wethAddress,
+        1,
         deployer.address,
     );
     log(
