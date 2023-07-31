@@ -56,8 +56,7 @@ interface IUSDOBase {
     }
 
     struct ILeverageSwapData {
-        uint256 tokenInId;
-        uint256 tokenOutId;
+        address tokenOut;
         uint256 amountOutMin;
         bytes data;
     }
