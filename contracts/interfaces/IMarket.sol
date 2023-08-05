@@ -68,9 +68,7 @@ interface IMarket {
         bool revertOnFail
     ) external returns (bool[] memory successes, string[] memory results);
 
-    function refreshPenroseFees(
-        address feeTo
-    ) external returns (uint256 feeShares);
+    function refreshPenroseFees() external returns (uint256 feeShares);
 
     function penrose() external view returns (address);
 
