@@ -21,4 +21,6 @@ interface IBigBang {
     function penrose() external view returns (address);
 
     function getDebtRate() external view returns (uint256);
+
+    function getTotalDebt() external view returns (uint256);
 }
