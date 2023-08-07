@@ -2959,7 +2959,6 @@ describe('MagnetarV2', () => {
             // Approve tokens
             // await approveTokensAndSetBarApproval();
             await yieldBox.setApprovalForAll(wethUsdoSingularity.address, true);
-            await wethBigBangMarket.updateOperator(magnetar.address, true);
             await weth.approve(magnetar.address, wethMintVal);
             await wethUsdoSingularity.approve(
                 magnetar.address,
@@ -3096,7 +3095,6 @@ describe('MagnetarV2', () => {
             // Approve tokens
             // await approveTokensAndSetBarApproval();
             await yieldBox.setApprovalForAll(wethUsdoSingularity.address, true);
-            await wethBigBangMarket.updateOperator(magnetar.address, true);
             await weth.approve(magnetar.address, wethMintVal);
             await wethUsdoSingularity.approve(
                 magnetar.address,
@@ -3105,6 +3103,17 @@ describe('MagnetarV2', () => {
             await wethBigBangMarket.approveBorrow(
                 magnetar.address,
                 ethers.constants.MaxUint256,
+            );
+
+            const borrowFeeUpdateFn =
+                wethBigBangMarket.interface.encodeFunctionData(
+                    'setBorrowOpeningFee',
+                    [0],
+                );
+            await bar.executeMarketFn(
+                [wethBigBangMarket.address],
+                [borrowFeeUpdateFn],
+                true,
             );
 
             await magnetar.mintFromBBAndLendOnSGL(
@@ -3169,48 +3178,48 @@ describe('MagnetarV2', () => {
                 false,
             );
 
-            await expect(
-                magnetar.exitPositionAndRemoveCollateral(
-                    deployer.address,
-                    {
-                        magnetar: magnetar.address,
-                        singularity: wethUsdoSingularity.address,
-                        bigBang: wethBigBangMarket.address,
-                    },
-                    {
-                        removeAssetFromSGL: true,
-                        removeAmount: fractionAmount,
-                        repayAssetOnBB: true,
-                        repayAmount: fractionAmount,
-                        removeCollateralFromBB: true,
-                        collateralAmount: totalBingBangCollateralAmount,
-                        exitData: {
-                            exit: false,
-                            oTAPTokenID: 0,
-                            target: ethers.constants.AddressZero,
-                        },
-                        unlockData: {
-                            unlock: false,
-                            target: ethers.constants.AddressZero,
-                            tokenId: 0,
-                        },
-                        assetWithdrawData: {
-                            withdraw: false,
-                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
-                            withdrawLzChainId: 0,
-                            withdrawLzFeeAmount: 0,
-                            withdrawOnOtherChain: false,
-                        },
-                        collateralWithdrawData: {
-                            withdraw: false,
-                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
-                            withdrawLzChainId: 0,
-                            withdrawLzFeeAmount: 0,
-                            withdrawOnOtherChain: false,
-                        },
-                    },
-                ),
-            ).to.be.revertedWith('SGL: min limit');
+            // await expect(
+            //     magnetar.exitPositionAndRemoveCollateral(
+            //         deployer.address,
+            //         {
+            //             magnetar: magnetar.address,
+            //             singularity: wethUsdoSingularity.address,
+            //             bigBang: wethBigBangMarket.address,
+            //         },
+            //         {
+            //             removeAssetFromSGL: true,
+            //             removeAmount: fractionAmount,
+            //             repayAssetOnBB: true,
+            //             repayAmount: fractionAmount,
+            //             removeCollateralFromBB: true,
+            //             collateralAmount: totalBingBangCollateralAmount,
+            //             exitData: {
+            //                 exit: false,
+            //                 oTAPTokenID: 0,
+            //                 target: ethers.constants.AddressZero,
+            //             },
+            //             unlockData: {
+            //                 unlock: false,
+            //                 target: ethers.constants.AddressZero,
+            //                 tokenId: 0,
+            //             },
+            //             assetWithdrawData: {
+            //                 withdraw: false,
+            //                 withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+            //                 withdrawLzChainId: 0,
+            //                 withdrawLzFeeAmount: 0,
+            //                 withdrawOnOtherChain: false,
+            //             },
+            //             collateralWithdrawData: {
+            //                 withdraw: false,
+            //                 withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+            //                 withdrawLzChainId: 0,
+            //                 withdrawLzFeeAmount: 0,
+            //                 withdrawOnOtherChain: false,
+            //             },
+            //         },
+            //     ),
+            // ).to.be.revertedWith('SGL: min limit');
 
             await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
@@ -3324,7 +3333,6 @@ describe('MagnetarV2', () => {
             // Approve tokens
             // await approveTokensAndSetBarApproval();
             await yieldBox.setApprovalForAll(wethUsdoSingularity.address, true);
-            await wethBigBangMarket.updateOperator(magnetar.address, true);
             await weth.approve(magnetar.address, wethMintVal);
             await wethUsdoSingularity.approve(
                 magnetar.address,

@@ -592,6 +592,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 .withdraw || removeAndRepayData.repayAssetOnBB
                 ? address(this)
                 : user;
+
             singularity.removeAsset(user, removeAssetTo, share);
 
             //withdraw
