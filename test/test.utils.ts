@@ -26,6 +26,10 @@ import {
     USDOLeverageModule__factory,
     USDOMarketModule__factory,
     USDOOptionsModule__factory,
+    BBLiquidation__factory,
+    BBCollateral__factory,
+    BBBorrow__factory,
+    BBLeverage__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -211,7 +215,7 @@ async function setPenroseAssets(
     bar: Penrose,
     usdcAddress: string,
 ) {
-    const wethAssetId = await bar.wethAssetId();
+    const wethAssetId = await bar.mainAssetId();
 
     const usdcStrategy = await createTokenEmptyStrategy(
         deployer,
@@ -968,8 +972,37 @@ async function registerBigBangMarket(
     debtStartPoint?: BigNumberish,
     staging?: boolean,
 ) {
+    const BBLiquidation = new BBLiquidation__factory(deployer);
+    const _bbLiquidationModule = await BBLiquidation.deploy();
+    log(
+        `Deployed BBLiquidationModule ${_bbLiquidationModule.address} with no arguments`,
+        staging,
+    );
+
+    const BBCollateral = new BBCollateral__factory(deployer);
+    const _bbCollateral = await BBCollateral.deploy();
+    log(
+        `Deployed BBCollateral ${_bbCollateral.address} with no arguments`,
+        staging,
+    );
+
+    const BBBorrow = new BBBorrow__factory(deployer);
+    const _bbBorrow = await BBBorrow.deploy();
+    log(`Deployed BBBorrow ${_bbBorrow.address} with no arguments`, staging);
+
+    const BBLeverage = new BBLeverage__factory(deployer);
+    const _bbLeverage = await BBLeverage.deploy();
+    log(
+        `Deployed BBLeverage ${_bbLeverage.address} with no arguments`,
+        staging,
+    );
+
     const data = new ethers.utils.AbiCoder().encode(
         [
+            'address',
+            'address',
+            'address',
+            'address',
             'address',
             'address',
             'uint256',
@@ -981,6 +1014,10 @@ async function registerBigBangMarket(
             'uint256',
         ],
         [
+            _bbLiquidationModule.address,
+            _bbBorrow.address,
+            _bbCollateral.address,
+            _bbLeverage.address,
             bar.address,
             collateral.address,
             collateralId,
@@ -1160,12 +1197,6 @@ export async function register(staging?: boolean) {
     const _sglLiquidationModule = wethUsdcSingularityData._sglLiquidationModule;
     log(`Deployed WethUsdcSingularity ${wethUsdcSingularity.address}`, staging);
 
-    // ------------------- 8 Set feeTo -------------------
-    log('Setting feeTo and feeVeTap', staging);
-    const singularityFeeTo = ethers.Wallet.createRandom();
-    await bar.setFeeTo(singularityFeeTo.address);
-    log(`feeTo ${singularityFeeTo} were set for WethUsdcSingularity`, staging);
-
     // ------------------- 9 Deploy & set LiquidationQueue -------------------
     log('Registering WETHUSDC LiquidationQueue', staging);
     const feeCollector = new ethers.Wallet(
@@ -1343,7 +1374,6 @@ export async function register(staging?: boolean) {
         magnetar,
         eoa1,
         multiSwapper,
-        singularityFeeTo,
         liquidationQueue,
         LQ_META,
         feeCollector,
