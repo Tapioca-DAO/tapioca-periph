@@ -464,6 +464,7 @@ async function registerSingularity(
             'uint256',
             'address',
             'uint256',
+            'uint256',
         ],
         [
             _sglLiquidationModule.address,
@@ -477,6 +478,7 @@ async function registerSingularity(
             usdcAssetId,
             wethUsdcOracle.address,
             exchangeRatePrecision ?? 0,
+            0,
         ],
     );
     await (await bar.registerSingularity(mediumRiskMC, data, true)).wait();
@@ -867,6 +869,7 @@ async function createWethUsd0Singularity(
             'uint256',
             'address',
             'uint256',
+            'uint256',
         ],
         [
             _sglLiquidationModule.address,
@@ -880,6 +883,7 @@ async function createWethUsd0Singularity(
             wethAssetId,
             wethUsd0Oracle.address,
             exchangePrecision,
+            0,
         ],
     );
     await bar.registerSingularity(mediumRiskMC.address, data, false);
@@ -1012,6 +1016,7 @@ async function registerBigBangMarket(
             'uint256',
             'uint256',
             'uint256',
+            'uint256',
         ],
         [
             _bbLiquidationModule.address,
@@ -1027,6 +1032,7 @@ async function registerBigBangMarket(
             debtRateMin,
             debtRateMax,
             debtStartPoint,
+            0,
         ],
     );
 

@@ -111,6 +111,7 @@ describe('MagnetarV2', () => {
                     'uint256',
                     'address',
                     'uint256',
+                    'uint256',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -124,6 +125,7 @@ describe('MagnetarV2', () => {
                     wethAssetId,
                     wethUsdcOracle.address,
                     ethers.utils.parseEther('1'),
+                    0,
                 ],
             );
             await bar.registerSingularity(mediumRiskMC.address, sglData, true);
@@ -742,6 +744,7 @@ describe('MagnetarV2', () => {
                     'uint256',
                     'address',
                     'uint256',
+                    'uint256',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -755,6 +758,7 @@ describe('MagnetarV2', () => {
                     wethAssetId,
                     wethUsdcOracle.address,
                     ethers.utils.parseEther('1'),
+                    0,
                 ],
             );
             await bar.registerSingularity(mediumRiskMC.address, sglData, true);
