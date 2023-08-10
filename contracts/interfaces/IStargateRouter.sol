@@ -37,4 +37,13 @@ interface IStargateRouter is IStargateRouterBase {
     function stargateRouter() external view returns (address);
 
     function stargateEthVault() external view returns (address);
+
+
+    //StargateRouter methods only
+    function createChainPath(
+        uint256 _poolId,
+        uint16 _dstChainId,
+        uint256 _dstPoolId,
+        uint256 _weight
+    ) external;
 }
