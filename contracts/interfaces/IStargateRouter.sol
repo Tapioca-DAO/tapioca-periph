@@ -58,4 +58,16 @@ interface IStargateRouter is IStargateRouterBase {
         uint256 _dstPoolId,
         uint16 _weight
     ) external;
+
+     struct CreditObj {
+        uint256 credits;
+        uint256 idealBalance;
+    }
+    
+    function creditChainPath(
+        uint16 _dstChainId,
+        uint256 _dstPoolId,
+        uint256 _srcPoolId,
+        CreditObj memory _c
+    ) external;
 }
