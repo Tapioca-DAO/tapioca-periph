@@ -39,8 +39,41 @@ interface IStargateRouter is IStargateRouterBase {
     function stargateEthVault() external view returns (address);
 
     //StargateRouter methods only
-    function bridge() external view returns(address);
-    
+    function retryRevert(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint256 _nonce
+    ) external payable;
+
+    function instantRedeemLocal(
+        uint16 _srcPoolId,
+        uint256 _amountLP,
+        address _to
+    ) external returns (uint256 amountSD);
+
+    function redeemLocal(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        bytes calldata _to,
+        lzTxObj memory _lzTxParams
+    ) external payable;
+
+    function redeemRemote(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        uint256 _minAmountLD,
+        bytes calldata _to,
+        lzTxObj memory _lzTxParams
+    ) external payable;
+
+    function bridge() external view returns (address);
+
     function addLiquidity(
         uint256 _poolId,
         uint256 _amountLD,
