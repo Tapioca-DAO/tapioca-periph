@@ -39,6 +39,12 @@ interface IStargateRouter is IStargateRouterBase {
     function stargateEthVault() external view returns (address);
 
     //StargateRouter methods only
+    function addLiquidity(
+        uint256 _poolId,
+        uint256 _amountLD,
+        address _to
+    ) external;
+
     function createChainPath(
         uint256 _poolId,
         uint16 _dstChainId,
@@ -59,11 +65,11 @@ interface IStargateRouter is IStargateRouterBase {
         uint16 _weight
     ) external;
 
-     struct CreditObj {
+    struct CreditObj {
         uint256 credits;
         uint256 idealBalance;
     }
-    
+
     function creditChainPath(
         uint16 _dstChainId,
         uint256 _dstPoolId,
