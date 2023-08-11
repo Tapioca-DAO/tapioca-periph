@@ -39,6 +39,8 @@ interface IStargateRouter is IStargateRouterBase {
     function stargateEthVault() external view returns (address);
 
     //StargateRouter methods only
+    function bridge() external view returns(address);
+    
     function addLiquidity(
         uint256 _poolId,
         uint256 _amountLD,
