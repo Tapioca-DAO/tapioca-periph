@@ -25,10 +25,90 @@ interface IStargateRouterBase {
 interface IStargateRouter is IStargateRouterBase {
     //for RouterETH
     function swapETH(
-        uint16 _dstChainId, // destination Stargate chainId
-        address payable _refundAddress, // refund additional messageFee to this address
+        uint16 _dstChainId, // _refundAddressdestination Stargate chainId
+        address payable, // refund additional messageFee to this address
         bytes calldata _toAddress, // the receiver of the destination ETH
         uint256 _amountLD, // the amount, in Local Decimals, to be swapped
         uint256 _minAmountLD // the minimum amount accepted out on destination
     ) external payable;
+
+    function poolId() external view returns (uint256);
+
+    function stargateRouter() external view returns (address);
+
+    function stargateEthVault() external view returns (address);
+
+    //StargateRouter methods only
+    function retryRevert(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint256 _nonce
+    ) external payable;
+
+    function instantRedeemLocal(
+        uint16 _srcPoolId,
+        uint256 _amountLP,
+        address _to
+    ) external returns (uint256 amountSD);
+
+    function redeemLocal(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        bytes calldata _to,
+        lzTxObj memory _lzTxParams
+    ) external payable;
+
+    function redeemRemote(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        uint256 _minAmountLD,
+        bytes calldata _to,
+        lzTxObj memory _lzTxParams
+    ) external payable;
+
+    function bridge() external view returns (address);
+
+    function addLiquidity(
+        uint256 _poolId,
+        uint256 _amountLD,
+        address _to
+    ) external;
+
+    function createChainPath(
+        uint256 _poolId,
+        uint16 _dstChainId,
+        uint256 _dstPoolId,
+        uint256 _weight
+    ) external;
+
+    function activateChainPath(
+        uint256 _poolId,
+        uint16 _dstChainId,
+        uint256 _dstPoolId
+    ) external;
+
+    function setWeightForChainPath(
+        uint256 _poolId,
+        uint16 _dstChainId,
+        uint256 _dstPoolId,
+        uint16 _weight
+    ) external;
+
+    struct CreditObj {
+        uint256 credits;
+        uint256 idealBalance;
+    }
+
+    function creditChainPath(
+        uint16 _dstChainId,
+        uint256 _dstPoolId,
+        uint256 _srcPoolId,
+        CreditObj memory _c
+    ) external;
 }
