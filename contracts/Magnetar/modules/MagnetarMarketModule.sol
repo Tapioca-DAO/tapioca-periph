@@ -551,10 +551,15 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 .exitPosition(removeAndRepayData.exitData.oTAPTokenID);
 
             if (!removeAndRepayData.unlockData.unlock) {
-                IERC721(oTapAddress).safeTransferFrom(
+                address tOLPContract = ITapiocaOptionsBroker(
+                    removeAndRepayData.exitData.target
+                ).tOLP();
+
+                //transfer tOLP to the user
+                IERC721(tOLPContract).safeTransferFrom(
                     address(this),
                     user,
-                    removeAndRepayData.exitData.oTAPTokenID,
+                    tOLPId,
                     "0x"
                 );
             }

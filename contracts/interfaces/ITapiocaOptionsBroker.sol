@@ -50,6 +50,8 @@ interface ITapiocaOptionsBroker {
 
     function oTAP() external view returns (address);
 
+    function tOLP() external view returns (address);
+
     function exerciseOption(
         uint256 oTAPTokenID,
         address paymentToken,
