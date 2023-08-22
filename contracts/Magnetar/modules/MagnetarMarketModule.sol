@@ -486,7 +486,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
             address oTapAddress = ITapiocaOptionsBroker(participateData.target)
                 .oTAP();
-            IERC721(oTapAddress).approve(address(this), oTAPTokenId);
             IERC721(oTapAddress).safeTransferFrom(
                 address(this),
                 user,
