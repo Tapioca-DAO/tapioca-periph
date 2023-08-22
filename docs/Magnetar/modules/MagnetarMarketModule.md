@@ -1,4 +1,4 @@
-# IMagnetar
+# MagnetarMarketModule
 
 
 
@@ -13,7 +13,7 @@
 ### depositAddCollateralAndBorrowFromMarket
 
 ```solidity
-function depositAddCollateralAndBorrowFromMarket(address market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, ICommonData.IWithdrawParams withdrawParams) external payable
+function depositAddCollateralAndBorrowFromMarket(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, ICommonData.IWithdrawParams withdrawParams) external payable
 ```
 
 
@@ -24,7 +24,7 @@ function depositAddCollateralAndBorrowFromMarket(address market, address user, u
 
 | Name | Type | Description |
 |---|---|---|
-| market | address | undefined |
+| market | contract IMarket | undefined |
 | user | address | undefined |
 | collateralAmount | uint256 | undefined |
 | borrowAmount | uint256 | undefined |
@@ -72,10 +72,10 @@ function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExtern
 | externalData | ICommonData.ICommonExternalContracts | undefined |
 | removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
 
-### getAmountForBorrowPart
+### isApprovedForAll
 
 ```solidity
-function getAmountForBorrowPart(address market, uint256 borrowPart) external view returns (uint256 amount)
+function isApprovedForAll(address, address) external view returns (bool)
 ```
 
 
@@ -86,37 +86,14 @@ function getAmountForBorrowPart(address market, uint256 borrowPart) external vie
 
 | Name | Type | Description |
 |---|---|---|
-| market | address | undefined |
-| borrowPart | uint256 | undefined |
+| _0 | address | undefined |
+| _1 | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| amount | uint256 | undefined |
-
-### getBorrowPartForAmount
-
-```solidity
-function getBorrowPartForAmount(address market, uint256 amount) external view returns (uint256 part)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| market | address | undefined |
-| amount | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| part | uint256 | undefined |
+| _0 | bool | undefined |
 
 ### mintFromBBAndLendOnSGL
 
@@ -143,7 +120,7 @@ function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMin
 ### withdrawToChain
 
 ```solidity
-function withdrawToChain(address yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
 ```
 
 
@@ -154,7 +131,7 @@ function withdrawToChain(address yieldBox, address from, uint256 assetId, uint16
 
 | Name | Type | Description |
 |---|---|---|
-| yieldBox | address | undefined |
+| yieldBox | contract IYieldBoxBase | undefined |
 | from | address | undefined |
 | assetId | uint256 | undefined |
 | dstChainId | uint16 | undefined |
@@ -165,6 +142,27 @@ function withdrawToChain(address yieldBox, address from, uint256 assetId, uint16
 | refundAddress | address payable | undefined |
 | gas | uint256 | undefined |
 
+
+
+## Events
+
+### ApprovalForAll
+
+```solidity
+event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner `indexed` | address | undefined |
+| operator `indexed` | address | undefined |
+| approved  | bool | undefined |
 
 
 

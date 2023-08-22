@@ -10,6 +10,29 @@
 
 ## Methods
 
+### assetTotals
+
+```solidity
+function assetTotals(uint256 assetId) external view returns (uint256 totalShare, uint256 totalAmount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| assetId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| totalShare | uint256 | undefined |
+| totalAmount | uint256 | undefined |
+
 ### assets
 
 ```solidity
