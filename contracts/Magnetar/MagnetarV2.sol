@@ -229,17 +229,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
             } else if (_action.id == TOFT_WRAP) {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
                 _checkSender(data.from);
-                if (_action.value > 0) {
-                    ITapiocaOFT(_action.target).wrapNative{
-                        value: _action.value
-                    }(data.to);
-                } else {
-                    ITapiocaOFT(_action.target).wrap(
-                        msg.sender,
-                        data.to,
-                        data.amount
-                    );
-                }
+                ITapiocaOFT(_action.target).wrap{value: _action.value}(
+                    msg.sender,
+                    data.to,
+                    data.amount
+                );
             } else if (_action.id == TOFT_SEND_FROM) {
                 (
                     address from,

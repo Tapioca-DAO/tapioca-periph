@@ -12,9 +12,7 @@ interface ITapiocaOFTBase {
         address fromAddress,
         address toAddress,
         uint256 amount
-    ) external;
-
-    function wrapNative(address _toAddress) external payable;
+    ) external payable;
 
     function unwrap(address _toAddress, uint256 _amount) external;
 
