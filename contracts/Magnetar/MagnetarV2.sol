@@ -686,7 +686,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     (HelperExerciseOption)
                 );
 
-                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption(
+                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption{
+                    value: _action.value
+                }(
                     data.optionsData,
                     data.lzData,
                     data.tapSendData,
@@ -698,7 +700,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     (HelperMultiHopBuy)
                 );
 
-                IUSDOBase(_action.target).initMultiHopBuy(
+                IUSDOBase(_action.target).initMultiHopBuy{value: _action.value}(
                     data.from,
                     data.collateralAmount,
                     data.borrowAmount,
