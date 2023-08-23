@@ -230,9 +230,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
                 _checkSender(data.from);
                 if (_action.value > 0) {
-                    unchecked {
-                        valAccumulator += _action.value;
-                    }
                     ITapiocaOFT(_action.target).wrapNative{
                         value: _action.value
                     }(data.to);
