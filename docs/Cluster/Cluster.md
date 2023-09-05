@@ -35,7 +35,7 @@ returns true if an address is marked as an Editor
 ### isWhitelisted
 
 ```solidity
-function isWhitelisted(enum ICluster.WhitelistType _whitelistType, uint16 _lzChainId, address _addr) external view returns (bool)
+function isWhitelisted(uint16 _lzChainId, address _addr) external view returns (bool)
 ```
 
 returns the whitelist status of a contract
@@ -46,7 +46,6 @@ returns the whitelist status of a contract
 
 | Name | Type | Description |
 |---|---|---|
-| _whitelistType | enum ICluster.WhitelistType | the contract&#39;s type |
 | _lzChainId | uint16 | LayerZero chain id |
 | _addr | address | the contract&#39;s address |
 
@@ -120,7 +119,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### updateContract
 
 ```solidity
-function updateContract(enum ICluster.WhitelistType _whitelistType, uint16 _lzChainId, address _addr, bool _status) external nonpayable
+function updateContract(uint16 _lzChainId, address _addr, bool _status) external nonpayable
 ```
 
 updates the whitelist status of a contract
@@ -131,7 +130,6 @@ updates the whitelist status of a contract
 
 | Name | Type | Description |
 |---|---|---|
-| _whitelistType | enum ICluster.WhitelistType | the contract&#39;s type |
 | _lzChainId | uint16 | LayerZero chain id |
 | _addr | address | the contract&#39;s address |
 | _status | bool | the new whitelist status |
@@ -176,7 +174,7 @@ updates LayerZero chain id
 ### ContractUpdated
 
 ```solidity
-event ContractUpdated(address indexed _contract, uint16 indexed _lzChainId, enum ICluster.WhitelistType _type, bool _oldStatus, bool _newStatus)
+event ContractUpdated(address indexed _contract, uint16 indexed _lzChainId, bool _oldStatus, bool _newStatus)
 ```
 
 event emitted when a contract status is updated
@@ -189,7 +187,6 @@ event emitted when a contract status is updated
 |---|---|---|
 | _contract `indexed` | address | undefined |
 | _lzChainId `indexed` | uint16 | undefined |
-| _type  | enum ICluster.WhitelistType | undefined |
 | _oldStatus  | bool | undefined |
 | _newStatus  | bool | undefined |
 

@@ -46,7 +46,6 @@ describe('Cluster', () => {
 
             const randomContract = ethers.Wallet.createRandom();
             let isWhitelisted = await cluster.isWhitelisted(
-                0,
                 1,
                 randomContract.address,
             );
@@ -55,18 +54,17 @@ describe('Cluster', () => {
             await expect(
                 cluster
                     .connect(eoa1)
-                    .updateContract(0, 0, randomContract.address, true),
+                    .updateContract(0, randomContract.address, true),
             ).to.be.reverted;
 
             await cluster.updateEditor(eoa1.address, true);
             await expect(
                 cluster
                     .connect(eoa1)
-                    .updateContract(0, 0, randomContract.address, true),
+                    .updateContract(0, randomContract.address, true),
             ).to.not.be.reverted;
 
             isWhitelisted = await cluster.isWhitelisted(
-                0,
                 1,
                 randomContract.address,
             );
@@ -78,7 +76,6 @@ describe('Cluster', () => {
 
             const randomContract = ethers.Wallet.createRandom();
             let isWhitelisted = await cluster.isWhitelisted(
-                0,
                 1,
                 randomContract.address,
             );
@@ -87,25 +84,23 @@ describe('Cluster', () => {
             await expect(
                 cluster
                     .connect(eoa1)
-                    .updateContract(0, 2, randomContract.address, true),
+                    .updateContract(2, randomContract.address, true),
             ).to.be.reverted;
 
             await cluster.updateEditor(eoa1.address, true);
             await expect(
                 cluster
                     .connect(eoa1)
-                    .updateContract(0, 2, randomContract.address, true),
+                    .updateContract(2, randomContract.address, true),
             ).to.not.be.reverted;
 
             isWhitelisted = await cluster.isWhitelisted(
-                0,
                 2,
                 randomContract.address,
             );
             expect(isWhitelisted).to.be.true;
 
             isWhitelisted = await cluster.isWhitelisted(
-                0,
                 1,
                 randomContract.address,
             );

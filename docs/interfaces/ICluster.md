@@ -13,7 +13,7 @@
 ### isWhitelisted
 
 ```solidity
-function isWhitelisted(enum ICluster.WhitelistType whitelistType, uint16 lzChainId, address _addr) external view returns (bool)
+function isWhitelisted(uint16 lzChainId, address _addr) external view returns (bool)
 ```
 
 
@@ -24,7 +24,6 @@ function isWhitelisted(enum ICluster.WhitelistType whitelistType, uint16 lzChain
 
 | Name | Type | Description |
 |---|---|---|
-| whitelistType | enum ICluster.WhitelistType | undefined |
 | lzChainId | uint16 | undefined |
 | _addr | address | undefined |
 
@@ -37,7 +36,7 @@ function isWhitelisted(enum ICluster.WhitelistType whitelistType, uint16 lzChain
 ### updateContract
 
 ```solidity
-function updateContract(enum ICluster.WhitelistType whitelistType, uint16 lzChainId, address _addr, bool _status) external nonpayable
+function updateContract(uint16 lzChainId, address _addr, bool _status) external nonpayable
 ```
 
 
@@ -48,7 +47,6 @@ function updateContract(enum ICluster.WhitelistType whitelistType, uint16 lzChai
 
 | Name | Type | Description |
 |---|---|---|
-| whitelistType | enum ICluster.WhitelistType | undefined |
 | lzChainId | uint16 | undefined |
 | _addr | address | undefined |
 | _status | bool | undefined |
