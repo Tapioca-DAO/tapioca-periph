@@ -44,6 +44,23 @@ function bigBangEthMarket() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### cluster
+
+```solidity
+function cluster() external view returns (contract ICluster)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ICluster | undefined |
+
 ### feeTo
 
 ```solidity
@@ -133,29 +150,6 @@ function mainToken() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### swappers
-
-```solidity
-function swappers(uint16 lzChainId, contract ISwapper swapper) external view returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| lzChainId | uint16 | undefined |
-| swapper | contract ISwapper | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
 
 ### tapAssetId
 
