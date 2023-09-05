@@ -208,9 +208,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 );
             }
 
-            unchecked {
-                valAccumulator += _action.value;
-            }
+            valAccumulator += _action.value;
 
             if (_action.id == PERMIT_ALL) {
                 _permit(

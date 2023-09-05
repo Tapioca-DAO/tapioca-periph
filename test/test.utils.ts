@@ -183,6 +183,7 @@ async function registerYieldBox(deployer: any, staging?: boolean) {
 async function registerPenrose(
     deployer: any,
     yieldBox: string,
+    cluster: string,
     tapAddress: string,
     wethAddress: string,
     staging?: boolean,
@@ -191,6 +192,7 @@ async function registerPenrose(
 
     const bar = await Penrose.deploy(
         yieldBox,
+        cluster,
         tapAddress,
         wethAddress,
         1,
@@ -1117,11 +1119,19 @@ export async function register(staging?: boolean) {
     const { yieldBox, uriBuilder } = await registerYieldBox(deployer, staging);
     log(`Deployed YieldBox ${yieldBox.address}`, staging);
 
-    // ------------------- 2.1 Deploy Penrose -------------------
+    // ------------------- 2.1 Create Cluster -------------------
+    const cluster = await (
+        await ethers.getContractFactory('Cluster')
+    ).deploy(1);
+    await cluster.deployed();
+    log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
+
+    // ------------------- 2.2 Deploy Penrose -------------------
     log('Deploying Penrose', staging);
     const { bar } = await registerPenrose(
         deployer,
         yieldBox.address,
+        cluster.address,
         tap.address,
         weth.address,
         staging,
@@ -1345,13 +1355,6 @@ export async function register(staging?: boolean) {
             staging,
         );
     }
-
-    // ------------------- 19 Create Cluster -------------------
-    const cluster = await (
-        await ethers.getContractFactory('Cluster')
-    ).deploy(1);
-    await cluster.deployed();
-    log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
     const timeTravel = async (seconds: number) => {
         await time.increase(seconds);
