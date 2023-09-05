@@ -46,6 +46,6 @@ interface IPenrose {
     function isMarketRegistered(address market) external view returns (bool);
 
     function hostLzChainId() external view returns (uint16);
-    
+
     function cluster() external view returns (ICluster);
 }
