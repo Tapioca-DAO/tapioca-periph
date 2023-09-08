@@ -44,6 +44,7 @@ runTestMainnet(() => {
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             hre.ethers.constants.AddressZero,
+            deployer.address, // Owner
         );
 
         console.log(
@@ -83,6 +84,7 @@ runTestMainnet(() => {
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description,
             hre.ethers.constants.AddressZero,
+            deployer.address, // Owner
         );
 
         console.log(
@@ -106,6 +108,8 @@ runTestMainnet(() => {
             '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // ETH feed
             '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D', // USDT feed
             '0xfdFD9C85aD200c506Cf9e21F1FD8dd01932FBB23', // WBTC feed
+            hre.ethers.constants.AddressZero, // No sequencer
+            deployer.address, // Owner
         );
 
         console.log(
@@ -126,6 +130,8 @@ runTestMainnet(() => {
             'sgETH/USD', // Symbol
             '0x101816545F6bd2b1076434B54383a1E633390A2E', // SG ETH/USD vault
             '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // ETH feed
+            hre.ethers.constants.AddressZero, // No sequencer
+            deployer.address, // Owner
         );
 
         console.log(
@@ -177,6 +183,7 @@ runTestMainnet(() => {
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             hre.ethers.constants.AddressZero,
+            deployer.address, // Owner
         );
 
         // Oracle doesn't exist, should not revert
@@ -216,6 +223,7 @@ runTestMainnet(() => {
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             sequencer.address,
+            deployer.address, // Owner
         );
 
         // Set the sequencer to be down
@@ -261,6 +269,8 @@ runTestArb(() => {
             await hre.ethers.getContractFactory('GLPOracle')
         ).deploy(
             '0x3963FfC9dff443c2A94f21b129D429891E32ec18', // GLP Manager
+            '0xFdB631F5EE196F0ed6FAa767959853A9F217697D', // Arbitrum mainnet chainlink sequence uptime feed
+            deployer.address, // Owner
         );
 
         console.log((await seer.peek('0x00')).rate);
