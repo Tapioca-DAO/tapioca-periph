@@ -3,6 +3,8 @@ pragma solidity ^0.8.9;
 
 import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
 import "../../interfaces/IOracle.sol" as ITOracle;
+import {SequencerCheck} from "../utils/SequencerCheck.sol";
+import {AccessControl} from "../external/AccessControl.sol";
 
 interface IStargatePool {
     function deltaCredit() external view returns (uint256);
@@ -20,7 +22,7 @@ interface IStargatePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract SGOracle is ITOracle.IOracle {
+contract SGOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
     string public _name;
     string public _symbol;
 
@@ -31,12 +33,16 @@ contract SGOracle is ITOracle.IOracle {
         string memory __name,
         string memory __symbol,
         IStargatePool pool,
-        AggregatorV2V3Interface _underlying
-    ) {
+        AggregatorV2V3Interface _underlying,
+        address _sequencerUptimeFeed,
+        address _admin
+    ) SequencerCheck(_sequencerUptimeFeed) {
         _name = __name;
         _symbol = __symbol;
         SG_POOL = pool;
         UNDERLYING = _underlying;
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     function decimals() external view returns (uint8) {
@@ -64,6 +70,7 @@ contract SGOracle is ITOracle.IOracle {
     function get(
         bytes calldata
     ) external virtual returns (bool success, uint256 rate) {
+        _sequencerBeatCheck();
         return (true, _get());
     }
 
@@ -113,5 +120,13 @@ contract SGOracle is ITOracle.IOracle {
         require(updatedAt > 0, "SGOracle: stale price");
         require(roundId > 0, "SGOracle: stale round");
         return uint256(answer);
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

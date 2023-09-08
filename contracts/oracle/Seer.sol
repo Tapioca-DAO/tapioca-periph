@@ -24,7 +24,8 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         uint32 _stalePeriod,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         OracleMulti(
             addressInAndOutUni,
@@ -44,6 +45,8 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     /// @notice Get the latest exchange rate.

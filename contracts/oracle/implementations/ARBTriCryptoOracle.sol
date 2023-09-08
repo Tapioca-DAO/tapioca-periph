@@ -4,6 +4,8 @@ pragma solidity ^0.8.9;
 import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
+import {SequencerCheck} from "../utils/SequencerCheck.sol";
+import {AccessControl} from "../external/AccessControl.sol";
 
 import "../../interfaces/IOracle.sol" as ITOracle;
 
@@ -27,7 +29,7 @@ interface ICurvePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract ARBTriCryptoOracle is ITOracle.IOracle {
+contract ARBTriCryptoOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
     string public _name;
     string public _symbol;
 
@@ -48,8 +50,10 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         AggregatorV2V3Interface btcFeed,
         AggregatorV2V3Interface ethFeed,
         AggregatorV2V3Interface usdtFeed,
-        AggregatorV2V3Interface wbtcFeed
-    ) {
+        AggregatorV2V3Interface wbtcFeed,
+        address _sequencerUptimeFeed,
+        address _admin
+    ) SequencerCheck(_sequencerUptimeFeed) {
         _name = __name;
         _symbol = __symbol;
         TRI_CRYPTO = pool;
@@ -57,6 +61,8 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         ETH_FEED = ethFeed;
         USDT_FEED = usdtFeed;
         WBTC_FEED = wbtcFeed;
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
@@ -115,6 +121,8 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
     /// @return _maxPrice the current value
     /// @dev This function comes from the implementation in vyper that is on the bottom
     function _get() internal view returns (uint256 _maxPrice) {
+        _sequencerBeatCheck();
+
         uint256 _vp = TRI_CRYPTO.get_virtual_price();
 
         // Get the prices from chainlink and add 10 decimals
@@ -150,5 +158,13 @@ contract ARBTriCryptoOracle is ITOracle.IOracle {
         require(updatedAt > 0, "ARBTriCryptoOracle: stale price");
         require(roundId > 0, "ARBTriCryptoOracle: stale round");
         return uint256(answer);
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
