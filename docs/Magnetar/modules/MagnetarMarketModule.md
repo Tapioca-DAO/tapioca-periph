@@ -13,7 +13,7 @@
 ### depositAddCollateralAndBorrowFromMarket
 
 ```solidity
-function depositAddCollateralAndBorrowFromMarket(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, ICommonData.IWithdrawParams withdrawParams) external payable
+function depositAddCollateralAndBorrowFromMarket(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, ICommonData.IWithdrawParams withdrawParams, uint256 valueAmount) external payable
 ```
 
 
@@ -31,11 +31,12 @@ function depositAddCollateralAndBorrowFromMarket(contract IMarket market, addres
 | extractFromSender | bool | undefined |
 | deposit | bool | undefined |
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
+| valueAmount | uint256 | undefined |
 
 ### depositRepayAndRemoveCollateralFromMarket
 
 ```solidity
-function depositRepayAndRemoveCollateralFromMarket(address market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool extractFromSender, ICommonData.IWithdrawParams withdrawCollateralParams) external payable
+function depositRepayAndRemoveCollateralFromMarket(address market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool extractFromSender, ICommonData.IWithdrawParams withdrawCollateralParams, uint256 valueAmount) external payable
 ```
 
 
@@ -53,11 +54,12 @@ function depositRepayAndRemoveCollateralFromMarket(address market, address user,
 | collateralAmount | uint256 | undefined |
 | extractFromSender | bool | undefined |
 | withdrawCollateralParams | ICommonData.IWithdrawParams | undefined |
+| valueAmount | uint256 | undefined |
 
 ### exitPositionAndRemoveCollateral
 
 ```solidity
-function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData) external payable
+function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData, uint256 valueAmount) external payable
 ```
 
 
@@ -71,6 +73,7 @@ function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExtern
 | user | address | undefined |
 | externalData | ICommonData.ICommonExternalContracts | undefined |
 | removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
+| valueAmount | uint256 | undefined |
 
 ### isApprovedForAll
 
