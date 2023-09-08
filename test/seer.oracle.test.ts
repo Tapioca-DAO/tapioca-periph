@@ -1,6 +1,7 @@
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import hre from 'hardhat';
 import { register } from './test.utils';
+import { expect } from 'chai';
 
 let runTestMainnet: any = (fn: () => any) =>
     describe('Seer only mainnet/arb fork', fn);
@@ -41,7 +42,8 @@ runTestMainnet(() => {
             [1, 0], // Multiply/divide CL
             8640000, // CL period before stale
             [deployer.address], // Owner
-            hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description
+            hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
+            hre.ethers.constants.AddressZero,
         );
 
         console.log(
@@ -79,7 +81,8 @@ runTestMainnet(() => {
             [1, 0], // Multiply/divide CL
             8640000, // CL period before stale
             [deployer.address], // Owner
-            hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description
+            hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description,
+            hre.ethers.constants.AddressZero,
         );
 
         console.log(
@@ -131,6 +134,122 @@ runTestMainnet(() => {
                 await seer.decimals(),
             ),
         );
+    });
+
+    it('Should not revert if the sequencer does not exist', async () => {
+        const { deployer } = await loadFixture(register);
+
+        const sequencer = await (
+            await hre.ethers.getContractFactory('SequencerFeedMock')
+        ).deploy();
+
+        await sequencer.setLatestRoundData({
+            answer: 0, // 0 up, 1 down
+            roundId: 0,
+            startedAt: (await hre.ethers.provider.getBlock('latest')).timestamp, // last upbeat
+            updatedAt: 0,
+            answeredInRound: 0,
+        });
+
+        const seer = await (
+            await hre.ethers.getContractFactory('Seer')
+        ).deploy(
+            'DAI/USDC', // Name
+            'DAI/USDC', // Symbol
+            18, // Decimals
+            [
+                '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // DAI
+                '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+            ],
+            [
+                '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
+            ],
+            [1], // Multiply/divide Uni
+            600, // TWAP
+            10, // Observation length
+            0, // Uni final currency
+            [
+                '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
+                '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
+            ],
+            [1, 0], // Multiply/divide CL
+            8640000, // CL period before stale
+            [deployer.address], // Owner
+            hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
+            hre.ethers.constants.AddressZero,
+        );
+
+        // Oracle doesn't exist, should not revert
+        expect((await seer.peek('0x00')).rate).to.not.be.reverted;
+    });
+
+    it('Should revert if the Sequencer is down or stale', async () => {
+        const { deployer } = await loadFixture(register);
+
+        const sequencer = await (
+            await hre.ethers.getContractFactory('SequencerFeedMock')
+        ).deploy();
+
+        const seer = await (
+            await hre.ethers.getContractFactory('Seer')
+        ).deploy(
+            'DAI/USDC', // Name
+            'DAI/USDC', // Symbol
+            18, // Decimals
+            [
+                '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // DAI
+                '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+            ],
+            [
+                '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
+            ],
+            [1], // Multiply/divide Uni
+            600, // TWAP
+            10, // Observation length
+            0, // Uni final currency
+            [
+                '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
+                '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
+            ],
+            [1, 0], // Multiply/divide CL
+            8640000, // CL period before stale
+            [deployer.address], // Owner
+            hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
+            sequencer.address,
+        );
+
+        // Set the sequencer to be down
+        await sequencer.setLatestRoundData({
+            answer: 1, // 0 up, 1 down
+            roundId: 0,
+            startedAt: (await hre.ethers.provider.getBlock('latest')).timestamp, // last upbeat
+            updatedAt: 0,
+            answeredInRound: 0,
+        });
+
+        await expect(seer.peek('0x00')).to.be.revertedWithCustomError(
+            seer,
+            'SequencerDown',
+        );
+
+        // Set the sequencer to be up but stale
+        await sequencer.setLatestRoundData({
+            answer: 0, // 0 up, 1 down
+            roundId: 0,
+            startedAt: (await hre.ethers.provider.getBlock('latest')).timestamp, // last upbeat
+            updatedAt: 0,
+            answeredInRound: 0,
+        });
+
+        // Should revert, grace period not over
+        await expect(seer.peek('0x00')).to.be.revertedWithCustomError(
+            seer,
+            'GracePeriodNotOver',
+        );
+
+        // Set grace period to be over
+        await time.increase((await seer.GRACE_PERIOD_TIME()).add(1));
+        await expect(seer.peek('0x00')).to.not.be.reverted;
     });
 });
 
