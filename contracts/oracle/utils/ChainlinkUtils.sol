@@ -4,30 +4,25 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "../external/AccessControl.sol";
+import "../utils/SequencerCheck.sol";
 
 /// @title ChainlinkUtils
 /// @author Angle Core Team
 /// @notice Utility contract that is used across the different module contracts using Chainlink
-contract ChainlinkUtils is AccessControl {
+contract ChainlinkUtils is AccessControl, SequencerCheck {
     /// @notice Represent the maximum amount of time (in seconds) between each Chainlink update
     /// before the price feed is considered stale
     uint32 public stalePeriod;
-
-    // sequencer uptime feed
-    AggregatorV3Interface public immutable SEQUENCER_UPTIME_FEED; // If not set, assume it's on a L1
-    uint256 public GRACE_PERIOD_TIME = 3600; // 1 hour
 
     // Role for guardians and governors
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
         keccak256("GUARDIAN_ROLE");
 
-    constructor(address _sequencerUptimeFeed) {
-        SEQUENCER_UPTIME_FEED = AggregatorV3Interface(_sequencerUptimeFeed);
-    }
+    constructor(
+        address _sequencerUptimeFeed
+    ) SequencerCheck(_sequencerUptimeFeed) {}
 
     error InvalidChainlinkRate();
-    error SequencerDown();
-    error GracePeriodNotOver();
 
     /// @notice Reads a Chainlink feed using a quote amount and converts the quote amount to
     /// the out-currency
@@ -72,31 +67,6 @@ contract ChainlinkUtils is AccessControl {
         return (quoteAmount, castedRatio);
     }
 
-    function _sequencerBeatCheck() internal view {
-        // Do not check if the sequencer uptime feed is not set
-        // Assume it's on a L1 if it's not set
-        if (address(SEQUENCER_UPTIME_FEED) == address(0)) {
-            return;
-        }
-
-        (, int256 answer, uint256 startedAt, , ) = SEQUENCER_UPTIME_FEED
-            .latestRoundData();
-
-        // Answer == 0: Sequencer is up
-        // Answer == 1: Sequencer is down
-        bool isSequencerUp = answer == 0;
-        if (!isSequencerUp) {
-            revert SequencerDown();
-        }
-
-        // Make sure the grace period has passed after the
-        // sequencer is back up.
-        uint256 timeSinceUp = block.timestamp - startedAt;
-        if (timeSinceUp <= GRACE_PERIOD_TIME) {
-            revert GracePeriodNotOver();
-        }
-    }
-
     /// @notice Changes the Stale Period
     /// @param _stalePeriod New stale period (in seconds)
     function changeStalePeriod(
@@ -109,7 +79,7 @@ contract ChainlinkUtils is AccessControl {
     /// @param _gracePeriod New stale period (in seconds)
     function changeGracePeriod(
         uint32 _gracePeriod
-    ) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
+    ) external override onlyRole(GUARDIAN_ROLE_CHAINLINK) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
