@@ -358,6 +358,7 @@ describe('MagnetarV2', () => {
                 magnetar,
                 createWethUsd0Singularity,
                 deployCurveStableToUsdoBidder,
+                cluster,
             } = await loadFixture(register);
 
             const {
@@ -372,6 +373,7 @@ describe('MagnetarV2', () => {
             } = await setupUsd0Environment(
                 mediumRiskMC,
                 yieldBox,
+                cluster.address,
                 bar,
                 usdc,
                 weth,
@@ -4016,6 +4018,7 @@ async function getChainId(): Promise<number> {
 async function setupUsd0Environment(
     mediumRiskMC: any,
     yieldBox: any,
+    cluster: string,
     bar: any,
     usdc: any,
     collateral: any,
@@ -4044,14 +4047,17 @@ async function setupUsd0Environment(
     const usdo_leverage_src = await USDOLeverageModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
+        cluster,
     );
     const usdo_market_src = await USDOMarketModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
+        cluster,
     );
     const usdo_options_src = await USDOOptionsModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
+        cluster,
     );
 
     //deploy usd0 tokens
@@ -4060,6 +4066,7 @@ async function setupUsd0Environment(
     const usd0Src = await USDO.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
+        cluster,
         deployer.address,
         usdo_leverage_src.address,
         usdo_market_src.address,
@@ -4087,19 +4094,23 @@ async function setupUsd0Environment(
     const usdo_leverage_dst = await USDOLeverageModule.deploy(
         lzEndpointDst.address,
         yieldBox.address,
+        cluster,
     );
     const usdo_market_dst = await USDOMarketModule.deploy(
         lzEndpointDst.address,
         yieldBox.address,
+        cluster,
     );
     const usdo_options_dst = await USDOOptionsModule.deploy(
         lzEndpointDst.address,
         yieldBox.address,
+        cluster,
     );
 
     const usd0Dst = await USDO.deploy(
         lzEndpointDst.address,
         yieldBox.address,
+        cluster,
         deployer.address,
         usdo_leverage_dst.address,
         usdo_market_dst.address,

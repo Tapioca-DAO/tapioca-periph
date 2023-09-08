@@ -560,6 +560,7 @@ async function registerLiquidationQueue(
 async function registerUsd0Contract(
     chainId: string,
     yieldBox: string,
+    cluster: string,
     owner: any,
     staging?: boolean,
 ) {
@@ -575,24 +576,28 @@ async function registerUsd0Contract(
     const usdo_leverage = await USDOLeverageModule.deploy(
         lzEndpointContract.address,
         yieldBox,
+        cluster,
     );
 
     const USDOMarketModule = new USDOMarketModule__factory(owner);
     const usdo_market = await USDOMarketModule.deploy(
         lzEndpointContract.address,
         yieldBox,
+        cluster,
     );
 
     const USDOOptionsModule = new USDOOptionsModule__factory(owner);
     const usdo_options = await USDOOptionsModule.deploy(
         lzEndpointContract.address,
         yieldBox,
+        cluster,
     );
 
     const USDO = new USDO__factory(owner);
     const usd0 = await USDO.deploy(
         lzEndpointContract.address,
         yieldBox,
+        cluster,
         owner.address,
         usdo_leverage.address,
         usdo_market.address,
@@ -1237,6 +1242,7 @@ export async function register(staging?: boolean) {
     const { usd0, lzEndpointContract } = await registerUsd0Contract(
         chainId,
         yieldBox.address,
+        cluster.address,
         deployer,
         staging,
     );
