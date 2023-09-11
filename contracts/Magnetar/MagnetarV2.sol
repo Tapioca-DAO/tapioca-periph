@@ -485,14 +485,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     bytes memory airdropAdapterParam
                 ) = abi.decode(
                         _action.call[4:],
-                        (
-                            address,
-                            uint256,
-                            uint256,
-                            uint16,
-                            address,
-                            bytes
-                        )
+                        (address, uint256, uint256, uint16, address, bytes)
                     );
 
                 _checkSender(from);
