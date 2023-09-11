@@ -3819,7 +3819,6 @@ describe('MagnetarV2', () => {
                         yieldBox.address,
                         yieldBox.address,
                         100,
-                        1000,
                         1,
                         10109,
                         {
@@ -3854,7 +3853,6 @@ describe('MagnetarV2', () => {
                     [
                         yieldBox.address,
                         100,
-                        1000,
                         1,
                         10109,
                         ethers.constants.AddressZero,

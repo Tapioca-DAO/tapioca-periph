@@ -284,7 +284,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
             //withdraw
             if (withdrawCollateralParams.withdraw) {
-                uint256 gas = msg.value >= valueAmount ? valueAmount : address(this).balance;
+                uint256 gas = msg.value >= valueAmount
+                    ? valueAmount
+                    : address(this).balance;
                 _withdrawToChain(
                     yieldBox,
                     collateralWithdrawReceiver,
@@ -782,7 +784,9 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             bytes memory adapterParams
         ) = abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
 
-        uint256 gas = msg.value >= valueAmount ? valueAmount : address(this).balance;
+        uint256 gas = msg.value >= valueAmount
+            ? valueAmount
+            : address(this).balance;
         _withdrawToChain(
             yieldBox,
             from,
