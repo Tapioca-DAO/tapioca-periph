@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
-import {SequencerCheck} from "../utils/SequencerCheck.sol";
-import {AccessControl} from "../external/AccessControl.sol";
+import {ChainlinkUtils, AggregatorV3Interface} from "../utils/ChainlinkUtils.sol";
 
 import "../../interfaces/IOracle.sol" as ITOracle;
 
@@ -29,15 +27,15 @@ interface ICurvePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract ARBTriCryptoOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
+contract ARBTriCryptoOracle is ITOracle.IOracle, ChainlinkUtils {
     string public _name;
     string public _symbol;
 
     ICurvePool public immutable TRI_CRYPTO;
-    AggregatorV2V3Interface public immutable BTC_FEED;
-    AggregatorV2V3Interface public immutable ETH_FEED;
-    AggregatorV2V3Interface public immutable USDT_FEED;
-    AggregatorV2V3Interface public immutable WBTC_FEED;
+    AggregatorV3Interface public immutable BTC_FEED;
+    AggregatorV3Interface public immutable ETH_FEED;
+    AggregatorV3Interface public immutable USDT_FEED;
+    AggregatorV3Interface public immutable WBTC_FEED;
 
     uint256 public constant GAMMA0 = 28_000_000_000_000; // 2.8e-5
     uint256 public constant A0 = 2 * 3 ** 3 * 10_000;
@@ -47,13 +45,13 @@ contract ARBTriCryptoOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
         string memory __name,
         string memory __symbol,
         ICurvePool pool,
-        AggregatorV2V3Interface btcFeed,
-        AggregatorV2V3Interface ethFeed,
-        AggregatorV2V3Interface usdtFeed,
-        AggregatorV2V3Interface wbtcFeed,
+        AggregatorV3Interface btcFeed,
+        AggregatorV3Interface ethFeed,
+        AggregatorV3Interface usdtFeed,
+        AggregatorV3Interface wbtcFeed,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    ) ChainlinkUtils(_sequencerUptimeFeed) {
         _name = __name;
         _symbol = __symbol;
         TRI_CRYPTO = pool;
@@ -126,10 +124,10 @@ contract ARBTriCryptoOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
         uint256 _vp = TRI_CRYPTO.get_virtual_price();
 
         // Get the prices from chainlink and add 10 decimals
-        uint256 _btcPrice = _assurePrice(BTC_FEED) * 1e10;
-        uint256 _wbtcPrice = _assurePrice(WBTC_FEED) * 1e10;
-        uint256 _ethPrice = _assurePrice(ETH_FEED) * 1e10;
-        uint256 _usdtPrice = _assurePrice(USDT_FEED) * 1e10;
+        uint256 _btcPrice = _readChainlinkBase(BTC_FEED, 0) * 1e10;
+        uint256 _wbtcPrice = _readChainlinkBase(WBTC_FEED, 0) * 1e10;
+        uint256 _ethPrice = _readChainlinkBase(ETH_FEED, 0) * 1e10;
+        uint256 _usdtPrice = _readChainlinkBase(USDT_FEED, 0) * 1e10;
 
         uint256 _minWbtcPrice = (_wbtcPrice < 1e18)
             ? (_wbtcPrice * _btcPrice) / 1e18
@@ -147,24 +145,5 @@ contract ARBTriCryptoOracle is ITOracle.IOracle, SequencerCheck, AccessControl {
         _discount = (FixedPointMathLib.sqrt(_discount) * DISCOUNT0) / 1 ether;
 
         _maxPrice -= (_maxPrice * _discount) / 1 ether;
-    }
-
-    function _assurePrice(
-        AggregatorV2V3Interface feed
-    ) private view returns (uint256 _price) {
-        (uint80 roundId, int256 answer, , uint256 updatedAt, ) = feed
-            .latestRoundData();
-        require(answer > 0, "ARBTriCryptoOracle: feed price 0");
-        require(updatedAt > 0, "ARBTriCryptoOracle: stale price");
-        require(roundId > 0, "ARBTriCryptoOracle: stale round");
-        return uint256(answer);
-    }
-
-    /// @notice Changes the grace period for the sequencer update
-    /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(
-        uint32 _gracePeriod
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
