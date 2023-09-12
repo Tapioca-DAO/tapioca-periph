@@ -49,7 +49,8 @@ contract OracleDAI is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti {
         uint8[] memory _circuitChainIsMultiplied,
         uint32 stalePeriod,
         address[] memory guardians,
-        bytes32 _description
+        bytes32 _description,
+        address _sequencerUptimeFeed
     )
         ModuleUniswapMulti(
             _circuitUniswap,
@@ -62,7 +63,8 @@ contract OracleDAI is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti {
             _circuitChainlink,
             _circuitChainIsMultiplied,
             stalePeriod,
-            guardians
+            guardians,
+            _sequencerUptimeFeed
         )
     {
         require(addressInAndOutUni.length == 2, "107");
