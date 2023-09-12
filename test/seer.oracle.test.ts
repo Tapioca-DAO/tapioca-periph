@@ -40,7 +40,7 @@ runTestMainnet(() => {
                 '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
             ],
             [1, 0], // Multiply/divide CL
-            86400, // CL period before stale
+            8640000, // CL period before stale
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             hre.ethers.constants.AddressZero,
@@ -80,7 +80,7 @@ runTestMainnet(() => {
                 '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
             ],
             [1, 0], // Multiply/divide CL
-            86400, // CL period before stale
+            8640000, // CL period before stale
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description,
             hre.ethers.constants.AddressZero,
@@ -139,6 +139,11 @@ runTestMainnet(() => {
             deployer.address, // Owner
         );
 
+        await seer.grantRole(
+            await seer.GUARDIAN_ROLE_CHAINLINK(),
+            deployer.address,
+        );
+        await seer.changeStalePeriod(8640000); // just for test purposes
         console.log(
             hre.ethers.utils.formatUnits(
                 (await seer.peek('0x00')).rate,
@@ -184,7 +189,7 @@ runTestMainnet(() => {
                 '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
             ],
             [1, 0], // Multiply/divide CL
-            86400, // CL period before stale
+            8640000, // CL period before stale
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             hre.ethers.constants.AddressZero,
@@ -224,7 +229,7 @@ runTestMainnet(() => {
                 '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
             ],
             [1, 0], // Multiply/divide CL
-            86400, // CL period before stale
+            8640000, // CL period before stale
             [deployer.address], // Owner
             hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
             sequencer.address,
