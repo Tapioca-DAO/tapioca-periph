@@ -26,13 +26,15 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle {
         uint256 _inBase,
         uint32 stalePeriod,
         address[] memory guardians,
-        bytes32 _description
+        bytes32 _description,
+        address _sequencerUptimeFeed
     )
         ModuleChainlinkSingle(
             _poolChainlink,
             _isChainlinkMultiplied,
             stalePeriod,
-            guardians
+            guardians,
+            _sequencerUptimeFeed
         )
     {
         inBase = _inBase;
