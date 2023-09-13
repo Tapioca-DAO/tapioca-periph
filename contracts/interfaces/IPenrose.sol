@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "./ISwapper.sol";
+import "./ICluster.sol";
 
 interface IPenrose {
     /// @notice swap extra data
@@ -26,11 +27,6 @@ interface IPenrose {
 
     function bigBangEthDebtRate() external view returns (uint256);
 
-    function swappers(
-        uint16 lzChainId,
-        ISwapper swapper
-    ) external view returns (bool);
-
     function yieldBox() external view returns (address payable);
 
     function tapToken() external view returns (address);
@@ -50,4 +46,6 @@ interface IPenrose {
     function isMarketRegistered(address market) external view returns (bool);
 
     function hostLzChainId() external view returns (uint16);
+
+    function cluster() external view returns (ICluster);
 }
