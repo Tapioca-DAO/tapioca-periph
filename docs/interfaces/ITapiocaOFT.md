@@ -379,7 +379,7 @@ function useCustomAdapterParams() external view returns (bool)
 ### wrap
 
 ```solidity
-function wrap(address fromAddress, address toAddress, uint256 amount) external nonpayable
+function wrap(address fromAddress, address toAddress, uint256 amount) external payable
 ```
 
 
@@ -393,22 +393,6 @@ function wrap(address fromAddress, address toAddress, uint256 amount) external n
 | fromAddress | address | undefined |
 | toAddress | address | undefined |
 | amount | uint256 | undefined |
-
-### wrapNative
-
-```solidity
-function wrapNative(address _toAddress) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _toAddress | address | undefined |
 
 ### wrappedAmount
 
