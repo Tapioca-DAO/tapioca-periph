@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 //OZ
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 //TAPIOCA
 import "./MagnetarV2Storage.sol";
@@ -23,7 +24,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract MagnetarV2 is Ownable, MagnetarV2Storage {
+contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
@@ -934,6 +935,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 removeAndRepayData
             )
         );
+    }
+
+    /// @notice IERC721Receiver implementation
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     // ********************* //
