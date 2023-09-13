@@ -170,8 +170,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 collateralId,
                 address(this),
                 address(this),
-                0,
-                _share
+                collateralAmount,
+                0
             );
         }
 
