@@ -61,6 +61,23 @@ function feeTo() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### hostLzChainId
+
+```solidity
+function hostLzChainId() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### isMarketRegistered
 
 ```solidity
@@ -83,10 +100,44 @@ function isMarketRegistered(address market) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### mainAssetId
+
+```solidity
+function mainAssetId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### mainToken
+
+```solidity
+function mainToken() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### swappers
 
 ```solidity
-function swappers(contract ISwapper swapper) external view returns (bool)
+function swappers(uint16 lzChainId, contract ISwapper swapper) external view returns (bool)
 ```
 
 
@@ -97,6 +148,7 @@ function swappers(contract ISwapper swapper) external view returns (bool)
 
 | Name | Type | Description |
 |---|---|---|
+| lzChainId | uint16 | undefined |
 | swapper | contract ISwapper | undefined |
 
 #### Returns
@@ -160,40 +212,6 @@ function usdoAssetId() external view returns (uint256)
 
 ```solidity
 function usdoToken() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-### wethAssetId
-
-```solidity
-function wethAssetId() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### wethToken
-
-```solidity
-function wethToken() external view returns (address)
 ```
 
 

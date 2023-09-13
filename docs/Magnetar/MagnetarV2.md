@@ -13,7 +13,7 @@
 ### bigBangMarketInfo
 
 ```solidity
-function bigBangMarketInfo(address who, contract IBigBang[] markets) external view returns (struct MagnetarV2Operations.BigBangInfo[])
+function bigBangMarketInfo(address who, contract IBigBang[] markets) external view returns (struct MagnetarV2Storage.BigBangInfo[])
 ```
 
 returns BigBang markets&#39; information
@@ -31,12 +31,12 @@ returns BigBang markets&#39; information
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | MagnetarV2Operations.BigBangInfo[] | undefined |
+| _0 | MagnetarV2Storage.BigBangInfo[] | undefined |
 
 ### burst
 
 ```solidity
-function burst(MagnetarV2ActionsData.Call[] calls) external payable returns (struct MagnetarV2ActionsData.Result[] returnData)
+function burst(MagnetarV2Storage.Call[] calls) external payable returns (struct MagnetarV2Storage.Result[] returnData)
 ```
 
 
@@ -47,18 +47,18 @@ function burst(MagnetarV2ActionsData.Call[] calls) external payable returns (str
 
 | Name | Type | Description |
 |---|---|---|
-| calls | MagnetarV2ActionsData.Call[] | undefined |
+| calls | MagnetarV2Storage.Call[] | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| returnData | MagnetarV2ActionsData.Result[] | undefined |
+| returnData | MagnetarV2Storage.Result[] | undefined |
 
-### depositAddCollateralAndBorrow
+### depositAddCollateralAndBorrowFromMarket
 
 ```solidity
-function depositAddCollateralAndBorrow(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, bool withdraw, bytes withdrawData) external payable
+function depositAddCollateralAndBorrowFromMarket(contract IMarket market, address user, uint256 collateralAmount, uint256 borrowAmount, bool extractFromSender, bool deposit, ICommonData.IWithdrawParams withdrawParams) external payable
 ```
 
 
@@ -75,13 +75,12 @@ function depositAddCollateralAndBorrow(contract IMarket market, address user, ui
 | borrowAmount | uint256 | undefined |
 | extractFromSender | bool | undefined |
 | deposit | bool | undefined |
-| withdraw | bool | undefined |
-| withdrawData | bytes | undefined |
+| withdrawParams | ICommonData.IWithdrawParams | undefined |
 
-### depositAndAddAsset
+### depositRepayAndRemoveCollateralFromMarket
 
 ```solidity
-function depositAndAddAsset(contract IMarket singularity, address _user, uint256 _amount, bool deposit_, bool extractFromSender) external payable
+function depositRepayAndRemoveCollateralFromMarket(address market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool extractFromSender, ICommonData.IWithdrawParams withdrawCollateralParams) external payable
 ```
 
 
@@ -92,55 +91,31 @@ function depositAndAddAsset(contract IMarket singularity, address _user, uint256
 
 | Name | Type | Description |
 |---|---|---|
-| singularity | contract IMarket | undefined |
-| _user | address | undefined |
-| _amount | uint256 | undefined |
-| deposit_ | bool | undefined |
-| extractFromSender | bool | undefined |
-
-### depositAndRepay
-
-```solidity
-function depositAndRepay(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, bool deposit, bool extractFromSender) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| market | contract IMarket | undefined |
-| user | address | undefined |
-| depositAmount | uint256 | undefined |
-| repayAmount | uint256 | undefined |
-| deposit | bool | undefined |
-| extractFromSender | bool | undefined |
-
-### depositRepayAndRemoveCollateral
-
-```solidity
-function depositRepayAndRemoveCollateral(contract IMarket market, address user, uint256 depositAmount, uint256 repayAmount, uint256 collateralAmount, bool deposit, bool withdraw, bool extractFromSender) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| market | contract IMarket | undefined |
+| market | address | undefined |
 | user | address | undefined |
 | depositAmount | uint256 | undefined |
 | repayAmount | uint256 | undefined |
 | collateralAmount | uint256 | undefined |
-| deposit | bool | undefined |
-| withdraw | bool | undefined |
 | extractFromSender | bool | undefined |
+| withdrawCollateralParams | ICommonData.IWithdrawParams | undefined |
+
+### exitPositionAndRemoveCollateral
+
+```solidity
+function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user | address | undefined |
+| externalData | ICommonData.ICommonExternalContracts | undefined |
+| removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
 
 ### getAmountForAssetFraction
 
@@ -188,6 +163,52 @@ Return the equivalent of borrow part in asset amount.
 |---|---|---|
 | amount | uint256 | The equivalent of borrow part in asset amount. |
 
+### getBorrowPartForAmount
+
+```solidity
+function getBorrowPartForAmount(contract IMarket market, uint256 amount) external view returns (uint256 part)
+```
+
+Return the equivalent of amount in borrow part.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | contract IMarket | the Singularity or BigBang address |
+| amount | uint256 | The amount to convert. |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| part | uint256 | The equivalent of amount in borrow part. |
+
+### getCollateralAmountForShare
+
+```solidity
+function getCollateralAmountForShare(contract IMarket market, uint256 share) external view returns (uint256 amount)
+```
+
+Calculate the collateral amount off the shares.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| market | contract IMarket | the Singularity or BigBang address |
+| share | uint256 | The shares. |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | The amount. |
+
 ### getCollateralSharesForBorrowPart
 
 ```solidity
@@ -213,6 +234,29 @@ Calculate the collateral shares that are needed for `borrowPart`, taking the cur
 |---|---|---|
 | collateralShares | uint256 | The collateral shares. |
 
+### getFractionForAmount
+
+```solidity
+function getFractionForAmount(contract ISingularity singularity, uint256 amount) external view returns (uint256 fraction)
+```
+
+Compute the fraction of `singularity.assetId` from `amount` `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| singularity | contract ISingularity | the singularity address |
+| amount | uint256 | The amount. |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| fraction | uint256 | The fraction. |
+
 ### isApprovedForAll
 
 ```solidity
@@ -236,10 +280,27 @@ function isApprovedForAll(address, address) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### mintAndLend
+### marketModule
 
 ```solidity
-function mintAndLend(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 collateralAmount, uint256 borrowAmount, bool deposit, bool extractFromSender) external payable
+function marketModule() external view returns (contract MagnetarMarketModule)
+```
+
+returns the Market module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract MagnetarMarketModule | undefined |
+
+### mintFromBBAndLendOnSGL
+
+```solidity
+function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMintData mintData, ICommonData.IDepositData depositData, ITapiocaOptionLiquidityProvision.IOptionsLockData lockData, ITapiocaOptionsBroker.IOptionsParticipateData participateData, ICommonData.ICommonExternalContracts externalContracts) external payable
 ```
 
 
@@ -250,13 +311,13 @@ function mintAndLend(contract ISingularity singularity, contract IMarket bingBan
 
 | Name | Type | Description |
 |---|---|---|
-| singularity | contract ISingularity | undefined |
-| bingBang | contract IMarket | undefined |
 | user | address | undefined |
-| collateralAmount | uint256 | undefined |
-| borrowAmount | uint256 | undefined |
-| deposit | bool | undefined |
-| extractFromSender | bool | undefined |
+| lendAmount | uint256 | undefined |
+| mintData | IUSDOBase.IMintData | undefined |
+| depositData | ICommonData.IDepositData | undefined |
+| lockData | ITapiocaOptionLiquidityProvision.IOptionsLockData | undefined |
+| participateData | ITapiocaOptionsBroker.IOptionsParticipateData | undefined |
+| externalContracts | ICommonData.ICommonExternalContracts | undefined |
 
 ### owner
 
@@ -275,29 +336,6 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### removeAssetAndRepay
-
-```solidity
-function removeAssetAndRepay(contract ISingularity singularity, contract IMarket bingBang, address user, uint256 removeShare, uint256 repayAmount, uint256 collateralShare, bool withdraw, bytes withdrawData) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| singularity | contract ISingularity | undefined |
-| bingBang | contract IMarket | undefined |
-| user | address | undefined |
-| removeShare | uint256 | undefined |
-| repayAmount | uint256 | undefined |
-| collateralShare | uint256 | undefined |
-| withdraw | bool | undefined |
-| withdrawData | bytes | undefined |
-
 ### renounceOwnership
 
 ```solidity
@@ -309,13 +347,13 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
-### setApprovalForAll
+### rescueEth
 
 ```solidity
-function setApprovalForAll(address operator, bool approved) external nonpayable
+function rescueEth(uint256 amount, address to) external nonpayable
 ```
 
-*** PUBLIC METHODS *** ***  ***Update approval status for an operator
+rescues unused ETH from the contract
 
 
 
@@ -323,16 +361,16 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| operator | address | The address approved to perform actions on your behalf |
-| approved | bool | True/False |
+| amount | uint256 | the amount to rescue |
+| to | address | the recipient |
 
 ### singularityMarketInfo
 
 ```solidity
-function singularityMarketInfo(address who, contract ISingularity[] markets) external view returns (struct MagnetarV2Operations.SingularityInfo[])
+function singularityMarketInfo(address who, contract ISingularity[] markets) external view returns (struct MagnetarV2Storage.SingularityInfo[])
 ```
 
-*** VIEW METHODS *** ***  ***returns Singularity markets&#39; information
+returns Singularity markets&#39; information
 
 
 
@@ -347,7 +385,7 @@ function singularityMarketInfo(address who, contract ISingularity[] markets) ext
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | MagnetarV2Operations.SingularityInfo[] | undefined |
+| _0 | MagnetarV2Storage.SingularityInfo[] | undefined |
 
 ### transferOwnership
 
@@ -365,30 +403,30 @@ function transferOwnership(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
-### withdrawTo
+### withdrawToChain
 
 ```solidity
-function withdrawTo(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
 ```
 
+performs a withdraw operation
 
-
-
+*it can withdraw on the current chain or it can send it to another one     - if `dstChainId` is 0 performs a same-chain withdrawal          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| yieldBox | contract IYieldBoxBase | undefined |
-| from | address | undefined |
-| assetId | uint256 | undefined |
-| dstChainId | uint16 | undefined |
-| receiver | bytes32 | undefined |
-| amount | uint256 | undefined |
-| share | uint256 | undefined |
-| adapterParams | bytes | undefined |
-| refundAddress | address payable | undefined |
-| gas | uint256 | undefined |
+| yieldBox | contract IYieldBoxBase | the YieldBox address |
+| from | address | user to withdraw from |
+| assetId | uint256 | the YieldBox asset id to withdraw |
+| dstChainId | uint16 | LZ chain id to withdraw to |
+| receiver | bytes32 | the receiver on the destination chain |
+| amount | uint256 | the amount to withdraw |
+| share | uint256 | the share to withdraw |
+| adapterParams | bytes | LZ adapter params |
+| refundAddress | address payable | the LZ refund address which receives the gas not used in the process |
+| gas | uint256 | the amount of gas to use for sending the asset to another layer |
 
 
 
@@ -397,10 +435,10 @@ function withdrawTo(contract IYieldBoxBase yieldBox, address from, uint256 asset
 ### ApprovalForAll
 
 ```solidity
-event ApprovalForAll(address owner, address operator, bool approved)
+event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
 ```
 
-*** EVENTS *** ***  ***
+
 
 
 
@@ -408,8 +446,8 @@ event ApprovalForAll(address owner, address operator, bool approved)
 
 | Name | Type | Description |
 |---|---|---|
-| owner  | address | undefined |
-| operator  | address | undefined |
+| owner `indexed` | address | undefined |
+| operator `indexed` | address | undefined |
 | approved  | bool | undefined |
 
 ### OwnershipTransferred

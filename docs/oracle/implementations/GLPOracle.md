@@ -1,4 +1,4 @@
-# IOracle
+# GLPOracle
 
 
 
@@ -13,7 +13,7 @@
 ### decimals
 
 ```solidity
-function decimals() external view returns (uint8)
+function decimals() external pure returns (uint8)
 ```
 
 
@@ -30,7 +30,7 @@ function decimals() external view returns (uint8)
 ### get
 
 ```solidity
-function get(bytes data) external nonpayable returns (bool success, uint256 rate)
+function get(bytes) external view returns (bool success, uint256 rate)
 ```
 
 Get the latest exchange rate.
@@ -41,7 +41,7 @@ Get the latest exchange rate.
 
 | Name | Type | Description |
 |---|---|---|
-| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+| _0 | bytes | undefined |
 
 #### Returns
 
@@ -53,7 +53,7 @@ Get the latest exchange rate.
 ### name
 
 ```solidity
-function name(bytes data) external view returns (string)
+function name(bytes) external pure returns (string)
 ```
 
 Returns a human readable name about this oracle.
@@ -64,7 +64,7 @@ Returns a human readable name about this oracle.
 
 | Name | Type | Description |
 |---|---|---|
-| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+| _0 | bytes | undefined |
 
 #### Returns
 
@@ -75,7 +75,7 @@ Returns a human readable name about this oracle.
 ### peek
 
 ```solidity
-function peek(bytes data) external view returns (bool success, uint256 rate)
+function peek(bytes) external view returns (bool success, uint256 rate)
 ```
 
 Check the last exchange rate without any state changes.
@@ -86,7 +86,7 @@ Check the last exchange rate without any state changes.
 
 | Name | Type | Description |
 |---|---|---|
-| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+| _0 | bytes | undefined |
 
 #### Returns
 
@@ -120,7 +120,7 @@ Check the current spot exchange rate without any state changes. For oracles like
 ### symbol
 
 ```solidity
-function symbol(bytes data) external view returns (string)
+function symbol(bytes) external pure returns (string)
 ```
 
 Returns a human readable (short) name about this oracle.
@@ -131,7 +131,7 @@ Returns a human readable (short) name about this oracle.
 
 | Name | Type | Description |
 |---|---|---|
-| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+| _0 | bytes | undefined |
 
 #### Returns
 

@@ -201,6 +201,33 @@ function borrow(address from, address to, uint256 amount) external nonpayable re
 | part | uint256 | undefined |
 | share | uint256 | undefined |
 
+### buyCollateral
+
+```solidity
+function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, uint256 minAmountOut, address swapper, bytes dexData) external nonpayable returns (uint256 amountOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| borrowAmount | uint256 | undefined |
+| supplyAmount | uint256 | undefined |
+| minAmountOut | uint256 | undefined |
+| swapper | address | undefined |
+| dexData | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountOut | uint256 | undefined |
+
 ### collateral
 
 ```solidity
@@ -222,6 +249,23 @@ function collateral() external view returns (address)
 
 ```solidity
 function collateralId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### collateralizationRate
+
+```solidity
+function collateralizationRate() external view returns (uint256)
 ```
 
 
@@ -299,6 +343,41 @@ function execute(bytes[] calls, bool revertOnFail) external nonpayable returns (
 | successes | bool[] | undefined |
 | results | string[] | undefined |
 
+### getInterestDetails
+
+```solidity
+function getInterestDetails() external view returns (struct ISingularity.AccrueInfo _accrueInfo, uint256 utilization)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _accrueInfo | ISingularity.AccrueInfo | undefined |
+| utilization | uint256 | undefined |
+
+### interestElasticity
+
+```solidity
+function interestElasticity() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### liquidationMultiplier
 
 ```solidity
@@ -332,6 +411,117 @@ function liquidationQueue() external view returns (address payable)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address payable | undefined |
+
+### maximumInterestPerSecond
+
+```solidity
+function maximumInterestPerSecond() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### maximumTargetUtilization
+
+```solidity
+function maximumTargetUtilization() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### minimumInterestPerSecond
+
+```solidity
+function minimumInterestPerSecond() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### minimumTargetUtilization
+
+```solidity
+function minimumTargetUtilization() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### multiHopBuyCollateral
+
+```solidity
+function multiHopBuyCollateral(address from, uint256 collateralAmount, uint256 borrowAmount, bool useAirdroppedFunds, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| collateralAmount | uint256 | undefined |
+| borrowAmount | uint256 | undefined |
+| useAirdroppedFunds | bool | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+
+### multiHopSellCollateral
+
+```solidity
+function multiHopSellCollateral(address from, uint256 share, bool useAirdroppedFunds, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| share | uint256 | undefined |
+| useAirdroppedFunds | bool | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 
 ### name
 
@@ -465,18 +655,13 @@ function permit(address owner_, address spender, uint256 value, uint256 deadline
 ### refreshPenroseFees
 
 ```solidity
-function refreshPenroseFees(address feeTo) external nonpayable returns (uint256 feeShares)
+function refreshPenroseFees() external nonpayable returns (uint256 feeShares)
 ```
 
 
 
 
 
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| feeTo | address | undefined |
 
 #### Returns
 
@@ -550,6 +735,49 @@ function repay(address from, address to, bool skim, uint256 part) external nonpa
 | Name | Type | Description |
 |---|---|---|
 | amount | uint256 | undefined |
+
+### sellCollateral
+
+```solidity
+function sellCollateral(address from, uint256 share, uint256 minAmountOut, address swapper, bytes dexData) external nonpayable returns (uint256 amountOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| share | uint256 | undefined |
+| minAmountOut | uint256 | undefined |
+| swapper | address | undefined |
+| dexData | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountOut | uint256 | undefined |
+
+### startingInterestPerSecond
+
+```solidity
+function startingInterestPerSecond() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### totalAsset
 

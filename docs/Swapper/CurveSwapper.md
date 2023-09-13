@@ -267,26 +267,4 @@ error AddressNotValid()
 
 
 
-### NotImplemented
-
-```solidity
-error NotImplemented()
-```
-
-
-
-
-
-
-### Undefined
-
-```solidity
-error Undefined()
-```
-
-*** ERRORS *** ***  ***
-
-
-
-
 

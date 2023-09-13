@@ -114,6 +114,33 @@ function borrow(address from, address to, uint256 amount) external nonpayable re
 | part | uint256 | undefined |
 | share | uint256 | undefined |
 
+### buyCollateral
+
+```solidity
+function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, uint256 minAmountOut, address swapper, bytes dexData) external nonpayable returns (uint256 amountOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| borrowAmount | uint256 | undefined |
+| supplyAmount | uint256 | undefined |
+| minAmountOut | uint256 | undefined |
+| swapper | address | undefined |
+| dexData | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountOut | uint256 | undefined |
+
 ### collateral
 
 ```solidity
@@ -135,6 +162,23 @@ function collateral() external view returns (address)
 
 ```solidity
 function collateralId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### collateralizationRate
+
+```solidity
+function collateralizationRate() external view returns (uint256)
 ```
 
 
@@ -277,18 +321,13 @@ function penrose() external view returns (address)
 ### refreshPenroseFees
 
 ```solidity
-function refreshPenroseFees(address feeTo) external nonpayable returns (uint256 feeShares)
+function refreshPenroseFees() external nonpayable returns (uint256 feeShares)
 ```
 
 
 
 
 
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| feeTo | address | undefined |
 
 #### Returns
 
@@ -338,6 +377,32 @@ function repay(address from, address to, bool skim, uint256 part) external nonpa
 | Name | Type | Description |
 |---|---|---|
 | amount | uint256 | undefined |
+
+### sellCollateral
+
+```solidity
+function sellCollateral(address from, uint256 share, uint256 minAmountOut, address swapper, bytes dexData) external nonpayable returns (uint256 amountOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| share | uint256 | undefined |
+| minAmountOut | uint256 | undefined |
+| swapper | address | undefined |
+| dexData | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountOut | uint256 | undefined |
 
 ### totalBorrow
 

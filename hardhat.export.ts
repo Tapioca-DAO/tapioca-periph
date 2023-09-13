@@ -99,7 +99,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     },
     gasReporter: {},
     dodoc: {
-        runOnCompile: false,
+        runOnCompile: true,
         freshOutput: true,
     },
     mocha: {
