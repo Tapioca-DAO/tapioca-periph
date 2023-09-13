@@ -718,6 +718,13 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 type(ISendFrom).interfaceId
             )
         {} catch {
+            yieldBox.withdraw(
+                assetId,
+                from,
+                LzLib.bytes32ToAddress(receiver),
+                amount,
+                share
+            );
             return;
         }
 
