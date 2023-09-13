@@ -24,7 +24,6 @@ interface IMagnetar {
         uint16 dstChainId,
         bytes32 receiver,
         uint256 amount,
-        uint256 share,
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
