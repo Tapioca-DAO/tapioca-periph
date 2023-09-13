@@ -2,22 +2,57 @@
 
 pragma solidity ^0.8.7;
 
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {AccessControlledOffchainAggregator, AggregatorV3Interface} from "../../interfaces/IAggregatorV3Interface.sol";
+import {SequencerCheck} from "../utils/SequencerCheck.sol";
 import "../external/AccessControl.sol";
 
 /// @title ChainlinkUtils
 /// @author Angle Core Team
 /// @notice Utility contract that is used across the different module contracts using Chainlink
-abstract contract ChainlinkUtils is AccessControl {
+contract ChainlinkUtils is AccessControl, SequencerCheck {
     /// @notice Represent the maximum amount of time (in seconds) between each Chainlink update
     /// before the price feed is considered stale
-    uint32 public stalePeriod;
+    uint32 public stalePeriod = 86400; // Default to 1 day
 
     // Role for guardians and governors
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
         keccak256("GUARDIAN_ROLE");
 
+    constructor(
+        address _sequencerUptimeFeed
+    ) SequencerCheck(_sequencerUptimeFeed) {}
+
     error InvalidChainlinkRate();
+
+    /// @notice Reads a Chainlink feed. Perform a sequence upbeat check if L2 chain
+    /// @param feed Chainlink feed to query
+    /// @return The value obtained with the Chainlink feed queried
+    function _readChainlinkBase(
+        AggregatorV3Interface feed,
+        uint256 castedRatio
+    ) internal view returns (uint256) {
+        // Checking whether the sequencer is up
+        _sequencerBeatCheck();
+
+        if (castedRatio == 0) {
+            (
+                uint80 roundId,
+                int256 ratio,
+                ,
+                uint256 updatedAt,
+                uint80 answeredInRound
+            ) = feed.latestRoundData();
+
+            if (
+                ratio <= feed.aggregator().minAnswer() ||
+                ratio >= feed.aggregator().maxAnswer() ||
+                roundId > answeredInRound ||
+                block.timestamp - updatedAt > stalePeriod
+            ) revert InvalidChainlinkRate();
+            castedRatio = uint256(ratio);
+        }
+        return castedRatio;
+    }
 
     /// @notice Reads a Chainlink feed using a quote amount and converts the quote amount to
     /// the out-currency
@@ -37,21 +72,11 @@ abstract contract ChainlinkUtils is AccessControl {
         uint256 decimals,
         uint256 castedRatio
     ) internal view returns (uint256, uint256) {
-        if (castedRatio == 0) {
-            (
-                uint80 roundId,
-                int256 ratio,
-                ,
-                uint256 updatedAt,
-                uint80 answeredInRound
-            ) = feed.latestRoundData();
-            if (
-                ratio <= 0 ||
-                roundId > answeredInRound ||
-                block.timestamp - updatedAt > stalePeriod
-            ) revert InvalidChainlinkRate();
-            castedRatio = uint256(ratio);
-        }
+        // Checking whether the sequencer is up
+        _sequencerBeatCheck();
+
+        castedRatio = _readChainlinkBase(feed, castedRatio);
+
         // Checking whether we should multiply or divide by the ratio computed
         if (multiplied == 1)
             quoteAmount = (quoteAmount * castedRatio) / (10 ** decimals);
@@ -65,5 +90,13 @@ abstract contract ChainlinkUtils is AccessControl {
         uint32 _stalePeriod
     ) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
         stalePeriod = _stalePeriod;
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(GUARDIAN_ROLE_CHAINLINK) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
