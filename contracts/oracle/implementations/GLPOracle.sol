@@ -3,12 +3,20 @@ pragma solidity >=0.8.0;
 
 import {IOracle} from "../../interfaces/IOracle.sol";
 import {IGmxGlpManager} from "../../interfaces/IGmxGlpManager.sol";
+import {SequencerCheck} from "../utils/SequencerCheck.sol";
+import {AccessControl} from "../external/AccessControl.sol";
 
-contract GLPOracle is IOracle {
+contract GLPOracle is IOracle, SequencerCheck, AccessControl {
     IGmxGlpManager private immutable glpManager;
 
-    constructor(IGmxGlpManager glpManager_) {
+    constructor(
+        IGmxGlpManager glpManager_,
+        address _sequencerUptimeFeed,
+        address _admin
+    ) SequencerCheck(_sequencerUptimeFeed) {
         glpManager = glpManager_;
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
@@ -24,6 +32,7 @@ contract GLPOracle is IOracle {
     function get(
         bytes calldata
     ) public view override returns (bool success, uint256 rate) {
+        _sequencerBeatCheck();
         return (true, _get());
     }
 
@@ -53,5 +62,13 @@ contract GLPOracle is IOracle {
         bytes calldata
     ) public pure override returns (string memory) {
         return "GLP/USD";
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
