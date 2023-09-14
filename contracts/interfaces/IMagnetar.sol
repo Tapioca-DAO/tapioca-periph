@@ -5,18 +5,11 @@ import "./ITapiocaOptionsBroker.sol";
 import "./ITapiocaOptionLiquidityProvision.sol";
 import "./ICommonData.sol";
 import {IUSDOBase} from "./IUSDO.sol";
+import "./IMagnetarHelper.sol";
 
 interface IMagnetar {
-    function getAmountForBorrowPart(
-        address market,
-        uint256 borrowPart
-    ) external view returns (uint256 amount);
-
-    function getBorrowPartForAmount(
-        address market,
-        uint256 amount
-    ) external view returns (uint256 part);
-
+    function helper() external view returns (IMagnetarHelper);
+    
     function withdrawToChain(
         address yieldBox,
         address from,

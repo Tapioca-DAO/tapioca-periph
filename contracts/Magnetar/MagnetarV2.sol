@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./MagnetarV2Storage.sol";
 import "./modules/MagnetarMarketModule.sol";
 
+import "../interfaces/IMagnetarHelper.sol";
+
 /*
 
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -38,6 +40,10 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
     /// @notice returns the Market module
     MagnetarMarketModule public marketModule;
 
+    IMagnetarHelper public helper;
+
+    event HelperUpdate(address indexed old, address indexed newHelper);
+
     constructor(
         address _cluster,
         address _owner,
@@ -46,6 +52,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         cluster = ICluster(_cluster);
         transferOwnership(_owner);
         marketModule = MagnetarMarketModule(_marketModule);
+    }
+    // *********************** //
+    // *** OWNER METHODS **** //
+    // ********************** //
+    function setHelper(address _helper) external onlyOwner {
+        emit HelperUpdate(address(helper), _helper);
+        helper = IMagnetarHelper(_helper);
     }
 
     // ********************** //
