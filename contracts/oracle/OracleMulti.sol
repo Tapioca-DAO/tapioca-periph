@@ -53,7 +53,8 @@ contract OracleMulti is
         uint8[] memory _circuitChainIsMultiplied,
         uint32 _stalePeriod,
         address[] memory guardians,
-        bytes32 _description
+        bytes32 _description,
+        address _sequencerUptimeFeed
     )
         ModuleUniswapMulti(
             _circuitUniswap,
@@ -66,7 +67,8 @@ contract OracleMulti is
             _circuitChainlink,
             _circuitChainIsMultiplied,
             _stalePeriod,
-            guardians
+            guardians,
+            _sequencerUptimeFeed
         )
     {
         require(addressInAndOutUni.length == 2, "107");
