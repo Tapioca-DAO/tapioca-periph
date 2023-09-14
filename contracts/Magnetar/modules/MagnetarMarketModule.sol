@@ -111,13 +111,15 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         address user,
         ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        uint256 valueAmount
+        uint256 valueAmount,
+        ICluster _cluster
     ) external payable {
         _exitPositionAndRemoveCollateral(
             user,
             externalData,
             removeAndRepayData,
-            valueAmount
+            valueAmount,
+            _cluster
         );
     }
 
@@ -514,8 +516,21 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         address user,
         ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        uint256 valueAmount
+        uint256 valueAmount,
+        ICluster _cluster
     ) private {
+        require(
+            _cluster.isWhitelisted(_cluster.lzChainId(), externalData.bigBang),
+            "MagnetarV2: BB not whitelisted"
+        );
+        require(
+            _cluster.isWhitelisted(
+                _cluster.lzChainId(),
+                externalData.singularity
+            ),
+            "MagnetarV2: SGL not whitelisted"
+        );
+
         IMarket bigBang = IMarket(externalData.bigBang);
         ISingularity singularity = ISingularity(externalData.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());

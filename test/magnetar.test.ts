@@ -324,13 +324,6 @@ describe('MagnetarV2', () => {
             );
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
-            const collateralShare =
-                await magnetar.getCollateralSharesForBorrowPart(
-                    wethUsdoSingularity.address,
-                    borrowPart,
-                    1e5,
-                    1e5,
-                );
             const receiverSplit = deployer.address.split('0x');
             await magnetar.withdrawToChain(
                 yieldBox.address,
@@ -3064,6 +3057,7 @@ describe('MagnetarV2', () => {
                 initContracts,
                 yieldBox,
                 magnetar,
+                cluster,
                 deployer,
             } = await loadFixture(register);
 
@@ -3238,6 +3232,8 @@ describe('MagnetarV2', () => {
             //     ),
             // ).to.be.revertedWith('SGL: min limit');
 
+            await cluster.updateContract(1, wethBigBangMarket.address, true);
+            await cluster.updateContract(1, wethUsdoSingularity.address, true);
             await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
                 {
@@ -3304,6 +3300,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 magnetar,
                 deployer,
+                cluster,
             } = await loadFixture(register);
 
             await initContracts();
@@ -3422,6 +3419,8 @@ describe('MagnetarV2', () => {
                 false,
             );
 
+            await cluster.updateContract(1, wethBigBangMarket.address, true);
+            await cluster.updateContract(1, wethUsdoSingularity.address, true);
             await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
                 {

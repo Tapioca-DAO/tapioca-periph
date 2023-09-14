@@ -10,28 +10,22 @@
 
 ## Methods
 
-### isApprovedForAll
+### cluster
 
 ```solidity
-function isApprovedForAll(address, address) external view returns (bool)
+function cluster() external view returns (contract ICluster)
 ```
 
 
 
 
 
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-| _1 | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| _0 | contract ICluster | undefined |
 
 
 
@@ -54,6 +48,23 @@ event ApprovalForAll(address indexed owner, address indexed operator, bool appro
 | owner `indexed` | address | undefined |
 | operator `indexed` | address | undefined |
 | approved  | bool | undefined |
+
+### ClusterSet
+
+```solidity
+event ClusterSet(address indexed oldCluster, address indexed newCluster)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| oldCluster `indexed` | address | undefined |
+| newCluster `indexed` | address | undefined |
 
 
 

@@ -24,60 +24,7 @@ contract MagnetarV2Storage {
     // ************ //
     // *** VARS *** //
     // ************ //
-    mapping(address => mapping(address => bool)) public isApprovedForAll;
-
-    struct MarketInfo {
-        address collateral;
-        uint256 collateralId;
-        address asset;
-        uint256 assetId;
-        IOracle oracle;
-        bytes oracleData;
-        uint256 totalCollateralShare;
-        uint256 userCollateralShare;
-        Rebase totalBorrow;
-        uint256 userBorrowPart;
-        uint256 currentExchangeRate;
-        uint256 spotExchangeRate;
-        uint256 oracleExchangeRate;
-        uint256 totalBorrowCap;
-        uint256 totalYieldBoxCollateralShare;
-        uint256 totalYieldBoxCollateralAmount;
-        uint256 totalYieldBoxAssetShare;
-        uint256 totalYieldBoxAssetAmount;
-        TokenType yieldBoxCollateralTokenType;
-        address yieldBoxCollateralContractAddress;
-        address yieldBoxCollateralStrategyAddress;
-        uint256 yieldBoxCollateralTokenId;
-        TokenType yieldBoxAssetTokenType;
-        address yieldBoxAssetContractAddress;
-        address yieldBoxAssetStrategyAddress;
-        uint256 yieldBoxAssetTokenId;
-        uint256 collateralizationRate;
-    }
-    struct SingularityInfo {
-        MarketInfo market;
-        Rebase totalAsset;
-        uint256 userAssetFraction;
-        ISingularity.AccrueInfo accrueInfo;
-        uint256 utilization;
-        uint256 minimumTargetUtilization;
-        uint256 maximumTargetUtilization;
-        uint256 minimumInterestPerSecond;
-        uint256 maximumInterestPerSecond;
-        uint256 interestElasticity;
-        uint256 startingInterestPerSecond;
-    }
-    struct BigBangInfo {
-        MarketInfo market;
-        IBigBang.AccrueInfo accrueInfo;
-        uint256 minDebtRate;
-        uint256 maxDebtRate;
-        uint256 debtRateAgainstEthMarket;
-        address mainBBMarket;
-        uint256 mainBBDebtRate;
-        uint256 currentDebtRate;
-    }
+    ICluster public cluster;
 
     // --- ACTIONS DATA ----
     struct Call {
@@ -301,6 +248,8 @@ contract MagnetarV2Storage {
         address indexed operator,
         bool approved
     );
+
+    event ClusterSet(address indexed oldCluster, address indexed newCluster);
 
     // ************************ //
     // *** INTERNAL METHODS *** //

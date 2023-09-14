@@ -10,6 +10,23 @@
 
 ## Methods
 
+### cluster
+
+```solidity
+function cluster() external view returns (contract ICluster)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ICluster | undefined |
+
 ### depositAddCollateralAndBorrowFromMarket
 
 ```solidity
@@ -59,7 +76,7 @@ function depositRepayAndRemoveCollateralFromMarket(address market, address user,
 ### exitPositionAndRemoveCollateral
 
 ```solidity
-function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData, uint256 valueAmount) external payable
+function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData, uint256 valueAmount, contract ICluster _cluster) external payable
 ```
 
 
@@ -74,29 +91,7 @@ function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExtern
 | externalData | ICommonData.ICommonExternalContracts | undefined |
 | removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
 | valueAmount | uint256 | undefined |
-
-### isApprovedForAll
-
-```solidity
-function isApprovedForAll(address, address) external view returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-| _1 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
+| _cluster | contract ICluster | undefined |
 
 ### mintFromBBAndLendOnSGL
 
@@ -165,6 +160,23 @@ event ApprovalForAll(address indexed owner, address indexed operator, bool appro
 | owner `indexed` | address | undefined |
 | operator `indexed` | address | undefined |
 | approved  | bool | undefined |
+
+### ClusterSet
+
+```solidity
+event ClusterSet(address indexed oldCluster, address indexed newCluster)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| oldCluster `indexed` | address | undefined |
+| newCluster `indexed` | address | undefined |
 
 
 
