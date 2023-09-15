@@ -9,7 +9,7 @@ import "./IMagnetarHelper.sol";
 
 interface IMagnetar {
     function helper() external view returns (IMagnetarHelper);
-    
+
     function withdrawToChain(
         address yieldBox,
         address from,

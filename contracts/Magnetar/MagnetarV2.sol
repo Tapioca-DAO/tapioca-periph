@@ -53,6 +53,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         transferOwnership(_owner);
         marketModule = MagnetarMarketModule(_marketModule);
     }
+
     // *********************** //
     // *** OWNER METHODS **** //
     // ********************** //
@@ -570,16 +571,15 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     data.airdropAdapterParams,
                     data.approvals
                 );
-            } else if (_action.id == MARKET_MULTIHOP_BUY) {
-                HelperMultiHopBuy memory data = abi.decode(
+            } else if (_action.id == MARKET_MULTIHOP_SELL) {
+                HelperMultiHopSell memory data = abi.decode(
                     _action.call[4:],
-                    (HelperMultiHopBuy)
+                    (HelperMultiHopSell)
                 );
 
-                IUSDOBase(_action.target).initMultiHopBuy(
+                ITapiocaOFT(_action.target).initMultiSell{value: _action.value}(
                     data.from,
-                    data.collateralAmount,
-                    data.borrowAmount,
+                    data.amount,
                     data.swapData,
                     data.lzData,
                     data.externalData,

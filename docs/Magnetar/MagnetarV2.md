@@ -111,6 +111,23 @@ function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExtern
 | externalData | ICommonData.ICommonExternalContracts | undefined |
 | removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
 
+### helper
+
+```solidity
+function helper() external view returns (contract IMagnetarHelper)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IMagnetarHelper | undefined |
+
 ### marketModule
 
 ```solidity
@@ -220,6 +237,22 @@ rescues unused ETH from the contract
 | amount | uint256 | the amount to rescue |
 | to | address | the recipient |
 
+### setHelper
+
+```solidity
+function setHelper(address _helper) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _helper | address | undefined |
+
 ### transferOwnership
 
 ```solidity
@@ -298,6 +331,23 @@ event ClusterSet(address indexed oldCluster, address indexed newCluster)
 |---|---|---|
 | oldCluster `indexed` | address | undefined |
 | newCluster `indexed` | address | undefined |
+
+### HelperUpdate
+
+```solidity
+event HelperUpdate(address indexed old, address indexed newHelper)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| old `indexed` | address | undefined |
+| newHelper `indexed` | address | undefined |
 
 ### OwnershipTransferred
 
