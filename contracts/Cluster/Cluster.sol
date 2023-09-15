@@ -50,6 +50,9 @@ contract Cluster is Ownable, ICluster {
         uint16 _lzChainId,
         address _addr
     ) external view override returns (bool) {
+        if (_lzChainId == 0) {
+            _lzChainId = lzChainId;
+        }
         return _whitelisted[_lzChainId][_addr];
     }
 
