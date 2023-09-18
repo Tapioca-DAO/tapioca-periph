@@ -757,7 +757,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         // build LZ params
         bytes memory _adapterParams;
         ISendFrom.LzCallParams memory callParams = ISendFrom.LzCallParams({
-            refundAddress: msg.value > 0 ? refundAddress : payable(this),
+            refundAddress: msg.value == gas ? refundAddress : payable(this),
             zroPaymentAddress: address(0),
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
                 ? adapterParams
