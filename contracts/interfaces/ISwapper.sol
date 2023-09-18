@@ -63,7 +63,7 @@ interface ISwapper {
         uint256 amountOutMin,
         address to,
         bytes calldata dexOptions
-    ) external returns (uint256 amountOut, uint256 shareOut);
+    ) external payable returns (uint256 amountOut, uint256 shareOut);
 }
 
 interface ICurveSwapper is ISwapper {
