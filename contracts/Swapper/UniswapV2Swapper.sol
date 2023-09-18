@@ -111,6 +111,7 @@ contract UniswapV2Swapper is BaseSwapper {
         bytes memory data
     )
         external
+        payable
         override
         nonReentrant
         returns (uint256 amountOut, uint256 shareOut)

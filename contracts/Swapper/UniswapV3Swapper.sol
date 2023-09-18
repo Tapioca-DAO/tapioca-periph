@@ -144,7 +144,7 @@ contract UniswapV3Swapper is BaseSwapper {
         uint256 amountOutMin,
         address to,
         bytes memory data
-    ) external override returns (uint256 amountOut, uint256 shareOut) {
+    ) external payable override returns (uint256 amountOut, uint256 shareOut) {
         // Get tokens' addresses
         (address tokenIn, address tokenOut) = _getTokens(
             swapData.tokensData,
