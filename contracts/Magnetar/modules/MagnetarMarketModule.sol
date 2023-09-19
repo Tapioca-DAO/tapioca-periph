@@ -52,7 +52,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        ICommonData.IWithdrawParams calldata withdrawParams
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        uint256 valueAmount
     ) external payable {
         _depositAddCollateralAndBorrowFromMarket(
             market,
@@ -61,7 +62,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             borrowAmount,
             extractFromSender,
             deposit,
-            withdrawParams
+            withdrawParams,
+            valueAmount
         );
     }
 
@@ -72,7 +74,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        ICommonData.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams,
+        uint256 valueAmount
     ) external payable {
         _depositRepayAndRemoveCollateralFromMarket(
             market,
@@ -81,7 +84,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             repayAmount,
             collateralAmount,
             extractFromSender,
-            withdrawCollateralParams
+            withdrawCollateralParams,
+            valueAmount
         );
     }
 
@@ -108,12 +112,14 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     function exitPositionAndRemoveCollateral(
         address user,
         ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
+        uint256 valueAmount
     ) external payable {
         _exitPositionAndRemoveCollateral(
             user,
             externalData,
-            removeAndRepayData
+            removeAndRepayData,
+            valueAmount
         );
     }
 
@@ -127,7 +133,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 borrowAmount,
         bool extractFromSender,
         bool deposit,
-        ICommonData.IWithdrawParams calldata withdrawParams
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        uint256 valueAmount
     ) private {
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
@@ -202,7 +209,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     yieldBox,
                     borrowAmount,
                     0,
-                    false
+                    false,
+                    valueAmount
                 );
             }
         }
@@ -217,7 +225,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint256 repayAmount,
         uint256 collateralAmount,
         bool extractFromSender,
-        ICommonData.IWithdrawParams calldata withdrawCollateralParams
+        ICommonData.IWithdrawParams calldata withdrawCollateralParams,
+        uint256 valueAmount
     ) private {
         IMarket marketInterface = IMarket(market);
         IYieldBoxBase yieldBox = IYieldBoxBase(marketInterface.yieldBox());
@@ -275,6 +284,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
             //withdraw
             if (withdrawCollateralParams.withdraw) {
+                uint256 gas = msg.value >= valueAmount ? valueAmount : address(this).balance;
                 _withdrawToChain(
                     yieldBox,
                     collateralWithdrawReceiver,
@@ -284,8 +294,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     collateralAmount,
                     collateralShare,
                     withdrawCollateralParams.withdrawAdapterParams,
-                    payable(this),
-                    address(this).balance
+                    gas > 0 ? payable(msg.sender) : payable(this),
+                    gas
                 );
             }
         }
@@ -505,7 +515,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
     function _exitPositionAndRemoveCollateral(
         address user,
         ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
+        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
+        uint256 valueAmount
     ) private {
         IMarket bigBang = IMarket(externalData.bigBang);
         ISingularity singularity = ISingularity(externalData.singularity);
@@ -614,7 +625,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     yieldBox,
                     _removeAmount,
                     share,
-                    false
+                    false,
+                    valueAmount
                 );
             }
         }
@@ -680,7 +692,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     yieldBox,
                     0,
                     collateralShare,
-                    true
+                    true,
+                    valueAmount
                 );
             }
         }
@@ -758,7 +771,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         IYieldBoxBase yieldBox,
         uint256 amount,
         uint256 share,
-        bool withdrawCollateral
+        bool withdrawCollateral,
+        uint256 valueAmount
     ) private {
         require(withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
         (
@@ -768,7 +782,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             bytes memory adapterParams
         ) = abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
 
-        uint256 gas = msg.value > 0 ? msg.value : address(this).balance;
+        uint256 gas = msg.value >= valueAmount ? valueAmount : address(this).balance;
         _withdrawToChain(
             yieldBox,
             from,

@@ -564,7 +564,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         borrowAmount,
                         false,
                         deposit,
-                        withdrawParams
+                        withdrawParams,
+                        _action.value
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
@@ -589,7 +590,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             .selector,
                         user,
                         externalData,
-                        removeAndRepayData
+                        removeAndRepayData,
+                        _action.value
                     )
                 );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
@@ -626,7 +628,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         repayAmount,
                         collateralAmount,
                         extractFromSender,
-                        withdrawCollateralParams
+                        withdrawCollateralParams,
+                        _action.value
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
@@ -819,7 +822,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 borrowAmount,
                 extractFromSender,
                 deposit,
-                withdrawParams
+                withdrawParams,
+                msg.value
             )
         );
     }
@@ -857,7 +861,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 repayAmount,
                 collateralAmount,
                 extractFromSender,
-                withdrawCollateralParams
+                withdrawCollateralParams,
+                msg.value
             )
         );
     }
@@ -923,7 +928,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 MagnetarMarketModule.exitPositionAndRemoveCollateral.selector,
                 user,
                 externalData,
-                removeAndRepayData
+                removeAndRepayData,
+                msg.value
             )
         );
     }
