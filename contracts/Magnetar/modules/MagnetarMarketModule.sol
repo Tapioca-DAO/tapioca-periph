@@ -579,6 +579,14 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 "Magnetar: oTAPTokenID 0"
             );
 
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    removeAndRepayData.exitData.target
+                ),
+                "MagnetarV2: oTAP not whitelisted"
+            );
+
             address oTapAddress = ITapiocaOptionsBroker(
                 removeAndRepayData.exitData.target
             ).oTAP();
@@ -623,6 +631,13 @@ contract MagnetarMarketModule is MagnetarV2Storage {
 
         // performs a tOLP.unlock operation
         if (removeAndRepayData.unlockData.unlock) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    removeAndRepayData.unlockData.target
+                ),
+                "MagnetarV2: tOLP not whitelisted"
+            );
             if (removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
                     require(
