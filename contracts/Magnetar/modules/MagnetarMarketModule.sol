@@ -170,8 +170,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 collateralId,
                 address(this),
                 address(this),
-                0,
-                _share
+                collateralAmount,
+                0
             );
         }
 
@@ -364,8 +364,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     bbCollateralId,
                     address(this),
                     address(this),
-                    0,
-                    bbCollateralShare
+                    mintData.collateralDepositData.amount,
+                    0
                 );
             }
 
@@ -412,8 +412,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 sglAssetId,
                 address(this),
                 user,
-                0,
-                yieldBox.toShare(sglAssetId, depositData.amount, false)
+                depositData.amount,
+                0
             );
         }
 
