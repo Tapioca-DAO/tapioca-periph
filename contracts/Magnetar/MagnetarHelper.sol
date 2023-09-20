@@ -177,12 +177,18 @@ contract MagnetarHelper is Ownable {
     ) external view returns (uint256 amount) {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity
             .totalAsset();
+        (uint128 totalBorrowElastic, ) = singularity
+            .totalBorrow();
 
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+
+        uint256 allShare = totalAssetElastic +
+            yieldBox.toShare(singularity.assetId(), totalBorrowElastic, true);
+
         return
             yieldBox.toAmount(
                 singularity.assetId(),
-                (fraction * totalAssetElastic) / totalAssetBase,
+                (fraction * allShare) / totalAssetBase,
                 false
             );
     }
