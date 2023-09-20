@@ -1071,6 +1071,33 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         bool permitAll,
         bool allowFailure
     ) private {
+        bytes memory data = actionCalldata;
+        bytes4 funcSig;
+        assembly {
+            funcSig := mload(add(data, 0x20))
+        }
+        bytes4 allowedTokenSig = permitAll
+            ? bytes4(
+                keccak256(
+                    "permitAll(address,address,address,uint256,uint256,uint8,bytes32,bytes32)"
+                )
+            )
+            : bytes4(
+                keccak256(
+                    "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)"
+                )
+            );
+        bytes4 allowedAllYbSig = bytes4(
+            keccak256(
+                "permitAll(address,address,uint256,uint8,bytes32,bytes32)"
+            )
+        );
+
+        require(
+            funcSig == allowedTokenSig || funcSig == allowedAllYbSig,
+            "MagnetarV2: permitAll selector not found"
+        );
+
         if (permitAll) {
             PermitAllData memory permitData = abi.decode(
                 actionCalldata[4:],
