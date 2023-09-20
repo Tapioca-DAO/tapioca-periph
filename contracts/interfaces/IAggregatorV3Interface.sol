@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+interface AccessControlledOffchainAggregator {
+    function maxAnswer() external view returns (int192);
+
+    function minAnswer() external view returns (int192);
+}
+
 interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
 
@@ -31,4 +37,9 @@ interface AggregatorV3Interface {
             uint256 updatedAt,
             uint80 answeredInRound
         );
+
+    function aggregator()
+        external
+        view
+        returns (AccessControlledOffchainAggregator);
 }

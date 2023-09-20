@@ -25,8 +25,9 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
         address[] memory _circuitChainlink,
         uint8[] memory _circuitChainIsMultiplied,
         uint32 _stalePeriod,
-        address[] memory guardians
-    ) {
+        address[] memory guardians,
+        address _sequencerUptimeFeed
+    ) ChainlinkUtils(_sequencerUptimeFeed) {
         uint256 circuitLength = _circuitChainlink.length;
         require(circuitLength > 0, "106");
         require(circuitLength == _circuitChainIsMultiplied.length, "104");
