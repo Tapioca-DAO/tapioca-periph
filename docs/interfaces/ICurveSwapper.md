@@ -147,7 +147,7 @@ function getOutputAmount(ISwapper.SwapData swapData, bytes dexOptions) external 
 ### swap
 
 ```solidity
-function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, bytes dexOptions) external nonpayable returns (uint256 amountOut, uint256 shareOut)
+function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, bytes dexOptions) external payable returns (uint256 amountOut, uint256 shareOut)
 ```
 
 

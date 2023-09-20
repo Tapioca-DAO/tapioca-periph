@@ -208,7 +208,7 @@ function setPoolFee(uint24 _newFee) external nonpayable
 ### swap
 
 ```solidity
-function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, bytes data) external nonpayable returns (uint256 amountOut, uint256 shareOut)
+function swap(ISwapper.SwapData swapData, uint256 amountOutMin, address to, bytes data) external payable returns (uint256 amountOut, uint256 shareOut)
 ```
 
 
