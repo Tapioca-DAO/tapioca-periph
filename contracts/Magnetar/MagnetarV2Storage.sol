@@ -190,7 +190,7 @@ contract MagnetarV2Storage {
 
     struct HelperMultiHopSell {
         address from;
-        uint256 share;
+        uint256 amount;
         IUSDOBase.ILeverageSwapData swapData;
         IUSDOBase.ILeverageLZData lzData;
         IUSDOBase.ILeverageExternalContractsData externalData;
