@@ -146,7 +146,6 @@ contract MagnetarV2Storage {
         address from;
         address to;
         uint256 amount;
-        uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
         ICommonData.ISendOptions options;
@@ -155,7 +154,6 @@ contract MagnetarV2Storage {
     struct TOFTRetrieveFromStrategyData {
         address from;
         uint256 amount;
-        uint256 share;
         uint256 assetId;
         uint16 lzDstChainId;
         address zroPaymentAddress;

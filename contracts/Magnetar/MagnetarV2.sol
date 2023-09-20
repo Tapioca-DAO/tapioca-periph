@@ -471,7 +471,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     msg.sender,
                     data.to,
                     data.amount,
-                    data.share,
                     data.assetId,
                     data.lzDstChainId,
                     data.options
@@ -480,22 +479,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 (
                     address from,
                     uint256 amount,
-                    uint256 share,
                     uint256 assetId,
                     uint16 lzDstChainId,
                     address zroPaymentAddress,
                     bytes memory airdropAdapterParam
                 ) = abi.decode(
                         _action.call[4:],
-                        (
-                            address,
-                            uint256,
-                            uint256,
-                            uint256,
-                            uint16,
-                            address,
-                            bytes
-                        )
+                        (address, uint256, uint256, uint16, address, bytes)
                     );
 
                 _checkSender(from);
@@ -505,7 +495,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 }(
                     msg.sender,
                     amount,
-                    share,
                     assetId,
                     lzDstChainId,
                     zroPaymentAddress,
