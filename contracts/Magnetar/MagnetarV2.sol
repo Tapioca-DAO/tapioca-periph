@@ -739,7 +739,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
     /// @param dstChainId LZ chain id to withdraw to
     /// @param receiver the receiver on the destination chain
     /// @param amount the amount to withdraw
-    /// @param share the share to withdraw
     /// @param adapterParams LZ adapter params
     /// @param refundAddress the LZ refund address which receives the gas not used in the process
     /// @param gas the amount of gas to use for sending the asset to another layer
@@ -750,7 +749,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         uint16 dstChainId,
         bytes32 receiver,
         uint256 amount,
-        uint256 share,
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
@@ -765,7 +763,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 dstChainId,
                 receiver,
                 amount,
-                share,
                 adapterParams,
                 refundAddress,
                 gas

@@ -54,7 +54,7 @@ const version = '1';
 
 describe('MagnetarV2', () => {
     describe('withdrawTo()', () => {
-        it.only('should test withdrawTo', async () => {
+        it('should test withdrawTo', async () => {
             const {
                 deployer,
                 eoa1,
@@ -339,7 +339,6 @@ describe('MagnetarV2', () => {
                 0,
                 '0x'.concat(receiverSplit[1].padStart(64, '0')),
                 borrowAmount,
-                0,
                 '0x00',
                 deployer.address,
                 0,

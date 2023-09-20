@@ -26,7 +26,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint16 dstChainId,
         bytes32 receiver,
         uint256 amount,
-        uint256 share,
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
@@ -38,7 +37,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             dstChainId,
             receiver,
             amount,
-            share,
             adapterParams,
             refundAddress,
             gas
@@ -208,7 +206,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     market,
                     yieldBox,
                     borrowAmount,
-                    0,
                     false,
                     valueAmount
                 );
@@ -294,7 +291,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     withdrawCollateralParams.withdrawLzChainId,
                     LzLib.addressToBytes32(user),
                     collateralAmount,
-                    collateralShare,
                     withdrawCollateralParams.withdrawAdapterParams,
                     gas > 0 ? payable(msg.sender) : payable(this),
                     gas
@@ -626,7 +622,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     singularity,
                     yieldBox,
                     _removeAmount,
-                    share,
                     false,
                     valueAmount
                 );
@@ -692,8 +687,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                     withdrawCollateralBytes,
                     singularity,
                     yieldBox,
-                    0,
-                    collateralShare,
+                    removeAndRepayData.collateralAmount,
                     true,
                     valueAmount
                 );
@@ -709,7 +703,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         uint16 dstChainId,
         bytes32 receiver,
         uint256 amount,
-        uint256 share,
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas
@@ -721,7 +714,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 from,
                 LzLib.bytes32ToAddress(receiver),
                 amount,
-                share
+                0
             );
             return;
         }
@@ -738,7 +731,7 @@ contract MagnetarMarketModule is MagnetarV2Storage {
                 from,
                 LzLib.bytes32ToAddress(receiver),
                 amount,
-                share
+                0
             );
             return;
         }
@@ -772,7 +765,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         IMarket market,
         IYieldBoxBase yieldBox,
         uint256 amount,
-        uint256 share,
         bool withdrawCollateral,
         uint256 valueAmount
     ) private {
@@ -794,7 +786,6 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             withdrawOnOtherChain ? destChain : 0,
             receiver,
             amount,
-            share,
             adapterParams,
             gas > 0 ? payable(msg.sender) : payable(this),
             gas

@@ -123,7 +123,7 @@ function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMin
 ### withdrawToChain
 
 ```solidity
-function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, uint256 share, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
 ```
 
 
@@ -140,7 +140,6 @@ function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 
 | dstChainId | uint16 | undefined |
 | receiver | bytes32 | undefined |
 | amount | uint256 | undefined |
-| share | uint256 | undefined |
 | adapterParams | bytes | undefined |
 | refundAddress | address payable | undefined |
 | gas | uint256 | undefined |
