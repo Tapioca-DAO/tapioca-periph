@@ -86,7 +86,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
     function getCollateralSharesForBorrowPart(
         IMarket market,
         uint256 borrowPart,
-        uint256 liquidationMultiplierPrecision,
+        uint256 collateralizationRatePrecision,
         uint256 exchangeRatePrecision
     ) external view returns (uint256 collateralShares) {
         Rebase memory _totalBorrowed;
@@ -96,15 +96,12 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
 
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
         uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
-        return
-            yieldBox.toShare(
-                market.collateralId(),
-                (borrowAmount *
-                    market.liquidationMultiplier() *
-                    market.exchangeRate()) /
-                    (liquidationMultiplierPrecision * exchangeRatePrecision),
-                false
-            );
+
+        uint256 val = (borrowAmount *
+            collateralizationRatePrecision *
+            market.exchangeRate()) /
+            (market.collateralizationRate() * exchangeRatePrecision);
+        return yieldBox.toShare(market.collateralId(), val, false);
     }
 
     /// @notice Return the equivalent of borrow part in asset amount.

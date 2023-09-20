@@ -212,7 +212,7 @@ Calculate the collateral amount off the shares.
 ### getCollateralSharesForBorrowPart
 
 ```solidity
-function getCollateralSharesForBorrowPart(contract IMarket market, uint256 borrowPart, uint256 liquidationMultiplierPrecision, uint256 exchangeRatePrecision) external view returns (uint256 collateralShares)
+function getCollateralSharesForBorrowPart(contract IMarket market, uint256 borrowPart, uint256 collateralizationRatePrecision, uint256 exchangeRatePrecision) external view returns (uint256 collateralShares)
 ```
 
 Calculate the collateral shares that are needed for `borrowPart`, taking the current exchange rate into account.
@@ -225,7 +225,7 @@ Calculate the collateral shares that are needed for `borrowPart`, taking the cur
 |---|---|---|
 | market | contract IMarket | the Singularity or BigBang address |
 | borrowPart | uint256 | The borrow part. |
-| liquidationMultiplierPrecision | uint256 | undefined |
+| collateralizationRatePrecision | uint256 | undefined |
 | exchangeRatePrecision | uint256 | undefined |
 
 #### Returns

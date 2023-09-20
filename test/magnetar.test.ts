@@ -54,7 +54,7 @@ const version = '1';
 
 describe('MagnetarV2', () => {
     describe('withdrawTo()', () => {
-        it('should test withdrawTo', async () => {
+        it.only('should test withdrawTo', async () => {
             const {
                 deployer,
                 eoa1,
@@ -324,6 +324,13 @@ describe('MagnetarV2', () => {
             );
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
+            const collateralShare =
+                await magnetar.getCollateralSharesForBorrowPart(
+                    wethUsdoSingularity.address,
+                    borrowPart,
+                    1e5,
+                    1e5,
+                );
             const receiverSplit = deployer.address.split('0x');
             await magnetar.withdrawToChain(
                 yieldBox.address,
@@ -1978,6 +1985,7 @@ describe('MagnetarV2', () => {
                 magnetar,
                 registerSingularity,
                 mediumRiskMC,
+                cluster,
                 bar,
             } = await loadFixture(register);
 
@@ -2008,6 +2016,7 @@ describe('MagnetarV2', () => {
                 false,
                 erc20Mock.address,
                 yieldBox.address,
+                cluster.address,
                 'collateralMock',
                 'toftMock',
                 18,
@@ -2019,6 +2028,7 @@ describe('MagnetarV2', () => {
                 false,
                 erc20Mock.address,
                 yieldBox.address,
+                cluster.address,
                 'collateralMock',
                 'collateralMock',
                 18,
@@ -2031,11 +2041,13 @@ describe('MagnetarV2', () => {
 
             const usdo_leverage_host = await USDOLeverageModule.deploy(
                 lzEndpoint1.address,
-                yieldBox,
+                yieldBox.address,
+                cluster.address,
             );
             const usdo_market_host = await USDOMarketModule.deploy(
                 lzEndpoint1.address,
-                yieldBox,
+                yieldBox.address,
+                cluster.address,
             );
 
             const USDO = new USDO__factory(deployer);
