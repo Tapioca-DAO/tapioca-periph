@@ -27,6 +27,23 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### GRACE_PERIOD_TIME
+
+```solidity
+function GRACE_PERIOD_TIME() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### GUARDIAN_ROLE_CHAINLINK
 
 ```solidity
@@ -44,6 +61,23 @@ function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### SEQUENCER_UPTIME_FEED
+
+```solidity
+function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract AggregatorV3Interface | undefined |
+
 ### chainlinkDecimals
 
 ```solidity
@@ -60,6 +94,22 @@ Decimals for each Chainlink pairs
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
+
+### changeGracePeriod
+
+```solidity
+function changeGracePeriod(uint32 _gracePeriod) external nonpayable
+```
+
+Changes the grace period for the sequencer update
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _gracePeriod | uint32 | New stale period (in seconds) |
 
 ### changeStalePeriod
 
@@ -286,10 +336,32 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 
 ## Errors
 
+### GracePeriodNotOver
+
+```solidity
+error GracePeriodNotOver()
+```
+
+
+
+
+
+
 ### InvalidChainlinkRate
 
 ```solidity
 error InvalidChainlinkRate()
+```
+
+
+
+
+
+
+### SequencerDown
+
+```solidity
+error SequencerDown()
 ```
 
 

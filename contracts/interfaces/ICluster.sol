@@ -12,4 +12,6 @@ interface ICluster {
         address _addr,
         bool _status
     ) external;
+
+    function lzChainId() external view returns (uint16);
 }

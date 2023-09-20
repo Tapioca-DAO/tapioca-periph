@@ -1302,7 +1302,7 @@ export async function register(staging?: boolean) {
 
     const magnetar = await (
         await ethers.getContractFactory('MagnetarV2')
-    ).deploy(deployer.address, magnetarMarketModule.address);
+    ).deploy(cluster.address, deployer.address, magnetarMarketModule.address);
     await magnetar.deployed();
     log(
         `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
@@ -1361,13 +1361,6 @@ export async function register(staging?: boolean) {
             staging,
         );
     }
-
-    // ------------------- 19 Create Cluster -------------------
-    const cluster = await (
-        await ethers.getContractFactory('Cluster')
-    ).deploy(1);
-    await cluster.deployed();
-    log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
     const timeTravel = async (seconds: number) => {
         await time.increase(seconds);

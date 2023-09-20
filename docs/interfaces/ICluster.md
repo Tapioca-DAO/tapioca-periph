@@ -33,6 +33,23 @@ function isWhitelisted(uint16 lzChainId, address _addr) external view returns (b
 |---|---|---|
 | _0 | bool | undefined |
 
+### lzChainId
+
+```solidity
+function lzChainId() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### updateContract
 
 ```solidity
