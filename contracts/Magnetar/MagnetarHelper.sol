@@ -177,8 +177,7 @@ contract MagnetarHelper is Ownable {
     ) external view returns (uint256 amount) {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity
             .totalAsset();
-        (uint128 totalBorrowElastic, ) = singularity
-            .totalBorrow();
+        (uint128 totalBorrowElastic, ) = singularity.totalBorrow();
 
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
