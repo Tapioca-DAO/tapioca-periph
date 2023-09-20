@@ -1362,6 +1362,13 @@ export async function register(staging?: boolean) {
         );
     }
 
+    // ------------------- 19 Create Cluster -------------------
+    const cluster = await (
+        await ethers.getContractFactory('Cluster')
+    ).deploy(1);
+    await cluster.deployed();
+    log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
+
     const timeTravel = async (seconds: number) => {
         await time.increase(seconds);
     };

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {AggregatorV2V3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol";
 import "../../interfaces/IOracle.sol" as ITOracle;
+import {ChainlinkUtils, AggregatorV3Interface} from "../utils/ChainlinkUtils.sol";
 
 interface IStargatePool {
     function deltaCredit() external view returns (uint256);
@@ -20,23 +20,27 @@ interface IStargatePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract SGOracle is ITOracle.IOracle {
+contract SGOracle is ITOracle.IOracle, ChainlinkUtils {
     string public _name;
     string public _symbol;
 
     IStargatePool public immutable SG_POOL;
-    AggregatorV2V3Interface public immutable UNDERLYING;
+    AggregatorV3Interface public immutable UNDERLYING;
 
     constructor(
         string memory __name,
         string memory __symbol,
         IStargatePool pool,
-        AggregatorV2V3Interface _underlying
-    ) {
+        AggregatorV3Interface _underlying,
+        address _sequencerUptimeFeed,
+        address _admin
+    ) ChainlinkUtils(_sequencerUptimeFeed) {
         _name = __name;
         _symbol = __symbol;
         SG_POOL = pool;
         UNDERLYING = _underlying;
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     function decimals() external view returns (uint8) {
@@ -49,7 +53,7 @@ contract SGOracle is ITOracle.IOracle {
     function _get() internal view returns (uint256 _maxPrice) {
         require(SG_POOL.totalSupply() > 0, "SGOracle: supply 0");
 
-        uint256 underlyingPrice = _assurePrice(UNDERLYING);
+        uint256 underlyingPrice = _readChainlinkBase(UNDERLYING, 0);
         uint256 lpPrice = (SG_POOL.totalLiquidity() *
             uint256(underlyingPrice)) / SG_POOL.totalSupply();
 
@@ -64,6 +68,7 @@ contract SGOracle is ITOracle.IOracle {
     function get(
         bytes calldata
     ) external virtual returns (bool success, uint256 rate) {
+        _sequencerBeatCheck();
         return (true, _get());
     }
 
@@ -102,16 +107,5 @@ contract SGOracle is ITOracle.IOracle {
     /// @return (string) A human readable name about this oracle.
     function name(bytes calldata) external view returns (string memory) {
         return _name;
-    }
-
-    function _assurePrice(
-        AggregatorV2V3Interface feed
-    ) private view returns (uint256 _price) {
-        (uint80 roundId, int256 answer, , uint256 updatedAt, ) = feed
-            .latestRoundData();
-        require(answer > 0, "SGOracle: feed price 0");
-        require(updatedAt > 0, "SGOracle: stale price");
-        require(roundId > 0, "SGOracle: stale round");
-        return uint256(answer);
     }
 }
