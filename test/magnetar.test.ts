@@ -1826,6 +1826,7 @@ describe('MagnetarV2', () => {
                 deployer,
                 initContracts,
                 magnetar,
+                cluster,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1838,6 +1839,7 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+            await cluster.updateContract(0, wethUsdcSingularity.address, true);
             await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
                 mintVal,
@@ -1884,6 +1886,7 @@ describe('MagnetarV2', () => {
                 initContracts,
                 magnetar,
                 wethAssetId,
+                cluster,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1896,6 +1899,7 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+            await cluster.updateContract(0, wethUsdcSingularity.address, true);
             const lendFn = magnetar.interface.encodeFunctionData(
                 'mintFromBBAndLendOnSGL',
                 [
@@ -2923,6 +2927,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 magnetar,
                 deployer,
+                cluster,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2980,6 +2985,8 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
 
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
+            await cluster.updateContract(0, wethBigBangMarket.address, true);
             await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
                 borrowAmount,
@@ -3127,6 +3134,8 @@ describe('MagnetarV2', () => {
                 true,
             );
 
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
+            await cluster.updateContract(0, wethBigBangMarket.address, true);
             await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
                 borrowAmount,
@@ -3357,6 +3366,8 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
 
+            await cluster.updateContract(0, wethBigBangMarket.address, true);
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await magnetar.mintFromBBAndLendOnSGL(
                 deployer.address,
                 borrowAmount,

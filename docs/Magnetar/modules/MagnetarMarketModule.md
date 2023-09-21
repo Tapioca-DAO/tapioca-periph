@@ -96,7 +96,7 @@ function exitPositionAndRemoveCollateral(address user, ICommonData.ICommonExtern
 ### mintFromBBAndLendOnSGL
 
 ```solidity
-function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMintData mintData, ICommonData.IDepositData depositData, ITapiocaOptionLiquidityProvision.IOptionsLockData lockData, ITapiocaOptionsBroker.IOptionsParticipateData participateData, ICommonData.ICommonExternalContracts externalContracts) external payable
+function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMintData mintData, ICommonData.IDepositData depositData, ITapiocaOptionLiquidityProvision.IOptionsLockData lockData, ITapiocaOptionsBroker.IOptionsParticipateData participateData, ICommonData.ICommonExternalContracts externalContracts, contract ICluster _cluster) external payable
 ```
 
 
@@ -114,6 +114,7 @@ function mintFromBBAndLendOnSGL(address user, uint256 lendAmount, IUSDOBase.IMin
 | lockData | ITapiocaOptionLiquidityProvision.IOptionsLockData | undefined |
 | participateData | ITapiocaOptionsBroker.IOptionsParticipateData | undefined |
 | externalContracts | ICommonData.ICommonExternalContracts | undefined |
+| _cluster | contract ICluster | undefined |
 
 ### withdrawToChain
 

@@ -395,7 +395,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         data.depositData,
                         data.lockData,
                         data.participateData,
-                        data.externalContracts
+                        data.externalContracts,
+                        cluster
                     )
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
@@ -767,7 +768,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                 depositData,
                 lockData,
                 participateData,
-                externalContracts
+                externalContracts,
+                cluster
             )
         );
     }

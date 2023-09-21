@@ -94,7 +94,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         ICommonData.IDepositData calldata depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
         ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
-        ICommonData.ICommonExternalContracts calldata externalContracts
+        ICommonData.ICommonExternalContracts calldata externalContracts,
+        ICluster _cluster
     ) external payable {
         _mintFromBBAndLendOnSGL(
             user,
@@ -103,7 +104,8 @@ contract MagnetarMarketModule is MagnetarV2Storage {
             depositData,
             lockData,
             participateData,
-            externalContracts
+            externalContracts,
+            _cluster
         );
     }
 
@@ -308,11 +310,31 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         ICommonData.IDepositData memory depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
         ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
-        ICommonData.ICommonExternalContracts calldata externalContracts
+        ICommonData.ICommonExternalContracts calldata externalContracts,
+        ICluster _cluster
     ) private {
         IMarket bigBang = IMarket(externalContracts.bigBang);
         ISingularity singularity = ISingularity(externalContracts.singularity);
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+
+        if (externalContracts.bigBang != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalContracts.bigBang
+                ),
+                "MagnetarV2: BB not whitelisted"
+            );
+        }
+        if (externalContracts.singularity != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalContracts.singularity
+                ),
+                "MagnetarV2: SGL not whitelisted"
+            );
+        }
 
         if (address(singularity) != address(0)) {
             _setApprovalForYieldBox(address(singularity), yieldBox);
@@ -432,6 +454,10 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         //      - performs tOLP.lock
         uint256 tOLPTokenId = 0;
         if (lockData.lock) {
+            require(
+                _cluster.isWhitelisted(_cluster.lzChainId(), lockData.target),
+                "MagnetarV2: tOLP not whitelisted"
+            );
             if (lockData.fraction > 0) {
                 fraction = lockData.fraction;
             }
@@ -472,6 +498,13 @@ contract MagnetarMarketModule is MagnetarV2Storage {
         //      - performs tOB.participate
         //      - transfer `oTAPTokenId` to user
         if (participateData.participate) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    participateData.target
+                ),
+                "MagnetarV2: tOB not whitelisted"
+            );
             if (participateData.tOLPTokenId != 0) {
                 if (tOLPTokenId != 0) {
                     require(
