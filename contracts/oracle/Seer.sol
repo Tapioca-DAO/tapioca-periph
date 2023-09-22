@@ -57,7 +57,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     function get(
         bytes calldata
     ) external virtual returns (bool success, uint256 rate) {
-        (, uint256 high) = _nonViewReadAll(inBase);
+        (, uint256 high) = _readAll(inBase);
         return (true, high);
     }
 

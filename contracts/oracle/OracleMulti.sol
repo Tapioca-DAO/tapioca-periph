@@ -27,8 +27,6 @@ contract OracleMulti is
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
 
-    bool private entered;
-
     /// @notice Constructor for an oracle using both Uniswap and Chainlink with multiple pools to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
     /// @param _circuitUniswap Path of the Uniswap pools
@@ -127,16 +125,6 @@ contract OracleMulti is
         if (quoteAmountCL <= quoteAmountUni) {
             return (quoteAmountCL, quoteAmountUni);
         } else return (quoteAmountUni, quoteAmountCL);
-    }
-
-    function _nonViewReadAll(
-        uint256 quoteAmount
-    ) internal returns (uint256, uint256) {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        (uint256 quoteAmountUni, uint256 quoteAmountCL) = _readAll(quoteAmount);
-        entered = false;
-        return (quoteAmountUni, quoteAmountCL);
     }
 
     /// @notice Uses Chainlink's value to change Uniswap's rate
