@@ -9,6 +9,9 @@ import {AccessControl} from "../external/AccessControl.sol";
 contract GLPOracle is IOracle, SequencerCheck, AccessControl {
     IGmxGlpManager private immutable glpManager;
 
+    /// @notice Reentrancy check
+    bool private entered;
+
     constructor(
         IGmxGlpManager glpManager_,
         address _sequencerUptimeFeed,
@@ -17,6 +20,13 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
         glpManager = glpManager_;
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+    }
+
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
     }
 
     function decimals() external pure returns (uint8) {
@@ -31,7 +41,7 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
     /// @inheritdoc IOracle
     function get(
         bytes calldata
-    ) public view override returns (bool success, uint256 rate) {
+    ) public override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         return (true, _get());
     }

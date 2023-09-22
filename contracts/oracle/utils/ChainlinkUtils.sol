@@ -18,11 +18,21 @@ contract ChainlinkUtils is AccessControl, SequencerCheck {
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
         keccak256("GUARDIAN_ROLE");
 
+    /// @notice Reentrancy check
+    bool private entered;
+
     constructor(
         address _sequencerUptimeFeed
     ) SequencerCheck(_sequencerUptimeFeed) {}
 
     error InvalidChainlinkRate();
+
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
+    }
 
     /// @notice Reads a Chainlink feed. Perform a sequence upbeat check if L2 chain
     /// @param feed Chainlink feed to query

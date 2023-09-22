@@ -67,7 +67,7 @@ contract SGOracle is ITOracle.IOracle, ChainlinkUtils {
     /// @return rate The rate of the requested asset / pair / pool.
     function get(
         bytes calldata
-    ) external virtual returns (bool success, uint256 rate) {
+    ) external virtual nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         return (true, _get());
     }
