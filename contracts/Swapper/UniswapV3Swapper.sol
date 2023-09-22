@@ -36,11 +36,13 @@ contract UniswapV3Swapper is BaseSwapper {
     IUniswapV3Factory public immutable factory;
 
     uint24 public poolFee = 3000;
+    uint32 public twapDuration = 60;
 
     // ************** //
     // *** EVENTS *** //
     // ************** //
     event PoolFee(uint256 _old, uint256 _new);
+    event TwapDurationSet(uint32 _oldVal, uint32 _newVal);
 
     constructor(
         IYieldBox _yieldBox,
@@ -58,6 +60,10 @@ contract UniswapV3Swapper is BaseSwapper {
 
     /// *** OWNER METHODS ***
     /// ***  ***
+    function setTwapDuration(uint32 _duration) external onlyOwner {
+        emit TwapDurationSet(twapDuration, _duration);
+        twapDuration = _duration;
+    }
     function setPoolFee(uint24 _newFee) external onlyOwner {
         emit PoolFee(poolFee, _newFee);
         poolFee = _newFee;
@@ -94,7 +100,7 @@ contract UniswapV3Swapper is BaseSwapper {
         );
 
         address pool = factory.getPool(tokenIn, tokenOut, poolFee);
-        (int24 tick, ) = OracleLibrary.consult(pool, 60);
+        (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
 
         amountOut = OracleLibrary.getQuoteAtTick(
             tick,
@@ -123,7 +129,7 @@ contract UniswapV3Swapper is BaseSwapper {
 
         address pool = factory.getPool(tokenIn, tokenOut, poolFee);
 
-        (int24 tick, ) = OracleLibrary.consult(pool, 60);
+        (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
         amountIn = OracleLibrary.getQuoteAtTick(
             tick,
             uint128(amountOut),
