@@ -56,7 +56,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// @return rate The rate of the requested asset / pair / pool.
     function get(
         bytes calldata
-    ) external virtual returns (bool success, uint256 rate) {
+    ) external virtual nonReentrant returns (bool success, uint256 rate) {
         (, uint256 high) = _readAll(inBase);
         return (true, high);
     }
