@@ -48,4 +48,6 @@ interface IPenrose {
     function hostLzChainId() external view returns (uint16);
 
     function cluster() external view returns (ICluster);
+
+    function reAccrueBigBangMarkets() external;
 }
