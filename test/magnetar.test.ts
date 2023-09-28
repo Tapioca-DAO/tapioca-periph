@@ -53,6 +53,11 @@ const symbol = 'MTKN';
 const version = '1';
 
 describe('MagnetarV2', () => {
+    describe('approval', () => {
+        it.only('should test approve acton', async()=> {
+
+        });
+    });
     describe('withdrawTo()', () => {
         it('should test withdrawTo', async () => {
             const {
