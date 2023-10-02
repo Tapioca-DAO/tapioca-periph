@@ -38,6 +38,7 @@ contract Cluster is Ownable, ICluster {
 
     constructor(uint16 _lzChainId) {
         lzChainId = _lzChainId;
+        transferOwnership(msg.sender);
     }
 
     // ******************** //

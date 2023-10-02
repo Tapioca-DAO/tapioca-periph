@@ -20,7 +20,10 @@ import {IUSDOBase} from "../interfaces/IUSDO.sol";
 //YIELDBOX
 import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
 
-contract MagnetarV2Storage {
+//OZ
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+contract MagnetarV2Storage is IERC721Receiver {
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -250,6 +253,19 @@ contract MagnetarV2Storage {
     );
 
     event ClusterSet(address indexed oldCluster, address indexed newCluster);
+
+    // ********************** //
+    // *** PUBLIC METHODS *** //
+    // ********************** //
+    /// @notice IERC721Receiver implementation
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
 
     // ************************ //
     // *** INTERNAL METHODS *** //
