@@ -14,7 +14,7 @@ interface IGmxGlpManager {
     );
     event RemoveLiquidity(
         address indexed account,
-        address indexed  token,
+        address indexed token,
         uint256 indexed glpAmount,
         uint256 aumInUsdg,
         uint256 glpSupply,

@@ -8,7 +8,11 @@ interface IUniswapV2Pair {
         address indexed spender,
         uint256 indexed value
     );
-    event Transfer(address indexed from, address indexed to, uint256 indexed value);
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed value
+    );
 
     function name() external pure returns (string memory);
 
