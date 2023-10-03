@@ -119,7 +119,7 @@ contract LiquidationQueue is ILiquidationQueue {
         yieldBox.setApprovalForAll(address(singularity), true);
 
         // We initialize the pools to save gas on conditionals later on.
-        for (uint256 i = 0; i <= MAX_BID_POOLS; ) {
+        for (uint256 i; i <= MAX_BID_POOLS; ) {
             _initOrderBookPoolInfo(i);
             ++i;
         }
@@ -216,7 +216,7 @@ contract LiquidationQueue is ILiquidationQueue {
 
         uint256 bidIndexesLen = bidIndexes.length;
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool];
-        for (uint256 i = 0; i < bidIndexesLen; ) {
+        for (uint256 i; i < bidIndexesLen; ) {
             if (bidIndexes[i] >= poolInfo.nextBidPull) {
                 bidIndexesLen--;
             }
@@ -771,7 +771,7 @@ contract LiquidationQueue is ILiquidationQueue {
         uint256[] storage bidIndexes = userBidIndexes[user][pool];
         uint256 bidIndexesLen = bidIndexes.length;
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool];
-        for (uint256 i = 0; i < bidIndexesLen; ) {
+        for (uint256 i; i < bidIndexesLen; ) {
             if (bidIndexes[i] >= poolInfo.nextBidPull) {
                 bidIndexesLen = bidIndexes.length;
                 bidIndexes[i] = bidIndexes[bidIndexesLen - 1];

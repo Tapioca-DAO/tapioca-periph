@@ -73,7 +73,7 @@ contract FunctionUtils {
         uint64[] memory yArray
     ) {
         require(xArray.length == yArray.length && xArray.length > 0, "5");
-        for (uint256 i = 0; i <= yArray.length - 1; i++) {
+        for (uint256 i; i <= yArray.length - 1; i++) {
             require(
                 yArray[i] <= uint64(BASE_PARAMS) &&
                     xArray[i] <= uint64(BASE_PARAMS),

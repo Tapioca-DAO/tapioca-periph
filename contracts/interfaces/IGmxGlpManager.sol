@@ -4,18 +4,18 @@ pragma solidity >=0.8.0;
 
 interface IGmxGlpManager {
     event AddLiquidity(
-        address account,
-        address token,
-        uint256 amount,
+        address indexed account,
+        address indexed token,
+        uint256 indexed amount,
         uint256 aumInUsdg,
         uint256 glpSupply,
         uint256 usdgAmount,
         uint256 mintAmount
     );
     event RemoveLiquidity(
-        address account,
-        address token,
-        uint256 glpAmount,
+        address indexed account,
+        address indexed  token,
+        uint256 indexed glpAmount,
         uint256 aumInUsdg,
         uint256 glpSupply,
         uint256 usdgAmount,

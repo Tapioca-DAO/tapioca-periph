@@ -26,7 +26,7 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     constructor(uint32 _stalePeriod, address[] memory guardians) {
         stalePeriod = _stalePeriod;
         if (guardians.length == 0) revert InvalidLength();
-        for (uint256 i = 0; i < guardians.length; i++) {
+        for (uint256 i; i < guardians.length; i++) {
             if (guardians[i] == address(0)) revert ZeroAddress();
             _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }
@@ -83,7 +83,7 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
         AggregatorV3Interface[2] memory circuitChainlink = _circuitChainlink();
         uint8[2] memory circuitChainIsMultiplied = _circuitChainIsMultiplied();
         uint8[2] memory chainlinkDecimals = _chainlinkDecimals();
-        for (uint256 i = 0; i < circuitChainlink.length; i++) {
+        for (uint256 i; i < circuitChainlink.length; i++) {
             (quoteAmount, ) = _readChainlinkFeed(
                 quoteAmount,
                 circuitChainlink[i],

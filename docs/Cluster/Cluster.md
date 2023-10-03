@@ -174,7 +174,7 @@ updates LayerZero chain id
 ### ContractUpdated
 
 ```solidity
-event ContractUpdated(address indexed _contract, uint16 indexed _lzChainId, bool _oldStatus, bool _newStatus)
+event ContractUpdated(address indexed _contract, uint16 indexed _lzChainId, bool indexed _oldStatus, bool _newStatus)
 ```
 
 event emitted when a contract status is updated
@@ -187,13 +187,13 @@ event emitted when a contract status is updated
 |---|---|---|
 | _contract `indexed` | address | undefined |
 | _lzChainId `indexed` | uint16 | undefined |
-| _oldStatus  | bool | undefined |
+| _oldStatus `indexed` | bool | undefined |
 | _newStatus  | bool | undefined |
 
 ### EditorUpdated
 
 ```solidity
-event EditorUpdated(address indexed _editor, bool _oldStatus, bool _newStatus)
+event EditorUpdated(address indexed _editor, bool indexed _oldStatus, bool indexed _newStatus)
 ```
 
 event emitted when an editor status is updated
@@ -205,13 +205,13 @@ event emitted when an editor status is updated
 | Name | Type | Description |
 |---|---|---|
 | _editor `indexed` | address | undefined |
-| _oldStatus  | bool | undefined |
-| _newStatus  | bool | undefined |
+| _oldStatus `indexed` | bool | undefined |
+| _newStatus `indexed` | bool | undefined |
 
 ### LzChainUpdate
 
 ```solidity
-event LzChainUpdate(uint256 _oldChain, uint256 _newChain)
+event LzChainUpdate(uint256 indexed _oldChain, uint256 indexed _newChain)
 ```
 
 event emitted when LZ chain id is updated
@@ -222,8 +222,8 @@ event emitted when LZ chain id is updated
 
 | Name | Type | Description |
 |---|---|---|
-| _oldChain  | uint256 | undefined |
-| _newChain  | uint256 | undefined |
+| _oldChain `indexed` | uint256 | undefined |
+| _newChain `indexed` | uint256 | undefined |
 
 ### OwnershipTransferred
 

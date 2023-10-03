@@ -6,9 +6,9 @@ interface IUniswapV2Pair {
     event Approval(
         address indexed owner,
         address indexed spender,
-        uint256 value
+        uint256 indexed value
     );
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 indexed value);
 
     function name() external pure returns (string memory);
 

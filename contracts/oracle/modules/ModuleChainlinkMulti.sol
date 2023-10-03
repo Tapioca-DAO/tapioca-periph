@@ -33,13 +33,13 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
         require(circuitLength == _circuitChainIsMultiplied.length, "104");
         // There is no `GOVERNOR_ROLE` in this contract, governor has `GUARDIAN_ROLE`
         require(guardians.length > 0, "101");
-        for (uint256 i = 0; i < guardians.length; i++) {
+        for (uint256 i; i < guardians.length; i++) {
             require(guardians[i] != address(0), "0");
             _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
 
-        for (uint256 i = 0; i < circuitLength; i++) {
+        for (uint256 i; i < circuitLength; i++) {
             AggregatorV3Interface _pool = AggregatorV3Interface(
                 _circuitChainlink[i]
             );
@@ -61,7 +61,7 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
     ) internal view returns (uint256, uint256) {
         uint256 castedRatio;
         // An invariant should be that `circuitChainlink.length > 0` otherwise `castedRatio = 0`
-        for (uint256 i = 0; i < circuitChainlink.length; i++) {
+        for (uint256 i; i < circuitChainlink.length; i++) {
             (quoteAmount, castedRatio) = _readChainlinkFeed(
                 quoteAmount,
                 circuitChainlink[i],
