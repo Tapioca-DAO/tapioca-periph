@@ -7,7 +7,6 @@ interface IMarketLiquidatorReceiver {
         address tokenIn,
         address tokenOut,
         uint256 collateralAmount,
-        uint256 amountToReceive,
         bytes calldata data
     ) external returns (bool);
 }
