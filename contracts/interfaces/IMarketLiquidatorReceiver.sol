@@ -3,9 +3,10 @@ pragma solidity ^0.8.18;
 
 interface IMarketLiquidatorReceiver {
     function onCollateralReceiver(
-        address initiator,
-        address token,
-        uint256 amount,
+        address tokenIn,
+        address tokenOut,
+        uint256 collateralAmount,
+        uint256 amountToReceive,
         bytes calldata data
     ) external returns (bool);
 }
