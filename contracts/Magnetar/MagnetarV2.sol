@@ -223,6 +223,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         )
                     );
 
+                _checkSender(from);
+
                 _executeModule(
                     Module.Market,
                     abi.encodeWithSelector(
@@ -376,7 +378,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, uint16, address, bytes)
                     );
-
                 _checkSender(from);
 
                 ITapiocaOFT(_action.target).retrieveFromStrategy{
@@ -394,6 +395,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     _action.call[4:],
                     (HelperLendData)
                 );
+                _checkSender(data.user);
 
                 _executeModule(
                     Module.Market,
@@ -430,6 +432,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             ICommonData.IWithdrawParams
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -460,6 +463,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             IUSDOBase.IRemoveAndRepay
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -495,6 +499,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             ICommonData.IWithdrawParams
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -524,6 +529,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, uint256, address, bytes)
                     );
+                _checkSender(from);
 
                 IMarket(_action.target).buyCollateral(
                     from,
@@ -544,6 +550,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, address, bytes)
                     );
+                _checkSender(from);
 
                 IMarket(_action.target).sellCollateral(
                     from,
@@ -603,6 +610,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     (HelperTOFTRemoveAndRepayAsset)
                 );
 
+                _checkSender(data.from);
                 IUSDOBase(_action.target).removeAsset(
                     data.from,
                     data.to,
@@ -646,6 +654,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         address payable refundAddress,
         uint256 gas
     ) external payable {
+        _checkSender(from);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -686,6 +695,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         bool deposit,
         ICommonData.IWithdrawParams calldata withdrawParams
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -725,6 +735,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         bool extractFromSender,
         ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -768,6 +779,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -799,6 +811,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(

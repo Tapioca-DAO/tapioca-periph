@@ -23,4 +23,6 @@ interface IBigBang {
     function getDebtRate() external view returns (uint256);
 
     function getTotalDebt() external view returns (uint256);
+
+    function accrue() external;
 }
