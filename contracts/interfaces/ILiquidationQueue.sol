@@ -95,7 +95,11 @@ interface ILiquidationQueue {
         uint256 timestamp
     );
     /// @notice event emitted when funds are redeemed
-    event Redeem(address indexed redeemer, address indexed to, uint256 amount);
+    event Redeem(
+        address indexed redeemer,
+        address indexed to,
+        uint256 indexed amount
+    );
     /// @notice event emitted when bid swapper is updated
     event BidSwapperUpdated(IBidder indexed _old, address indexed _new);
     /// @notice event emitted when usdo swapper is updated

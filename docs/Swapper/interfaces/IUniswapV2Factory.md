@@ -168,7 +168,7 @@ function setFeeToSetter(address) external nonpayable
 ### PairCreated
 
 ```solidity
-event PairCreated(address indexed token0, address indexed token1, address pair, uint256)
+event PairCreated(address indexed token0, address indexed token1, address indexed pair, uint256)
 ```
 
 
@@ -181,7 +181,7 @@ event PairCreated(address indexed token0, address indexed token1, address pair, 
 |---|---|---|
 | token0 `indexed` | address | undefined |
 | token1 `indexed` | address | undefined |
-| pair  | address | undefined |
+| pair `indexed` | address | undefined |
 | _3  | uint256 | undefined |
 
 

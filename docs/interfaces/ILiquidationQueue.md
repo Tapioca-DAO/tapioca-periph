@@ -459,7 +459,7 @@ event emitted when bids are executed
 ### Redeem
 
 ```solidity
-event Redeem(address indexed redeemer, address indexed to, uint256 amount)
+event Redeem(address indexed redeemer, address indexed to, uint256 indexed amount)
 ```
 
 event emitted when funds are redeemed
@@ -472,7 +472,7 @@ event emitted when funds are redeemed
 |---|---|---|
 | redeemer `indexed` | address | undefined |
 | to `indexed` | address | undefined |
-| amount  | uint256 | undefined |
+| amount `indexed` | uint256 | undefined |
 
 ### RemoveBid
 

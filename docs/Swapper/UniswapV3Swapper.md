@@ -321,7 +321,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### PoolFee
 
 ```solidity
-event PoolFee(uint256 _old, uint256 _new)
+event PoolFee(uint256 indexed _old, uint256 indexed _new)
 ```
 
 
@@ -332,8 +332,8 @@ event PoolFee(uint256 _old, uint256 _new)
 
 | Name | Type | Description |
 |---|---|---|
-| _old  | uint256 | undefined |
-| _new  | uint256 | undefined |
+| _old `indexed` | uint256 | undefined |
+| _new `indexed` | uint256 | undefined |
 
 ### TwapDurationSet
 

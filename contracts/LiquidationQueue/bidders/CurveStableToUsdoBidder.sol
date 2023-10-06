@@ -195,7 +195,7 @@ contract CurveStableToUsdoBidder is BoringOwnable {
     function _getCurveIndex(address token) private view returns (uint256) {
         ICurvePool pool = ICurvePool(curveSwapper.curvePool());
         int256 index = -1;
-        for (uint256 i = 0; i < curveAssetsLength; i++) {
+        for (uint256 i; i < curveAssetsLength; i++) {
             address tokenAtIndex = pool.coins(i);
             if (tokenAtIndex == token) {
                 index = int256(i);

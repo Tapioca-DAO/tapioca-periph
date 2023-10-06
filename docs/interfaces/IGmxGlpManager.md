@@ -663,7 +663,7 @@ function vault() external view returns (address)
 ### AddLiquidity
 
 ```solidity
-event AddLiquidity(address account, address token, uint256 amount, uint256 aumInUsdg, uint256 glpSupply, uint256 usdgAmount, uint256 mintAmount)
+event AddLiquidity(address indexed account, address indexed token, uint256 indexed amount, uint256 aumInUsdg, uint256 glpSupply, uint256 usdgAmount, uint256 mintAmount)
 ```
 
 
@@ -674,9 +674,9 @@ event AddLiquidity(address account, address token, uint256 amount, uint256 aumIn
 
 | Name | Type | Description |
 |---|---|---|
-| account  | address | undefined |
-| token  | address | undefined |
-| amount  | uint256 | undefined |
+| account `indexed` | address | undefined |
+| token `indexed` | address | undefined |
+| amount `indexed` | uint256 | undefined |
 | aumInUsdg  | uint256 | undefined |
 | glpSupply  | uint256 | undefined |
 | usdgAmount  | uint256 | undefined |
@@ -685,7 +685,7 @@ event AddLiquidity(address account, address token, uint256 amount, uint256 aumIn
 ### RemoveLiquidity
 
 ```solidity
-event RemoveLiquidity(address account, address token, uint256 glpAmount, uint256 aumInUsdg, uint256 glpSupply, uint256 usdgAmount, uint256 amountOut)
+event RemoveLiquidity(address indexed account, address indexed token, uint256 indexed glpAmount, uint256 aumInUsdg, uint256 glpSupply, uint256 usdgAmount, uint256 amountOut)
 ```
 
 
@@ -696,9 +696,9 @@ event RemoveLiquidity(address account, address token, uint256 glpAmount, uint256
 
 | Name | Type | Description |
 |---|---|---|
-| account  | address | undefined |
-| token  | address | undefined |
-| glpAmount  | uint256 | undefined |
+| account `indexed` | address | undefined |
+| token `indexed` | address | undefined |
+| glpAmount `indexed` | uint256 | undefined |
 | aumInUsdg  | uint256 | undefined |
 | glpSupply  | uint256 | undefined |
 | usdgAmount  | uint256 | undefined |

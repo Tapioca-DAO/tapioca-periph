@@ -41,8 +41,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************** //
     // *** EVENTS *** //
     // ************** //
-    event PoolFee(uint256 _old, uint256 _new);
-    event TwapDurationSet(uint32 _oldVal, uint32 _newVal);
+    event PoolFee(uint256 indexed _old, uint256 indexed _new);
 
     constructor(
         IYieldBox _yieldBox,

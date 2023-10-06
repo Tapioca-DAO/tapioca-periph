@@ -39,7 +39,7 @@ function paused(bytes32) external view returns (bool)
 ### Paused
 
 ```solidity
-event Paused(bytes32 name)
+event Paused(bytes32 indexed name)
 ```
 
 
@@ -50,12 +50,12 @@ event Paused(bytes32 name)
 
 | Name | Type | Description |
 |---|---|---|
-| name  | bytes32 | undefined |
+| name `indexed` | bytes32 | undefined |
 
 ### Unpaused
 
 ```solidity
-event Unpaused(bytes32 name)
+event Unpaused(bytes32 indexed name)
 ```
 
 
@@ -66,7 +66,7 @@ event Unpaused(bytes32 name)
 
 | Name | Type | Description |
 |---|---|---|
-| name  | bytes32 | undefined |
+| name `indexed` | bytes32 | undefined |
 
 
 

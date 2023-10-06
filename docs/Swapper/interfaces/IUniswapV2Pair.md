@@ -524,7 +524,7 @@ function transferFrom(address from, address to, uint256 value) external nonpayab
 ### Approval
 
 ```solidity
-event Approval(address indexed owner, address indexed spender, uint256 value)
+event Approval(address indexed owner, address indexed spender, uint256 indexed value)
 ```
 
 
@@ -537,7 +537,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 |---|---|---|
 | owner `indexed` | address | undefined |
 | spender `indexed` | address | undefined |
-| value  | uint256 | undefined |
+| value `indexed` | uint256 | undefined |
 
 ### Burn
 
@@ -617,7 +617,7 @@ event Sync(uint112 reserve0, uint112 reserve1)
 ### Transfer
 
 ```solidity
-event Transfer(address indexed from, address indexed to, uint256 value)
+event Transfer(address indexed from, address indexed to, uint256 indexed value)
 ```
 
 
@@ -630,7 +630,7 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 |---|---|---|
 | from `indexed` | address | undefined |
 | to `indexed` | address | undefined |
-| value  | uint256 | undefined |
+| value `indexed` | uint256 | undefined |
 
 
 

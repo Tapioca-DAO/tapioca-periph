@@ -42,7 +42,7 @@ contract Multicall3 is Ownable {
         uint256 length = calls.length;
         returnData = new Result[](length);
         Call memory calli;
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i; i < length; ) {
             Result memory result = returnData[i];
             calli = calls[i];
 
@@ -66,7 +66,7 @@ contract Multicall3 is Ownable {
         uint256 length = calls.length;
         returnData = new Result[](length);
         CallValue memory calli;
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i; i < length; ) {
             Result memory result = returnData[i];
             calli = calls[i];
             uint256 val = calli.value;
