@@ -151,10 +151,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         );
         //deposit to YieldBox
         if (deposit) {
-            if (!extractFromSender) {
-                _checkSender(user);
-            }
-
             // transfers tokens from sender or from the user to this contract
             collateralAmount = _extractTokens(
                 extractFromSender ? msg.sender : user,
@@ -360,9 +356,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             );
             // deposit collateral to YB
             if (mintData.collateralDepositData.deposit) {
-                if (!mintData.collateralDepositData.extractFromSender) {
-                    _checkSender(user);
-                }
                 mintData.collateralDepositData.amount = _extractTokens(
                     mintData.collateralDepositData.extractFromSender
                         ? msg.sender
@@ -414,10 +407,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 sglAssetId = singularity.assetId();
         (, address sglAssetAddress, , ) = yieldBox.assets(sglAssetId);
         if (depositData.deposit) {
-            if (!depositData.extractFromSender) {
-                _checkSender(user);
-            }
-
             depositData.amount = _extractTokens(
                 depositData.extractFromSender ? msg.sender : user,
                 sglAssetAddress,
