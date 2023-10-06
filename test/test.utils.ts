@@ -1125,9 +1125,13 @@ export async function register(staging?: boolean) {
     log(`Deployed YieldBox ${yieldBox.address}`, staging);
 
     // ------------------- 2.1 Create Cluster -------------------
+    const LZEndpointMock = new LZEndpointMock__factory(deployer);
+    const clusterLzEndpoint = await LZEndpointMock.deploy(
+        await hre.getChainId(),
+    );
     const cluster = await (
         await ethers.getContractFactory('Cluster')
-    ).deploy(1);
+    ).deploy(clusterLzEndpoint.address);
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
