@@ -64,6 +64,7 @@ contract UniswapV3Swapper is BaseSwapper {
         emit TwapDurationSet(twapDuration, _duration);
         twapDuration = _duration;
     }
+
     function setPoolFee(uint24 _newFee) external onlyOwner {
         emit PoolFee(poolFee, _newFee);
         poolFee = _newFee;
