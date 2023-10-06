@@ -335,23 +335,6 @@ event PoolFee(uint256 indexed _old, uint256 indexed _new)
 | _old `indexed` | uint256 | undefined |
 | _new `indexed` | uint256 | undefined |
 
-### TwapDurationSet
-
-```solidity
-event TwapDurationSet(uint32 _oldVal, uint32 _newVal)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _oldVal  | uint32 | undefined |
-| _newVal  | uint32 | undefined |
-
 
 
 ## Errors

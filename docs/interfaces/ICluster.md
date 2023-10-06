@@ -10,6 +10,24 @@
 
 ## Methods
 
+### batchUpdateContracts
+
+```solidity
+function batchUpdateContracts(uint16 _lzChainId, address[] _addresses, bool _status) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _lzChainId | uint16 | undefined |
+| _addresses | address[] | undefined |
+| _status | bool | undefined |
+
 ### isWhitelisted
 
 ```solidity

@@ -60,7 +60,6 @@ contract UniswapV3Swapper is BaseSwapper {
     /// *** OWNER METHODS ***
     /// ***  ***
     function setTwapDuration(uint32 _duration) external onlyOwner {
-        emit TwapDurationSet(twapDuration, _duration);
         twapDuration = _duration;
     }
 

@@ -13,5 +13,11 @@ interface ICluster {
         bool _status
     ) external;
 
+    function batchUpdateContracts(
+        uint16 _lzChainId,
+        address[] memory _addresses,
+        bool _status
+    ) external;
+
     function lzChainId() external view returns (uint16);
 }
