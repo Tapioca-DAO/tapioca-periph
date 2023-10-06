@@ -23,10 +23,7 @@ contract TapiocaDeployer {
         bytes memory bytecode,
         string memory contractName
     ) external payable returns (address addr) {
-        require(
-            address(this).balance >= amount,
-            "Create2: insufficient balance"
-        );
+        require(msg.value == amount, "Create2: insufficient balance");
         require(
             bytecode.length != 0,
             string.concat(
