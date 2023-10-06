@@ -97,7 +97,7 @@ function decimals() external pure returns (uint8)
 ### get
 
 ```solidity
-function get(bytes) external view returns (bool success, uint256 rate)
+function get(bytes) external nonpayable returns (bool success, uint256 rate)
 ```
 
 Get the latest exchange rate.
