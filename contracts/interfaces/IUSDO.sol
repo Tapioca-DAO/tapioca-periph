@@ -73,6 +73,8 @@ interface IUSDOBase {
 
     function setFlashloanHelper(address _helper) external;
 
+    function paused() external view returns (bool);
+
     function sendAndLendOrRepay(
         address _from,
         address _to,
