@@ -67,6 +67,23 @@ function mint(address _to, uint256 _amount) external nonpayable
 | _to | address | undefined |
 | _amount | uint256 | undefined |
 
+### paused
+
+```solidity
+function paused() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### removeAsset
 
 ```solidity
@@ -132,6 +149,22 @@ function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverag
 | lzData | IUSDOBase.ILeverageLZData | undefined |
 | swapData | IUSDOBase.ILeverageSwapData | undefined |
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+
+### setFlashloanHelper
+
+```solidity
+function setFlashloanHelper(address _helper) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _helper | address | undefined |
 
 
 
