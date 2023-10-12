@@ -40,25 +40,6 @@ contract MagnetarV2Storage {
         bytes returnData;
     }
 
-    struct PermitData {
-        address owner;
-        address spender;
-        uint256 value;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    struct PermitAllData {
-        address owner;
-        address spender;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
     struct WrapData {
         address from;
         address to;
@@ -212,6 +193,7 @@ contract MagnetarV2Storage {
     // --- ACTIONS IDS ----
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
+    uint16 internal constant PERMIT_MARKET = 3;
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
     uint16 internal constant YB_WITHDRAW_TO = 102;
@@ -255,7 +237,10 @@ contract MagnetarV2Storage {
     // *** INTERNAL METHODS *** //
     // ************************ //
     function _checkSender(address _from) internal view {
-        require(_from == msg.sender, "MagnetarV2: operator not approved");
+        require(
+            _from == msg.sender || cluster.isWhitelisted(0, msg.sender),
+            "MagnetarV2: operator not approved"
+        );
     }
 
     receive() external payable virtual {}

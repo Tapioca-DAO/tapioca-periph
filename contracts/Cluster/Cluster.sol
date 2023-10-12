@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol";
 import "../interfaces/ICluster.sol";
 
 contract Cluster is Ownable, ICluster {
@@ -36,8 +37,8 @@ contract Cluster is Ownable, ICluster {
         bool _newStatus
     );
 
-    constructor(uint16 _lzChainId) {
-        lzChainId = _lzChainId;
+    constructor(address lzEndpoint) {
+        lzChainId = ILayerZeroEndpoint(lzEndpoint).getChainId();
     }
 
     // ******************** //

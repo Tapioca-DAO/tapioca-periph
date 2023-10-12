@@ -94,14 +94,24 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     _action.target,
                     _action.call,
                     true,
-                    _action.allowFailure
+                    _action.allowFailure,
+                    true
                 );
             } else if (_action.id == PERMIT) {
                 _permit(
                     _action.target,
                     _action.call,
                     false,
-                    _action.allowFailure
+                    _action.allowFailure,
+                    true
+                );
+            } else if (_action.id == PERMIT_MARKET) {
+                _permit(
+                    _action.target,
+                    _action.call,
+                    false,
+                    _action.allowFailure,
+                    false
                 );
             } else if (_action.id == TOFT_WRAP) {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
@@ -212,6 +222,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             address
                         )
                     );
+
+                _checkSender(from);
 
                 _executeModule(
                     Module.Market,
@@ -366,7 +378,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, uint16, address, bytes)
                     );
-
                 _checkSender(from);
 
                 ITapiocaOFT(_action.target).retrieveFromStrategy{
@@ -384,6 +395,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     _action.call[4:],
                     (HelperLendData)
                 );
+                _checkSender(data.user);
 
                 _executeModule(
                     Module.Market,
@@ -420,6 +432,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             ICommonData.IWithdrawParams
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -450,6 +463,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             IUSDOBase.IRemoveAndRepay
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -485,6 +499,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                             ICommonData.IWithdrawParams
                         )
                     );
+                _checkSender(user);
 
                 _executeModule(
                     Module.Market,
@@ -514,6 +529,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, uint256, address, bytes)
                     );
+                _checkSender(from);
 
                 IMarket(_action.target).buyCollateral(
                     from,
@@ -534,6 +550,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                         _action.call[4:],
                         (address, uint256, uint256, address, bytes)
                     );
+                _checkSender(from);
 
                 IMarket(_action.target).sellCollateral(
                     from,
@@ -556,43 +573,44 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     data.tapSendData,
                     data.approvals
                 );
-            } else if (_action.id == MARKET_MULTIHOP_BUY) {
-                HelperMultiHopBuy memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperMultiHopBuy)
-                );
-
-                IUSDOBase(_action.target).initMultiHopBuy{value: _action.value}(
-                    data.from,
-                    data.collateralAmount,
-                    data.borrowAmount,
-                    data.swapData,
-                    data.lzData,
-                    data.externalData,
-                    data.airdropAdapterParams,
-                    data.approvals
-                );
-            } else if (_action.id == MARKET_MULTIHOP_SELL) {
-                HelperMultiHopSell memory data = abi.decode(
-                    _action.call[4:],
-                    (HelperMultiHopSell)
-                );
-
-                ITapiocaOFT(_action.target).initMultiSell{value: _action.value}(
-                    data.from,
-                    data.amount,
-                    data.swapData,
-                    data.lzData,
-                    data.externalData,
-                    data.airdropAdapterParams,
-                    data.approvals
-                );
-            } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
+            }
+            // else if (_action.id == MARKET_MULTIHOP_BUY) {
+            //     HelperMultiHopBuy memory data = abi.decode(
+            //         _action.call[4:],
+            //         (HelperMultiHopBuy)
+            //     );
+            //     IUSDOBase(_action.target).initMultiHopBuy{value: _action.value}(
+            //         data.from,
+            //         data.collateralAmount,
+            //         data.borrowAmount,
+            //         data.swapData,
+            //         data.lzData,
+            //         data.externalData,
+            //         data.airdropAdapterParams,
+            //         data.approvals
+            //     );
+            // } else if (_action.id == MARKET_MULTIHOP_SELL) {
+            //     HelperMultiHopSell memory data = abi.decode(
+            //         _action.call[4:],
+            //         (HelperMultiHopSell)
+            //     );
+            //     ITapiocaOFT(_action.target).initMultiSell{value: _action.value}(
+            //         data.from,
+            //         data.amount,
+            //         data.swapData,
+            //         data.lzData,
+            //         data.externalData,
+            //         data.airdropAdapterParams,
+            //         data.approvals
+            //     );
+            // }
+            else if (_action.id == TOFT_REMOVE_AND_REPAY) {
                 HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
                     _action.call[4:],
                     (HelperTOFTRemoveAndRepayAsset)
                 );
 
+                _checkSender(data.from);
                 IUSDOBase(_action.target).removeAsset(
                     data.from,
                     data.to,
@@ -636,6 +654,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         address payable refundAddress,
         uint256 gas
     ) external payable {
+        _checkSender(from);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -676,6 +695,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         bool deposit,
         ICommonData.IWithdrawParams calldata withdrawParams
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -715,6 +735,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         bool extractFromSender,
         ICommonData.IWithdrawParams calldata withdrawCollateralParams
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -758,6 +779,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -789,6 +811,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
     ) external payable {
+        _checkSender(user);
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
@@ -830,17 +853,65 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
         address target,
         bytes calldata actionCalldata,
         bool permitAll,
-        bool allowFailure
+        bool allowFailure,
+        bool executeOnYb
     ) private {
+        require(target.code.length > 0, "Magnetar: no contract");
+
         bytes memory data = actionCalldata;
         bytes4 funcSig;
         assembly {
             funcSig := mload(add(data, 0x20))
         }
+
+        if (executeOnYb) {
+            _permitOnYb(
+                target,
+                actionCalldata,
+                permitAll,
+                allowFailure,
+                funcSig
+            );
+        } else {
+            _permitOnMarket(target, actionCalldata, allowFailure, funcSig);
+        }
+    }
+
+    function _permitOnMarket(
+        address target,
+        bytes calldata actionCalldata,
+        bool allowFailure,
+        bytes4 funcSig
+    ) private {
+        bytes4 allowedTokenSig = bytes4(
+            keccak256("permitAction(bytes,uint16)")
+        );
+        require(funcSig == allowedTokenSig, "MagnetarV2: permit sig not valid");
+
+        (bytes memory data, ) = abi.decode(actionCalldata[4:], (bytes, uint16));
+        (, address owner, , , , , , ) = abi.decode(
+            data,
+            (bool, address, address, uint256, uint256, uint8, bytes32, bytes32)
+        );
+        _checkSender(owner);
+
+        (bool success, bytes memory returnData) = target.call(actionCalldata);
+        if (!success && !allowFailure) {
+            _getRevertMsg(returnData);
+        }
+    }
+
+    function _permitOnYb(
+        address target,
+        bytes calldata actionCalldata,
+        bool permitAll,
+        bool allowFailure,
+        bytes4 funcSig
+    ) private {
         bytes4 allowedTokenSig = permitAll
             ? bytes4(
                 keccak256(
-                    "permitAll(address,address,address,uint256,uint256,uint8,bytes32,bytes32)"
+                    "permitAll(address,address,uint256,uint8,bytes32,bytes32)"
                 )
             )
             : bytes4(
@@ -848,32 +919,23 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage, IERC721Receiver {
                     "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)"
                 )
             );
-        bytes4 allowedAllYbSig = bytes4(
-            keccak256(
-                "permitAll(address,address,uint256,uint8,bytes32,bytes32)"
-            )
-        );
 
-        require(
-            funcSig == allowedTokenSig || funcSig == allowedAllYbSig,
-            "MagnetarV2: permitAll selector not found"
-        );
+        require(funcSig == allowedTokenSig, "MagnetarV2: permit sig not valid");
 
         if (permitAll) {
-            PermitAllData memory permitData = abi.decode(
+            (address owner, , , , , ) = abi.decode(
                 actionCalldata[4:],
-                (PermitAllData)
+                (address, address, uint256, uint8, bytes32, bytes32)
             );
-            _checkSender(permitData.owner);
+            _checkSender(owner);
         } else {
-            PermitData memory permitData = abi.decode(
+            (address owner, , , , , , ) = abi.decode(
                 actionCalldata[4:],
-                (PermitData)
+                (address, address, uint256, uint256, uint8, bytes32, bytes32)
             );
-            _checkSender(permitData.owner);
+            _checkSender(owner);
         }
 
-        require(target.code.length > 0, "Magnetar: no contract");
         (bool success, bytes memory returnData) = target.call(actionCalldata);
         if (!success && !allowFailure) {
             _getRevertMsg(returnData);
