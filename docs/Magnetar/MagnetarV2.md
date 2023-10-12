@@ -237,6 +237,22 @@ rescues unused ETH from the contract
 | amount | uint256 | the amount to rescue |
 | to | address | the recipient |
 
+### setCluster
+
+```solidity
+function setCluster(contract ICluster _cluster) external nonpayable
+```
+
+updates the cluster address
+
+*can only be called by the owner*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _cluster | contract ICluster | the new address |
+
 ### setHelper
 
 ```solidity

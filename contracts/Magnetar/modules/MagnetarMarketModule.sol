@@ -542,17 +542,24 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 valueAmount,
         ICluster _cluster
     ) private {
-        require(
-            _cluster.isWhitelisted(_cluster.lzChainId(), externalData.bigBang),
-            "MagnetarV2: BB not whitelisted"
-        );
-        require(
-            _cluster.isWhitelisted(
-                _cluster.lzChainId(),
-                externalData.singularity
-            ),
-            "MagnetarV2: SGL not whitelisted"
-        );
+        if (externalData.bigBang != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalData.bigBang
+                ),
+                "MagnetarV2: BB not whitelisted"
+            );
+        }
+        if (externalData.singularity != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalData.singularity
+                ),
+                "MagnetarV2: SGL not whitelisted"
+            );
+        }
 
         IMarket bigBang = IMarket(externalData.bigBang);
         ISingularity singularity = ISingularity(externalData.singularity);
