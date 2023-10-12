@@ -97,7 +97,15 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
     function _safeApprove(address token, address to, uint256 value) internal {
         require(token.code.length > 0, "Swapper: no contract");
-        (bool success, bytes memory data) = token.call(
+        bool success;
+        bytes memory data;
+        (success, data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, 0));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "BaseSwapper::safeApprove: approve failed"
+        );
+
+        (success, data) = token.call(
             abi.encodeWithSelector(0x095ea7b3, to, value)
         );
         require(

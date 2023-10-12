@@ -37,8 +37,9 @@ contract Cluster is Ownable, ICluster {
         bool _newStatus
     );
 
-    constructor(address lzEndpoint) {
-        lzChainId = ILayerZeroEndpoint(lzEndpoint).getChainId();
+    constructor(uint16 _lzChainId) {
+        lzChainId = _lzChainId;
+        transferOwnership(msg.sender);
     }
 
     // ******************** //
