@@ -10,6 +10,22 @@
 
 ## Methods
 
+### addFlashloanFee
+
+```solidity
+function addFlashloanFee(uint256 _fee) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _fee | uint256 | undefined |
+
 ### burn
 
 ```solidity

@@ -112,6 +112,7 @@ describe('MagnetarV2', () => {
                     'address',
                     'uint256',
                     'uint256',
+                    'uint256',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -125,6 +126,7 @@ describe('MagnetarV2', () => {
                     wethAssetId,
                     wethUsdcOracle.address,
                     ethers.utils.parseEther('1'),
+                    0,
                     0,
                 ],
             );
@@ -158,38 +160,6 @@ describe('MagnetarV2', () => {
                 usdc,
                 usd0,
             );
-
-            const LQ_META = {
-                activationTime: 600, // 10min
-                minBidAmount: ethers.BigNumber.from((1e18).toString()).mul(200), // 200 USDC
-                closeToMinBidAmount: ethers.BigNumber.from(
-                    (1e18).toString(),
-                ).mul(202),
-                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
-                    400,
-                ), // 400 USDC
-                feeCollector: feeCollector.address,
-                bidExecutionSwapper: ethers.constants.AddressZero,
-                usdoSwapper: stableToUsdoBidder.address,
-            };
-            await liquidationQueue.init(LQ_META, wethUsdoSingularity.address);
-
-            const payload = wethUsdoSingularity.interface.encodeFunctionData(
-                'setLiquidationQueueConfig',
-                [
-                    liquidationQueue.address,
-                    ethers.constants.AddressZero,
-                    ethers.constants.AddressZero,
-                ],
-            );
-
-            await (
-                await bar.executeMarketFn(
-                    [wethUsdoSingularity.address],
-                    [payload],
-                    true,
-                )
-            ).wait();
 
             const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(10);
             const usdoShare = await yieldBox.toShare(
@@ -3125,8 +3095,21 @@ describe('MagnetarV2', () => {
 
             const borrowFeeUpdateFn =
                 wethBigBangMarket.interface.encodeFunctionData(
-                    'setBorrowOpeningFee',
-                    [0],
+                    'setMarketConfig',
+                    [
+                        0,
+                        ethers.constants.AddressZero,
+                        '0x',
+                        ethers.constants.AddressZero,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                    ],
                 );
             await bar.executeMarketFn(
                 [wethBigBangMarket.address],

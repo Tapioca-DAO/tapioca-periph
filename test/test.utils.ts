@@ -30,6 +30,10 @@ import {
     BBCollateral__factory,
     BBBorrow__factory,
     BBLeverage__factory,
+    USDOLeverageDestinationModule__factory,
+    USDOMarketDestinationModule__factory,
+    USDOOptionsDestinationModule__factory,
+    USDOGenericModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
 
 import {
@@ -467,6 +471,7 @@ async function registerSingularity(
             'address',
             'uint256',
             'uint256',
+            'uint256',
         ],
         [
             _sglLiquidationModule.address,
@@ -480,6 +485,7 @@ async function registerSingularity(
             usdcAssetId,
             wethUsdcOracle.address,
             exchangeRatePrecision ?? 0,
+            0,
             0,
         ],
     );
@@ -578,9 +584,25 @@ async function registerUsd0Contract(
         yieldBox,
         cluster,
     );
+    const USDOLeverageDestinationModule =
+        new USDOLeverageDestinationModule__factory(owner);
+    const usdo_leverage_destination =
+        await USDOLeverageDestinationModule.deploy(
+            lzEndpointContract.address,
+            yieldBox,
+            cluster,
+        );
 
     const USDOMarketModule = new USDOMarketModule__factory(owner);
     const usdo_market = await USDOMarketModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+        cluster,
+    );
+
+    const USDOMarketDestinationModule =
+        new USDOMarketDestinationModule__factory(owner);
+    const usdo_market_destination = await USDOMarketDestinationModule.deploy(
         lzEndpointContract.address,
         yieldBox,
         cluster,
@@ -593,6 +615,21 @@ async function registerUsd0Contract(
         cluster,
     );
 
+    const USDOOptionsDestinationModule =
+        new USDOOptionsDestinationModule__factory(owner);
+    const usdo_options_destination = await USDOOptionsDestinationModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+        cluster,
+    );
+
+    const USDOGenericModule = new USDOGenericModule__factory(owner);
+    const usdo_generic = await USDOGenericModule.deploy(
+        lzEndpointContract.address,
+        yieldBox,
+        cluster,
+    );
+
     const USDO = new USDO__factory(owner);
     const usd0 = await USDO.deploy(
         lzEndpointContract.address,
@@ -600,8 +637,12 @@ async function registerUsd0Contract(
         cluster,
         owner.address,
         usdo_leverage.address,
+        usdo_leverage_destination.address,
         usdo_market.address,
+        usdo_market_destination.address,
         usdo_options.address,
+        usdo_options_destination.address,
+        usdo_generic.address,
     );
     log(
         `Deployed UDS0 ${usd0.address} with args [${lzEndpointContract.address},${yieldBox}]`,
@@ -877,6 +918,7 @@ async function createWethUsd0Singularity(
             'address',
             'uint256',
             'uint256',
+            'uint256',
         ],
         [
             _sglLiquidationModule.address,
@@ -890,6 +932,7 @@ async function createWethUsd0Singularity(
             wethAssetId,
             wethUsd0Oracle.address,
             exchangePrecision,
+            0,
             0,
         ],
     );
@@ -927,43 +970,6 @@ async function createWethUsd0Singularity(
         `Deployed WethUsd0LiquidationQueue at ${liquidationQueue.address} with no arguments`,
         staging,
     );
-
-    const feeCollector = new ethers.Wallet(
-        ethers.Wallet.createRandom().privateKey,
-        ethers.provider,
-    );
-    log(`WethUsd0Singularity feeCollector ${feeCollector.address}`, staging);
-
-    const LQ_META = {
-        activationTime: 600, // 10min
-        minBidAmount: ethers.BigNumber.from((1e18).toString()).mul(1), // 1 USDC
-        closeToMinBidAmount: ethers.BigNumber.from((1e18).toString()).mul(202),
-        defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(400), // 400 USDC
-        feeCollector: feeCollector.address,
-        bidExecutionSwapper: ethers.constants.AddressZero,
-        usdoSwapper: stableToUsdoBidder.address,
-    };
-
-    await liquidationQueue.init(LQ_META, wethUsdoSingularity.address);
-    log('LiquidationQueue initialized');
-
-    const payload = wethUsdoSingularity.interface.encodeFunctionData(
-        'setLiquidationQueueConfig',
-        [
-            liquidationQueue.address,
-            ethers.constants.AddressZero,
-            ethers.constants.AddressZero,
-        ],
-    );
-
-    await (
-        await bar.executeMarketFn(
-            [wethUsdoSingularity.address],
-            [payload],
-            true,
-        )
-    ).wait();
-    log('WethUsd0LiquidationQueue was set for WethUsd0Singularity', staging);
 
     return { wethUsdoSingularity };
 }
@@ -1024,6 +1030,7 @@ async function registerBigBangMarket(
             'uint256',
             'uint256',
             'uint256',
+            'uint256',
         ],
         [
             _bbLiquidationModule.address,
@@ -1039,6 +1046,7 @@ async function registerBigBangMarket(
             debtRateMin,
             debtRateMax,
             debtStartPoint,
+            0,
             0,
         ],
     );
@@ -1131,7 +1139,7 @@ export async function register(staging?: boolean) {
     );
     const cluster = await (
         await ethers.getContractFactory('Cluster')
-    ).deploy(clusterLzEndpoint.address);
+    ).deploy(clusterLzEndpoint.address, deployer.address);
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
@@ -1221,24 +1229,6 @@ export async function register(staging?: boolean) {
 
     const _sglLiquidationModule = wethUsdcSingularityData._sglLiquidationModule;
     log(`Deployed WethUsdcSingularity ${wethUsdcSingularity.address}`, staging);
-
-    // ------------------- 9 Deploy & set LiquidationQueue -------------------
-    log('Registering WETHUSDC LiquidationQueue', staging);
-    const feeCollector = new ethers.Wallet(
-        ethers.Wallet.createRandom().privateKey,
-        ethers.provider,
-    );
-    const { liquidationQueue, LQ_META } = await registerLiquidationQueue(
-        deployer,
-        bar,
-        wethUsdcSingularity,
-        feeCollector.address,
-        staging,
-    );
-    log(
-        `Registered WETHUSDC LiquidationQueue ${liquidationQueue.address}`,
-        staging,
-    );
 
     // ------------------- 10 Deploy USDO -------------------
     log('Registering USDO', staging);
@@ -1401,9 +1391,6 @@ export async function register(staging?: boolean) {
         cluster,
         eoa1,
         multiSwapper,
-        liquidationQueue,
-        LQ_META,
-        feeCollector,
         usdoToWethBidder,
         mediumRiskMC,
         registerSingularity,
