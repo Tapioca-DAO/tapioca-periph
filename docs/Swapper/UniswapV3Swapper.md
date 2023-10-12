@@ -195,22 +195,6 @@ function renounceOwnership() external nonpayable
 function setPoolFee(uint24 _newFee) external nonpayable
 ```
 
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _newFee | uint24 | undefined |
-
-### setTwapDuration
-
-```solidity
-function setTwapDuration(uint32 _duration) external nonpayable
-```
-
 *** OWNER METHODS *** ***  ***
 
 
@@ -219,7 +203,7 @@ function setTwapDuration(uint32 _duration) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _duration | uint32 | undefined |
+| _newFee | uint24 | undefined |
 
 ### swap
 
@@ -321,7 +305,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### PoolFee
 
 ```solidity
-event PoolFee(uint256 _old, uint256 _new)
+event PoolFee(uint256 indexed _old, uint256 indexed _new)
 ```
 
 
@@ -332,25 +316,8 @@ event PoolFee(uint256 _old, uint256 _new)
 
 | Name | Type | Description |
 |---|---|---|
-| _old  | uint256 | undefined |
-| _new  | uint256 | undefined |
-
-### TwapDurationSet
-
-```solidity
-event TwapDurationSet(uint32 _oldVal, uint32 _newVal)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _oldVal  | uint32 | undefined |
-| _newVal  | uint32 | undefined |
+| _old `indexed` | uint256 | undefined |
+| _new `indexed` | uint256 | undefined |
 
 
 

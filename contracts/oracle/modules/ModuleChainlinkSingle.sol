@@ -32,7 +32,7 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
         chainlinkDecimals = AggregatorV3Interface(_poolChainlink).decimals();
         // There is no `GOVERNOR_ROLE` in this contract, governor has `GUARDIAN_ROLE`
         require(guardians.length > 0, "101");
-        for (uint256 i = 0; i < guardians.length; i++) {
+        for (uint256 i; i < guardians.length; i++) {
             require(guardians[i] != address(0), "0");
             _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }

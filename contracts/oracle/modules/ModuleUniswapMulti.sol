@@ -30,7 +30,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
     ) {
         // There is no `GOVERNOR_ROLE` in this contract, governor has `GUARDIAN_ROLE`
         require(guardians.length > 0, "101");
-        for (uint256 i = 0; i < guardians.length; i++) {
+        for (uint256 i; i < guardians.length; i++) {
             require(guardians[i] != address(0), "0");
             _setupRole(GUARDIAN_ROLE_UNISWAP, guardians[i]);
         }
@@ -46,7 +46,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
         circuitUniswap = _circuitUniswap;
         circuitUniIsMultiplied = _circuitUniIsMultiplied;
 
-        for (uint256 i = 0; i < circuitUniLength; i++) {
+        for (uint256 i; i < circuitUniLength; i++) {
             circuitUniswap[i].increaseObservationCardinalityNext(
                 observationLength
             );
@@ -60,7 +60,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
     function _quoteUniswap(
         uint256 quoteAmount
     ) internal view returns (uint256) {
-        for (uint256 i = 0; i < circuitUniswap.length; i++) {
+        for (uint256 i; i < circuitUniswap.length; i++) {
             quoteAmount = _readUniswapPool(
                 quoteAmount,
                 circuitUniswap[i],
@@ -75,7 +75,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
     /// @param newLengthStored Size asked for
     /// @dev newLengthStored should be larger than all previous pools observations length
     function increaseTWAPStore(uint16 newLengthStored) external {
-        for (uint256 i = 0; i < circuitUniswap.length; i++) {
+        for (uint256 i; i < circuitUniswap.length; i++) {
             circuitUniswap[i].increaseObservationCardinalityNext(
                 newLengthStored
             );

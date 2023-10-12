@@ -75,7 +75,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         uint256 length = calls.length;
         returnData = new Result[](length);
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i; i < length; i++) {
             Call calldata _action = calls[i];
             if (!_action.allowFailure) {
                 require(

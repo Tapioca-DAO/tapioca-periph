@@ -16,10 +16,10 @@ pragma solidity ^0.8.7;
 /// is imported
 contract PausableMapUpgradeable {
     /// @dev Emitted when the pause is triggered for `name`
-    event Paused(bytes32 name);
+    event Paused(bytes32 indexed name);
 
     /// @dev Emitted when the pause is lifted for `name`
-    event Unpaused(bytes32 name);
+    event Unpaused(bytes32 indexed name);
 
     /// @dev Mapping between a name and a boolean representing the paused state
     mapping(bytes32 => bool) public paused;

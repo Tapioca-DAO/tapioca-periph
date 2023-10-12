@@ -223,7 +223,7 @@ contract MagnetarHelper is Ownable {
         SingularityInfo[] memory result = new SingularityInfo[](len);
 
         Rebase memory _totalAsset;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i; i < len; i++) {
             ISingularity sgl = markets[i];
 
             result[i].market = _commonInfo(who, IMarket(address(sgl)));
@@ -261,7 +261,7 @@ contract MagnetarHelper is Ownable {
         BigBangInfo[] memory result = new BigBangInfo[](len);
 
         IBigBang.AccrueInfo memory _accrueInfo;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i; i < len; i++) {
             IBigBang bigBang = markets[i];
             result[i].market = _commonInfo(who, IMarket(address(bigBang)));
 
