@@ -18,7 +18,7 @@ interface ICommonData {
     struct IApproval {
         bool permitAll;
         bool allowFailure;
-        bool approveOnYieldBox;
+        bool yieldBoxTypeApproval;
         uint16 actionType;
         address target;
         bool permitBorrow;
