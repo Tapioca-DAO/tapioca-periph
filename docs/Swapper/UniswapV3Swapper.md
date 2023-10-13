@@ -195,22 +195,6 @@ function renounceOwnership() external nonpayable
 function setPoolFee(uint24 _newFee) external nonpayable
 ```
 
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _newFee | uint24 | undefined |
-
-### setTwapDuration
-
-```solidity
-function setTwapDuration(uint32 _duration) external nonpayable
-```
-
 *** OWNER METHODS *** ***  ***
 
 
@@ -219,7 +203,7 @@ function setTwapDuration(uint32 _duration) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _duration | uint32 | undefined |
+| _newFee | uint24 | undefined |
 
 ### swap
 
