@@ -282,9 +282,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
             //withdraw
             if (withdrawCollateralParams.withdraw) {
-                uint256 gas = msg.value >= valueAmount
-                    ? valueAmount
-                    : address(this).balance;
                 _withdrawToChain(
                     yieldBox,
                     collateralWithdrawReceiver,
@@ -293,8 +290,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     LzLib.addressToBytes32(user),
                     collateralAmount,
                     withdrawCollateralParams.withdrawAdapterParams,
-                    gas > 0 ? payable(msg.sender) : payable(this),
-                    gas
+                    valueAmount > 0 ? payable(msg.sender) : payable(this),
+                    valueAmount
                 );
             }
         }
@@ -836,9 +833,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             bytes memory adapterParams
         ) = abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
 
-        uint256 gas = msg.value >= valueAmount
-            ? valueAmount
-            : address(this).balance;
         _withdrawToChain(
             yieldBox,
             from,
@@ -847,8 +841,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             receiver,
             amount,
             adapterParams,
-            gas > 0 ? payable(msg.sender) : payable(this),
-            gas
+            valueAmount > 0 ? payable(msg.sender) : payable(this),
+            valueAmount
         );
     }
 
