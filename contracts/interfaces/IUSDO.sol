@@ -71,6 +71,12 @@ interface IUSDOBase {
 
     function burn(address _from, uint256 _amount) external;
 
+    function setFlashloanHelper(address _helper) external;
+
+    function addFlashloanFee(uint256 _fee) external; //onlyOwner
+
+    function paused() external view returns (bool);
+
     function sendAndLendOrRepay(
         address _from,
         address _to,

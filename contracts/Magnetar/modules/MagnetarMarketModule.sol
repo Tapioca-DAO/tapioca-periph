@@ -282,9 +282,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
             //withdraw
             if (withdrawCollateralParams.withdraw) {
-                uint256 gas = msg.value >= valueAmount
-                    ? valueAmount
-                    : address(this).balance;
                 _withdrawToChain(
                     yieldBox,
                     collateralWithdrawReceiver,
@@ -293,8 +290,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     LzLib.addressToBytes32(user),
                     collateralAmount,
                     withdrawCollateralParams.withdrawAdapterParams,
-                    gas > 0 ? payable(msg.sender) : payable(this),
-                    gas
+                    valueAmount > 0 ? payable(msg.sender) : payable(this),
+                    valueAmount
                 );
             }
         }
@@ -542,17 +539,24 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 valueAmount,
         ICluster _cluster
     ) private {
-        require(
-            _cluster.isWhitelisted(_cluster.lzChainId(), externalData.bigBang),
-            "MagnetarV2: BB not whitelisted"
-        );
-        require(
-            _cluster.isWhitelisted(
-                _cluster.lzChainId(),
-                externalData.singularity
-            ),
-            "MagnetarV2: SGL not whitelisted"
-        );
+        if (externalData.bigBang != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalData.bigBang
+                ),
+                "MagnetarV2: BB not whitelisted"
+            );
+        }
+        if (externalData.singularity != address(0)) {
+            require(
+                _cluster.isWhitelisted(
+                    _cluster.lzChainId(),
+                    externalData.singularity
+                ),
+                "MagnetarV2: SGL not whitelisted"
+            );
+        }
 
         IMarket bigBang = IMarket(externalData.bigBang);
         ISingularity singularity = ISingularity(externalData.singularity);
@@ -829,9 +833,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             bytes memory adapterParams
         ) = abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
 
-        uint256 gas = msg.value >= valueAmount
-            ? valueAmount
-            : address(this).balance;
         _withdrawToChain(
             yieldBox,
             from,
@@ -840,8 +841,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             receiver,
             amount,
             adapterParams,
-            gas > 0 ? payable(msg.sender) : payable(this),
-            gas
+            valueAmount > 0 ? payable(msg.sender) : payable(this),
+            valueAmount
         );
     }
 

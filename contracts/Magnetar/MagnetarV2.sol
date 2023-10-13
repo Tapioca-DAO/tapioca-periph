@@ -57,6 +57,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     // *********************** //
     // *** OWNER METHODS **** //
     // ********************** //
+    /// @notice updates the cluster address
+    /// @dev can only be called by the owner
+    /// @param _cluster the new address
+    function setCluster(ICluster _cluster) external {
+        require(address(_cluster) != address(0), "Magnetar: not valid");
+        cluster = _cluster;
+    }
+
     function setHelper(address _helper) external onlyOwner {
         emit HelperUpdate(address(helper), _helper);
         helper = IMagnetarHelper(_helper);

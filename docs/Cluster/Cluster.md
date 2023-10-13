@@ -10,6 +10,24 @@
 
 ## Methods
 
+### batchUpdateContracts
+
+```solidity
+function batchUpdateContracts(uint16 _lzChainId, address[] _addresses, bool _status) external nonpayable
+```
+
+updates the whitelist status of contracts
+
+*can only be called by Editors or the Owner*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _lzChainId | uint16 | LayerZero chain id |
+| _addresses | address[] | the contracts addresses |
+| _status | bool | the new whitelist status |
+
 ### isEditor
 
 ```solidity

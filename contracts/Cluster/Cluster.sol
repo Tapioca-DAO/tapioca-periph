@@ -37,9 +37,9 @@ contract Cluster is Ownable, ICluster {
         bool _newStatus
     );
 
-    constructor(uint16 _lzChainId) {
-        lzChainId = _lzChainId;
-        transferOwnership(msg.sender);
+    constructor(address lzEndpoint, address _owner) {
+        lzChainId = ILayerZeroEndpoint(lzEndpoint).getChainId();
+        transferOwnership(_owner);
     }
 
     // ******************** //
@@ -61,6 +61,38 @@ contract Cluster is Ownable, ICluster {
     // ********************** //
     // *** PUBLIC METHODS *** //
     // ********************** //
+
+    /// @notice updates the whitelist status of contracts
+    /// @dev can only be called by Editors or the Owner
+    /// @param _lzChainId LayerZero chain id
+    /// @param _addresses the contracts addresses
+    /// @param _status the new whitelist status
+    function batchUpdateContracts(
+        uint16 _lzChainId,
+        address[] memory _addresses,
+        bool _status
+    ) external override {
+        require(
+            isEditor[msg.sender] || msg.sender == owner(),
+            "Cluster: not authorized"
+        );
+
+        if (_lzChainId == 0) {
+            //set lz chain as the current one
+            _lzChainId = lzChainId;
+        }
+
+        for (uint256 i; i < _addresses.length; i++) {
+            emit ContractUpdated(
+                _addresses[i],
+                _lzChainId,
+                _whitelisted[_lzChainId][_addresses[i]],
+                _status
+            );
+            _whitelisted[_lzChainId][_addresses[i]] = _status;
+        }
+    }
+
     /// @notice updates the whitelist status of a contract
     /// @dev can only be called by Editors or the Owner
     /// @param _lzChainId LayerZero chain id
