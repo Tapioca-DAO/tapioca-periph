@@ -27,6 +27,10 @@ import {
     USDOLeverageModule__factory,
     USDOMarketModule__factory,
     USDOOptionsModule__factory,
+    USDOGenericModule__factory,
+    USDOLeverageDestinationModule__factory,
+    USDOMarketDestinationModule__factory,
+    USDOOptionsDestinationModule__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/Tapioca-Bar';
 import {
     ERC20WithoutStrategy__factory,
@@ -388,6 +392,7 @@ describe('MagnetarV2', () => {
                 magnetar.address,
                 ethers.constants.MaxUint256,
             );
+
             await magnetar.connect(deployer).burst(
                 [
                     {
@@ -716,6 +721,7 @@ describe('MagnetarV2', () => {
                     'address',
                     'uint256',
                     'uint256',
+                    'uint256',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -729,6 +735,7 @@ describe('MagnetarV2', () => {
                     wethAssetId,
                     wethUsdcOracle.address,
                     ethers.utils.parseEther('1'),
+                    0,
                     0,
                 ],
             );
@@ -748,51 +755,6 @@ describe('MagnetarV2', () => {
             const LiquidationQueueFactory = await ethers.getContractFactory(
                 'LiquidationQueue',
             );
-            const liquidationQueue = await LiquidationQueueFactory.deploy();
-
-            const feeCollector = new ethers.Wallet(
-                ethers.Wallet.createRandom().privateKey,
-                ethers.provider,
-            );
-
-            const { stableToUsdoBidder } = await deployCurveStableToUsdoBidder(
-                deployer,
-                bar,
-                usdc,
-                usd0,
-            );
-
-            const LQ_META = {
-                activationTime: 600, // 10min
-                minBidAmount: ethers.BigNumber.from((1e18).toString()).mul(200), // 200 USDC
-                closeToMinBidAmount: ethers.BigNumber.from(
-                    (1e18).toString(),
-                ).mul(202),
-                defaultBidAmount: ethers.BigNumber.from((1e18).toString()).mul(
-                    400,
-                ), // 400 USDC
-                feeCollector: feeCollector.address,
-                bidExecutionSwapper: ethers.constants.AddressZero,
-                usdoSwapper: stableToUsdoBidder.address,
-            };
-            await liquidationQueue.init(LQ_META, wethUsdoSingularity.address);
-
-            const payload = wethUsdoSingularity.interface.encodeFunctionData(
-                'setLiquidationQueueConfig',
-                [
-                    liquidationQueue.address,
-                    ethers.constants.AddressZero,
-                    ethers.constants.AddressZero,
-                ],
-            );
-
-            await (
-                await bar.executeMarketFn(
-                    [wethUsdoSingularity.address],
-                    [payload],
-                    true,
-                )
-            ).wait();
 
             const usdoAmount = ethers.BigNumber.from((1e6).toString());
             const usdoShare = await yieldBox.toShare(
@@ -4043,20 +4005,50 @@ async function setupUsd0Environment(
     const lzEndpointDst = await LZEndpointMock.deploy(chainIdDst);
 
     const USDOLeverageModule = new USDOLeverageModule__factory(deployer);
+    const USDOLeverageDestinationModule =
+        new USDOLeverageDestinationModule__factory(deployer);
     const USDOMarketModule = new USDOMarketModule__factory(deployer);
+    const USDOMarketDestinationModule =
+        new USDOMarketDestinationModule__factory(deployer);
     const USDOOptionsModule = new USDOOptionsModule__factory(deployer);
+    const USDOOptionsDestinationModule =
+        new USDOOptionsDestinationModule__factory(deployer);
+    const USDOGenericModule = new USDOGenericModule__factory(deployer);
 
     const usdo_leverage_src = await USDOLeverageModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
         cluster,
     );
+    const usdo_leverage_destination_src =
+        await USDOLeverageDestinationModule.deploy(
+            lzEndpointSrc.address,
+            yieldBox.address,
+            cluster,
+        );
     const usdo_market_src = await USDOMarketModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
         cluster,
     );
+    const usdo_market_destination_src =
+        await USDOMarketDestinationModule.deploy(
+            lzEndpointSrc.address,
+            yieldBox.address,
+            cluster,
+        );
     const usdo_options_src = await USDOOptionsModule.deploy(
+        lzEndpointSrc.address,
+        yieldBox.address,
+        cluster,
+    );
+    const usdo_options_destination_src =
+        await USDOOptionsDestinationModule.deploy(
+            lzEndpointSrc.address,
+            yieldBox.address,
+            cluster,
+        );
+    const usdo_neneric_src = await USDOGenericModule.deploy(
         lzEndpointSrc.address,
         yieldBox.address,
         cluster,
@@ -4071,8 +4063,12 @@ async function setupUsd0Environment(
         cluster,
         deployer.address,
         usdo_leverage_src.address,
+        usdo_leverage_destination_src.address,
         usdo_market_src.address,
+        usdo_market_destination_src.address,
         usdo_options_src.address,
+        usdo_options_destination_src.address,
+        usdo_neneric_src.address,
     );
 
     const usd0SrcStrategy = await createTokenEmptyStrategy(
@@ -4098,12 +4094,35 @@ async function setupUsd0Environment(
         yieldBox.address,
         cluster,
     );
+    const usdo_leverage_destination_dst =
+        await USDOLeverageDestinationModule.deploy(
+            lzEndpointDst.address,
+            yieldBox.address,
+            cluster,
+        );
     const usdo_market_dst = await USDOMarketModule.deploy(
         lzEndpointDst.address,
         yieldBox.address,
         cluster,
     );
+    const usdo_market_destination_dst =
+        await USDOMarketDestinationModule.deploy(
+            lzEndpointDst.address,
+            yieldBox.address,
+            cluster,
+        );
     const usdo_options_dst = await USDOOptionsModule.deploy(
+        lzEndpointDst.address,
+        yieldBox.address,
+        cluster,
+    );
+    const usdo_options_destination_dst =
+        await USDOOptionsDestinationModule.deploy(
+            lzEndpointDst.address,
+            yieldBox.address,
+            cluster,
+        );
+    const usdo_generic_dst = await USDOGenericModule.deploy(
         lzEndpointDst.address,
         yieldBox.address,
         cluster,
@@ -4115,8 +4134,12 @@ async function setupUsd0Environment(
         cluster,
         deployer.address,
         usdo_leverage_dst.address,
+        usdo_leverage_destination_dst.address,
         usdo_market_dst.address,
+        usdo_market_destination_dst.address,
         usdo_options_dst.address,
+        usdo_options_destination_dst.address,
+        usdo_generic_dst.address,
     );
 
     const usd0DstStrategy = await createTokenEmptyStrategy(
