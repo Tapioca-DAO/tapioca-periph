@@ -2,6 +2,12 @@
 pragma solidity ^0.8.18;
 
 interface ILeverageExecutor {
+    function swapper() external view returns (address);
+
+    function cluster() external view returns (address);
+
+    function yieldBox() external view returns (address);
+
     function getCollateral(
         uint256 assetId,
         uint256 collateralId,
