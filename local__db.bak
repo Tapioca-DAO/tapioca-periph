@@ -1,17 +1,5 @@
 {
     "default": {
-        "4002": [
-            {
-                "name": "Cluster",
-                "address": "0x9c67D037e9bc36F1Df733e034f389e300Bb758b7",
-                "meta": {
-                    "args": [
-                        "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
-                        "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
-                    ]
-                }
-            }
-        ],
         "421613": [
             {
                 "name": "Cluster",
