@@ -6,6 +6,7 @@ interface ILeverageExecutor {
         uint256 assetId,
         uint256 collateralId,
         uint256 assetShareIn,
+        address from,
         bytes calldata data
     ) external returns (uint256 collateralAmountOut); //used for buyCollateral
 
@@ -13,6 +14,7 @@ interface ILeverageExecutor {
         uint256 assetId,
         uint256 collateralId,
         uint256 collateralShareIn,
+        address from,
         bytes calldata data
     ) external returns (uint256 assetAmountOut); //used for sellCollateral
 }
