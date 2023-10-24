@@ -472,6 +472,7 @@ async function registerSingularity(
             'uint256',
             'uint256',
             'uint256',
+            'address',
         ],
         [
             _sglLiquidationModule.address,
@@ -487,6 +488,7 @@ async function registerSingularity(
             exchangeRatePrecision ?? 0,
             0,
             0,
+            ethers.constants.AddressZero,
         ],
     );
     await (await bar.registerSingularity(mediumRiskMC, data, true)).wait();
@@ -919,6 +921,7 @@ async function createWethUsd0Singularity(
             'uint256',
             'uint256',
             'uint256',
+            'address',
         ],
         [
             _sglLiquidationModule.address,
@@ -934,6 +937,7 @@ async function createWethUsd0Singularity(
             exchangePrecision,
             0,
             0,
+            ethers.constants.AddressZero,
         ],
     );
     await bar.registerSingularity(mediumRiskMC.address, data, false);
@@ -959,15 +963,6 @@ async function createWethUsd0Singularity(
     await usd0.setBurnerStatus(wethUsdoSingularity.address, true);
     log(
         'Updated Usd0 Minter and Burner status for WethUsd0Singularity',
-        staging,
-    );
-
-    const LiquidationQueueFactory = await ethers.getContractFactory(
-        'LiquidationQueue',
-    );
-    const liquidationQueue = await LiquidationQueueFactory.deploy();
-    log(
-        `Deployed WethUsd0LiquidationQueue at ${liquidationQueue.address} with no arguments`,
         staging,
     );
 
@@ -1031,6 +1026,7 @@ async function registerBigBangMarket(
             'uint256',
             'uint256',
             'uint256',
+            'address',
         ],
         [
             _bbLiquidationModule.address,
@@ -1048,6 +1044,7 @@ async function registerBigBangMarket(
             debtStartPoint,
             0,
             0,
+            ethers.constants.AddressZero,
         ],
     );
 
@@ -1062,6 +1059,26 @@ async function registerBigBangMarket(
         BigBangArtifact.abi,
         ethers.provider,
     ).connect(deployer);
+
+    const OracleMock = new OracleMock__factory(deployer);
+    log('Deploying USDOUSDC mock oracle', staging);
+    const usdoUsdcOracle = await OracleMock.deploy(
+        'USDOUSDCOracle',
+        'USDOUSDCOracle',
+        ethers.utils.parseEther('1'),
+    );
+    await usdoUsdcOracle.deployed();
+    await usdoUsdcOracle.set(ethers.utils.parseEther('1'));
+
+    const setAssetOracleFn = bigBangMarket.interface.encodeFunctionData(
+        'setAssetOracle',
+        [usdoUsdcOracle.address, '0x'],
+    );
+    await bar.executeMarketFn(
+        [bigBangMarket.address],
+        [setAssetOracleFn],
+        true,
+    );
 
     return { bigBangMarket };
 }

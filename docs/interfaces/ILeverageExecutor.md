@@ -10,10 +10,27 @@
 
 ## Methods
 
+### cluster
+
+```solidity
+function cluster() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### getAsset
 
 ```solidity
-function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShareIn, bytes data) external nonpayable returns (uint256 assetAmountOut)
+function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShareIn, address from, bytes data) external nonpayable returns (uint256 assetAmountOut)
 ```
 
 
@@ -27,6 +44,7 @@ function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShare
 | assetId | uint256 | undefined |
 | collateralId | uint256 | undefined |
 | collateralShareIn | uint256 | undefined |
+| from | address | undefined |
 | data | bytes | undefined |
 
 #### Returns
@@ -38,7 +56,7 @@ function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShare
 ### getCollateral
 
 ```solidity
-function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShareIn, bytes data) external nonpayable returns (uint256 collateralAmountOut)
+function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShareIn, address from, bytes data) external nonpayable returns (uint256 collateralAmountOut)
 ```
 
 
@@ -52,6 +70,7 @@ function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShare
 | assetId | uint256 | undefined |
 | collateralId | uint256 | undefined |
 | assetShareIn | uint256 | undefined |
+| from | address | undefined |
 | data | bytes | undefined |
 
 #### Returns
@@ -59,6 +78,40 @@ function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShare
 | Name | Type | Description |
 |---|---|---|
 | collateralAmountOut | uint256 | undefined |
+
+### swapper
+
+```solidity
+function swapper() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### yieldBox
+
+```solidity
+function yieldBox() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 
 
