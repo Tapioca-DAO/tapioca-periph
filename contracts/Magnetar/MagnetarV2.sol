@@ -581,38 +581,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.tapSendData,
                     data.approvals
                 );
-            }
-            // else if (_action.id == MARKET_MULTIHOP_BUY) {
-            //     HelperMultiHopBuy memory data = abi.decode(
-            //         _action.call[4:],
-            //         (HelperMultiHopBuy)
-            //     );
-            //     IUSDOBase(_action.target).initMultiHopBuy{value: _action.value}(
-            //         data.from,
-            //         data.collateralAmount,
-            //         data.borrowAmount,
-            //         data.swapData,
-            //         data.lzData,
-            //         data.externalData,
-            //         data.airdropAdapterParams,
-            //         data.approvals
-            //     );
-            // } else if (_action.id == MARKET_MULTIHOP_SELL) {
-            //     HelperMultiHopSell memory data = abi.decode(
-            //         _action.call[4:],
-            //         (HelperMultiHopSell)
-            //     );
-            //     ITapiocaOFT(_action.target).initMultiSell{value: _action.value}(
-            //         data.from,
-            //         data.amount,
-            //         data.swapData,
-            //         data.lzData,
-            //         data.externalData,
-            //         data.airdropAdapterParams,
-            //         data.approvals
-            //     );
-            // }
-            else if (_action.id == TOFT_REMOVE_AND_REPAY) {
+            } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
                 HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
                     _action.call[4:],
                     (HelperTOFTRemoveAndRepayAsset)
