@@ -30,7 +30,7 @@ function cluster() external view returns (address)
 ### getAsset
 
 ```solidity
-function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShareIn, address from, bytes data) external nonpayable returns (uint256 assetAmountOut)
+function getAsset(uint256 assetId, address assetAddress, address collateralAddress, uint256 collateralAmountIn, address from, bytes data) external nonpayable returns (uint256 assetAmountOut)
 ```
 
 
@@ -42,8 +42,9 @@ function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShare
 | Name | Type | Description |
 |---|---|---|
 | assetId | uint256 | undefined |
-| collateralId | uint256 | undefined |
-| collateralShareIn | uint256 | undefined |
+| assetAddress | address | undefined |
+| collateralAddress | address | undefined |
+| collateralAmountIn | uint256 | undefined |
 | from | address | undefined |
 | data | bytes | undefined |
 
@@ -56,7 +57,7 @@ function getAsset(uint256 assetId, uint256 collateralId, uint256 collateralShare
 ### getCollateral
 
 ```solidity
-function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShareIn, address from, bytes data) external nonpayable returns (uint256 collateralAmountOut)
+function getCollateral(uint256 collateralId, address assetAddress, address collateralAddress, uint256 assetAmountIn, address from, bytes data) external nonpayable returns (uint256 collateralAmountOut)
 ```
 
 
@@ -67,9 +68,10 @@ function getCollateral(uint256 assetId, uint256 collateralId, uint256 assetShare
 
 | Name | Type | Description |
 |---|---|---|
-| assetId | uint256 | undefined |
 | collateralId | uint256 | undefined |
-| assetShareIn | uint256 | undefined |
+| assetAddress | address | undefined |
+| collateralAddress | address | undefined |
+| assetAmountIn | uint256 | undefined |
 | from | address | undefined |
 | data | bytes | undefined |
 

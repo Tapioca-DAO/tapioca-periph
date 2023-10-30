@@ -46,6 +46,62 @@ describe('UniswapV2Swapper', () => {
     });
 
     describe('swap()', () => {
+        it('should swap usdc to eth', async () => {
+            const {
+                uniswapV2Swapper,
+                deployer,
+                binanceWallet,
+                weth,
+                usdc,
+                createSimpleSwapData,
+            } = await loadFixture(registerFork);
+            const amount = BN(1000e6);
+
+            await usdc
+                .connect(binanceWallet)
+                .transfer(deployer.address, amount);
+            const ethBalanceBefore = await ethers.provider.getBalance(
+                deployer.address,
+            );
+
+            const swapData = createSimpleSwapData(
+                usdc.address,
+                ethers.constants.AddressZero,
+                amount,
+                0,
+            );
+            await usdc.approve(uniswapV2Swapper.address, amount);
+            await uniswapV2Swapper.swap(swapData, 0, deployer.address, '0x');
+            const ethBalanceAfter = await ethers.provider.getBalance(
+                deployer.address,
+            );
+            expect(ethBalanceAfter.gt(ethBalanceBefore)).to.be.true;
+        });
+
+        it('should swap eth as token in', async () => {
+            const {
+                uniswapV2Swapper,
+                deployer,
+                binanceWallet,
+                weth,
+                usdc,
+                createSimpleSwapData,
+            } = await loadFixture(registerFork);
+            const amount = BN(1e18);
+
+            const swapData = createSimpleSwapData(
+                ethers.constants.AddressZero,
+                usdc.address,
+                amount,
+                0,
+            );
+            await uniswapV2Swapper.swap(swapData, 0, deployer.address, '0x', {
+                value: amount,
+            });
+
+            const usdcBalanceAfter = await usdc.balanceOf(deployer.address);
+            expect(usdcBalanceAfter.gt(0)).to.be.true;
+        });
         it('should swap', async () => {
             const {
                 uniswapV2Swapper,

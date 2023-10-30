@@ -24,6 +24,16 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 */
 
+interface ISwapRouterReader {
+    function WETH9() external view returns (address);
+}
+
+interface IWETH9 {
+    function deposit() external payable;
+
+    function withdraw(uint wad) external;
+}
+
 /// @title UniswapV3 swapper contract
 contract UniswapV3Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
@@ -170,7 +180,9 @@ contract UniswapV3Swapper is BaseSwapper {
             swapData.amountData.shareIn
         );
 
-        TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
+        if (tokenIn != address(0)) {
+            TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
+        }
 
         // Perform the swap operation
         if (data.length == 0) {
@@ -178,14 +190,18 @@ contract UniswapV3Swapper is BaseSwapper {
         }
         uint256 deadline = abi.decode(data, (uint256));
 
+        address _tokenIn = tokenIn != address(0)
+            ? tokenIn
+            : ISwapRouterReader(address(swapRouter)).WETH9();
+        address _tokenOut = tokenOut != address(0)
+            ? tokenOut
+            : ISwapRouterReader(address(swapRouter)).WETH9();
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
             .ExactInputSingleParams({
-                tokenIn: tokenIn,
-                tokenOut: tokenOut,
+                tokenIn: _tokenIn,
+                tokenOut: _tokenOut,
                 fee: poolFee,
-                recipient: swapData.yieldBoxData.depositToYb
-                    ? address(this)
-                    : to,
+                recipient: address(this),
                 deadline: deadline,
                 amountIn: amountIn,
                 amountOutMinimum: amountOutMin,
@@ -193,9 +209,14 @@ contract UniswapV3Swapper is BaseSwapper {
             });
 
         // Compute outputs
-        amountOut = swapRouter.exactInputSingle(params);
+        if (tokenIn == address(0)) {
+            require(msg.value == amountIn, "UniswapV3Swapper: gas not valid");
+        }
+        amountOut = _swap(params, swapData.yieldBoxData.depositToYb, to);
         if (swapData.yieldBoxData.depositToYb) {
-            _safeApprove(tokenOut, address(yieldBox), amountOut);
+            if (tokenOut != address(0)) {
+                _safeApprove(tokenOut, address(yieldBox), amountOut);
+            }
             (, shareOut) = yieldBox.depositAsset(
                 swapData.tokensData.tokenOutId,
                 address(this),
@@ -205,4 +226,31 @@ contract UniswapV3Swapper is BaseSwapper {
             );
         }
     }
+
+    function _swap(
+        ISwapRouter.ExactInputSingleParams memory params,
+        bool depositToYb,
+        address to
+    ) private returns (uint256 amountOut) {
+        address weth = ISwapRouterReader(address(swapRouter)).WETH9();
+        amountOut = swapRouter.exactInputSingle{value: msg.value}(params);
+        if (params.tokenOut == weth) {
+            IWETH9(weth).withdraw(amountOut);
+            require(
+                address(this).balance >= amountOut,
+                "UniswapV3Swapper: eth unwrap failed"
+            );
+
+            if (!depositToYb) {
+                (bool sent, ) = to.call{value: amountOut}("");
+                require(sent, "UniswapV3Swapper: eth transfer failed");
+            }
+        } else {
+            if (!depositToYb) {
+                IERC20(params.tokenOut).safeTransfer(to, amountOut);
+            }
+        }
+    }
+
+    receive() external payable {}
 }
