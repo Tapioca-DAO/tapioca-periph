@@ -65,12 +65,14 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             saveDeployments: false,
-            chainId: 1,
-            // chainId: 42161,
+            // chainId: 1,
+            chainId: 42161,
+            mining: { auto: true },
             forking: {
-                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-                // url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-                blockNumber: 17068626, // Mainnet
+                // url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
+                url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+                // blockNumber: 17068626, // Mainnet
+                blockNumber: 145526897, // Arb
             },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
@@ -80,6 +82,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                 count: 10,
                 accountsBalance: '1000000000000000000000',
             },
+            tags: ['local'],
         },
         ...supportedChains,
     },
