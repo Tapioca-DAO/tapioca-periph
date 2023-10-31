@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
-import { Seer__factory } from '../typechain';
+import { SeerCLSolo__factory, Seer__factory } from '../typechain';
 
 export const loadVM = async (
     hre: HardhatRuntimeEnvironment,
@@ -17,6 +17,14 @@ export const loadVM = async (
         tag,
     });
     return VM;
+};
+
+export const nonNullValues = <T>(args: Array<any>) => {
+    for (let i = 0; i < args.length; i++) {
+        if (_.isNil(args[i])) {
+            throw `[-] Argument ${i} is null`;
+        }
+    }
 };
 
 export const displaySeerArgs = (args: Parameters<Seer__factory['deploy']>) => {
@@ -40,10 +48,18 @@ export const displaySeerArgs = (args: Parameters<Seer__factory['deploy']>) => {
     console.log(`\t[${i}]Admins:`, args[i++]);
 };
 
-export const nonNullValues = <T>(args: Array<any>) => {
-    for (let i = 0; i < args.length; i++) {
-        if (_.isNil(args[i])) {
-            throw `[-] Argument ${i} is null`;
-        }
-    }
+export const displaySeerCLSoloArgs = (
+    args: Parameters<SeerCLSolo__factory['deploy']>,
+) => {
+    let i = 0;
+    console.log('[+] With args:');
+    console.log(`\t[${i}]Name:`, args[i++]);
+    console.log(`\t[${i}]Symbol:`, args[i++]);
+    console.log(`\t[${i}]Decimal:`, args[i++]);
+    console.log(`\t[${i}]LP:`, args[i++]);
+    console.log(`\t[${i}]Multiply/divide Uni:`, args[i++]);
+    console.log(`\t[${i}]Guardians:`, args[i++]);
+    console.log(`\t[${i}]Description:`, args[i++]);
+    console.log(`\t[${i}]ChainLink sequencer:`, args[i++]);
+    console.log(`\t[${i}]Admins:`, args[i++]);
 };
