@@ -161,27 +161,6 @@ contract MagnetarV2Storage is IERC721Receiver {
         ICommonData.IApproval[] approvals;
     }
 
-    struct HelperMultiHopBuy {
-        address from;
-        uint256 collateralAmount;
-        uint256 borrowAmount;
-        IUSDOBase.ILeverageSwapData swapData;
-        IUSDOBase.ILeverageLZData lzData;
-        IUSDOBase.ILeverageExternalContractsData externalData;
-        bytes airdropAdapterParams;
-        ICommonData.IApproval[] approvals;
-    }
-
-    struct HelperMultiHopSell {
-        address from;
-        uint256 amount;
-        IUSDOBase.ILeverageSwapData swapData;
-        IUSDOBase.ILeverageLZData lzData;
-        IUSDOBase.ILeverageExternalContractsData externalData;
-        bytes airdropAdapterParams;
-        ICommonData.IApproval[] approvals;
-    }
-
     struct HelperTOFTRemoveAndRepayAsset {
         address from;
         address to;
@@ -211,8 +190,6 @@ contract MagnetarV2Storage is IERC721Receiver {
     uint16 internal constant MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL = 208;
     uint16 internal constant MARKET_BUY_COLLATERAL = 209;
     uint16 internal constant MARKET_SELL_COLLATERAL = 210;
-    uint16 internal constant MARKET_MULTIHOP_BUY = 211;
-    uint16 internal constant MARKET_MULTIHOP_SELL = 212;
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;

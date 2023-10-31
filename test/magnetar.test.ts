@@ -48,7 +48,12 @@ import {
     BaseTOFTStrategyModule__factory,
     BaseTOFTMarketModule__factory,
     BaseTOFTOptionsModule__factory,
-} from 'tapioca-sdk/dist/typechain/TapiocaZ';
+    BaseTOFTLeverageDestinationModule__factory,
+    BaseTOFTMarketDestinationModule__factory,
+    BaseTOFTStrategyDestinationModule__factory,
+    BaseTOFTOptionsDestinationModule__factory,
+    BaseTOFTGenericModule__factory,
+} from '../gitsub_tapioca-sdk/src/typechain/tapiocaz';
 import { ITapiocaOFT__factory } from '../typechain';
 
 const MAX_DEADLINE = 9999999999999;
@@ -117,6 +122,7 @@ describe('MagnetarV2', () => {
                     'uint256',
                     'uint256',
                     'uint256',
+                    'address',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -132,6 +138,7 @@ describe('MagnetarV2', () => {
                     ethers.utils.parseEther('1'),
                     0,
                     0,
+                    ethers.constants.AddressZero,
                 ],
             );
             await bar.registerSingularity(mediumRiskMC.address, sglData, true);
@@ -722,6 +729,7 @@ describe('MagnetarV2', () => {
                     'uint256',
                     'uint256',
                     'uint256',
+                    'address',
                 ],
                 [
                     _sglLiquidationModule.address,
@@ -737,6 +745,7 @@ describe('MagnetarV2', () => {
                     ethers.utils.parseEther('1'),
                     0,
                     0,
+                    ethers.constants.AddressZero,
                 ],
             );
             await bar.registerSingularity(mediumRiskMC.address, sglData, true);
@@ -3059,7 +3068,6 @@ describe('MagnetarV2', () => {
                 wethBigBangMarket.interface.encodeFunctionData(
                     'setMarketConfig',
                     [
-                        0,
                         ethers.constants.AddressZero,
                         '0x',
                         ethers.constants.AddressZero,
@@ -3441,6 +3449,7 @@ describe('MagnetarV2', () => {
             mediumRiskMC,
             bar,
             timeTravel,
+            cluster,
         } = await loadFixture(register);
 
         const TapiocaOFTMock__factory = (
@@ -3466,49 +3475,303 @@ describe('MagnetarV2', () => {
         // await erc20Mock.updateMintLimit(BN(100e18));
 
         // Collateral
-        const collateralHost = await TapiocaOFTMock__factory.deploy(
+        const BaseTOFTLeverageModule = new BaseTOFTLeverageModule__factory(
+            deployer,
+        );
+        const BaseTOFTLeverageDestinationModule =
+            new BaseTOFTLeverageDestinationModule__factory(deployer);
+        const BaseTOFTStrategyModule = new BaseTOFTStrategyModule__factory(
+            deployer,
+        );
+        const BaseTOFTStrategyDestinationModule =
+            new BaseTOFTStrategyDestinationModule__factory(deployer);
+        const BaseTOFTMarketModule = new BaseTOFTMarketModule__factory(
+            deployer,
+        );
+        const BaseTOFTMarketDestinationModule =
+            new BaseTOFTMarketDestinationModule__factory(deployer);
+        const BaseTOFTOptionsModule = new BaseTOFTOptionsModule__factory(
+            deployer,
+        );
+        const BaseTOFTOptionsDestinationModule =
+            new BaseTOFTOptionsDestinationModule__factory(deployer);
+        const BaseTOFTGenericModule = new BaseTOFTGenericModule__factory(
+            deployer,
+        );
+
+        const collateralHostLeverageModule =
+            await BaseTOFTLeverageModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostLeverageDestinationModule =
+            await BaseTOFTLeverageDestinationModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostStrategyModule =
+            await BaseTOFTStrategyModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostStrategyDestinationModule =
+            await BaseTOFTStrategyDestinationModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostMarketModule = await BaseTOFTMarketModule.deploy(
             lzEndpoint1.address,
-            false,
             erc20Mock.address,
             yieldBox.address,
+            cluster.address,
             'collateralMock',
             'toftMock',
             18,
             1,
         );
-
-        const collateralLinked = await TapiocaOFTMock__factory.deploy(
-            lzEndpoint2.address,
-            false,
+        const collateralHostMarketDestinationModule =
+            await BaseTOFTMarketDestinationModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostOptionsModule = await BaseTOFTOptionsModule.deploy(
+            lzEndpoint1.address,
             erc20Mock.address,
             yieldBox.address,
+            cluster.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+        const collateralHostOptionsDestinationModule =
+            await BaseTOFTOptionsDestinationModule.deploy(
+                lzEndpoint1.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralHostGenericModule = await BaseTOFTGenericModule.deploy(
+            lzEndpoint1.address,
+            erc20Mock.address,
+            yieldBox.address,
+            cluster.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+        const collateralHost = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint1.address,
+            erc20Mock.address,
+            yieldBox.address,
+            cluster.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+            collateralHostLeverageModule.address,
+            collateralHostLeverageDestinationModule.address,
+            collateralHostStrategyModule.address,
+            collateralHostStrategyDestinationModule.address,
+            collateralHostMarketModule.address,
+            collateralHostMarketDestinationModule.address,
+            collateralHostOptionsModule.address,
+            collateralHostOptionsDestinationModule.address,
+            collateralHostGenericModule.address,
+        );
+
+        const collateralLinkedLeverageModule =
+            await BaseTOFTLeverageModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedLeverageDestinationModule =
+            await BaseTOFTLeverageDestinationModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedStrategyModule =
+            await BaseTOFTStrategyModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedStrategyDestinationModule =
+            await BaseTOFTStrategyDestinationModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedMarketModule = await BaseTOFTMarketModule.deploy(
+            lzEndpoint2.address,
+            erc20Mock.address,
+            yieldBox.address,
+            cluster.address,
+            'collateralMock',
+            'toftMock',
+            18,
+            1,
+        );
+        const collateralLinkedMarketDestinationModule =
+            await BaseTOFTMarketDestinationModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedOptionsModule =
+            await BaseTOFTOptionsModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedOptionsDestinationModule =
+            await BaseTOFTOptionsDestinationModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinkedGenericModule =
+            await BaseTOFTGenericModule.deploy(
+                lzEndpoint2.address,
+                erc20Mock.address,
+                yieldBox.address,
+                cluster.address,
+                'collateralMock',
+                'toftMock',
+                18,
+                1,
+            );
+        const collateralLinked = await TapiocaOFTMock__factory.deploy(
+            lzEndpoint2.address,
+            erc20Mock.address,
+            yieldBox.address,
+            cluster.address,
             'collateralMock',
             'collateralMock',
             18,
             1,
+            collateralLinkedLeverageModule.address,
+            collateralLinkedLeverageDestinationModule.address,
+            collateralLinkedStrategyModule.address,
+            collateralLinkedStrategyDestinationModule.address,
+            collateralLinkedMarketModule.address,
+            collateralLinkedMarketDestinationModule.address,
+            collateralLinkedOptionsModule.address,
+            collateralLinkedOptionsDestinationModule.address,
+            collateralLinkedGenericModule.address,
         );
 
         // Asset
         const assetHost = await TapiocaOFTMock__factory.deploy(
             lzEndpoint1.address,
-            false,
             erc20Mock.address,
             yieldBox.address,
+            cluster.address,
             'assetHost',
             'assetHost',
             18,
             1,
+            collateralHostLeverageModule.address,
+            collateralHostLeverageDestinationModule.address,
+            collateralHostStrategyModule.address,
+            collateralHostStrategyDestinationModule.address,
+            collateralHostMarketModule.address,
+            collateralHostMarketDestinationModule.address,
+            collateralHostOptionsModule.address,
+            collateralHostOptionsDestinationModule.address,
+            collateralHostGenericModule.address,
         );
 
         const assetLinked = await TapiocaOFTMock__factory.deploy(
             lzEndpoint2.address,
-            false,
             erc20Mock.address,
             yieldBox.address,
+            cluster.address,
             'assetLinked',
             'assetLinked',
             18,
             1,
+            collateralLinkedLeverageModule.address,
+            collateralLinkedLeverageDestinationModule.address,
+            collateralLinkedStrategyModule.address,
+            collateralLinkedStrategyDestinationModule.address,
+            collateralLinkedMarketModule.address,
+            collateralLinkedMarketDestinationModule.address,
+            collateralLinkedOptionsModule.address,
+            collateralLinkedOptionsDestinationModule.address,
+            collateralLinkedGenericModule.address,
         );
 
         // -------------------  Link TOFTs -------------------
