@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "../../interfaces/IOracle.sol" as ITOracle;
-import {ChainlinkUtils, AggregatorV3Interface} from "../utils/ChainlinkUtils.sol";
+import "../../../interfaces/IOracle.sol" as ITOracle;
+import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
 
 interface IStargatePool {
     function deltaCredit() external view returns (uint256);

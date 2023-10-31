@@ -3,9 +3,9 @@ pragma solidity ^0.8.9;
 
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
-import {ChainlinkUtils, AggregatorV3Interface} from "../utils/ChainlinkUtils.sol";
+import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
 
-import "../../interfaces/IOracle.sol" as ITOracle;
+import "../../../interfaces/IOracle.sol" as ITOracle;
 
 interface ICurvePool {
     function coins(uint256 i) external view returns (address);

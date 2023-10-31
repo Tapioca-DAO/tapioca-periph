@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import {IOracle} from "../../interfaces/IOracle.sol";
-import {IGmxGlpManager} from "../../interfaces/IGmxGlpManager.sol";
-import {SequencerCheck} from "../utils/SequencerCheck.sol";
-import {AccessControl} from "../external/AccessControl.sol";
+import {IOracle} from "../../../interfaces/IOracle.sol";
+import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
+import {SequencerCheck} from "../../utils/SequencerCheck.sol";
+import {AccessControl} from "../../external/AccessControl.sol";
 
 contract GLPOracle is IOracle, SequencerCheck, AccessControl {
     IGmxGlpManager private immutable glpManager;
