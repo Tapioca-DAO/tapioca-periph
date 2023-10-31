@@ -3,7 +3,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadVM } from '../utils';
 import inquirer from 'inquirer';
 import { buildGLPOracle } from './builds/buildGLPOracle';
-import { buildTapOracle } from './builds/buildTAPOracle';
+import { buildTapOracle } from './builds/buildTapOracle';
+import { buildDaiOracle } from './builds/buildDaiOracle';
 
 // hh deployOracle --network goerli
 export const deployOracle__task = async (
@@ -29,16 +30,18 @@ export const deployOracle__task = async (
     const deployType = [
         'GLPOracle',
         'TapOracle',
+        'DaiOracle',
         // '[-] Deprecated / ARBTriCryptoOracle',
         // '[-] Deprecated / SGOracle',
-    ];
+    ] as const;
 
-    const { buildToDeploy } = await inquirer.prompt({
-        message: '[+] Build to deploy: ',
-        name: 'buildToDeploy',
-        type: 'list',
-        choices: deployType,
-    });
+    const { buildToDeploy }: { buildToDeploy: (typeof deployType)[number] } =
+        await inquirer.prompt({
+            message: '[+] Build to deploy: ',
+            name: 'buildToDeploy',
+            type: 'list',
+            choices: deployType,
+        });
 
     const VM = await loadVM(hre, tag);
 
@@ -49,6 +52,10 @@ export const deployOracle__task = async (
     if (buildToDeploy === 'TapOracle') {
         VM.add(await buildTapOracle(hre));
     }
+    if (buildToDeploy === 'DaiOracle') {
+        VM.add(await buildDaiOracle(hre));
+    }
+
     const isLocal = hre.network.config.tags.includes('local');
 
     // Add and execute

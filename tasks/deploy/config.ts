@@ -17,6 +17,16 @@ const GLP_ORACLE = {
     },
 };
 
+const DAI_ORACLE = {
+    [EChainID.MAINNET]: {
+        DAI_ORACLE: {
+            DAI_ADDRESS: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+            DAI_USD_CL_DATA_FEED_ADDRESS:
+                '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9',
+        },
+    },
+};
+
 const MISC = {
     [EChainID.ARBITRUM]: {
         MISC: {
@@ -31,5 +41,8 @@ export const ARGS_CONFIG = {
         ...TAP_ORACLE[EChainID.ARBITRUM],
         ...GLP_ORACLE[EChainID.ARBITRUM],
         ...MISC[EChainID.ARBITRUM],
+    },
+    [EChainID.MAINNET]: {
+        ...DAI_ORACLE[EChainID.MAINNET],
     },
 };
