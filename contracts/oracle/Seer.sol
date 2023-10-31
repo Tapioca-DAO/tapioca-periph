@@ -9,6 +9,25 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     string public _symbol;
     uint8 public immutable override decimals;
 
+    /// @notice Constructor for the oracle using a mix of ChainLink and Uniswap
+    /// @param __name Name of the oracle
+    /// @param __symbol Symbol of the oracle
+    /// @param _decimals Number of decimals of the oracle
+    /// @param addressInAndOutUni Array of contract addresses used the Uniswap pool
+    /// @param _circuitUniswap Array of Uniswap pool addresses to use
+    /// @param _circuitUniIsMultiplied Array of booleans indicating whether we should multiply or divide by the Uniswap rate the
+    /// in-currency amount to get the out-currency amount
+    /// @param _twapPeriod Time weighted average window for all Uniswap pools, in seconds
+    /// @param observationLength Number of observations that each pool should have stored
+    /// @param _uniFinalCurrency Whether we need to use the last ChainLink oracle to convert to another
+    /// currency / asset (Forex for instance)
+    /// @param _circuitChainlink ChainLink pool addresses put in order
+    /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
+    /// @param _stalePeriod Time in seconds after which the oracle is considered stale
+    /// @param guardians List of governor or guardian addresses
+    /// @param _description Description of the assets concerned by the oracle
+    /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _admin Address of the admin of the oracle
     constructor(
         string memory __name,
         string memory __symbol,
