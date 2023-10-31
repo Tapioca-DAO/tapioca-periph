@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadVM } from '../utils';
 import inquirer from 'inquirer';
 import { buildGLPOracle } from './builds/buildGLPOracle';
-import { buildTapOracle } from './builds/buildTAPOracle';
+import { buildTapOracle } from './builds/buildTapOracle';
 
 // hh deployOracle --network goerli
 export const deployOracle__task = async (
