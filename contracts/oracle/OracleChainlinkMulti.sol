@@ -22,15 +22,13 @@ contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti {
         uint256 _inBase,
         uint32 stalePeriod,
         address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed
+        bytes32 _description
     )
         ModuleChainlinkMulti(
             _circuitChainlink,
             _circuitChainIsMultiplied,
             stalePeriod,
-            guardians,
-            _sequencerUptimeFeed
+            guardians
         )
     {
         inBase = _inBase;

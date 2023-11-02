@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "../../../interfaces/IOracle.sol" as ITOracle;
 import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
+import {SequencerCheck} from "../../utils/SequencerCheck.sol";
+import "../../../interfaces/IOracle.sol" as ITOracle;
 
 interface IStargatePool {
     function deltaCredit() external view returns (uint256);
@@ -20,12 +21,21 @@ interface IStargatePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract SGOracle is ITOracle.IOracle, ChainlinkUtils {
+contract SGOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck {
     string public _name;
     string public _symbol;
 
     IStargatePool public immutable SG_POOL;
     AggregatorV3Interface public immutable UNDERLYING;
+
+    /// @notice Reentrancy check
+    bool private entered;
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
+    }
 
     constructor(
         string memory __name,
@@ -34,7 +44,7 @@ contract SGOracle is ITOracle.IOracle, ChainlinkUtils {
         AggregatorV3Interface _underlying,
         address _sequencerUptimeFeed,
         address _admin
-    ) ChainlinkUtils(_sequencerUptimeFeed) {
+    ) SequencerCheck(_sequencerUptimeFeed) {
         _name = __name;
         _symbol = __symbol;
         SG_POOL = pool;

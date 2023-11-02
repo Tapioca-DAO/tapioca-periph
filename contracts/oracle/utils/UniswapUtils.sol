@@ -3,7 +3,6 @@
 pragma solidity ^0.8.7;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-
 import "../external/AccessControl.sol";
 import "./OracleMath.sol";
 

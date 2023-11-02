@@ -76,6 +76,9 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     function get(
         bytes calldata
     ) external virtual nonReentrant returns (bool success, uint256 rate) {
+        // Checking whether the sequencer is up
+        _sequencerBeatCheck();
+
         (, uint256 high) = _readAll(inBase);
         return (true, high);
     }
@@ -92,7 +95,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         return (true, high);
     }
 
-    /// @notice Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
+    /// @notice Check the current spot exchange rate without any state changes.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.

@@ -24,9 +24,8 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
         address _poolChainlink,
         uint8 _isChainlinkMultiplied,
         uint32 _stalePeriod,
-        address[] memory guardians,
-        address _sequencerUptimeFeed
-    ) ChainlinkUtils(_sequencerUptimeFeed) {
+        address[] memory guardians
+    ) {
         require(_poolChainlink != address(0), "105");
         poolChainlink = AggregatorV3Interface(_poolChainlink);
         chainlinkDecimals = AggregatorV3Interface(_poolChainlink).decimals();

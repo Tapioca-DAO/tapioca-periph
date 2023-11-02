@@ -4,10 +4,10 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./OracleAbstract.sol";
-
+import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleChainlinkMulti.sol";
 import "./modules/ModuleUniswapMulti.sol";
+import "./OracleAbstract.sol";
 
 /// @title OracleMulti
 /// @author Angle Core Team
@@ -19,13 +19,24 @@ import "./modules/ModuleUniswapMulti.sol";
 contract OracleMulti is
     OracleAbstract,
     ModuleChainlinkMulti,
-    ModuleUniswapMulti
+    ModuleUniswapMulti,
+    SequencerCheck
 {
     /// @notice Whether the final rate obtained with Uniswap should be multiplied to last rate from Chainlink
     uint8 public immutable uniFinalCurrency;
 
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
+
+    /// @notice Reentrancy check
+    bool private entered;
+
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
+    }
 
     /// @notice Constructor for an oracle using both Uniswap and Chainlink with multiple pools to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
@@ -67,9 +78,9 @@ contract OracleMulti is
             _circuitChainlink,
             _circuitChainIsMultiplied,
             _stalePeriod,
-            guardians,
-            _sequencerUptimeFeed
+            guardians
         )
+        SequencerCheck(_sequencerUptimeFeed)
     {
         require(addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals
@@ -162,5 +173,13 @@ contract OracleMulti is
         if (uniFinalCurrency > 0) {
             uniAmount = _changeUniswapNotFinal(0, uniAmount);
         }
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(SEQUENCER_ROLE) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
