@@ -95,6 +95,23 @@ function GUARDIAN_ROLE_UNISWAP() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### SEQUENCER_ROLE
+
+```solidity
+function SEQUENCER_ROLE() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SEQUENCER_UPTIME_FEED
 
 ```solidity
@@ -524,7 +541,7 @@ Check the last exchange rate without any state changes. For example: (string mem
 function peekSpot(bytes) external view returns (uint256 rate)
 ```
 
-Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek(). For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+Check the current spot exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 

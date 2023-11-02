@@ -1,12 +1,12 @@
-# OracleDAI
+# SeerUniSolo
 
-*Angle Core Team*
 
-> OracleDAI
 
-Oracle contract, one contract is deployed per collateral/stablecoin pair
 
-*This contract concerns an oracle that only uses both Chainlink and Uniswap for multiple poolsThis is going to be used for like ETH/EUR oraclesLike all oracle contracts, this contract is an instance of `OracleAstract` that contains some base functions*
+
+
+
+
 
 ## Methods
 
@@ -44,10 +44,10 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### GUARDIAN_ROLE_CHAINLINK
+### GRACE_PERIOD_TIME
 
 ```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
+function GRACE_PERIOD_TIME() external view returns (uint256)
 ```
 
 
@@ -59,7 +59,7 @@ function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes32 | undefined |
+| _0 | uint256 | undefined |
 
 ### GUARDIAN_ROLE_UNISWAP
 
@@ -78,35 +78,81 @@ function GUARDIAN_ROLE_UNISWAP() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### chainlinkDecimals
+### SEQUENCER_ROLE
 
 ```solidity
-function chainlinkDecimals(uint256) external view returns (uint8)
+function SEQUENCER_ROLE() external view returns (bytes32)
 ```
 
-Decimals for each Chainlink pairs
 
 
 
-#### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint8 | undefined |
+| _0 | bytes32 | undefined |
 
-### changeStalePeriod
+### SEQUENCER_UPTIME_FEED
 
 ```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
+function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
 ```
 
-Changes the Stale Period
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract AggregatorV3Interface | undefined |
+
+### _name
+
+```solidity
+function _name() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### _symbol
+
+```solidity
+function _symbol() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### changeGracePeriod
+
+```solidity
+function changeGracePeriod(uint32 _gracePeriod) external nonpayable
+```
+
+Changes the grace period for the sequencer update
 
 
 
@@ -114,7 +160,7 @@ Changes the Stale Period
 
 | Name | Type | Description |
 |---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
+| _gracePeriod | uint32 | New stale period (in seconds) |
 
 ### changeTwapPeriod
 
@@ -131,50 +177,6 @@ Changes the TWAP period
 | Name | Type | Description |
 |---|---|---|
 | _twapPeriod | uint32 | New window to compute the TWAP |
-
-### circuitChainIsMultiplied
-
-```solidity
-function circuitChainIsMultiplied(uint256) external view returns (uint8)
-```
-
-Whether each rate for the pairs in `circuitChainlink` should be multiplied or divided
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
-### circuitChainlink
-
-```solidity
-function circuitChainlink(uint256) external view returns (contract AggregatorV3Interface)
-```
-
-Chanlink pools, the order of the pools has to be the order in which they are read for the computation of the price
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
 
 ### circuitUniIsMultiplied
 
@@ -220,6 +222,23 @@ Uniswap pools, the order of the pools to arrive to the final price should be res
 |---|---|---|
 | _0 | contract IUniswapV3Pool | undefined |
 
+### decimals
+
+```solidity
+function decimals() external view returns (uint8)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint8 | undefined |
+
 ### description
 
 ```solidity
@@ -236,6 +255,29 @@ Description of the assets concerned by the oracle and the price outputted
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | undefined |
+
+### get
+
+```solidity
+function get(bytes) external nonpayable returns (bool success, uint256 rate)
+```
+
+Get the latest exchange rate. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| success | bool | if no valid (recent) rate is available, return false else true. |
+| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### getRoleAdmin
 
@@ -332,6 +374,28 @@ Increases the number of observations for each Uniswap pools
 |---|---|---|
 | newLengthStored | uint16 | Size asked for |
 
+### name
+
+```solidity
+function name(bytes) external view returns (string)
+```
+
+Returns a human readable name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | (string) A human readable name about this oracle. |
+
 ### outBase
 
 ```solidity
@@ -348,6 +412,51 @@ Unit out Uniswap currency
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### peek
+
+```solidity
+function peek(bytes) external view returns (bool success, uint256 rate)
+```
+
+Check the last exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| success | bool | if no valid (recent) rate is available, return false else true. |
+| rate | uint256 | The rate of the requested asset / pair / pool. |
+
+### peekSpot
+
+```solidity
+function peekSpot(bytes) external view returns (uint256 rate)
+```
+
+Check the current spot exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### read
 
@@ -496,22 +605,27 @@ function revokeRole(bytes32 role, address account) external nonpayable
 | role | bytes32 | undefined |
 | account | address | undefined |
 
-### stalePeriod
+### symbol
 
 ```solidity
-function stalePeriod() external view returns (uint32)
+function symbol(bytes) external view returns (string)
 ```
 
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
+Returns a human readable (short) name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint32 | undefined |
+| _0 | string | (string) A human readable symbol name about this oracle. |
 
 ### twapPeriod
 
@@ -529,23 +643,6 @@ Time weigthed average window that should be used for each Uniswap rate It is mai
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint32 | undefined |
-
-### uniFinalCurrency
-
-```solidity
-function uniFinalCurrency() external view returns (uint8)
-```
-
-Whether the final rate obtained with Uniswap should be multiplied to last rate from Chainlink
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
 
 
 
@@ -609,10 +706,21 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 
 ## Errors
 
-### InvalidChainlinkRate
+### GracePeriodNotOver
 
 ```solidity
-error InvalidChainlinkRate()
+error GracePeriodNotOver()
+```
+
+
+
+
+
+
+### SequencerDown
+
+```solidity
+error SequencerDown()
 ```
 
 
