@@ -71,7 +71,7 @@ export async function impersonateAccount(address: string) {
 }
 
 export function BN(n: BigNumberish) {
-    return ethers.BigNumber.from(n.toString());
+    return ethers.BigNumber.from(n);
 }
 
 export async function setBalance(addr: string, ether: number) {
