@@ -42,9 +42,6 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
             _sequencerUptimeFeed
         )
     {
-        inBase = _decimals;
-        description = _description;
-
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
@@ -64,7 +61,7 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        (rate, ) = _quoteChainlink(BASE);
+        (rate, ) = _quoteChainlink(inBase);
         return (true, rate);
     }
 

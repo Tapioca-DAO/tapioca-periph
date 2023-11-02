@@ -50,9 +50,6 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
             _sequencerUptimeFeed
         )
     {
-        inBase = _decimals;
-        description = _description;
-
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
@@ -72,7 +69,7 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        rate = _readUniswapQuote(BASE);
+        rate = _readUniswapQuote(inBase);
         return (true, rate);
     }
 
