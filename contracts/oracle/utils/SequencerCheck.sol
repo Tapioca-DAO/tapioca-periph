@@ -8,6 +8,8 @@ contract SequencerCheck {
     AggregatorV3Interface public immutable SEQUENCER_UPTIME_FEED; // If not set, assume it's on a L1
     uint256 public GRACE_PERIOD_TIME = 3600; // 1 hour
 
+    bytes32 public constant SEQUENCER_ROLE = keccak256("SEQUENCER_ROLE");
+
     error SequencerDown();
     error GracePeriodNotOver();
 

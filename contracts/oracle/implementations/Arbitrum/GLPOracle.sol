@@ -11,6 +11,12 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
 
     /// @notice Reentrancy check
     bool private entered;
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
+    }
 
     constructor(
         IGmxGlpManager glpManager_,
@@ -20,13 +26,7 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
         glpManager = glpManager_;
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-    }
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
+        _setupRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
@@ -78,7 +78,7 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
     /// @param _gracePeriod New stale period (in seconds)
     function changeGracePeriod(
         uint32 _gracePeriod
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

@@ -1,29 +1,26 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+// SPDX-License-Identifier: GPL-3.0
 
-import "./OracleMulti.sol";
+pragma solidity ^0.8.7;
+
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
 import "../interfaces/IOracle.sol" as ITOracle;
+import "./OracleUniSolo.sol";
 
-contract Seer is ITOracle.IOracle, OracleMulti {
+contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;
 
-    /// @notice Constructor for the oracle using a mix of ChainLink and Uniswap
+    /// @notice Constructor for an oracle using both Uniswap to read from
     /// @param __name Name of the oracle
     /// @param __symbol Symbol of the oracle
     /// @param _decimals Number of decimals of the oracle
-    /// @param addressInAndOutUni Array of contract addresses used the Uniswap pool
-    /// @param _circuitUniswap Array of Uniswap pool addresses to use
-    /// @param _circuitUniIsMultiplied Array of booleans indicating whether we should multiply or divide by the Uniswap rate the
-    /// in-currency amount to get the out-currency amount
-    /// @param _twapPeriod Time weighted average window for all Uniswap pools, in seconds
+    /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
+    /// @param _circuitUniswap Path of the Uniswap pools
+    /// @param _circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
+    /// @param _twapPeriod Time weighted average window for all Uniswap pools
     /// @param observationLength Number of observations that each pool should have stored
-    /// @param _uniFinalCurrency Whether we need to use the last ChainLink oracle to convert to another
-    /// currency / asset (Forex for instance)
-    /// @param _circuitChainlink ChainLink pool addresses put in order
-    /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
-    /// @param _stalePeriod Time in seconds after which the oracle is considered stale
     /// @param guardians List of governor or guardian addresses
     /// @param _description Description of the assets concerned by the oracle
     /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
@@ -37,25 +34,17 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         uint8[] memory _circuitUniIsMultiplied,
         uint32 _twapPeriod,
         uint16 observationLength,
-        uint8 _uniFinalCurrency,
-        address[] memory _circuitChainlink,
-        uint8[] memory _circuitChainIsMultiplied,
-        uint32 _stalePeriod,
         address[] memory guardians,
         bytes32 _description,
         address _sequencerUptimeFeed,
         address _admin
     )
-        OracleMulti(
+        OracleUniSolo(
             addressInAndOutUni,
             _circuitUniswap,
             _circuitUniIsMultiplied,
             _twapPeriod,
             observationLength,
-            _uniFinalCurrency,
-            _circuitChainlink,
-            _circuitChainIsMultiplied,
-            _stalePeriod,
             guardians,
             _description,
             _sequencerUptimeFeed
@@ -66,6 +55,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         decimals = _decimals;
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+        _setupRole(SEQUENCER_ROLE, _admin);
     }
 
     /// @notice Get the latest exchange rate.
@@ -79,8 +69,8 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        (, uint256 high) = _readAll(inBase);
-        return (true, high);
+        rate = _readUniswapQuote(inBase);
+        return (true, rate);
     }
 
     /// @notice Check the last exchange rate without any state changes.
