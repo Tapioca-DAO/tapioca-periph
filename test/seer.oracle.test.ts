@@ -1,6 +1,10 @@
-import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
+import {
+    loadFixture,
+    mine,
+    time,
+} from '@nomicfoundation/hardhat-network-helpers';
 import hre from 'hardhat';
-import { register } from './test.utils';
+import { BN, register } from './test.utils';
 import { expect } from 'chai';
 
 let runTestMainnet: any = (fn: () => any) =>
@@ -9,7 +13,7 @@ if (hre.network.config.chainId !== 1)
     runTestMainnet = (fn: () => any) => describe.skip('Seer mainnet', fn);
 
 let runTestArb: any = (fn: () => any) =>
-    describe.skip('Seer only mainnet/arb fork', fn);
+    describe('Seer only mainnet/arb fork', fn);
 if (hre.network.config.chainId !== 42161)
     runTestArb = (fn: () => any) => describe.skip('Seer arbitrum', fn);
 
@@ -290,5 +294,88 @@ runTestArb(() => {
                 await seer.decimals(),
             ),
         );
+    });
+
+    it('TapOracle', async () => {
+        const { deployer, timeTravel } = await loadFixture(register);
+
+        // Try with WETH/USDC
+        const seer = await (
+            await hre.ethers.getContractFactory('TapOracle')
+        ).deploy(
+            'WETH/USDC', // Name
+            'WETH/USDC', // Symbol
+            18, // Decimals
+            [
+                '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+                '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', // USDC
+            ], // Address In/Out
+            ['0xC31E54c7a869B9FcBEcc14363CF510d1c41fa443'], // LP
+            [1], // Circuit Uni is multiplied
+            600, // TWAP, 5min
+            10, // Observation length
+            [deployer.address], // Guardians
+            hre.ethers.utils.formatBytes32String('WETH/USDC'), // Description
+            '0x4da69f028a5790fccafe81a75c0d24f46cecdd69', // CL Sequencer
+            deployer.address, // Owner
+        );
+
+        // Price of WETH/USDC at block 145526897
+        const priceOfWETH = BN('1805201916000000000000');
+
+        {
+            await expect(seer.get('0x00')).to.be.revertedWith(
+                'TapOracle: not enough data',
+            );
+            await expect(seer.updateLastPrice()).to.emit(
+                seer,
+                'LastPriceUpdated',
+            );
+            expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
+            expect(await seer.lastPrices(1)).to.be.equal(0);
+            expect(await seer.lastPrices(2)).to.be.equal(0);
+
+            await expect(seer.updateLastPrice()).to.be.revertedWith(
+                'TapOracle: too early',
+            );
+        }
+
+        await timeTravel((await seer.FETCH_TIME()).toNumber());
+
+        {
+            await expect(seer.get('0x00')).to.be.revertedWith(
+                'TapOracle: not enough data',
+            );
+            await expect(seer.updateLastPrice()).to.emit(
+                seer,
+                'LastPriceUpdated',
+            );
+            expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
+            expect(await seer.lastPrices(1)).to.be.equal(priceOfWETH);
+            expect(await seer.lastPrices(2)).to.be.equal(0);
+
+            await expect(seer.updateLastPrice()).to.be.revertedWith(
+                'TapOracle: too early',
+            );
+        }
+
+        await timeTravel((await seer.FETCH_TIME()).toNumber());
+
+        {
+            await expect(seer.get('0x00')).to.not.be.reverted;
+            await expect(seer.updateLastPrice()).to.be.revertedWith(
+                'TapOracle: too early',
+            );
+            expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
+            expect(await seer.lastPrices(1)).to.be.equal(priceOfWETH);
+            expect(await seer.lastPrices(2)).to.be.equal(priceOfWETH);
+
+            await expect(seer.updateLastPrice()).to.be.revertedWith(
+                'TapOracle: too early',
+            );
+        }
+
+        await expect(await seer.get('0x00')).to.not.be.reverted;
+        expect((await seer.peek('0x00')).rate).to.be.equal(priceOfWETH);
     });
 });
