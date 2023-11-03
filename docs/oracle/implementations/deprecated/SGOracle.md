@@ -1,12 +1,12 @@
-# GLPOracle
+# SGOracle
 
 
 
 
 
+Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 
-
-
+*Addresses are for Arbitrum*
 
 ## Methods
 
@@ -44,6 +44,40 @@ function GRACE_PERIOD_TIME() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### GUARDIAN_ROLE_CHAINLINK
+
+```solidity
+function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### SEQUENCER_ROLE
+
+```solidity
+function SEQUENCER_ROLE() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SEQUENCER_UPTIME_FEED
 
 ```solidity
@@ -61,6 +95,74 @@ function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Int
 |---|---|---|
 | _0 | contract AggregatorV3Interface | undefined |
 
+### SG_POOL
+
+```solidity
+function SG_POOL() external view returns (contract IStargatePool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IStargatePool | undefined |
+
+### UNDERLYING
+
+```solidity
+function UNDERLYING() external view returns (contract AggregatorV3Interface)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract AggregatorV3Interface | undefined |
+
+### _name
+
+```solidity
+function _name() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### _symbol
+
+```solidity
+function _symbol() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
 ### changeGracePeriod
 
 ```solidity
@@ -77,10 +179,26 @@ Changes the grace period for the sequencer update
 |---|---|---|
 | _gracePeriod | uint32 | New stale period (in seconds) |
 
+### changeStalePeriod
+
+```solidity
+function changeStalePeriod(uint32 _stalePeriod) external nonpayable
+```
+
+Changes the Stale Period
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _stalePeriod | uint32 | New stale period (in seconds) |
+
 ### decimals
 
 ```solidity
-function decimals() external pure returns (uint8)
+function decimals() external view returns (uint8)
 ```
 
 
@@ -100,7 +218,7 @@ function decimals() external pure returns (uint8)
 function get(bytes) external nonpayable returns (bool success, uint256 rate)
 ```
 
-Get the latest exchange rate.
+Get the latest exchange rate. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
@@ -182,10 +300,10 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 ### name
 
 ```solidity
-function name(bytes) external pure returns (string)
+function name(bytes) external view returns (string)
 ```
 
-Returns a human readable name about this oracle.
+Returns a human readable name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
@@ -207,7 +325,7 @@ Returns a human readable name about this oracle.
 function peek(bytes) external view returns (bool success, uint256 rate)
 ```
 
-Check the last exchange rate without any state changes.
+Check the last exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
@@ -227,10 +345,10 @@ Check the last exchange rate without any state changes.
 ### peekSpot
 
 ```solidity
-function peekSpot(bytes data) external view returns (uint256 rate)
+function peekSpot(bytes) external view returns (uint256 rate)
 ```
 
-Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
+Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek(). For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
@@ -238,7 +356,7 @@ Check the current spot exchange rate without any state changes. For oracles like
 
 | Name | Type | Description |
 |---|---|---|
-| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+| _0 | bytes | undefined |
 
 #### Returns
 
@@ -280,13 +398,30 @@ function revokeRole(bytes32 role, address account) external nonpayable
 | role | bytes32 | undefined |
 | account | address | undefined |
 
+### stalePeriod
+
+```solidity
+function stalePeriod() external view returns (uint32)
+```
+
+Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint32 | undefined |
+
 ### symbol
 
 ```solidity
-function symbol(bytes) external pure returns (string)
+function symbol(bytes) external view returns (string)
 ```
 
-Returns a human readable (short) name about this oracle.
+Returns a human readable (short) name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
 
 
 
@@ -368,6 +503,17 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 
 ```solidity
 error GracePeriodNotOver()
+```
+
+
+
+
+
+
+### InvalidChainlinkRate
+
+```solidity
+error InvalidChainlinkRate()
 ```
 
 

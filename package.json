@@ -55,7 +55,7 @@
         "prb-math": "^2.4.1",
         "prettier": "^2.5.1",
         "prettier-plugin-solidity": "^1.0.0-beta.19",
-        "solc": "^0.8.21",
+        "solc": "^0.8.18",
         "solhint": "^3.4.1",
         "solidity-coverage": "^0.8.1",
         "ts-node": "^10.7.0",
@@ -72,7 +72,7 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.4.9",
+        "tapioca-sdk": "^1.5.3",
         "uuid": "^9.0.0"
     }
 }

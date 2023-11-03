@@ -78,6 +78,23 @@ function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### SEQUENCER_ROLE
+
+```solidity
+function SEQUENCER_ROLE() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SEQUENCER_UPTIME_FEED
 
 ```solidity

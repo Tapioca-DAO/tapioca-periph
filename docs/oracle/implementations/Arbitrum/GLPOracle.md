@@ -1,12 +1,12 @@
-# ModuleChainlinkSingle
+# GLPOracle
 
-*Angle Core Team*
 
-> ModuleChainlinkSingle
 
-Module Contract that is going to be used to help compute Chainlink prices
 
-*This contract will help for an oracle using a single Chainlink priceAn oracle using Chainlink is either going to be a `ModuleChainlinkSingle` or a `ModuleChainlinkMulti`*
+
+
+
+
 
 ## Methods
 
@@ -27,10 +27,27 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### GUARDIAN_ROLE_CHAINLINK
+### GRACE_PERIOD_TIME
 
 ```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
+function GRACE_PERIOD_TIME() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### SEQUENCER_ROLE
+
+```solidity
+function SEQUENCER_ROLE() external view returns (bytes32)
 ```
 
 
@@ -44,13 +61,46 @@ function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### chainlinkDecimals
+### SEQUENCER_UPTIME_FEED
 
 ```solidity
-function chainlinkDecimals() external view returns (uint8)
+function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
 ```
 
-Decimals for each Chainlink pairs
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract AggregatorV3Interface | undefined |
+
+### changeGracePeriod
+
+```solidity
+function changeGracePeriod(uint32 _gracePeriod) external nonpayable
+```
+
+Changes the grace period for the sequencer update
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _gracePeriod | uint32 | New stale period (in seconds) |
+
+### decimals
+
+```solidity
+function decimals() external pure returns (uint8)
+```
+
+
 
 
 
@@ -61,13 +111,13 @@ Decimals for each Chainlink pairs
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### changeStalePeriod
+### get
 
 ```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
+function get(bytes) external nonpayable returns (bool success, uint256 rate)
 ```
 
-Changes the Stale Period
+Get the latest exchange rate.
 
 
 
@@ -75,7 +125,14 @@ Changes the Stale Period
 
 | Name | Type | Description |
 |---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
+| _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| success | bool | if no valid (recent) rate is available, return false else true. |
+| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### getRoleAdmin
 
@@ -139,39 +196,72 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### isChainlinkMultiplied
+### name
 
 ```solidity
-function isChainlinkMultiplied() external view returns (uint8)
+function name(bytes) external pure returns (string)
 ```
 
-Whether the rate computed using the Chainlink pool should be multiplied to the quote amount or not
+Returns a human readable name about this oracle.
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint8 | undefined |
+| _0 | string | (string) A human readable name about this oracle. |
 
-### poolChainlink
+### peek
 
 ```solidity
-function poolChainlink() external view returns (contract AggregatorV3Interface)
+function peek(bytes) external view returns (bool success, uint256 rate)
 ```
 
-Chainlink pool to look for in the contract
+Check the last exchange rate without any state changes.
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
+| success | bool | if no valid (recent) rate is available, return false else true. |
+| rate | uint256 | The rate of the requested asset / pair / pool. |
+
+### peekSpot
+
+```solidity
+function peekSpot(bytes data) external view returns (uint256 rate)
+```
+
+Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| data | bytes | Usually abi encoded, implementation specific data that contains information and arguments to &amp; about the oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256)); |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### renounceRole
 
@@ -207,22 +297,27 @@ function revokeRole(bytes32 role, address account) external nonpayable
 | role | bytes32 | undefined |
 | account | address | undefined |
 
-### stalePeriod
+### symbol
 
 ```solidity
-function stalePeriod() external view returns (uint32)
+function symbol(bytes) external pure returns (string)
 ```
 
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
+Returns a human readable (short) name about this oracle.
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint32 | undefined |
+| _0 | string | (string) A human readable symbol name about this oracle. |
 
 
 
@@ -286,10 +381,21 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 
 ## Errors
 
-### InvalidChainlinkRate
+### GracePeriodNotOver
 
 ```solidity
-error InvalidChainlinkRate()
+error GracePeriodNotOver()
+```
+
+
+
+
+
+
+### SequencerDown
+
+```solidity
+error SequencerDown()
 ```
 
 

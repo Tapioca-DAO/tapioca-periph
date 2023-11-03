@@ -71,7 +71,7 @@ export async function impersonateAccount(address: string) {
 }
 
 export function BN(n: BigNumberish) {
-    return ethers.BigNumber.from(n.toString());
+    return ethers.BigNumber.from(n);
 }
 
 export async function setBalance(addr: string, ether: number) {
@@ -1071,8 +1071,21 @@ async function registerBigBangMarket(
     await usdoUsdcOracle.set(ethers.utils.parseEther('1'));
 
     const setAssetOracleFn = bigBangMarket.interface.encodeFunctionData(
-        'setAssetOracle',
-        [usdoUsdcOracle.address, '0x'],
+        'setMarketConfig',
+        [
+            0,
+            usdoUsdcOracle.address,
+            '0x',
+            hre.ethers.constants.AddressZero,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ],
     );
     await bar.executeMarketFn(
         [bigBangMarket.address],

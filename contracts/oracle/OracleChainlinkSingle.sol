@@ -3,8 +3,9 @@
 // contracts/oracle/OracleChainlinkSingle.sol
 pragma solidity ^0.8.7;
 
-import "./OracleAbstract.sol";
+import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleChainlinkSingle.sol";
+import "./OracleAbstract.sol";
 
 /// @title OracleChainlinkSingle
 /// @author Angle Core Team
@@ -13,7 +14,21 @@ import "./modules/ModuleChainlinkSingle.sol";
 /// @dev This is mainly going to be the contract used for the USD/EUR pool (or for other fiat currencies)
 /// @dev Like all oracle contracts, this contract is an instance of `OracleAstract` that contains some
 /// base functions
-contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle {
+contract OracleChainlinkSingle is
+    OracleAbstract,
+    ModuleChainlinkSingle,
+    SequencerCheck
+{
+    /// @notice Reentrancy check
+    bool private entered;
+
+    modifier nonReentrant() {
+        require(!entered, "Oracle: reentrancy");
+        entered = true;
+        _;
+        entered = false;
+    }
+
     /// @notice Constructor for the oracle using a single Chainlink pool
     /// @param _poolChainlink Chainlink pool address
     /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
@@ -33,9 +48,9 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle {
             _poolChainlink,
             _isChainlinkMultiplied,
             stalePeriod,
-            guardians,
-            _sequencerUptimeFeed
+            guardians
         )
+        SequencerCheck(_sequencerUptimeFeed)
     {
         inBase = _inBase;
         description = _description;
@@ -77,5 +92,13 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle {
         (quoteAmount, ) = _quoteChainlink(quoteAmount);
         // We return only rates with base BASE
         return quoteAmount;
+    }
+
+    /// @notice Changes the grace period for the sequencer update
+    /// @param _gracePeriod New stale period (in seconds)
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(SEQUENCER_ROLE) {
+        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

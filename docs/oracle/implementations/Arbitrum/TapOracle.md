@@ -1,14 +1,31 @@
-# SGOracle
+# TapOracle
 
 
 
 
 
-Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 
-*Addresses are for Arbitrum*
+
+
 
 ## Methods
+
+### BASE
+
+```solidity
+function BASE() external view returns (uint256)
+```
+
+Base used for computation
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### DEFAULT_ADMIN_ROLE
 
@@ -27,6 +44,23 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### FETCH_TIME
+
+```solidity
+function FETCH_TIME() external view returns (uint256)
+```
+
+Time in seconds after which get() can be called again (1 hour).
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### GRACE_PERIOD_TIME
 
 ```solidity
@@ -44,10 +78,27 @@ function GRACE_PERIOD_TIME() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### GUARDIAN_ROLE_CHAINLINK
+### GUARDIAN_ROLE_UNISWAP
 
 ```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
+function GUARDIAN_ROLE_UNISWAP() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### SEQUENCER_ROLE
+
+```solidity
+function SEQUENCER_ROLE() external view returns (bytes32)
 ```
 
 
@@ -65,40 +116,6 @@ function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 
 ```solidity
 function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### SG_POOL
-
-```solidity
-function SG_POOL() external view returns (contract IStargatePool)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStargatePool | undefined |
-
-### UNDERLYING
-
-```solidity
-function UNDERLYING() external view returns (contract AggregatorV3Interface)
 ```
 
 
@@ -162,13 +179,13 @@ Changes the grace period for the sequencer update
 |---|---|---|
 | _gracePeriod | uint32 | New stale period (in seconds) |
 
-### changeStalePeriod
+### changeTwapPeriod
 
 ```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
+function changeTwapPeriod(uint32 _twapPeriod) external nonpayable
 ```
 
-Changes the Stale Period
+Changes the TWAP period
 
 
 
@@ -176,7 +193,51 @@ Changes the Stale Period
 
 | Name | Type | Description |
 |---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
+| _twapPeriod | uint32 | New window to compute the TWAP |
+
+### circuitUniIsMultiplied
+
+```solidity
+function circuitUniIsMultiplied(uint256) external view returns (uint8)
+```
+
+Whether the rate obtained with each pool should be multiplied or divided to the current amount
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint8 | undefined |
+
+### circuitUniswap
+
+```solidity
+function circuitUniswap(uint256) external view returns (contract IUniswapV3Pool)
+```
+
+Uniswap pools, the order of the pools to arrive to the final price should be respected
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IUniswapV3Pool | undefined |
 
 ### decimals
 
@@ -194,6 +255,23 @@ function decimals() external view returns (uint8)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
+
+### description
+
+```solidity
+function description() external view returns (bytes32)
+```
+
+Description of the assets concerned by the oracle and the price outputted
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### get
 
@@ -280,6 +358,61 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### inBase
+
+```solidity
+function inBase() external view returns (uint256)
+```
+
+Unit of the in-currency
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### increaseTWAPStore
+
+```solidity
+function increaseTWAPStore(uint16 newLengthStored) external nonpayable
+```
+
+Increases the number of observations for each Uniswap pools
+
+*newLengthStored should be larger than all previous pools observations length*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newLengthStored | uint16 | Size asked for |
+
+### lastPrices
+
+```solidity
+function lastPrices(uint256) external view returns (uint256)
+```
+
+Last prices of the oracle. get() will return the average.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### name
 
 ```solidity
@@ -301,6 +434,23 @@ Returns a human readable name about this oracle. For example: (string memory col
 | Name | Type | Description |
 |---|---|---|
 | _0 | string | (string) A human readable name about this oracle. |
+
+### outBase
+
+```solidity
+function outBase() external view returns (uint256)
+```
+
+Unit out Uniswap currency
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### peek
 
@@ -347,6 +497,119 @@ Check the current spot exchange rate without any state changes. For oracles like
 |---|---|---|
 | rate | uint256 | The rate of the requested asset / pair / pool. |
 
+### read
+
+```solidity
+function read() external view returns (uint256)
+```
+
+Reads the Uniswap rate using the circuit given
+
+*By default even if there is a Chainlink rate, this function returns the Uniswap rateThe amount returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The current rate between the in-currency and out-currency |
+
+### readAll
+
+```solidity
+function readAll() external view returns (uint256, uint256)
+```
+
+Read rates from the circuit of both Uniswap and Chainlink if there are both circuits else returns twice the same price
+
+*The rate returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | Return all available rates (Chainlink and Uniswap) with the lowest rate returned first. |
+| _1 | uint256 | undefined |
+
+### readLower
+
+```solidity
+function readLower() external view returns (uint256 rate)
+```
+
+Reads rates from the circuit of both Uniswap and Chainlink if there are both circuits and returns either the highest of both rates or the lowest
+
+*If there is only one rate computed in an oracle contract, then the only rate is returned regardless of the value of the `lower` parameterThe rate returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| rate | uint256 | The lower rate between Chainlink and Uniswap |
+
+### readQuote
+
+```solidity
+function readQuote(uint256 quoteAmount) external view returns (uint256)
+```
+
+Converts an in-currency quote amount to out-currency using the Uniswap rate
+
+*Like in the `read` function, this function returns the Uniswap quoteThe amount returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| quoteAmount | uint256 | Amount (in the input collateral) to be converted in out-currency |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | Quote amount in out-currency from the base amount in in-currency |
+
+### readQuoteLower
+
+```solidity
+function readQuoteLower(uint256 quoteAmount) external view returns (uint256)
+```
+
+Returns the lowest quote amount between Uniswap and Chainlink circuits (if possible). If the oracle contract only involves a single feed, then this returns the value of this feed
+
+*The rate returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| quoteAmount | uint256 | Amount (in the input collateral) to be converted |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The lowest quote amount from the quote amount in in-currency |
+
+### readUpper
+
+```solidity
+function readUpper() external view returns (uint256 rate)
+```
+
+Reads rates from the circuit of both Uniswap and Chainlink if there are both circuits and returns either the highest of both rates or the lowest
+
+*If there is only one rate computed in an oracle contract, then the only rate is returned regardless of the value of the `lower` parameterThe rate returned is expressed with base `BASE` (and not the base of the out-currency)*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| rate | uint256 | The upper rate between Chainlink and Uniswap |
+
 ### renounceRole
 
 ```solidity
@@ -381,23 +644,6 @@ function revokeRole(bytes32 role, address account) external nonpayable
 | role | bytes32 | undefined |
 | account | address | undefined |
 
-### stalePeriod
-
-```solidity
-function stalePeriod() external view returns (uint32)
-```
-
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined |
-
 ### symbol
 
 ```solidity
@@ -420,9 +666,86 @@ Returns a human readable (short) name about this oracle. For example: (string me
 |---|---|---|
 | _0 | string | (string) A human readable symbol name about this oracle. |
 
+### twapPeriod
+
+```solidity
+function twapPeriod() external view returns (uint32)
+```
+
+Time weigthed average window that should be used for each Uniswap rate It is mainly going to be 5 minutes in the protocol
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint32 | undefined |
+
+### updateFetchTime
+
+```solidity
+function updateFetchTime(uint256 _newFetchTime) external nonpayable
+```
+
+Update the time in seconds after which get() can be called again.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _newFetchTime | uint256 | New time in seconds after which get() can be called again. |
+
+### updateLastPrice
+
+```solidity
+function updateLastPrice() external nonpayable
+```
+
+Update the last price of the oracle.
+
+
+
+
 
 
 ## Events
+
+### FetchTimeUpdated
+
+```solidity
+event FetchTimeUpdated(uint256 newFetchTime)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newFetchTime  | uint256 | undefined |
+
+### LastPriceUpdated
+
+```solidity
+event LastPriceUpdated(uint256 newLastPrice, uint8 index)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newLastPrice  | uint256 | undefined |
+| index  | uint8 | undefined |
 
 ### RoleAdminChanged
 
@@ -486,17 +809,6 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 
 ```solidity
 error GracePeriodNotOver()
-```
-
-
-
-
-
-
-### InvalidChainlinkRate
-
-```solidity
-error InvalidChainlinkRate()
 ```
 
 

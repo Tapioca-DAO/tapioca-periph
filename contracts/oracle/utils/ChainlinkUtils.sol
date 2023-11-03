@@ -3,13 +3,12 @@
 pragma solidity ^0.8.7;
 
 import {AccessControlledOffchainAggregator, AggregatorV3Interface} from "../../interfaces/IAggregatorV3Interface.sol";
-import {SequencerCheck} from "../utils/SequencerCheck.sol";
 import "../external/AccessControl.sol";
 
 /// @title ChainlinkUtils
 /// @author Angle Core Team
 /// @notice Utility contract that is used across the different module contracts using Chainlink
-contract ChainlinkUtils is AccessControl, SequencerCheck {
+contract ChainlinkUtils is AccessControl {
     /// @notice Represent the maximum amount of time (in seconds) between each Chainlink update
     /// before the price feed is considered stale
     uint32 public stalePeriod = 86400; // Default to 1 day
@@ -18,21 +17,9 @@ contract ChainlinkUtils is AccessControl, SequencerCheck {
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
         keccak256("GUARDIAN_ROLE");
 
-    /// @notice Reentrancy check
-    bool private entered;
-
-    constructor(
-        address _sequencerUptimeFeed
-    ) SequencerCheck(_sequencerUptimeFeed) {}
+    constructor() {}
 
     error InvalidChainlinkRate();
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     /// @notice Reads a Chainlink feed. Perform a sequence upbeat check if L2 chain
     /// @param feed Chainlink feed to query
@@ -41,9 +28,6 @@ contract ChainlinkUtils is AccessControl, SequencerCheck {
         AggregatorV3Interface feed,
         uint256 castedRatio
     ) internal view returns (uint256) {
-        // Checking whether the sequencer is up
-        _sequencerBeatCheck();
-
         if (castedRatio == 0) {
             (
                 uint80 roundId,
@@ -82,9 +66,6 @@ contract ChainlinkUtils is AccessControl, SequencerCheck {
         uint256 decimals,
         uint256 castedRatio
     ) internal view returns (uint256, uint256) {
-        // Checking whether the sequencer is up
-        _sequencerBeatCheck();
-
         castedRatio = _readChainlinkBase(feed, castedRatio);
 
         // Checking whether we should multiply or divide by the ratio computed
@@ -100,13 +81,5 @@ contract ChainlinkUtils is AccessControl, SequencerCheck {
         uint32 _stalePeriod
     ) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
         stalePeriod = _stalePeriod;
-    }
-
-    /// @notice Changes the grace period for the sequencer update
-    /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(
-        uint32 _gracePeriod
-    ) external override onlyRole(GUARDIAN_ROLE_CHAINLINK) {
-        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
