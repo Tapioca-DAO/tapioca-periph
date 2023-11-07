@@ -8,7 +8,7 @@ describe('UniswapV3Swapper', () => {
         it('should get output amount', async () => {
             const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } =
                 await loadFixture(registerFork);
-            const amount = BN(1e18);
+            const amount = BN((1e18).toString());
 
             const swapData = createSimpleSwapData(
                 weth.address,
@@ -86,7 +86,7 @@ describe('UniswapV3Swapper', () => {
                 usdc,
                 createSimpleSwapData,
             } = await loadFixture(registerFork);
-            const amount = BN(1e18);
+            const amount = BN((1e18).toString());
 
             const swapData = createSimpleSwapData(
                 ethers.constants.AddressZero,
@@ -111,7 +111,7 @@ describe('UniswapV3Swapper', () => {
                 usdc,
                 createSimpleSwapData,
             } = await loadFixture(registerFork);
-            const amount = BN(1e18);
+            const amount = BN((1e18).toString());
 
             await weth
                 .connect(binanceWallet)
@@ -145,7 +145,7 @@ describe('UniswapV3Swapper', () => {
                 createYbSwapData,
             } = await loadFixture(registerFork);
 
-            const amount = BN(1e18);
+            const amount = BN((1e18).toString());
             const share = await yieldBox.toShare(wethAssetId, amount, false);
 
             await weth

@@ -1073,7 +1073,6 @@ async function registerBigBangMarket(
     const setAssetOracleFn = bigBangMarket.interface.encodeFunctionData(
         'setMarketConfig',
         [
-            0,
             usdoUsdcOracle.address,
             '0x',
             hre.ethers.constants.AddressZero,
