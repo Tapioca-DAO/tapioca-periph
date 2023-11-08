@@ -148,6 +148,24 @@ function setApprovalForAll(address spender, bool status) external nonpayable
 | spender | address | undefined |
 | status | bool | undefined |
 
+### setApprovalForAsset
+
+```solidity
+function setApprovalForAsset(address operator, uint256 assetId, bool approved) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| operator | address | undefined |
+| assetId | uint256 | undefined |
+| approved | bool | undefined |
+
 ### toAmount
 
 ```solidity

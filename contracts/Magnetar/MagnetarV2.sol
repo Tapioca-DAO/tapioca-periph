@@ -97,7 +97,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
             valAccumulator += _action.value;
 
-            if (_action.id == PERMIT_ALL) {
+            if (_action.id == PERMIT_YB_ALL) {
                 _permit(
                     _action.target,
                     _action.call,
@@ -119,6 +119,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     _action.call,
                     false,
                     _action.allowFailure,
+                    false
+                );
+            } else if (_action.id == REVOKE_YB_ALL) {
+                address spender = abi.decode(_action.call[4:], (address));
+                IYieldBoxBase(_action.target).setApprovalForAll(spender, false);
+            } else if (_action.id == REVOKE_YB_ASSET) {
+                (address spender, uint256 asset) = abi.decode(
+                    _action.call[4:],
+                    (address, uint256)
+                );
+                IYieldBoxBase(_action.target).setApprovalForAsset(
+                    spender,
+                    asset,
                     false
                 );
             } else if (_action.id == TOFT_WRAP) {

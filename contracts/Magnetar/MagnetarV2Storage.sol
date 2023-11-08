@@ -173,9 +173,11 @@ contract MagnetarV2Storage is IERC721Receiver {
     }
 
     // --- ACTIONS IDS ----
-    uint16 internal constant PERMIT_ALL = 1;
-    uint16 internal constant PERMIT = 2;
-    uint16 internal constant PERMIT_MARKET = 3;
+    uint16 internal constant PERMIT_YB_ALL = 1; // executed on YieldBox
+    uint16 internal constant PERMIT = 2; // ERC20 permit sig type
+    uint16 internal constant PERMIT_MARKET = 3; // SGL/BB permit sig type
+    uint16 internal constant REVOKE_YB_ALL = 4; // executed on YieldBox
+    uint16 internal constant REVOKE_YB_ASSET = 5; // executed on YieldBox
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
     uint16 internal constant YB_WITHDRAW_TO = 102;
