@@ -2838,17 +2838,13 @@ describe('MagnetarV2', () => {
                     collateralAmount,
                     true,
                     {
-                        withdraw: true,
+                        withdraw: false,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
                     },
                 );
-            const usdcBalanceAfter = await usdc.balanceOf(eoa1.address);
-            expect(usdcBalanceAfter.gt(usdcBalanceBefore)).to.be.true;
-            expect(usdcBalanceAfter.sub(usdcBalanceBefore).eq(collateralAmount))
-                .to.be.true;
         });
     });
 

@@ -170,11 +170,17 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         }
 
         require(amount > 0, "Swapper: amount is 0");
-        uint256 balanceBefore = IERC20(token).balanceOf(address(this));
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        uint256 balanceAfter = IERC20(token).balanceOf(address(this));
-        require(balanceAfter > balanceBefore, "Swapper: transfer failed");
-        return balanceAfter - balanceBefore;
+
+        if (token != address(0)) {
+            uint256 balanceBefore = IERC20(token).balanceOf(address(this));
+            IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+            uint256 balanceAfter = IERC20(token).balanceOf(address(this));
+            require(balanceAfter > balanceBefore, "Swapper: transfer failed");
+            return balanceAfter - balanceBefore;
+        } else {
+            require(msg.value == amount, "Swapper: gas not valid");
+            return amount;
+        }
     }
 
     function _createPath(

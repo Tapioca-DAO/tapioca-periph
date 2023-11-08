@@ -122,9 +122,6 @@ contract UniswapV2Swapper is BaseSwapper {
             yieldBox
         );
 
-        // Create swap path for UniswapV2Router02 operations
-        address[] memory path = _createPath(tokenIn, tokenOut);
-
         // Get tokens' amounts
         (uint256 amountIn, ) = _getAmounts(
             swapData.amountData,
@@ -144,15 +141,17 @@ contract UniswapV2Swapper is BaseSwapper {
         );
 
         // Perform the swap operation
-        _safeApprove(tokenIn, address(swapRouter), amountIn);
         if (data.length == 0) {
             data = getDefaultDexOptions();
         }
         uint256 deadline = abi.decode(data, (uint256));
-        uint256[] memory amounts = swapRouter.swapExactTokensForTokens(
+        // Create swap path for UniswapV2Router02 operations
+        address[] memory path = _createPath(tokenIn, tokenOut);
+        uint256[] memory amounts = _swap(
             amountIn,
             amountOutMin,
-            path,
+            tokenIn,
+            tokenOut,
             swapData.yieldBoxData.depositToYb ? address(this) : to,
             deadline
         );
@@ -160,7 +159,13 @@ contract UniswapV2Swapper is BaseSwapper {
         // Compute outputs
         amountOut = amounts[1];
         if (swapData.yieldBoxData.depositToYb) {
-            _safeApprove(path[path.length - 1], address(yieldBox), amountOut);
+            if (path[path.length - 1] != address(0)) {
+                _safeApprove(
+                    path[path.length - 1],
+                    address(yieldBox),
+                    amountOut
+                );
+            }
             (, shareOut) = yieldBox.depositAsset(
                 swapData.tokensData.tokenOutId,
                 address(this),
@@ -170,4 +175,52 @@ contract UniswapV2Swapper is BaseSwapper {
             );
         }
     }
+
+    function _swap(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address tokenIn,
+        address tokenOut,
+        address receiver,
+        uint256 deadline
+    ) private returns (uint256[] memory amounts) {
+        // Create swap path for UniswapV2Router02 operations
+
+        address _tokenIn = tokenIn != address(0) ? tokenIn : swapRouter.WETH();
+        address _tokenOut = tokenOut != address(0)
+            ? tokenOut
+            : swapRouter.WETH();
+        address[] memory path = _createPath(_tokenIn, _tokenOut);
+
+        if (tokenIn != address(0) && tokenOut != address(0)) {
+            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            amounts = swapRouter.swapExactTokensForTokens(
+                amountIn,
+                amountOutMin,
+                path,
+                receiver,
+                deadline
+            );
+        } else if (tokenIn == address(0) && tokenOut != address(0)) {
+            amounts = swapRouter.swapExactETHForTokens{value: amountIn}(
+                amountOutMin,
+                path,
+                receiver,
+                deadline
+            );
+        } else if (tokenIn != address(0) && tokenOut == address(0)) {
+            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            amounts = swapRouter.swapExactTokensForETH(
+                amountIn,
+                amountOutMin,
+                path,
+                receiver,
+                deadline
+            );
+        } else {
+            revert("UniswapV2Swapper: swap not valid");
+        }
+    }
+
+    receive() external payable {}
 }
