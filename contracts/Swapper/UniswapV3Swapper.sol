@@ -212,7 +212,12 @@ contract UniswapV3Swapper is BaseSwapper {
         if (tokenIn == address(0)) {
             require(msg.value == amountIn, "UniswapV3Swapper: gas not valid");
         }
-        amountOut = _swap(params, swapData.yieldBoxData.depositToYb, to);
+        amountOut = _swap(
+            tokenOut,
+            params,
+            swapData.yieldBoxData.depositToYb,
+            to
+        );
         if (swapData.yieldBoxData.depositToYb) {
             if (tokenOut != address(0)) {
                 _safeApprove(tokenOut, address(yieldBox), amountOut);
@@ -228,13 +233,14 @@ contract UniswapV3Swapper is BaseSwapper {
     }
 
     function _swap(
+        address tokenOut,
         ISwapRouter.ExactInputSingleParams memory params,
         bool depositToYb,
         address to
     ) private returns (uint256 amountOut) {
         address weth = ISwapRouterReader(address(swapRouter)).WETH9();
         amountOut = swapRouter.exactInputSingle{value: msg.value}(params);
-        if (params.tokenOut == weth) {
+        if (params.tokenOut == weth && tokenOut == address(0)) {
             IWETH9(weth).withdraw(amountOut);
             require(
                 address(this).balance >= amountOut,

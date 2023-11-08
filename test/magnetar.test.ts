@@ -2869,6 +2869,27 @@ describe('MagnetarV2', () => {
 
             await initContracts();
 
+            //set assets oracle
+            const OracleMock = new OracleMock__factory(deployer);
+            const usdoUsdcOracle = await OracleMock.deploy(
+                'USDOUSDCOracle',
+                'USDOUSDCOracle',
+                ethers.utils.parseEther('1'),
+            );
+            await usdoUsdcOracle.deployed();
+            await usdoUsdcOracle.set(ethers.utils.parseEther('1'));
+
+            const setAssetOracleFn =
+                wethBigBangMarket.interface.encodeFunctionData(
+                    'setAssetOracle',
+                    [usdoUsdcOracle.address, '0x'],
+                );
+            await bar.executeMarketFn(
+                [wethBigBangMarket.address],
+                [setAssetOracleFn],
+                true,
+            );
+
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
             const usdoAssetId = await yieldBox.ids(
                 1,
@@ -2902,7 +2923,7 @@ describe('MagnetarV2', () => {
                 100,
             );
             const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
+                1000,
             );
 
             // We get asset
@@ -3007,6 +3028,27 @@ describe('MagnetarV2', () => {
 
             await initContracts();
 
+            //set assets oracle
+            const OracleMock = new OracleMock__factory(deployer);
+            const usdoUsdcOracle = await OracleMock.deploy(
+                'USDOUSDCOracle',
+                'USDOUSDCOracle',
+                ethers.utils.parseEther('1'),
+            );
+            await usdoUsdcOracle.deployed();
+            await usdoUsdcOracle.set(ethers.utils.parseEther('1'));
+
+            const setAssetOracleFn =
+                wethBigBangMarket.interface.encodeFunctionData(
+                    'setAssetOracle',
+                    [usdoUsdcOracle.address, '0x'],
+                );
+            await bar.executeMarketFn(
+                [wethBigBangMarket.address],
+                [setAssetOracleFn],
+                true,
+            );
+
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
             const usdoAssetId = await yieldBox.ids(
                 1,
@@ -3040,7 +3082,7 @@ describe('MagnetarV2', () => {
                 100,
             );
             const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
+                1000,
             );
 
             await usd0.mint(deployer.address, borrowAmount.mul(2));
@@ -3263,6 +3305,27 @@ describe('MagnetarV2', () => {
 
             await initContracts();
 
+            //set assets oracle
+            const OracleMock = new OracleMock__factory(deployer);
+            const usdoUsdcOracle = await OracleMock.deploy(
+                'USDOUSDCOracle',
+                'USDOUSDCOracle',
+                ethers.utils.parseEther('1'),
+            );
+            await usdoUsdcOracle.deployed();
+            await usdoUsdcOracle.set(ethers.utils.parseEther('1'));
+
+            const setAssetOracleFn =
+                wethBigBangMarket.interface.encodeFunctionData(
+                    'setAssetOracle',
+                    [usdoUsdcOracle.address, '0x'],
+                );
+            await bar.executeMarketFn(
+                [wethBigBangMarket.address],
+                [setAssetOracleFn],
+                true,
+            );
+
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
             const usdoAssetId = await yieldBox.ids(
                 1,
@@ -3295,7 +3358,7 @@ describe('MagnetarV2', () => {
                 100,
             );
             const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
-                10,
+                1000,
             );
 
             await usd0.mint(deployer.address, borrowAmount.mul(2));
