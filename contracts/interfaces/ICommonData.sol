@@ -19,6 +19,7 @@ interface ICommonData {
         bool permitAll;
         bool allowFailure;
         bool yieldBoxTypeApproval;
+        bool revokeYieldBox;
         uint16 actionType;
         address target;
         bool permitBorrow;
