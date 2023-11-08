@@ -176,6 +176,7 @@ contract MagnetarV2Storage is IERC721Receiver {
     uint16 internal constant PERMIT_ALL = 1;
     uint16 internal constant PERMIT = 2;
     uint16 internal constant PERMIT_MARKET = 3;
+    uint16 internal constant REVOKE_ALL = 4;
 
     uint16 internal constant YB_DEPOSIT_ASSET = 100;
     uint16 internal constant YB_WITHDRAW_TO = 102;

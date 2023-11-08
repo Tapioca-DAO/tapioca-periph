@@ -121,6 +121,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     _action.allowFailure,
                     false
                 );
+            } else if (_action.id == REVOKE_ALL) {
+                address spender = abi.decode(_action.call[4:], (address));
+                IYieldBoxBase(_action.target).setApprovalForAll(spender, false);
             } else if (_action.id == TOFT_WRAP) {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
                 _checkSender(data.from);
