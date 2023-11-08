@@ -34,6 +34,12 @@ interface IYieldBoxBase {
 
     function setApprovalForAll(address spender, bool status) external;
 
+    function setApprovalForAsset(
+        address operator,
+        uint256 assetId,
+        bool approved
+    ) external;
+
     function assets(
         uint256 assetId
     )
