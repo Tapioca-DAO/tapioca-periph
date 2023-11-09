@@ -148,7 +148,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 dstChainId,
                     bytes32 to,
                     uint256 amount,
-                    ISendFrom.LzCallParams memory lzCallParams
+                    ICommonOFT.LzCallParams memory lzCallParams
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -156,7 +156,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             bytes32,
                             uint256,
-                            (ISendFrom.LzCallParams)
+                            (ICommonOFT.LzCallParams)
                         )
                     );
                 _checkSender(from);

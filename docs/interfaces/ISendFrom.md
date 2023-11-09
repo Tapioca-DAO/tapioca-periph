@@ -13,7 +13,7 @@
 ### sendFrom
 
 ```solidity
-function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256 _amount, ISendFrom.LzCallParams _callParams) external payable
+function sendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
 ```
 
 
@@ -24,11 +24,32 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _dstChainId | uint16 | undefined |
-| _toAddress | bytes32 | undefined |
-| _amount | uint256 | undefined |
-| _callParams | ISendFrom.LzCallParams | undefined |
+| from | address | undefined |
+| dstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+
+### sendFromWithParams
+
+```solidity
+function sendFromWithParams(address from, uint16 lzDstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+| unwrap | bool | undefined |
 
 ### useCustomAdapterParams
 

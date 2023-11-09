@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 //LZ
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
+import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
 
 //OZ
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -798,7 +799,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
         // build LZ params
         bytes memory _adapterParams;
-        ISendFrom.LzCallParams memory callParams = ISendFrom.LzCallParams({
+        ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
             refundAddress: msg.value == gas ? refundAddress : payable(this),
             zroPaymentAddress: address(0),
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
