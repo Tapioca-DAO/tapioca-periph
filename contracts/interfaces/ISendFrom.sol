@@ -6,6 +6,7 @@ interface ISendFrom {
         address payable refundAddress;
         address zroPaymentAddress;
         bytes adapterParams;
+        bool unwrapOnDestination;
     }
 
     function sendFrom(
