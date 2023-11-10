@@ -237,6 +237,26 @@ function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverag
 | swapData | IUSDOBase.ILeverageSwapData | undefined |
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 
+### sendFrom
+
+```solidity
+function sendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| dstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+
 ### sendToStrategy
 
 ```solidity

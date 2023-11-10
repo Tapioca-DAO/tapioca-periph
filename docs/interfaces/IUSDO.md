@@ -342,6 +342,26 @@ function transferFrom(address from, address to, uint256 amount) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
+### triggerSendFrom
+
+```solidity
+function triggerSendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| dstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+
 
 
 ## Events

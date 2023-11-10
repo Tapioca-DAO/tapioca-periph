@@ -316,6 +316,7 @@ describe('MagnetarV2', () => {
                 '0x00',
                 deployer.address,
                 0,
+                false,
             );
 
             const usdoBalanceOfDeployer = await usd0.balanceOf(

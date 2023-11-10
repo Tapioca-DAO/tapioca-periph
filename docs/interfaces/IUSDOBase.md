@@ -159,6 +159,26 @@ function setFlashloanHelper(address _helper) external nonpayable
 |---|---|---|
 | _helper | address | undefined |
 
+### triggerSendFrom
+
+```solidity
+function triggerSendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| dstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+
 
 
 
