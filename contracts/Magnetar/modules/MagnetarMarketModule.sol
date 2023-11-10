@@ -30,7 +30,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 amount,
         bytes memory adapterParams,
         address payable refundAddress,
-        uint256 gas
+        uint256 gas,
+        bool unwrap
     ) external payable {
         _withdrawToChain(
             yieldBox,
@@ -41,7 +42,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             amount,
             adapterParams,
             refundAddress,
-            gas
+            gas,
+            unwrap
         );
     }
 
@@ -209,7 +211,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     yieldBox,
                     borrowAmount,
                     false,
-                    valueAmount
+                    valueAmount,
+                    false
                 );
             }
         }
@@ -292,7 +295,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     collateralAmount,
                     withdrawCollateralParams.withdrawAdapterParams,
                     valueAmount > 0 ? payable(msg.sender) : payable(this),
-                    valueAmount
+                    valueAmount,
+                    withdrawCollateralParams.unwrap
                 );
             }
         }
@@ -681,7 +685,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     yieldBox,
                     _removeAmount,
                     false,
-                    valueAmount
+                    valueAmount,
+                    false
                 );
             }
         }
@@ -747,7 +752,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     yieldBox,
                     removeAndRepayData.collateralAmount,
                     true,
-                    valueAmount
+                    valueAmount,
+                    removeAndRepayData.collateralWithdrawData.unwrap
                 );
             }
         }
@@ -763,7 +769,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 amount,
         bytes memory adapterParams,
         address payable refundAddress,
-        uint256 gas
+        uint256 gas,
+        bool unwrap
     ) private {
         // perform a same chain withdrawal
         if (dstChainId == 0) {
@@ -808,13 +815,27 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         });
 
         // sends the asset to another layer
-        ISendFrom(address(asset)).sendFrom{value: gas}(
-            address(this),
-            dstChainId,
-            receiver,
-            amount,
-            callParams
-        );
+        if (unwrap) {
+            ICommonData.IApproval[]
+                memory approvals = new ICommonData.IApproval[](0);
+            ISendFrom(address(asset)).triggerSendFromWithParams{value: gas}(
+                address(this),
+                dstChainId,
+                receiver,
+                amount,
+                callParams,
+                true,
+                approvals
+            );
+        } else {
+            ISendFrom(address(asset)).triggerSendFrom{value: gas}(
+                address(this),
+                dstChainId,
+                receiver,
+                amount,
+                callParams
+            );
+        }
     }
 
     function _withdraw(
@@ -824,7 +845,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         IYieldBoxBase yieldBox,
         uint256 amount,
         bool withdrawCollateral,
-        uint256 valueAmount
+        uint256 valueAmount,
+        bool unwrap
     ) private {
         require(withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
         (
@@ -843,7 +865,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             amount,
             adapterParams,
             valueAmount > 0 ? payable(msg.sender) : payable(this),
-            valueAmount
+            valueAmount,
+            unwrap
         );
     }
 

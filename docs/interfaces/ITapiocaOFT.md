@@ -237,47 +237,6 @@ function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverag
 | swapData | IUSDOBase.ILeverageSwapData | undefined |
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 
-### sendFrom
-
-```solidity
-function sendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| dstChainId | uint16 | undefined |
-| toAddress | bytes32 | undefined |
-| amount | uint256 | undefined |
-| callParams | ICommonOFT.LzCallParams | undefined |
-
-### sendFromWithParams
-
-```solidity
-function sendFromWithParams(address from, uint16 lzDstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| lzDstChainId | uint16 | undefined |
-| toAddress | bytes32 | undefined |
-| amount | uint256 | undefined |
-| callParams | ICommonOFT.LzCallParams | undefined |
-| unwrap | bool | undefined |
-
 ### sendToStrategy
 
 ```solidity
@@ -338,6 +297,48 @@ function totalFees() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### triggerSendFrom
+
+```solidity
+function triggerSendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| dstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+
+### triggerSendFromWithParams
+
+```solidity
+function triggerSendFromWithParams(address from, uint16 lzDstChainId, bytes32 to, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| to | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+| unwrap | bool | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### unwrap
 

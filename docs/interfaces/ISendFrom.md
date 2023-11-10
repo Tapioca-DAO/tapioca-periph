@@ -10,10 +10,10 @@
 
 ## Methods
 
-### sendFrom
+### triggerSendFrom
 
 ```solidity
-function sendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
+function triggerSendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams) external payable
 ```
 
 
@@ -30,10 +30,10 @@ function sendFrom(address from, uint16 dstChainId, bytes32 toAddress, uint256 am
 | amount | uint256 | undefined |
 | callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendFromWithParams
+### triggerSendFromWithParams
 
 ```solidity
-function sendFromWithParams(address from, uint16 lzDstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap) external payable
+function triggerSendFromWithParams(address from, uint16 lzDstChainId, bytes32 to, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -46,10 +46,11 @@ function sendFromWithParams(address from, uint16 lzDstChainId, bytes32 toAddress
 |---|---|---|
 | from | address | undefined |
 | lzDstChainId | uint16 | undefined |
-| toAddress | bytes32 | undefined |
+| to | bytes32 | undefined |
 | amount | uint256 | undefined |
 | callParams | ICommonOFT.LzCallParams | undefined |
 | unwrap | bool | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### useCustomAdapterParams
 

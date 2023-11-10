@@ -2,9 +2,10 @@
 pragma solidity ^0.8.18;
 
 import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
+import "./ICommonData.sol";
 
 interface ISendFrom {
-    function sendFrom(
+    function triggerSendFrom(
         address from,
         uint16 dstChainId,
         bytes32 toAddress,
@@ -12,13 +13,14 @@ interface ISendFrom {
         ICommonOFT.LzCallParams calldata callParams
     ) external payable;
 
-     function sendFromWithParams(
+    function triggerSendFromWithParams(
         address from,
         uint16 lzDstChainId,
-        bytes32 toAddress,
+        bytes32 to,
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams,
-        bool unwrap
+        bool unwrap,
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 
     function useCustomAdapterParams() external view returns (bool);

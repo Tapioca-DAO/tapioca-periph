@@ -161,7 +161,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     );
                 _checkSender(from);
 
-                ISendFrom(_action.target).sendFrom{value: _action.value}(
+                ISendFrom(_action.target).triggerSendFrom{value: _action.value}(
                     msg.sender,
                     dstChainId,
                     to,
@@ -633,6 +633,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param adapterParams LZ adapter params
     /// @param refundAddress the LZ refund address which receives the gas not used in the process
     /// @param gas the amount of gas to use for sending the asset to another layer
+    /// @param unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
     function withdrawToChain(
         IYieldBoxBase yieldBox,
         address from,
@@ -642,7 +643,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         uint256 amount,
         bytes memory adapterParams,
         address payable refundAddress,
-        uint256 gas
+        uint256 gas,
+        bool unwrap
     ) external payable {
         _checkSender(from);
         _executeModule(
@@ -657,7 +659,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 amount,
                 adapterParams,
                 refundAddress,
-                gas
+                gas,
+                unwrap
             )
         );
     }
