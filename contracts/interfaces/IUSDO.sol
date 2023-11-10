@@ -107,7 +107,7 @@ interface IUSDOBase {
         ICommonData.IApproval[] calldata approvals
     ) external payable;
 
-      function triggerSendFrom(
+    function triggerSendFrom(
         address from,
         uint16 dstChainId,
         bytes32 toAddress,

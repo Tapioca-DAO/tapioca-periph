@@ -106,7 +106,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         bytes calldata adapterParams
     ) external payable;
 
-     function triggerSendFrom(
+    function triggerSendFrom(
         address from,
         uint16 dstChainId,
         bytes32 toAddress,
