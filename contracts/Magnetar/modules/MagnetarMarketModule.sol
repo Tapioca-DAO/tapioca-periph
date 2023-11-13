@@ -825,6 +825,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 amount,
                 callParams,
                 true,
+                approvals,
                 approvals
             );
         } else {

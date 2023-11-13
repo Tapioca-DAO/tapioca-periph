@@ -84,6 +84,7 @@ interface IUSDOBase {
         address zroPaymentAddress,
         ILendOrRepayParams calldata lendParams,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         ICommonData.IWithdrawParams calldata withdrawParams, //collateral remove data
         bytes calldata adapterParams
     ) external payable;
@@ -104,7 +105,8 @@ interface IUSDOBase {
         bytes calldata adapterParams,
         ICommonData.ICommonExternalContracts calldata externalData,
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable;
 
     function triggerSendFrom(
@@ -113,6 +115,12 @@ interface IUSDOBase {
         bytes32 toAddress,
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams
+    ) external payable;
+
+    function triggerApproveOrRevoke(
+        uint16 lzDstChainId,
+        ICommonOFT.LzCallParams calldata lzCallParams,
+        ICommonData.IApproval[] calldata approvals
     ) external payable;
 }
 

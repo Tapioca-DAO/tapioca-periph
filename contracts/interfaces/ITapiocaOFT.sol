@@ -66,7 +66,8 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         IBorrowParams calldata borrowParams,
         ICommonData.IWithdrawParams calldata withdrawParams,
         ICommonData.ISendOptions calldata options,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable;
 
     function sendToStrategy(
@@ -103,6 +104,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         bytes calldata adapterParams
     ) external payable;
 
@@ -121,6 +123,13 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams,
         bool unwrap,
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
+    ) external payable;
+
+    function triggerApproveOrRevoke(
+        uint16 lzDstChainId,
+        ICommonOFT.LzCallParams calldata lzCallParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable;
 }
