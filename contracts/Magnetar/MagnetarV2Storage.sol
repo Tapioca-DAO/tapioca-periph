@@ -62,6 +62,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         ICommonData.IWithdrawParams withdrawParams;
         ICommonData.ISendOptions options;
         ICommonData.IApproval[] approvals;
+        ICommonData.IApproval[] revokes;
     }
 
     struct TOFTSendAndLendData {
@@ -71,6 +72,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         IUSDOBase.ILendOrRepayParams lendParams;
         ICommonData.ISendOptions options;
         ICommonData.IApproval[] approvals;
+        ICommonData.IApproval[] revokes;
     }
 
     struct TOFTSendToStrategyData {
@@ -159,6 +161,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData;
         ICommonData.IApproval[] approvals;
+        ICommonData.IApproval[] revokes;
     }
 
     struct HelperTOFTRemoveAndRepayAsset {
@@ -170,6 +173,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         ICommonData.ICommonExternalContracts externalData;
         IUSDOBase.IRemoveAndRepay removeAndRepayData;
         ICommonData.IApproval[] approvals;
+        ICommonData.IApproval[] revokes;
     }
 
     // --- ACTIONS IDS ----

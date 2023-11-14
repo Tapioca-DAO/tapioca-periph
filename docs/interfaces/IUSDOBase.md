@@ -80,7 +80,7 @@ function paused() external view returns (bool)
 ### removeAsset
 
 ```solidity
-function removeAsset(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, bytes adapterParams, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData, ICommonData.IApproval[] approvals) external payable
+function removeAsset(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, bytes adapterParams, ICommonData.ICommonExternalContracts externalData, IUSDOBase.IRemoveAndRepay removeAndRepayData, ICommonData.IApproval[] approvals, ICommonData.IApproval[] revokes) external payable
 ```
 
 
@@ -99,11 +99,12 @@ function removeAsset(address from, address to, uint16 lzDstChainId, address zroP
 | externalData | ICommonData.ICommonExternalContracts | undefined |
 | removeAndRepayData | IUSDOBase.IRemoveAndRepay | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| revokes | ICommonData.IApproval[] | undefined |
 
 ### sendAndLendOrRepay
 
 ```solidity
-function sendAndLendOrRepay(address _from, address _to, uint16 lzDstChainId, address zroPaymentAddress, IUSDOBase.ILendOrRepayParams lendParams, ICommonData.IApproval[] approvals, ICommonData.IWithdrawParams withdrawParams, bytes adapterParams) external payable
+function sendAndLendOrRepay(address _from, address _to, uint16 lzDstChainId, address zroPaymentAddress, IUSDOBase.ILendOrRepayParams lendParams, ICommonData.IApproval[] approvals, ICommonData.IApproval[] revokes, ICommonData.IWithdrawParams withdrawParams, bytes adapterParams) external payable
 ```
 
 
@@ -120,6 +121,7 @@ function sendAndLendOrRepay(address _from, address _to, uint16 lzDstChainId, add
 | zroPaymentAddress | address | undefined |
 | lendParams | IUSDOBase.ILendOrRepayParams | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| revokes | ICommonData.IApproval[] | undefined |
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
 | adapterParams | bytes | undefined |
 
@@ -158,6 +160,24 @@ function setFlashloanHelper(address _helper) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | _helper | address | undefined |
+
+### triggerApproveOrRevoke
+
+```solidity
+function triggerApproveOrRevoke(uint16 lzDstChainId, ICommonOFT.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| lzDstChainId | uint16 | undefined |
+| lzCallParams | ICommonOFT.LzCallParams | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### triggerSendFrom
 

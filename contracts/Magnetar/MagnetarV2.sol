@@ -305,7 +305,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     ITapiocaOFT.IBorrowParams memory borrowParams,
                     ICommonData.IWithdrawParams memory withdrawParams,
                     ICommonData.ISendOptions memory options,
-                    ICommonData.IApproval[] memory approvals
+                    ICommonData.IApproval[] memory approvals,
+                    ICommonData.IApproval[] memory revokes
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -316,6 +317,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             ITapiocaOFT.IBorrowParams,
                             ICommonData.IWithdrawParams,
                             ICommonData.ISendOptions,
+                            ICommonData.IApproval[],
                             ICommonData.IApproval[]
                         )
                     );
@@ -331,7 +333,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     borrowParams,
                     withdrawParams,
                     options,
-                    approvals
+                    approvals,
+                    revokes
                 );
             } else if (_action.id == TOFT_SEND_AND_LEND) {
                 (
@@ -341,6 +344,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address zroPaymentAddress,
                     IUSDOBase.ILendOrRepayParams memory lendParams,
                     ICommonData.IApproval[] memory approvals,
+                    ICommonData.IApproval[] memory revokes,
                     ICommonData.IWithdrawParams memory withdrawParams,
                     bytes memory adapterParams
                 ) = abi.decode(
@@ -351,6 +355,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             address,
                             (IUSDOBase.ILendOrRepayParams),
+                            (ICommonData.IApproval[]),
                             (ICommonData.IApproval[]),
                             (ICommonData.IWithdrawParams),
                             bytes
@@ -367,6 +372,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     zroPaymentAddress,
                     lendParams,
                     approvals,
+                    revokes,
                     withdrawParams,
                     adapterParams
                 );
@@ -592,7 +598,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.optionsData,
                     data.lzData,
                     data.tapSendData,
-                    data.approvals
+                    data.approvals,
+                    data.revokes
                 );
             } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
                 HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
@@ -609,7 +616,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.adapterParams,
                     data.externalData,
                     data.removeAndRepayData,
-                    data.approvals
+                    data.approvals,
+                    data.revokes
                 );
             } else {
                 revert("MagnetarV2: action not valid");
