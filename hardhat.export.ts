@@ -42,6 +42,14 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     }),
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
+
+let chain =
+    supportedChains[
+        process.env.NODE_ENV == 'mainnet' ? 'ethereum' : process.env.NODE_ENV
+    ];
+if (!chain) {
+    chain = supportedChains['ethereum'];
+}
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
     solidity: {
@@ -69,10 +77,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
             // chainId: 42161,
             mining: { auto: true },
             forking: {
-                url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-                // url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-                blockNumber: 17068626, // Mainnet
-                // blockNumber: 145526897, // Arb
+                url: chain?.url,
             },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
