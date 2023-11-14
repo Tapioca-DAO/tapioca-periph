@@ -43,29 +43,6 @@ function burn(address _from, uint256 _amount) external nonpayable
 | _from | address | undefined |
 | _amount | uint256 | undefined |
 
-### initMultiHopBuy
-
-```solidity
-function initMultiHopBuy(address from, uint256 collateralAmount, uint256 borrowAmount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| collateralAmount | uint256 | undefined |
-| borrowAmount | uint256 | undefined |
-| swapData | IUSDOBase.ILeverageSwapData | undefined |
-| lzData | IUSDOBase.ILeverageLZData | undefined |
-| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
-| airdropAdapterParams | bytes | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-
 ### mint
 
 ```solidity

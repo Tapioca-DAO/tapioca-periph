@@ -105,14 +105,4 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable;
-
-    function initMultiSell(
-        address from,
-        uint256 share,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData,
-        bytes calldata airdropAdapterParams,
-        ICommonData.IApproval[] calldata approvals
-    ) external payable;
 }
