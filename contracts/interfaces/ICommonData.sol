@@ -8,6 +8,7 @@ interface ICommonData {
         bool withdrawOnOtherChain;
         uint16 withdrawLzChainId;
         bytes withdrawAdapterParams;
+        bool unwrap; // valid only for TOFTs
     }
 
     struct ISendOptions {

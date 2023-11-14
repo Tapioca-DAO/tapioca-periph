@@ -105,4 +105,22 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable;
+
+    function triggerSendFrom(
+        address from,
+        uint16 dstChainId,
+        bytes32 toAddress,
+        uint256 amount,
+        ICommonOFT.LzCallParams calldata callParams
+    ) external payable;
+
+    function triggerSendFromWithParams(
+        address from,
+        uint16 lzDstChainId,
+        bytes32 to,
+        uint256 amount,
+        ICommonOFT.LzCallParams calldata callParams,
+        bool unwrap,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable;
 }

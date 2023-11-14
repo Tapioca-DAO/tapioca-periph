@@ -106,6 +106,14 @@ interface IUSDOBase {
         IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
         ICommonData.IApproval[] calldata approvals
     ) external payable;
+
+    function triggerSendFrom(
+        address from,
+        uint16 dstChainId,
+        bytes32 toAddress,
+        uint256 amount,
+        ICommonOFT.LzCallParams calldata callParams
+    ) external payable;
 }
 
 interface IUSDO is IUSDOBase, IERC20Metadata {}

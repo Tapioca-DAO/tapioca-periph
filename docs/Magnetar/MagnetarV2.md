@@ -288,7 +288,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### withdrawToChain
 
 ```solidity
-function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, bytes adapterParams, address payable refundAddress, uint256 gas) external payable
+function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 assetId, uint16 dstChainId, bytes32 receiver, uint256 amount, bytes adapterParams, address payable refundAddress, uint256 gas, bool unwrap) external payable
 ```
 
 performs a withdraw operation
@@ -308,6 +308,7 @@ performs a withdraw operation
 | adapterParams | bytes | LZ adapter params |
 | refundAddress | address payable | the LZ refund address which receives the gas not used in the process |
 | gas | uint256 | the amount of gas to use for sending the asset to another layer |
+| unwrap | bool | if withdrawn asset is a TOFT, it can be unwrapped on destination |
 
 
 
