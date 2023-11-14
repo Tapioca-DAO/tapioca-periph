@@ -9,6 +9,7 @@
         "list": "npx hardhat listDeploy --network",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test",
+        "test:main": "NODE_ENV=mainnet hardhat test",
         "prepare": "husky install",
         "lint:ts": "eslint . --fix --ext ts",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",
