@@ -20,6 +20,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
+/// deprecated
 /// @title Curve pool swapper
 contract CurveSwapper is BaseSwapper {
     using SafeERC20 for IERC20;

@@ -37,6 +37,11 @@ contract Cluster is Ownable, ICluster {
         bool _newStatus
     );
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotAuthorized();
+
     constructor(address lzEndpoint, address _owner) {
         lzChainId = ILayerZeroEndpoint(lzEndpoint).getChainId();
         transferOwnership(_owner);
@@ -72,10 +77,8 @@ contract Cluster is Ownable, ICluster {
         address[] memory _addresses,
         bool _status
     ) external override {
-        require(
-            isEditor[msg.sender] || msg.sender == owner(),
-            "Cluster: not authorized"
-        );
+        if (!isEditor[msg.sender] && msg.sender != owner())
+            revert NotAuthorized();
 
         if (_lzChainId == 0) {
             //set lz chain as the current one
@@ -103,10 +106,8 @@ contract Cluster is Ownable, ICluster {
         address _addr,
         bool _status
     ) external override {
-        require(
-            isEditor[msg.sender] || msg.sender == owner(),
-            "Cluster: not authorized"
-        );
+        if (!isEditor[msg.sender] && msg.sender != owner())
+            revert NotAuthorized();
 
         if (_lzChainId == 0) {
             //set lz chain as the current one

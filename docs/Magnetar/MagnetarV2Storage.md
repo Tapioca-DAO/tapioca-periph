@@ -93,3 +93,17 @@ event ClusterSet(address indexed oldCluster, address indexed newCluster)
 
 
 
+## Errors
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+

@@ -4,7 +4,7 @@
 
 > Curve pool swapper
 
-
+deprecated
 
 
 
@@ -263,6 +263,50 @@ error AddressNotValid()
 ```
 
 *** ERRORS *** ***  ***
+
+
+
+
+### AmountZero
+
+```solidity
+error AmountZero()
+```
+
+
+
+
+
+
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
+### NoContract
+
+```solidity
+error NoContract()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
 
 
 

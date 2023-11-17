@@ -268,3 +268,61 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 
 
+## Errors
+
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
+### LockTargetMismatch
+
+```solidity
+error LockTargetMismatch()
+```
+
+
+
+
+
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+### tOLPTokenMismatch
+
+```solidity
+error tOLPTokenMismatch()
+```
+
+
+
+
+
+
+

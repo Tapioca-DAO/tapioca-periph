@@ -219,6 +219,11 @@ contract MagnetarV2Storage is IERC721Receiver {
 
     event ClusterSet(address indexed oldCluster, address indexed newCluster);
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotAuthorized();
+
     // ********************** //
     // *** PUBLIC METHODS *** //
     // ********************** //
@@ -236,10 +241,8 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** INTERNAL METHODS *** //
     // ************************ //
     function _checkSender(address _from) internal view {
-        require(
-            _from == msg.sender || cluster.isWhitelisted(0, msg.sender),
-            "MagnetarV2: operator not approved"
-        );
+        if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender))
+            revert NotAuthorized();
     }
 
     receive() external payable virtual {}

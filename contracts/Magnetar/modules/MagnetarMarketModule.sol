@@ -21,6 +21,14 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotValid();
+    error tOLPTokenMismatch();
+    error LockTargetMismatch();
+    error Failed();
+
     function withdrawToChain(
         IYieldBoxBase yieldBox,
         address from,
@@ -317,22 +325,20 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
 
         if (externalContracts.bigBang != address(0)) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     externalContracts.bigBang
-                ),
-                "MagnetarV2: BB not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
         }
         if (externalContracts.singularity != address(0)) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     externalContracts.singularity
-                ),
-                "MagnetarV2: SGL not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
         }
 
         if (address(singularity) != address(0)) {
@@ -446,10 +452,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - performs tOLP.lock
         uint256 tOLPTokenId = 0;
         if (lockData.lock) {
-            require(
-                _cluster.isWhitelisted(_cluster.lzChainId(), lockData.target),
-                "MagnetarV2: tOLP not whitelisted"
-            );
+            if (!_cluster.isWhitelisted(_cluster.lzChainId(), lockData.target))
+                revert NotAuthorized();
             if (lockData.fraction > 0) {
                 fraction = lockData.fraction;
             }
@@ -457,7 +461,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             (uint256 tOLPSglAssetId, , ) = ITapiocaOptionLiquidityProvision(
                 lockData.target
             ).activeSingularities(address(singularity));
-            require(fraction > 0, "Magnetar: fraction 0");
+            if (fraction == 0) revert NotValid();
             IERC20(address(singularity)).safeTransferFrom(
                 user,
                 address(this),
@@ -490,28 +494,24 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - performs tOB.participate
         //      - transfer `oTAPTokenId` to user
         if (participateData.participate) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     participateData.target
-                ),
-                "MagnetarV2: tOB not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
+
             if (participateData.tOLPTokenId != 0) {
                 if (tOLPTokenId != 0) {
-                    require(
-                        participateData.tOLPTokenId == tOLPTokenId,
-                        "Magnetar: tOLPTokenId mismatch"
-                    );
+                    if (participateData.tOLPTokenId != tOLPTokenId)
+                        revert tOLPTokenMismatch();
                 }
 
                 tOLPTokenId = participateData.tOLPTokenId;
             }
-            require(
-                lockData.target != address(0),
-                "Magnetar: lock target mismatch"
-            );
-            require(tOLPTokenId != 0, "Magnetar: tOLPTokenId 0");
+            if (lockData.target == address(0)) revert LockTargetMismatch();
+            if (tOLPTokenId == 0) revert NotValid();
+
             IERC721(lockData.target).approve(
                 participateData.target,
                 tOLPTokenId
@@ -545,22 +545,20 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         ICluster _cluster
     ) private {
         if (externalData.bigBang != address(0)) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     externalData.bigBang
-                ),
-                "MagnetarV2: BB not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
         }
         if (externalData.singularity != address(0)) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     externalData.singularity
-                ),
-                "MagnetarV2: SGL not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
         }
 
         IMarket bigBang = IMarket(externalData.bigBang);
@@ -573,18 +571,13 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
         uint256 tOLPId = 0;
         if (removeAndRepayData.exitData.exit) {
-            require(
-                removeAndRepayData.exitData.oTAPTokenID > 0,
-                "Magnetar: oTAPTokenID 0"
-            );
-
-            require(
-                _cluster.isWhitelisted(
+            if (removeAndRepayData.exitData.oTAPTokenID == 0) revert NotValid();
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     removeAndRepayData.exitData.target
-                ),
-                "MagnetarV2: oTAP not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
 
             address oTapAddress = ITapiocaOptionsBroker(
                 removeAndRepayData.exitData.target
@@ -598,10 +591,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(
                 removeAndRepayData.exitData.oTAPTokenID
             );
-            require(
-                ownerOfTapTokenId == user || ownerOfTapTokenId == address(this),
-                "Magnetar: oTAPTokenID owner mismatch"
-            );
+
+            if (ownerOfTapTokenId != user && ownerOfTapTokenId != address(this))
+                revert NotValid();
             if (ownerOfTapTokenId == user) {
                 IERC721(oTapAddress).safeTransferFrom(
                     user,
@@ -630,19 +622,17 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
         // performs a tOLP.unlock operation
         if (removeAndRepayData.unlockData.unlock) {
-            require(
-                _cluster.isWhitelisted(
+            if (
+                !_cluster.isWhitelisted(
                     _cluster.lzChainId(),
                     removeAndRepayData.unlockData.target
-                ),
-                "MagnetarV2: tOLP not whitelisted"
-            );
+                )
+            ) revert NotAuthorized();
+
             if (removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
-                    require(
-                        tOLPId == removeAndRepayData.unlockData.tokenId,
-                        "Magnetar: tOLPId mismatch"
-                    );
+                    if (tOLPId != removeAndRepayData.unlockData.tokenId)
+                        revert tOLPTokenMismatch();
                 }
                 tOLPId = removeAndRepayData.unlockData.tokenId;
             }
@@ -849,7 +839,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 valueAmount,
         bool unwrap
     ) private {
-        require(withdrawData.length > 0, "MagnetarV2: withdrawData is empty");
+        if (withdrawData.length == 0) revert NotValid();
         (
             bool withdrawOnOtherChain,
             uint16 destChain,
@@ -905,7 +895,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
-        require(balanceAfter > balanceBefore, "Magnetar: transfer failed");
+        if (balanceAfter <= balanceBefore) revert Failed();
         return balanceAfter - balanceBefore;
     }
 }

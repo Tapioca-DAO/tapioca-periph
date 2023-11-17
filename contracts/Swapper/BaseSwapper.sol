@@ -14,9 +14,13 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     /// *** ERRORS ***
     /// ***  ***
     error AddressNotValid();
+    error Failed();
+    error NotValid();
+    error AmountZero();
+    error NoContract();
 
     modifier validAddress(address _addr) {
-        require(_addr != address(0), "Swapper: address not valid");
+        if (_addr == address(0)) revert AddressNotValid();
         _;
     }
 
@@ -96,7 +100,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     }
 
     function _safeApprove(address token, address to, uint256 value) internal {
-        require(token.code.length > 0, "Swapper: no contract");
+        if (token.code.length == 0) revert NoContract();
         bool success;
         bytes memory data;
         (success, data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, 0));
@@ -169,16 +173,16 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
             return amount;
         }
 
-        require(amount > 0, "Swapper: amount is 0");
+        if (amount == 0) revert AmountZero();
 
         if (token != address(0)) {
             uint256 balanceBefore = IERC20(token).balanceOf(address(this));
             IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
             uint256 balanceAfter = IERC20(token).balanceOf(address(this));
-            require(balanceAfter > balanceBefore, "Swapper: transfer failed");
+            if (balanceAfter <= balanceBefore) revert Failed();
             return balanceAfter - balanceBefore;
         } else {
-            require(msg.value == amount, "Swapper: gas not valid");
+            if (msg.value != amount) revert NotValid();
             return amount;
         }
     }

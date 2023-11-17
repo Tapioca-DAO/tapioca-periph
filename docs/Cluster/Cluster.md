@@ -262,3 +262,17 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 
 
+## Errors
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+

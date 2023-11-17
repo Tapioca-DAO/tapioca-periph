@@ -3,7 +3,7 @@
         "4002": [
             {
                 "name": "Cluster",
-                "address": "0x9c67D037e9bc36F1Df733e034f389e300Bb758b7",
+                "address": "0xA093564210161954E91e08fB4C0A0224c0832E52",
                 "meta": {
                     "args": [
                         "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
@@ -15,7 +15,7 @@
         "421613": [
             {
                 "name": "Cluster",
-                "address": "0x1D94C0A5BecFed5FCC213D00d42fbA66c50fA055",
+                "address": "0xBBB6aAea0d096FB840723D6B4c921Ed690a39C5F",
                 "meta": {
                     "args": [
                         "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",

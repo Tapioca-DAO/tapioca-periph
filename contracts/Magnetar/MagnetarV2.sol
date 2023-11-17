@@ -44,6 +44,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
     event HelperUpdate(address indexed old, address indexed newHelper);
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotValid();
+    error ValueMismatch();
+    error Failed();
+
     constructor(
         address _cluster,
         address _owner,
@@ -61,7 +68,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @dev can only be called by the owner
     /// @param _cluster the new address
     function setCluster(ICluster _cluster) external {
-        require(address(_cluster) != address(0), "Magnetar: not valid");
+        if (address(_cluster) == address(0)) revert NotValid();
         cluster = _cluster;
     }
 
@@ -624,7 +631,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             }
         }
 
-        require(msg.value == valAccumulator, "MagnetarV2: value mismatch");
+        if (msg.value != valAccumulator) revert ValueMismatch();
     }
 
     /// @notice performs a withdraw operation
@@ -834,7 +841,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param to the recipient
     function rescueEth(uint256 amount, address to) external onlyOwner {
         (bool success, ) = to.call{value: amount}("");
-        require(success, "Magnetar: transfer failed.");
+        if (!success) revert Failed();
     }
 
     // ********************** //
@@ -847,7 +854,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         bool allowFailure,
         bool executeOnYb
     ) private {
-        require(target.code.length > 0, "Magnetar: no contract");
+        if (target.code.length == 0) revert NotValid();
 
         bytes memory data = actionCalldata;
         bytes4 funcSig;
@@ -877,7 +884,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         bytes4 allowedTokenSig = bytes4(
             keccak256("permitAction(bytes,uint16)")
         );
-        require(funcSig == allowedTokenSig, "MagnetarV2: permit sig not valid");
+        if (funcSig != allowedTokenSig) revert NotValid();
 
         (bytes memory data, ) = abi.decode(actionCalldata[4:], (bytes, uint16));
         (, address owner, , , , , , ) = abi.decode(
@@ -911,7 +918,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 )
             );
 
-        require(funcSig == allowedTokenSig, "MagnetarV2: permit sig not valid");
+        if (funcSig != allowedTokenSig) revert NotValid();
 
         if (permitAll) {
             (address owner, , , , , ) = abi.decode(

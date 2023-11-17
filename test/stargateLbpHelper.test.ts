@@ -70,7 +70,7 @@ describe.skip('StargateLbpHelper-fork test', () => {
         };
     }
 
-    it.only('should use Stargate to transfer USDC to arbitrum', async () => {
+    it('should use Stargate to transfer USDC to arbitrum', async () => {
         const {
             realUsdcContract,
             deployer,
