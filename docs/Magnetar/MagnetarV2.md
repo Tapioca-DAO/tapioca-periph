@@ -385,3 +385,50 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 
 
+## Errors
+
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+### ValueMismatch
+
+```solidity
+error ValueMismatch()
+```
+
+
+
+
+
+
+

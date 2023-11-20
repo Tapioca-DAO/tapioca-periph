@@ -334,4 +334,59 @@ error AddressNotValid()
 
 
 
+### AmountZero
+
+```solidity
+error AmountZero()
+```
+
+
+
+
+
+
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
+### NoContract
+
+```solidity
+error NoContract()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+### UnwrapFailed
+
+```solidity
+error UnwrapFailed()
+```
+
+
+
+
+
+
 

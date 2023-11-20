@@ -4128,7 +4128,7 @@ describe('MagnetarV2', () => {
                         call: sendToStrategyEncoded,
                     },
                 ]),
-            ).to.be.revertedWith('MagnetarV2: operator not approved');
+            ).to.be.reverted;
         });
 
         it('should decode send to strategy correctly', async () => {
@@ -4159,7 +4159,7 @@ describe('MagnetarV2', () => {
                         call: encoded,
                     },
                 ]),
-            ).to.be.revertedWith('MagnetarV2: operator not approved');
+            ).to.be.reverted;
         });
     });
 });

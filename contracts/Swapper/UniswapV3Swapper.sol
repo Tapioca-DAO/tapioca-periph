@@ -53,6 +53,11 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************** //
     event PoolFee(uint256 indexed _old, uint256 indexed _new);
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error UnwrapFailed();
+
     constructor(
         IYieldBox _yieldBox,
         ISwapRouter _swapRouter,
@@ -210,7 +215,7 @@ contract UniswapV3Swapper is BaseSwapper {
 
         // Compute outputs
         if (tokenIn == address(0)) {
-            require(msg.value == amountIn, "UniswapV3Swapper: gas not valid");
+            if (msg.value != amountIn) revert NotValid();
         }
         amountOut = _swap(
             tokenOut,
@@ -242,14 +247,11 @@ contract UniswapV3Swapper is BaseSwapper {
         amountOut = swapRouter.exactInputSingle{value: msg.value}(params);
         if (params.tokenOut == weth && tokenOut == address(0)) {
             IWETH9(weth).withdraw(amountOut);
-            require(
-                address(this).balance >= amountOut,
-                "UniswapV3Swapper: eth unwrap failed"
-            );
+            if (address(this).balance < amountOut) revert UnwrapFailed();
 
             if (!depositToYb) {
                 (bool sent, ) = to.call{value: amountOut}("");
-                require(sent, "UniswapV3Swapper: eth transfer failed");
+                if (!sent) revert Failed();
             }
         } else {
             if (!depositToYb) {
