@@ -77,8 +77,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 SLIPPAGE_PRECISION);
 
         // approve token for Stargate router
-        erc20.approve(address(router), 0);
-        erc20.approve(address(router), stargateData.amount);
+        erc20.safeApprove(address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
         router.swap{value: msg.value}(
@@ -148,7 +147,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             singleSwap,
             fundManagement,
             data.minAmountOut,
-            block.timestamp + (data.deadline != 0 ? data.deadline : 10 minutes)
+            (data.deadline != 0 ? data.deadline : block.timestamp)
         );
     }
 
