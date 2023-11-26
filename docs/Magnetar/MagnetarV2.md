@@ -369,10 +369,32 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 ## Errors
 
+### ActionNotValid
+
+```solidity
+error ActionNotValid()
+```
+
+
+
+
+
+
 ### Failed
 
 ```solidity
 error Failed()
+```
+
+
+
+
+
+
+### ModuleNotFound
+
+```solidity
+error ModuleNotFound()
 ```
 
 
@@ -395,6 +417,17 @@ error NotAuthorized()
 
 ```solidity
 error NotValid()
+```
+
+
+
+
+
+
+### UnknownReason
+
+```solidity
+error UnknownReason()
 ```
 
 
