@@ -211,7 +211,7 @@ contract MagnetarV2Storage is IERC721Receiver {
     // ************** //
     // *** EVENTS *** //
     // ************** //
-    event ClusterSet(address indexed oldCluster, address indexed newCluster);
+    event ClusterSet(ICluster indexed oldCluster, ICluster indexed newCluster);
 
     // ************** //
     // *** ERRORS *** //
