@@ -3,26 +3,24 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleUniswapMulti.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleUniSolo
 /// @notice Updated version of the OracleMulti contract that only uses Uniswap
-contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck {
+contract OracleUniSolo is
+    OracleAbstract,
+    ModuleUniswapMulti,
+    SequencerCheck,
+    ReentrancyGuard
+{
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
 
     /// @notice Reentrancy check
     bool private entered;
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     /// @notice Constructor for an oracle using both Uniswap to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
