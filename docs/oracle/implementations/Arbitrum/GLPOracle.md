@@ -30,7 +30,7 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 ### GRACE_PERIOD_TIME
 
 ```solidity
-function GRACE_PERIOD_TIME() external view returns (uint256)
+function GRACE_PERIOD_TIME() external view returns (uint32)
 ```
 
 
@@ -42,7 +42,7 @@ function GRACE_PERIOD_TIME() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint32 | undefined |
 
 ### SEQUENCER_ROLE
 

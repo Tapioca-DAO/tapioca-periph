@@ -47,7 +47,7 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 ### FETCH_TIME
 
 ```solidity
-function FETCH_TIME() external view returns (uint256)
+function FETCH_TIME() external view returns (uint32)
 ```
 
 Time in seconds after which get() can be called again (1 hour).
@@ -59,12 +59,12 @@ Time in seconds after which get() can be called again (1 hour).
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint32 | undefined |
 
 ### GRACE_PERIOD_TIME
 
 ```solidity
-function GRACE_PERIOD_TIME() external view returns (uint256)
+function GRACE_PERIOD_TIME() external view returns (uint32)
 ```
 
 
@@ -76,7 +76,7 @@ function GRACE_PERIOD_TIME() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint32 | undefined |
 
 ### GUARDIAN_ROLE_UNISWAP
 
@@ -877,7 +877,7 @@ Time weigthed average window that should be used for each Uniswap rate It is mai
 ### updateFetchTime
 
 ```solidity
-function updateFetchTime(uint256 _newFetchTime) external nonpayable
+function updateFetchTime(uint32 _newFetchTime) external nonpayable
 ```
 
 Update the time in seconds after which get() can be called again.
@@ -888,7 +888,7 @@ Update the time in seconds after which get() can be called again.
 
 | Name | Type | Description |
 |---|---|---|
-| _newFetchTime | uint256 | New time in seconds after which get() can be called again. |
+| _newFetchTime | uint32 | New time in seconds after which get() can be called again. |
 
 ### updateLastPrice
 
