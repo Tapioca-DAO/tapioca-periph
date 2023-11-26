@@ -865,12 +865,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         address target,
         IYieldBoxBase yieldBox
     ) private {
-        bool isApproved = yieldBox.isApprovedForAll(
-            address(this),
-            address(target)
-        );
+        bool isApproved = yieldBox.isApprovedForAll(address(this), target);
         if (!isApproved) {
-            yieldBox.setApprovalForAll(address(target), true);
+            yieldBox.setApprovalForAll(target, true);
         }
     }
 
