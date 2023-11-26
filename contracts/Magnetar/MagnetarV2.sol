@@ -235,7 +235,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint256 amount,
                     uint256 share,
                     bytes memory adapterParams,
-                    address payable refundAddress
+                    address payable refundAddress,
+                    bool unwrap
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -247,7 +248,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint256,
                             uint256,
                             bytes,
-                            address
+                            address,
+                            bool
                         )
                     );
 
@@ -263,11 +265,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             assetId,
                             dstChainId,
                             receiver,
-                            amount,
                             share,
                             adapterParams,
                             refundAddress,
-                            _action.value
+                            _action.value,
+                            unwrap
                         )
                     )
                 );
