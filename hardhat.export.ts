@@ -9,7 +9,6 @@ import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
 import { HttpNetworkConfig } from 'hardhat/types';
 import 'hardhat-tracer';
-import { TAPIOCA_PROJECTS_NAME } from './gitsub_tapioca-sdk/src/api/config';
 
 dotenv.config();
 
@@ -18,6 +17,8 @@ declare global {
     namespace NodeJS {
         interface ProcessEnv {
             ALCHEMY_API_KEY: string;
+            NETWORK: string;
+            FROM_BLOCK: string;
         }
     }
 }
@@ -43,15 +44,10 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-let chain =
-    supportedChains[
-        process.env.NODE_ENV == 'mainnet' ? 'ethereum' : process.env.NODE_ENV
-    ];
-if (!chain) {
-    chain = supportedChains['ethereum'];
-}
+const forkChain = supportedChains[process.env.NETWORK as TNetwork];
+
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
+    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
     solidity: {
         compilers: [
             {
@@ -73,11 +69,13 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             saveDeployments: false,
-            chainId: 1,
-            // chainId: 42161,
+            chainId: forkChain.chainId,
             mining: { auto: true },
             forking: {
-                url: chain?.url,
+                url: forkChain.url,
+                ...(process.env.FROM_BLOCK
+                    ? { blockNumber: Number(process.env.FROM_BLOCK) }
+                    : {}),
             },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
