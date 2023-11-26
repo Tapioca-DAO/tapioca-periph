@@ -4,9 +4,9 @@ pragma solidity 0.8.19;
 import {IOracle} from "../../../interfaces/IOracle.sol";
 import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
-import {AccessControl} from "../../external/AccessControl.sol";
+import {AccessControlDefaultAdminRules} from "../../external/AccessControlDefaultAdminRules.sol";
 
-contract GLPOracle is IOracle, SequencerCheck, AccessControl {
+contract GLPOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules {
     IGmxGlpManager private immutable glpManager;
 
     /// @notice Reentrancy check
@@ -22,11 +22,13 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControl {
         IGmxGlpManager glpManager_,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    )
+        SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         glpManager = glpManager_;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {

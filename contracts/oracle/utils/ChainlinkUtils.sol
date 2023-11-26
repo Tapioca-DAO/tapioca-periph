@@ -3,12 +3,13 @@
 pragma solidity 0.8.19;
 
 import {AccessControlledOffchainAggregator, AggregatorV3Interface} from "../../interfaces/IAggregatorV3Interface.sol";
-import "../external/AccessControl.sol";
+
+import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
 
 /// @title ChainlinkUtils
-/// @author Angle Core Team
+/// @author Angle Core Team, modifier by Tapioca
 /// @notice Utility contract that is used across the different module contracts using Chainlink
-contract ChainlinkUtils is AccessControl {
+abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
     /// @notice Represent the maximum amount of time (in seconds) between each Chainlink update
     /// before the price feed is considered stale
     uint32 public stalePeriod = 86400; // Default to 1 day
@@ -16,8 +17,6 @@ contract ChainlinkUtils is AccessControl {
     // Role for guardians and governors
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
         keccak256("GUARDIAN_ROLE");
-
-    constructor() {}
 
     error InvalidChainlinkRate();
 

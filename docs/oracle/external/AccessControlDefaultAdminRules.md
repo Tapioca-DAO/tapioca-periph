@@ -1,48 +1,14 @@
-# ARBTriCryptoOracle
+# AccessControlDefaultAdminRules
 
 
 
 
 
-Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 
-*Addresses are for Arbitrum*
+
+*Extension of {AccessControl} that allows specifying special rules to manage the `DEFAULT_ADMIN_ROLE` holder, which is a sensitive role with special permissions over other roles that may potentially have privileged rights in the system. If a specific role doesn&#39;t have an admin role assigned, the holder of the `DEFAULT_ADMIN_ROLE` will have the ability to grant it and revoke it. This contract implements the following risk mitigations on top of {AccessControl}: * Only one account holds the `DEFAULT_ADMIN_ROLE` since deployment until it&#39;s potentially renounced. * Enforces a 2-step process to transfer the `DEFAULT_ADMIN_ROLE` to another account. * Enforces a configurable delay between the two steps, with the ability to cancel before the transfer is accepted. * The delay can be changed by scheduling, see {changeDefaultAdminDelay}. * It is not possible to use another role to manage the `DEFAULT_ADMIN_ROLE`. Example usage: ```solidity contract MyToken is AccessControlDefaultAdminRules {   constructor() AccessControlDefaultAdminRules(     3 days,     msg.sender // Explicit initial `DEFAULT_ADMIN_ROLE` holder    ) {} } ```*
 
 ## Methods
-
-### A0
-
-```solidity
-function A0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### BTC_FEED
-
-```solidity
-function BTC_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
 
 ### DEFAULT_ADMIN_ROLE
 
@@ -60,210 +26,6 @@ function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | undefined |
-
-### DISCOUNT0
-
-```solidity
-function DISCOUNT0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### ETH_FEED
-
-```solidity
-function ETH_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### GAMMA0
-
-```solidity
-function GAMMA0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### GRACE_PERIOD_TIME
-
-```solidity
-function GRACE_PERIOD_TIME() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### GUARDIAN_ROLE_CHAINLINK
-
-```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### SEQUENCER_ROLE
-
-```solidity
-function SEQUENCER_ROLE() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### SEQUENCER_UPTIME_FEED
-
-```solidity
-function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### TRI_CRYPTO
-
-```solidity
-function TRI_CRYPTO() external view returns (contract ICurvePool)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract ICurvePool | undefined |
-
-### USDT_FEED
-
-```solidity
-function USDT_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### WBTC_FEED
-
-```solidity
-function WBTC_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### _name
-
-```solidity
-function _name() external view returns (string)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | undefined |
-
-### _symbol
-
-```solidity
-function _symbol() external view returns (string)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | undefined |
 
 ### acceptDefaultAdminTransfer
 
@@ -319,55 +81,6 @@ function changeDefaultAdminDelay(uint48 newDelay) external nonpayable
 |---|---|---|
 | newDelay | uint48 | undefined |
 
-### changeGracePeriod
-
-```solidity
-function changeGracePeriod(uint32 _gracePeriod) external nonpayable
-```
-
-Changes the grace period for the sequencer update
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _gracePeriod | uint32 | New stale period (in seconds) |
-
-### changeStalePeriod
-
-```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
-```
-
-Changes the Stale Period
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
-
-### decimals
-
-```solidity
-function decimals() external pure returns (uint8)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
 ### defaultAdmin
 
 ```solidity
@@ -418,29 +131,6 @@ function defaultAdminDelayIncreaseWait() external view returns (uint48)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint48 | undefined |
-
-### get
-
-```solidity
-function get(bytes) external nonpayable returns (bool success, uint256 rate)
-```
-
-Get the latest exchange rate. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| success | bool | if no valid (recent) rate is available, return false else true. |
-| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### getRoleAdmin
 
@@ -504,28 +194,6 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### name
-
-```solidity
-function name(bytes) external view returns (string)
-```
-
-Returns a human readable name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | (string) A human readable name about this oracle. |
-
 ### owner
 
 ```solidity
@@ -542,51 +210,6 @@ function owner() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### peek
-
-```solidity
-function peek(bytes) external view returns (bool success, uint256 rate)
-```
-
-Check the last exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| success | bool | if no valid (recent) rate is available, return false else true. |
-| rate | uint256 | The rate of the requested asset / pair / pool. |
-
-### peekSpot
-
-```solidity
-function peekSpot(bytes) external view returns (uint256 rate)
-```
-
-Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek(). For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| rate | uint256 | The rate of the requested asset / pair / pool. |
 
 ### pendingDefaultAdmin
 
@@ -669,23 +292,6 @@ function rollbackDefaultAdminDelay() external nonpayable
 *Cancels a scheduled {defaultAdminDelay} change. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminDelayChangeCanceled event.*
 
 
-### stalePeriod
-
-```solidity
-function stalePeriod() external view returns (uint32)
-```
-
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined |
-
 ### supportsInterface
 
 ```solidity
@@ -707,28 +313,6 @@ function supportsInterface(bytes4 interfaceId) external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### symbol
-
-```solidity
-function symbol(bytes) external view returns (string)
-```
-
-Returns a human readable (short) name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | (string) A human readable symbol name about this oracle. |
 
 
 
@@ -918,38 +502,5 @@ error AccessControlUnauthorizedAccount(address account, bytes32 neededRole)
 |---|---|---|
 | account | address | undefined |
 | neededRole | bytes32 | undefined |
-
-### GracePeriodNotOver
-
-```solidity
-error GracePeriodNotOver()
-```
-
-
-
-
-
-
-### InvalidChainlinkRate
-
-```solidity
-error InvalidChainlinkRate()
-```
-
-
-
-
-
-
-### SequencerDown
-
-```solidity
-error SequencerDown()
-```
-
-
-
-
-
 
 

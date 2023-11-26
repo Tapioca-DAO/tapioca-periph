@@ -6,7 +6,7 @@ import "./modules/ModuleChainlinkMulti.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleChainlinkMulti
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
 /// @dev This contract concerns an oracle that uses Chainlink with multiple pools to read from
 /// @dev It inherits the `ModuleChainlinkMulti` contract and like all oracle contracts, this contract
@@ -16,13 +16,15 @@ contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti {
     /// @param _circuitChainlink Chainlink pool addresses (in order)
     /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
     /// @param _description Description of the assets concerned by the oracle
+    /// @param _admin Address of the admin of the oracle
     constructor(
         address[] memory _circuitChainlink,
         uint8[] memory _circuitChainIsMultiplied,
         uint256 _inBase,
         uint32 stalePeriod,
         address[] memory guardians,
-        bytes32 _description
+        bytes32 _description,
+        address _admin
     )
         ModuleChainlinkMulti(
             _circuitChainlink,
@@ -30,6 +32,7 @@ contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti {
             stalePeriod,
             guardians
         )
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         inBase = _inBase;
         description = _description;

@@ -8,7 +8,7 @@ import "./modules/ModuleChainlinkSingle.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleChainlinkSingle
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
 /// @dev This contract concerns an oracle that only uses Chainlink and a single pool
 /// @dev This is mainly going to be the contract used for the USD/EUR pool (or for other fiat currencies)
@@ -35,6 +35,7 @@ contract OracleChainlinkSingle is
     /// in-currency amount to get the out-currency amount
     /// @param _inBase Number of units of the in-currency
     /// @param _description Description of the assets concerned by the oracle
+    /// @param _admin Address of the admin of the oracle
     constructor(
         address _poolChainlink,
         uint8 _isChainlinkMultiplied,
@@ -42,7 +43,8 @@ contract OracleChainlinkSingle is
         uint32 stalePeriod,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         ModuleChainlinkSingle(
             _poolChainlink,
@@ -51,6 +53,7 @@ contract OracleChainlinkSingle is
             guardians
         )
         SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         inBase = _inBase;
         description = _description;

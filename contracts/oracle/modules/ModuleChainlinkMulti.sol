@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import "../utils/ChainlinkUtils.sol";
 
 /// @title ModuleChainlinkMulti
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Module Contract that is going to be used to help compute Chainlink prices
 /// @dev This contract helps for an oracle using a Chainlink circuit composed of multiple pools
 /// @dev An oracle using Chainlink is either going to be a `ModuleChainlinkSingle` or a `ModuleChainlinkMulti`
@@ -34,7 +34,7 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
         require(guardians.length > 0, "101");
         for (uint256 i; i < guardians.length; i++) {
             require(guardians[i] != address(0), "0");
-            _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
+            _grantRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
 

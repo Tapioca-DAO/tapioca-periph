@@ -58,14 +58,13 @@ contract Seer is ITOracle.IOracle, OracleMulti {
             _stalePeriod,
             guardians,
             _description,
-            _sequencerUptimeFeed
+            _sequencerUptimeFeed,
+            _admin
         )
     {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
-
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     /// @notice Get the latest exchange rate.

@@ -33,7 +33,7 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
         require(guardians.length > 0, "101");
         for (uint256 i; i < guardians.length; i++) {
             require(guardians[i] != address(0), "0");
-            _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
+            _grantRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
 

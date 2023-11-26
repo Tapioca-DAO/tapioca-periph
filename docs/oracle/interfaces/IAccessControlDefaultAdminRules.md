@@ -1,269 +1,14 @@
-# ARBTriCryptoOracle
+# IAccessControlDefaultAdminRules
 
 
 
 
 
-Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 
-*Addresses are for Arbitrum*
+
+*External interface of AccessControlDefaultAdminRules declared to support ERC-165 detection.*
 
 ## Methods
-
-### A0
-
-```solidity
-function A0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### BTC_FEED
-
-```solidity
-function BTC_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### DEFAULT_ADMIN_ROLE
-
-```solidity
-function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### DISCOUNT0
-
-```solidity
-function DISCOUNT0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### ETH_FEED
-
-```solidity
-function ETH_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### GAMMA0
-
-```solidity
-function GAMMA0() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### GRACE_PERIOD_TIME
-
-```solidity
-function GRACE_PERIOD_TIME() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### GUARDIAN_ROLE_CHAINLINK
-
-```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### SEQUENCER_ROLE
-
-```solidity
-function SEQUENCER_ROLE() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### SEQUENCER_UPTIME_FEED
-
-```solidity
-function SEQUENCER_UPTIME_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### TRI_CRYPTO
-
-```solidity
-function TRI_CRYPTO() external view returns (contract ICurvePool)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract ICurvePool | undefined |
-
-### USDT_FEED
-
-```solidity
-function USDT_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### WBTC_FEED
-
-```solidity
-function WBTC_FEED() external view returns (contract AggregatorV3Interface)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
-### _name
-
-```solidity
-function _name() external view returns (string)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | undefined |
-
-### _symbol
-
-```solidity
-function _symbol() external view returns (string)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | undefined |
 
 ### acceptDefaultAdminTransfer
 
@@ -319,55 +64,6 @@ function changeDefaultAdminDelay(uint48 newDelay) external nonpayable
 |---|---|---|
 | newDelay | uint48 | undefined |
 
-### changeGracePeriod
-
-```solidity
-function changeGracePeriod(uint32 _gracePeriod) external nonpayable
-```
-
-Changes the grace period for the sequencer update
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _gracePeriod | uint32 | New stale period (in seconds) |
-
-### changeStalePeriod
-
-```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
-```
-
-Changes the Stale Period
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
-
-### decimals
-
-```solidity
-function decimals() external pure returns (uint8)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
 ### defaultAdmin
 
 ```solidity
@@ -419,29 +115,6 @@ function defaultAdminDelayIncreaseWait() external view returns (uint48)
 |---|---|---|
 | _0 | uint48 | undefined |
 
-### get
-
-```solidity
-function get(bytes) external nonpayable returns (bool success, uint256 rate)
-```
-
-Get the latest exchange rate. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| success | bool | if no valid (recent) rate is available, return false else true. |
-| rate | uint256 | The rate of the requested asset / pair / pool. |
-
 ### getRoleAdmin
 
 ```solidity
@@ -450,7 +123,7 @@ function getRoleAdmin(bytes32 role) external view returns (bytes32)
 
 
 
-*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {_setRoleAdmin}.*
+*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {AccessControl-_setRoleAdmin}.*
 
 #### Parameters
 
@@ -472,7 +145,7 @@ function grantRole(bytes32 role, address account) external nonpayable
 
 
 
-*See {AccessControl-grantRole}. Reverts for `DEFAULT_ADMIN_ROLE`.*
+*Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``&#39;s admin role.*
 
 #### Parameters
 
@@ -504,94 +177,10 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### name
-
-```solidity
-function name(bytes) external view returns (string)
-```
-
-Returns a human readable name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | (string) A human readable name about this oracle. |
-
-### owner
-
-```solidity
-function owner() external view returns (address)
-```
-
-
-
-*See {IERC5313-owner}.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-### peek
-
-```solidity
-function peek(bytes) external view returns (bool success, uint256 rate)
-```
-
-Check the last exchange rate without any state changes. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| success | bool | if no valid (recent) rate is available, return false else true. |
-| rate | uint256 | The rate of the requested asset / pair / pool. |
-
-### peekSpot
-
-```solidity
-function peekSpot(bytes) external view returns (uint256 rate)
-```
-
-Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek(). For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| rate | uint256 | The rate of the requested asset / pair / pool. |
-
 ### pendingDefaultAdmin
 
 ```solidity
-function pendingDefaultAdmin() external view returns (address newAdmin, uint48 schedule)
+function pendingDefaultAdmin() external view returns (address newAdmin, uint48 acceptSchedule)
 ```
 
 
@@ -604,12 +193,12 @@ function pendingDefaultAdmin() external view returns (address newAdmin, uint48 s
 | Name | Type | Description |
 |---|---|---|
 | newAdmin | address | undefined |
-| schedule | uint48 | undefined |
+| acceptSchedule | uint48 | undefined |
 
 ### pendingDefaultAdminDelay
 
 ```solidity
-function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint48 schedule)
+function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint48 effectSchedule)
 ```
 
 
@@ -622,24 +211,24 @@ function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint
 | Name | Type | Description |
 |---|---|---|
 | newDelay | uint48 | undefined |
-| schedule | uint48 | undefined |
+| effectSchedule | uint48 | undefined |
 
 ### renounceRole
 
 ```solidity
-function renounceRole(bytes32 role, address account) external nonpayable
+function renounceRole(bytes32 role, address callerConfirmation) external nonpayable
 ```
 
 
 
-*See {AccessControl-renounceRole}. For the `DEFAULT_ADMIN_ROLE`, it only allows renouncing in two steps by first calling {beginDefaultAdminTransfer} to the `address(0)`, so it&#39;s required that the {pendingDefaultAdmin} schedule has also passed when calling this function. After its execution, it will not be possible to call `onlyRole(DEFAULT_ADMIN_ROLE)` functions. NOTE: Renouncing `DEFAULT_ADMIN_ROLE` will leave the contract without a {defaultAdmin}, thereby disabling any functionality that is only available for it, and the possibility of reassigning a non-administrated role.*
+*Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | role | bytes32 | undefined |
-| account | address | undefined |
+| callerConfirmation | address | undefined |
 
 ### revokeRole
 
@@ -649,7 +238,7 @@ function revokeRole(bytes32 role, address account) external nonpayable
 
 
 
-*See {AccessControl-revokeRole}. Reverts for `DEFAULT_ADMIN_ROLE`.*
+*Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``&#39;s admin role.*
 
 #### Parameters
 
@@ -668,67 +257,6 @@ function rollbackDefaultAdminDelay() external nonpayable
 
 *Cancels a scheduled {defaultAdminDelay} change. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminDelayChangeCanceled event.*
 
-
-### stalePeriod
-
-```solidity
-function stalePeriod() external view returns (uint32)
-```
-
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined |
-
-### supportsInterface
-
-```solidity
-function supportsInterface(bytes4 interfaceId) external view returns (bool)
-```
-
-
-
-*See {IERC165-supportsInterface}.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| interfaceId | bytes4 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### symbol
-
-```solidity
-function symbol(bytes) external view returns (string)
-```
-
-Returns a human readable (short) name about this oracle. For example: (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | (string) A human readable symbol name about this oracle. |
 
 
 
@@ -918,38 +446,5 @@ error AccessControlUnauthorizedAccount(address account, bytes32 neededRole)
 |---|---|---|
 | account | address | undefined |
 | neededRole | bytes32 | undefined |
-
-### GracePeriodNotOver
-
-```solidity
-error GracePeriodNotOver()
-```
-
-
-
-
-
-
-### InvalidChainlinkRate
-
-```solidity
-error InvalidChainlinkRate()
-```
-
-
-
-
-
-
-### SequencerDown
-
-```solidity
-error SequencerDown()
-```
-
-
-
-
-
 
 
