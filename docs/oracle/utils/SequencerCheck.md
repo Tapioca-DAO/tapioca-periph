@@ -13,7 +13,7 @@
 ### GRACE_PERIOD_TIME
 
 ```solidity
-function GRACE_PERIOD_TIME() external view returns (uint32)
+function GRACE_PERIOD_TIME() external view returns (uint256)
 ```
 
 
@@ -25,7 +25,7 @@ function GRACE_PERIOD_TIME() external view returns (uint32)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint32 | undefined |
+| _0 | uint256 | undefined |
 
 ### SEQUENCER_ROLE
 
