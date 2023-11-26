@@ -69,6 +69,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param _cluster the new address
     function setCluster(ICluster _cluster) external {
         if (address(_cluster) == address(0)) revert NotValid();
+        emit ClusterSet(cluster, _cluster);
         cluster = _cluster;
     }
 
