@@ -27,6 +27,9 @@ contract UniswapV2Swapper is BaseSwapper {
     IUniswapV2Factory public immutable factory;
     IYieldBox public immutable yieldBox;
 
+    /// *** ERRORS ***
+    error InvalidSwap();
+
     constructor(
         address _router,
         address _factory,
@@ -218,7 +221,7 @@ contract UniswapV2Swapper is BaseSwapper {
                 deadline
             );
         } else {
-            revert("UniswapV2Swapper: swap not valid");
+            revert InvalidSwap();
         }
     }
 
