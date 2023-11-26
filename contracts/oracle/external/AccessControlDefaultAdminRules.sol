@@ -5,8 +5,8 @@
 pragma solidity 0.8.19;
 
 import {IAccessControlDefaultAdminRules} from "../interfaces/IAccessControlDefaultAdminRules.sol";
-import {AccessControl, IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {AccessControl, IAccessControl} from "./AccessControl.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 interface IERC5313 {
