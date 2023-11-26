@@ -199,7 +199,6 @@ contract MagnetarV2Storage is IERC721Receiver {
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;
-    uint16 internal constant TOFT_SEND_APPROVAL = 302;
     uint16 internal constant TOFT_SEND_AND_BORROW = 303;
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
