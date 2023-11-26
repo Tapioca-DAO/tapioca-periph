@@ -4,13 +4,15 @@ pragma solidity 0.8.19;
 import "../../SeerUniSolo.sol";
 
 contract TapOracle is SeerUniSolo {
-    /// @notice Time in seconds after which get() can be called again (1 hour).
-    uint256 public FETCH_TIME = 4 hours;
-
     /// @notice Last prices of the oracle. get() will return the average.
     uint256[3] public lastPrices = [0, 0, 0];
+
     /// @notice Last index update of the oracle. goes from 0 to 2.
     uint8 private lastIndex = 0;
+
+    /// @notice Time in seconds after which get() can be called again (1 hour).
+    uint32 public FETCH_TIME = 4 hours;
+
     /// @dev Last timestamp of the oracle update.
     uint128 private lastCall = 0;
 
