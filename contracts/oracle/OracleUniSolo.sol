@@ -31,6 +31,7 @@ contract OracleUniSolo is
     /// @param guardians List of governor or guardian addresses
     /// @param _description Description of the assets concerned by the oracle
     /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _admin Address of the admin of the oracle
     constructor(
         address[] memory addressInAndOutUni,
         IUniswapV3Pool[] memory _circuitUniswap,
@@ -39,7 +40,8 @@ contract OracleUniSolo is
         uint16 observationLength,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         ModuleUniswapMulti(
             _circuitUniswap,
@@ -49,6 +51,7 @@ contract OracleUniSolo is
             guardians
         )
         SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         require(addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals

@@ -4,7 +4,7 @@
 // Copied from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/extensions/IAccessControlDefaultAdminRules.sol
 pragma solidity 0.8.19;
 
-import {IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IAccessControl} from "./IAccessControl.sol";
 
 /**
  * @dev External interface of AccessControlDefaultAdminRules declared to support ERC-165 detection.

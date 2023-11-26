@@ -10,7 +10,7 @@ import "./modules/ModuleUniswapMulti.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleMulti
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
 /// @dev This contract concerns an oracle that only uses both Chainlink and Uniswap for multiple pools
 /// @dev This is going to be used for like ETH/EUR oracles
@@ -50,6 +50,7 @@ contract OracleMulti is
     /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
     /// @param guardians List of governor or guardian addresses
     /// @param _description Description of the assets concerned by the oracle
+    /// @param _admin Address of the admin of the oracle
     /// @dev When deploying this contract, it is important to check in the case where Uniswap circuit is not final whether
     /// Chainlink and Uniswap circuits are compatible. If Chainlink is UNI-WBTC and WBTC-USD and Uniswap is just UNI-WETH,
     /// then Chainlink cannot be the final circuit
@@ -65,7 +66,8 @@ contract OracleMulti is
         uint32 _stalePeriod,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         ModuleUniswapMulti(
             _circuitUniswap,
@@ -81,6 +83,7 @@ contract OracleMulti is
             guardians
         )
         SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         require(addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals

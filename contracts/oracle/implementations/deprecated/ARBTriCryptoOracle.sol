@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
+import {ChainlinkUtils, AggregatorV3Interface, AccessControlDefaultAdminRules} from "../../utils/ChainlinkUtils.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -65,7 +65,10 @@ contract ARBTriCryptoOracle is
         AggregatorV3Interface wbtcFeed,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    )
+        SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         _name = __name;
         _symbol = __symbol;
         TRI_CRYPTO = pool;
@@ -74,8 +77,7 @@ contract ARBTriCryptoOracle is
         USDT_FEED = usdtFeed;
         WBTC_FEED = wbtcFeed;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
