@@ -12,7 +12,7 @@ contract TapOracle is SeerUniSolo {
     /// @notice Last index update of the oracle. goes from 0 to 2.
     uint8 private lastIndex = 0;
     /// @dev Last timestamp of the oracle update.
-    uint128 lastCall = 0;
+    uint128 private lastCall = 0;
 
     event FetchTimeUpdated(uint256 newFetchTime);
     event LastPriceUpdated(uint256 newLastPrice, uint8 index);
