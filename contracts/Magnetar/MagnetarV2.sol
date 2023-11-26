@@ -236,7 +236,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint256 assetId,
                     uint16 dstChainId,
                     bytes32 receiver,
-                    uint256 share,
+                    uint256 amount,
                     bytes memory adapterParams,
                     address payable refundAddress,
                     bool unwrap
@@ -267,7 +267,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             assetId,
                             dstChainId,
                             receiver,
-                            share,
+                            amount,
                             adapterParams,
                             refundAddress,
                             _action.value,
