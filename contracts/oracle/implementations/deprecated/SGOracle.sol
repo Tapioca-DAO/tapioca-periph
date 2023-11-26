@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import {ChainlinkUtils, AggregatorV3Interface, AccessControlDefaultAdminRules} from "../../utils/ChainlinkUtils.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import "../../../interfaces/IOracle.sol" as ITOracle;
 
@@ -19,21 +20,17 @@ interface IStargatePool {
     function token() external view returns (address);
 }
 
-contract SGOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck {
+contract SGOracle is
+    ITOracle.IOracle,
+    ChainlinkUtils,
+    SequencerCheck,
+    ReentrancyGuard
+{
     string public _name;
     string public _symbol;
 
     IStargatePool public immutable SG_POOL;
     AggregatorV3Interface public immutable UNDERLYING;
-
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     constructor(
         string memory __name,

@@ -3,6 +3,7 @@
 // contracts/oracle/OracleChainlinkSingle.sol
 pragma solidity 0.8.19;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleChainlinkSingle.sol";
 import "./OracleAbstract.sol";
@@ -17,18 +18,9 @@ import "./OracleAbstract.sol";
 contract OracleChainlinkSingle is
     OracleAbstract,
     ModuleChainlinkSingle,
-    SequencerCheck
+    SequencerCheck,
+    ReentrancyGuard
 {
-    /// @notice Reentrancy check
-    bool private entered;
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
-
     /// @notice Constructor for the oracle using a single Chainlink pool
     /// @param _poolChainlink Chainlink pool address
     /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the

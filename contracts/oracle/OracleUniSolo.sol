@@ -19,9 +19,6 @@ contract OracleUniSolo is
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
 
-    /// @notice Reentrancy check
-    bool private entered;
-
     /// @notice Constructor for an oracle using both Uniswap to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
     /// @param _circuitUniswap Path of the Uniswap pools

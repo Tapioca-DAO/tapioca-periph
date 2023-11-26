@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleChainlinkMulti.sol";
 import "./modules/ModuleUniswapMulti.sol";
@@ -20,23 +20,14 @@ contract OracleMulti is
     OracleAbstract,
     ModuleChainlinkMulti,
     ModuleUniswapMulti,
-    SequencerCheck
+    SequencerCheck,
+    ReentrancyGuard
 {
     /// @notice Whether the final rate obtained with Uniswap should be multiplied to last rate from Chainlink
     uint8 public immutable uniFinalCurrency;
 
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
-
-    /// @notice Reentrancy check
-    bool private entered;
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     /// @notice Constructor for an oracle using both Uniswap and Chainlink with multiple pools to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address

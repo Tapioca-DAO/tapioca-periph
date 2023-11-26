@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import {ChainlinkUtils, AggregatorV3Interface, AccessControlDefaultAdminRules} from "../../utils/ChainlinkUtils.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import "../../../interfaces/IOracle.sol" as ITOracle;
 
@@ -31,7 +31,8 @@ interface ICurvePool {
 contract ARBTriCryptoOracle is
     ITOracle.IOracle,
     ChainlinkUtils,
-    SequencerCheck
+    SequencerCheck,
+    ReentrancyGuard
 {
     string public _name;
     string public _symbol;
@@ -45,15 +46,6 @@ contract ARBTriCryptoOracle is
     uint256 public constant GAMMA0 = 28_000_000_000_000; // 2.8e-5
     uint256 public constant A0 = 2 * 3 ** 3 * 10_000;
     uint256 public constant DISCOUNT0 = 1_087_460_000_000_000; // 0.00108..
-
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     constructor(
         string memory __name,

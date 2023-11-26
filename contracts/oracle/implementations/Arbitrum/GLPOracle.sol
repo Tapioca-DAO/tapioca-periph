@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {IOracle} from "../../../interfaces/IOracle.sol";
-import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
-import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import {AccessControlDefaultAdminRules} from "../../external/AccessControlDefaultAdminRules.sol";
+import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {SequencerCheck} from "../../utils/SequencerCheck.sol";
+import {IOracle} from "../../../interfaces/IOracle.sol";
 
-contract GLPOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules {
+contract GLPOracle is
+    IOracle,
+    SequencerCheck,
+    AccessControlDefaultAdminRules,
+    ReentrancyGuard
+{
     IGmxGlpManager private immutable glpManager;
-
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     constructor(
         IGmxGlpManager glpManager_,
