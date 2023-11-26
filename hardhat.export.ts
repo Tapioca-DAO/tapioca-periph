@@ -55,7 +55,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     solidity: {
         compilers: [
             {
-                version: '0.8.18',
+                version: '0.8.19',
                 settings: {
                     viaIR: true,
                     optimizer: {
