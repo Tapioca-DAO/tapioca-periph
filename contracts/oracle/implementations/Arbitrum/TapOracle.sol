@@ -131,7 +131,7 @@ contract TapOracle is SeerUniSolo {
     /// @notice Update the time in seconds after which get() can be called again.
     /// @param _newFetchTime New time in seconds after which get() can be called again.
     function updateFetchTime(
-        uint256 _newFetchTime
+        uint32 _newFetchTime
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         FETCH_TIME = _newFetchTime;
         emit FetchTimeUpdated(_newFetchTime);
