@@ -50,6 +50,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     error NotValid();
     error ValueMismatch();
     error Failed();
+    error ActionNotValid();
+    error ModuleNotFound();
+    error UnknownReason();
 
     constructor(
         address _cluster,
@@ -628,7 +631,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.revokes
                 );
             } else {
-                revert("MagnetarV2: action not valid");
+                revert ActionNotValid();
             }
         }
 
@@ -948,7 +951,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         }
 
         if (module == address(0)) {
-            revert("MagnetarV2: module not found");
+            revert ModuleNotFound();
         }
 
         return module;
@@ -970,7 +973,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function _getRevertMsg(bytes memory _returnData) private pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert("MagnetarV2: Reason unknown");
+        if (_returnData.length < 68) revert UnknownReason();
 
         assembly {
             // Slice the sighash.
