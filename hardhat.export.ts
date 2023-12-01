@@ -7,8 +7,9 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
-import { HttpNetworkConfig } from 'hardhat/types';
+import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
+import '@nomicfoundation/hardhat-foundry';
 
 dotenv.config();
 
@@ -44,7 +45,19 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-const forkChain = supportedChains[process.env.NETWORK as TNetwork];
+const forkNetwork = process.env.NETWORK as TNetwork;
+const forkChainInfo = supportedChains[forkNetwork];
+const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
+    ? {
+          chainId: forkChainInfo.chainId,
+          forking: {
+              url: forkChainInfo.url,
+              ...(process.env.FROM_BLOCK
+                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
+                  : {}),
+          },
+      }
+    : {};
 
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
@@ -69,14 +82,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             saveDeployments: false,
-            chainId: forkChain.chainId,
             mining: { auto: true },
-            forking: {
-                url: forkChain.url,
-                ...(process.env.FROM_BLOCK
-                    ? { blockNumber: Number(process.env.FROM_BLOCK) }
-                    : {}),
-            },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
@@ -86,6 +92,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                 accountsBalance: '1000000000000000000000',
             },
             tags: ['local'],
+            ...forkInfo,
         },
         ...supportedChains,
     },
