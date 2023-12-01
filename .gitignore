@@ -10,6 +10,10 @@ package-lock.json
 cache
 artifacts
 
+#Forge
+cache_forge
+out
+
 #Others
 .DS_Store
 .VSCodeCounter
