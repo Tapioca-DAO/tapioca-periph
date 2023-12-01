@@ -10,6 +10,24 @@
 
 ## Methods
 
+### _sgReceive
+
+```solidity
+function _sgReceive(address token, uint256 amountLD, bytes payload) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| token | address | undefined |
+| amountLD | uint256 | undefined |
+| payload | bytes | undefined |
+
 ### instantRedeemLocal
 
 ```solidity
@@ -196,7 +214,7 @@ Stargate router address
 ### sgReceive
 
 ```solidity
-function sgReceive(uint16, bytes, uint256, address token, uint256 amountLD, bytes payload) external nonpayable
+function sgReceive(uint16 srcChainId, bytes, uint256 nonce, address token, uint256 amountLD, bytes payload) external nonpayable
 ```
 
 receive call for Stargate
@@ -207,9 +225,9 @@ receive call for Stargate
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint16 | undefined |
+| srcChainId | uint16 | undefined |
 | _1 | bytes | undefined |
-| _2 | uint256 | undefined |
+| nonce | uint256 | undefined |
 | token | address | undefined |
 | amountLD | uint256 | undefined |
 | payload | bytes | undefined |
@@ -250,6 +268,46 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### ReceiveFailed
+
+```solidity
+event ReceiveFailed(uint16 indexed srcChainId, address indexed token, uint256 indexed nonce, uint256 amountLD, bytes payload)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| srcChainId `indexed` | uint16 | undefined |
+| token `indexed` | address | undefined |
+| nonce `indexed` | uint256 | undefined |
+| amountLD  | uint256 | undefined |
+| payload  | bytes | undefined |
+
+### ReceiveSuccess
+
+```solidity
+event ReceiveSuccess(uint16 indexed srcChainId, address indexed token, uint256 indexed nonce, uint256 amountLD, bytes payload)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| srcChainId `indexed` | uint16 | undefined |
+| token `indexed` | address | undefined |
+| nonce `indexed` | uint256 | undefined |
+| amountLD  | uint256 | undefined |
+| payload  | bytes | undefined |
 
 
 
