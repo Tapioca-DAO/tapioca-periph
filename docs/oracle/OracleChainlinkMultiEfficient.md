@@ -208,6 +208,28 @@ Returns twice the value obtained from Chainlink feeds
 | _0 | uint256 | undefined |
 | _1 | uint256 | undefined |
 
+### readData
+
+```solidity
+function readData(contract AggregatorV3Interface feed) external nonpayable returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| feed | contract AggregatorV3Interface | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### readLower
 
 ```solidity
@@ -394,6 +416,22 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 | role `indexed` | bytes32 | undefined |
 | account `indexed` | address | undefined |
 | sender `indexed` | address | undefined |
+
+### logInt
+
+```solidity
+event logInt(uint256 value)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| value  | uint256 | undefined |
 
 
 
