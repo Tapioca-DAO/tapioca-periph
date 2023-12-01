@@ -11,7 +11,7 @@ contract TapOracle is SeerUniSolo {
     uint8 private lastIndex = 0;
 
     /// @notice Time in seconds after which get() can be called again (1 hour).
-    uint32 public FETCH_TIME = 4 hours;
+    uint32 public FETCH_TIME = 1 hours;
 
     /// @dev Last timestamp of the oracle update.
     uint128 private lastCall = 0;
