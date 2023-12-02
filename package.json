@@ -47,7 +47,7 @@
         "eth-sig-util": "^3.0.1",
         "ethereumjs-utils": "^5.2.5",
         "ethers": "^5.7.0",
-        "hardhat": "^2.13.0",
+        "hardhat": "2.13.0",
         "hardhat-contract-sizer": "^2.5.1",
         "hardhat-deploy": "^0.9.6",
         "hardhat-gas-reporter": "^1.0.8",
