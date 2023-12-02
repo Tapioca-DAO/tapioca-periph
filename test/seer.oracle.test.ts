@@ -6,6 +6,7 @@ import {
 import hre from 'hardhat';
 import { BN, register } from './test.utils';
 import { expect } from 'chai';
+import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
 
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
@@ -311,31 +312,22 @@ if (hre.network.config.chainId === 42161) {
             ).deploy();
 
             const seer = await (
-                await hre.ethers.getContractFactory('Seer')
+                await hre.ethers.getContractFactory('SeerUniSolo')
             ).deploy(
-                'DAI/USDC', // Name
-                'DAI/USDC', // Symbol
+                'WETH/USDC', // Name
+                'WETH/USDC', // Symbol
                 18, // Decimals
                 [
-                    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // DAI
-                    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-                ],
-                [
-                    '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
-                ],
-                [1], // Multiply/divide Uni
-                600, // TWAP
+                    '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+                    '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', // USDC
+                ], // Address In/Out
+                ['0xC31E54c7a869B9FcBEcc14363CF510d1c41fa443'], // LP
+                [1], // Circuit Uni is multiplied
+                600, // TWAP, 5min
                 10, // Observation length
-                0, // Uni final currency
-                [
-                    '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
-                    '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
-                ],
-                [1, 0], // Multiply/divide CL
-                8640000, // CL period before stale
-                [deployer.address], // Owner
-                hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
-                sequencer.address,
+                [deployer.address], // Guardians
+                hre.ethers.utils.formatBytes32String('WETH/USDC'), // Description
+                sequencer.address, // CL Sequencer
                 deployer.address, // Owner
             );
 
@@ -349,6 +341,11 @@ if (hre.network.config.chainId === 42161) {
                 updatedAt: 0,
                 answeredInRound: 0,
             });
+            // Should revert, grace period not over
+            await expect(seer.get('0x00')).to.be.revertedWithCustomError(
+                seer,
+                'SequencerDown',
+            );
 
             // Set the sequencer to be up but stale
             await sequencer.setLatestRoundData({
@@ -360,9 +357,8 @@ if (hre.network.config.chainId === 42161) {
                 updatedAt: 0,
                 answeredInRound: 0,
             });
-
             // Should revert, grace period not over
-            await expect(seer.peek('0x00')).to.be.revertedWithCustomError(
+            await expect(seer.get('0x00')).to.be.revertedWithCustomError(
                 seer,
                 'GracePeriodNotOver',
             );
@@ -370,6 +366,23 @@ if (hre.network.config.chainId === 42161) {
             // Set grace period to be over
             await time.increase((await seer.GRACE_PERIOD_TIME()).add(1));
             await expect(seer.peek('0x00')).to.not.be.reverted;
+        });
+
+        it.only('GMXOracle', async () => {
+            const { deployer } = await loadFixture(register);
+
+            const seer = await (
+                await hre.ethers.getContractFactory('SeerCLSolo')
+            ).deploy(...(await __buildGMXOracleArgs(hre, deployer.address)));
+
+            hre.tracer.enabled = true;
+            hre.tracer.verbosity = 4;
+            await seer.readData(
+                (
+                    await __buildGMXOracleArgs(hre, deployer.address)
+                )[3],
+            );
+            // console.log(await seer.peek('0x00'));
         });
     });
 }

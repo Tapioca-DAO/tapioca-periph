@@ -57,7 +57,7 @@ export const displaySeerCLSoloArgs = (
     console.log(`\t[${i}]Symbol:`, args[i++]);
     console.log(`\t[${i}]Decimal:`, args[i++]);
     console.log(`\t[${i}]LP:`, args[i++]);
-    console.log(`\t[${i}]Multiply/divide Uni:`, args[i++]);
+    console.log(`\t[${i}]Multiply/divide CL:`, args[i++]);
     console.log(`\t[${i}]Guardians:`, args[i++]);
     console.log(`\t[${i}]Description:`, args[i++]);
     console.log(`\t[${i}]ChainLink sequencer:`, args[i++]);
