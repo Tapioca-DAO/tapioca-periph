@@ -4,3 +4,6 @@
 [submodule "gitsub_tapioca-sdk"]
 	path = gitsub_tapioca-sdk
 	url = https://github.com/Tapioca-DAO/tapioca-sdk.git
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

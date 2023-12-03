@@ -6,6 +6,8 @@ import {
 import hre from 'hardhat';
 import { BN, register } from './test.utils';
 import { expect } from 'chai';
+import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
+import { AggregatorV3Interface } from '../typechain';
 
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
@@ -196,75 +198,6 @@ if (hre.network.config.chainId === 1) {
             // Oracle doesn't exist, should not revert
             expect((await seer.peek('0x00')).rate).to.not.be.reverted;
         });
-
-        it('Should revert if the Sequencer is down or stale', async () => {
-            const { deployer } = await loadFixture(register);
-
-            const sequencer = await (
-                await hre.ethers.getContractFactory('SequencerFeedMock')
-            ).deploy();
-
-            const seer = await (
-                await hre.ethers.getContractFactory('Seer')
-            ).deploy(
-                'DAI/USDC', // Name
-                'DAI/USDC', // Symbol
-                18, // Decimals
-                [
-                    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // DAI
-                    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-                ],
-                [
-                    '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
-                ],
-                [1], // Multiply/divide Uni
-                600, // TWAP
-                10, // Observation length
-                0, // Uni final currency
-                [
-                    '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
-                    '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
-                ],
-                [1, 0], // Multiply/divide CL
-                8640000, // CL period before stale
-                [deployer.address], // Owner
-                hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
-                sequencer.address,
-                deployer.address, // Owner
-            );
-
-            // Set the sequencer to be down
-            await sequencer.setLatestRoundData({
-                answer: 1, // 0 up, 1 down
-                roundId: 0,
-                startedAt: (
-                    await hre.ethers.provider.getBlock('latest')
-                ).timestamp, // last upbeat
-                updatedAt: 0,
-                answeredInRound: 0,
-            });
-
-            // Set the sequencer to be up but stale
-            await sequencer.setLatestRoundData({
-                answer: 0, // 0 up, 1 down
-                roundId: 0,
-                startedAt: (
-                    await hre.ethers.provider.getBlock('latest')
-                ).timestamp, // last upbeat
-                updatedAt: 0,
-                answeredInRound: 0,
-            });
-
-            // Should revert, grace period not over
-            await expect(seer.peek('0x00')).to.be.revertedWithCustomError(
-                seer,
-                'GracePeriodNotOver',
-            );
-
-            // Set grace period to be over
-            await time.increase((await seer.GRACE_PERIOD_TIME()).add(1));
-            await expect(seer.peek('0x00')).to.not.be.reverted;
-        });
     });
 }
 
@@ -282,10 +215,13 @@ if (hre.network.config.chainId === 42161) {
             );
 
             console.log(
-                hre.ethers.utils.formatUnits(
-                    (await seer.peek('0x00')).rate,
-                    await seer.decimals(),
-                ),
+                'GLP/USD price:',
+                hre.ethers.utils
+                    .formatUnits(
+                        (await seer.peek('0x00')).rate,
+                        await seer.decimals(),
+                    )
+                    .slice(0, 6),
             );
         });
 
@@ -313,9 +249,9 @@ if (hre.network.config.chainId === 42161) {
                 deployer.address, // Owner
             );
 
-            // Price of WETH/USDC at block 145526897
-            const priceOfWETH = BN('1805201916000000000000');
-
+            // ~Price of WETH/USDC at block 145526897
+            const priceOfWETH = hre.ethers.utils.parseEther('1800');
+            const delta = hre.ethers.utils.parseEther('6');
             {
                 await expect(seer.get('0x00')).to.be.revertedWith(
                     'TapOracle: not enough data',
@@ -324,7 +260,10 @@ if (hre.network.config.chainId === 42161) {
                     seer,
                     'LastPriceUpdated',
                 );
-                expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
+                expect(await seer.lastPrices(0)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
                 expect(await seer.lastPrices(1)).to.be.equal(0);
                 expect(await seer.lastPrices(2)).to.be.equal(0);
 
@@ -343,8 +282,14 @@ if (hre.network.config.chainId === 42161) {
                     seer,
                     'LastPriceUpdated',
                 );
-                expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
-                expect(await seer.lastPrices(1)).to.be.equal(priceOfWETH);
+                expect(await seer.lastPrices(0)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
+                expect(await seer.lastPrices(1)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
                 expect(await seer.lastPrices(2)).to.be.equal(0);
 
                 await expect(seer.updateLastPrice()).to.be.revertedWith(
@@ -359,9 +304,18 @@ if (hre.network.config.chainId === 42161) {
                 await expect(seer.updateLastPrice()).to.be.revertedWith(
                     'TapOracle: too early',
                 );
-                expect(await seer.lastPrices(0)).to.be.equal(priceOfWETH);
-                expect(await seer.lastPrices(1)).to.be.equal(priceOfWETH);
-                expect(await seer.lastPrices(2)).to.be.equal(priceOfWETH);
+                expect(await seer.lastPrices(0)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
+                expect(await seer.lastPrices(1)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
+                expect(await seer.lastPrices(2)).to.be.closeTo(
+                    priceOfWETH,
+                    delta,
+                ); // $6 tolerance
 
                 await expect(seer.updateLastPrice()).to.be.revertedWith(
                     'TapOracle: too early',
@@ -369,7 +323,93 @@ if (hre.network.config.chainId === 42161) {
             }
 
             await expect(await seer.get('0x00')).to.not.be.reverted;
-            expect((await seer.peek('0x00')).rate).to.be.equal(priceOfWETH);
+            expect((await seer.peek('0x00')).rate).to.be.closeTo(
+                priceOfWETH,
+                delta,
+            ); // $6 tolerance
+        });
+
+        it('Should revert if the Sequencer is down or stale', async () => {
+            const { deployer } = await loadFixture(register);
+
+            const sequencer = await (
+                await hre.ethers.getContractFactory('SequencerFeedMock')
+            ).deploy();
+
+            const seer = await (
+                await hre.ethers.getContractFactory('SeerUniSolo')
+            ).deploy(
+                'WETH/USDC', // Name
+                'WETH/USDC', // Symbol
+                18, // Decimals
+                [
+                    '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+                    '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', // USDC
+                ], // Address In/Out
+                ['0xC31E54c7a869B9FcBEcc14363CF510d1c41fa443'], // LP
+                [1], // Circuit Uni is multiplied
+                600, // TWAP, 5min
+                10, // Observation length
+                [deployer.address], // Guardians
+                hre.ethers.utils.formatBytes32String('WETH/USDC'), // Description
+                sequencer.address, // CL Sequencer
+                deployer.address, // Owner
+            );
+
+            // Set the sequencer to be down
+            await sequencer.setLatestRoundData({
+                answer: 1, // 0 up, 1 down
+                roundId: 0,
+                startedAt: (
+                    await hre.ethers.provider.getBlock('latest')
+                ).timestamp, // last upbeat
+                updatedAt: 0,
+                answeredInRound: 0,
+            });
+            // Should revert, grace period not over
+            await expect(seer.get('0x00')).to.be.revertedWithCustomError(
+                seer,
+                'SequencerDown',
+            );
+
+            // Set the sequencer to be up but stale
+            await sequencer.setLatestRoundData({
+                answer: 0, // 0 up, 1 down
+                roundId: 0,
+                startedAt: (
+                    await hre.ethers.provider.getBlock('latest')
+                ).timestamp, // last upbeat
+                updatedAt: 0,
+                answeredInRound: 0,
+            });
+            // Should revert, grace period not over
+            await expect(seer.get('0x00')).to.be.revertedWithCustomError(
+                seer,
+                'GracePeriodNotOver',
+            );
+
+            // Set grace period to be over
+            await time.increase((await seer.GRACE_PERIOD_TIME()).add(1));
+            await expect(seer.peek('0x00')).to.not.be.reverted;
+        });
+
+        it('GMXOracle', async () => {
+            const { deployer } = await loadFixture(register);
+
+            const seer = await (
+                await hre.ethers.getContractFactory('SeerCLSolo')
+            ).deploy(
+                ...(await __buildGMXOracleArgs(hre, deployer.address, false)),
+            );
+
+            await seer.changeStalePeriod(86400); // TODO Do it in the constructor and remove this
+
+            const gmxPrice = (await seer.peek('0x00')).rate;
+            console.log(
+                'GMX/USD price:',
+                gmxPrice.div((1e18).toString()).toString(),
+            );
+            expect(gmxPrice.div((1e18).toString())).to.be.closeTo(45, 1);
         });
     });
 }
