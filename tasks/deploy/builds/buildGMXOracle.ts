@@ -8,6 +8,7 @@ import { SeerCLSolo__factory } from '../../../typechain';
 export const __buildGMXOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
     deployerAddr: string,
+    logArgs = true,
 ): Promise<Parameters<SeerCLSolo__factory['deploy']>> => {
     const chainID = await hre.getChainId();
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
@@ -27,7 +28,7 @@ export const __buildGMXOracleArgs = async (
     ];
 
     // Check for null values
-    displaySeerCLSoloArgs(args);
+    if (logArgs) displaySeerCLSoloArgs(args);
     nonNullValues(args);
 
     return args;
