@@ -1,4 +1,4 @@
-import { time } from '@nomicfoundation/hardhat-network-helpers';
+import { time, reset } from '@nomicfoundation/hardhat-network-helpers';
 import { BigNumber, BigNumberish, Signature, Wallet } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
 import { splitSignature } from 'ethers/lib/utils';
@@ -58,10 +58,6 @@ import { CurveStableToUsdoBidder } from 'tapioca-sdk/dist/typechain/tapioca-peri
 
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
 const verifyEtherscanQueue: { address: string; args: any[] }[] = [];
-
-async function resetVM() {
-    await ethers.provider.send('hardhat_reset', []);
-}
 
 export async function impersonateAccount(address: string) {
     return network.provider.request({
@@ -274,8 +270,8 @@ async function uniV2EnvironnementSetup(
     const usdcPairAmount = wethPairAmount.mul(
         __wethUsdcPrice.div((1e18).toString()),
     );
-    await (await weth.freeMint(wethPairAmount)).wait();
-    await (await usdc.freeMint(usdcPairAmount)).wait();
+    await (await weth.mintTo(deployer.address, wethPairAmount)).wait();
+    await (await usdc.mintTo(deployer.address, usdcPairAmount)).wait();
 
     await (await weth.approve(__uniRouter.address, wethPairAmount)).wait();
     await (await usdc.approve(__uniRouter.address, usdcPairAmount)).wait();
@@ -295,11 +291,10 @@ async function uniV2EnvironnementSetup(
         weth.address,
         usdc.address,
     );
-    await time.increase(86500);
 
     // Create WETH/TAP LP
-    await (await weth.freeMint(wethPairAmount)).wait();
-    await (await tap.freeMint(wethPairAmount)).wait();
+    await (await weth.mintTo(deployer.address, wethPairAmount)).wait();
+    await (await tap.mintTo(deployer.address, wethPairAmount)).wait();
 
     await (await weth.approve(__uniRouter.address, wethPairAmount)).wait();
     await (await tap.approve(__uniRouter.address, wethPairAmount)).wait();
@@ -320,7 +315,6 @@ async function uniV2EnvironnementSetup(
         tap.address,
     );
 
-    await time.increase(86500);
     return {
         __wethUsdcMockPair,
         __wethTapMockPair,
@@ -661,8 +655,8 @@ async function registerUsd0Contract(
 
 async function addUniV2Liquidity(
     deployerAddress: string,
-    token1: any,
-    token2: any,
+    token1: ERC20Mock | any,
+    token2: ERC20Mock | any,
     token1Amount: BigNumberish,
     token2Amount: BigNumberish,
     __uniFactory: UniswapV2Factory,
@@ -674,13 +668,15 @@ async function addUniV2Liquidity(
             await __uniFactory.createPair(token1.address, token2.address)
         ).wait();
     }
-    if (token1.freeMint !== undefined) {
-        await token1.freeMint(token1Amount);
+
+    if (token1.mintTo !== undefined) {
+        await token1.mintTo(deployerAddress, token1Amount);
     } else {
         await token1.mint(deployerAddress, token1Amount);
     }
-    if (token2.freeMint !== undefined) {
-        await token2.freeMint(token2Amount);
+
+    if (token2.mintTo !== undefined) {
+        await token2.mintTo(deployerAddress, token2Amount);
     } else {
         await token2.mint(deployerAddress, token2Amount);
     }
@@ -697,7 +693,6 @@ async function addUniV2Liquidity(
         deployerAddress,
         ethers.utils.parseEther('10'),
     );
-    await time.increase(86500);
 }
 
 async function addUniV2UsdoWethLiquidity(
@@ -1098,13 +1093,12 @@ async function registerBigBangMarket(
 const log = (message: string, staging?: boolean) =>
     staging && console.log(message);
 export async function register(staging?: boolean) {
-    // if (!staging) {
-    //     await resetVM();
-    // }
-
     const deployer = (await ethers.getSigners())[0];
     const eoas = await ethers.getSigners();
     eoas.shift(); //remove deployer
+
+    const INITIAL_TIMESTAMP = (await hre.ethers.provider.getBlock('latest'))
+        .timestamp;
 
     const eoa1 = new ethers.Wallet(
         ethers.Wallet.createRandom().privateKey,
@@ -1429,6 +1423,7 @@ export async function register(staging?: boolean) {
         __wethTapMockPair,
         __wethUsdoMockPair,
         __tapUsdoMockPair,
+        INITIAL_TIMESTAMP,
     };
 
     /**
@@ -1516,8 +1511,8 @@ export async function register(staging?: boolean) {
     };
 
     const initContracts = async () => {
-        await (await weth.freeMint(1000)).wait();
-        await timeTravel(86500);
+        await (await weth.mintTo(deployerAddress, 1000)).wait();
+
         const mintValShare = await yieldBox.toShare(
             await wethUsdcSingularity.assetId(),
             1000,
