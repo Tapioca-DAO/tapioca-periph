@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -103,14 +103,14 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         if (token.code.length == 0) revert NoContract();
         bool success;
         bytes memory data;
-        (success, data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, 0));
+        (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, 0)));
         require(
             success && (data.length == 0 || abi.decode(data, (bool))),
             "BaseSwapper::safeApprove: approve failed"
         );
 
         (success, data) = token.call(
-            abi.encodeWithSelector(0x095ea7b3, to, value)
+            abi.encodeCall(IERC20.approve, (to, value))
         );
         require(
             success && (data.length == 0 || abi.decode(data, (bool))),

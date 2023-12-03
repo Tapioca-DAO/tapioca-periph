@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
 import "./utils/ChainlinkUtils.sol";
 
@@ -28,7 +28,7 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
         if (guardians.length == 0) revert InvalidLength();
         for (uint256 i; i < guardians.length; i++) {
             if (guardians[i] == address(0)) revert ZeroAddress();
-            _setupRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
+            _grantRole(GUARDIAN_ROLE_CHAINLINK, guardians[i]);
         }
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
     }

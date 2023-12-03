@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 //Boring
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
@@ -199,7 +199,6 @@ contract MagnetarV2Storage is IERC721Receiver {
 
     uint16 internal constant TOFT_WRAP = 300;
     uint16 internal constant TOFT_SEND_FROM = 301;
-    uint16 internal constant TOFT_SEND_APPROVAL = 302;
     uint16 internal constant TOFT_SEND_AND_BORROW = 303;
     uint16 internal constant TOFT_SEND_AND_LEND = 304;
     uint16 internal constant TOFT_DEPOSIT_TO_STRATEGY = 305;
@@ -211,13 +210,7 @@ contract MagnetarV2Storage is IERC721Receiver {
     // ************** //
     // *** EVENTS *** //
     // ************** //
-    event ApprovalForAll(
-        address indexed owner,
-        address indexed operator,
-        bool approved
-    );
-
-    event ClusterSet(address indexed oldCluster, address indexed newCluster);
+    event ClusterSet(ICluster indexed oldCluster, ICluster indexed newCluster);
 
     // ************** //
     // *** ERRORS *** //

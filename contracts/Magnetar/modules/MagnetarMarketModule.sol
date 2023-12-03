@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 //LZ
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
@@ -865,12 +865,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         address target,
         IYieldBoxBase yieldBox
     ) private {
-        bool isApproved = yieldBox.isApprovedForAll(
-            address(this),
-            address(target)
-        );
+        bool isApproved = yieldBox.isApprovedForAll(address(this), target);
         if (!isApproved) {
-            yieldBox.setApprovalForAll(address(target), true);
+            yieldBox.setApprovalForAll(target, true);
         }
     }
 

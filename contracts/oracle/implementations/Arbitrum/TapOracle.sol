@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 import "../../SeerUniSolo.sol";
 
 contract TapOracle is SeerUniSolo {
-    /// @notice Time in seconds after which get() can be called again (1 hour).
-    uint256 public FETCH_TIME = 4 hours;
-
     /// @notice Last prices of the oracle. get() will return the average.
     uint256[3] public lastPrices = [0, 0, 0];
+
     /// @notice Last index update of the oracle. goes from 0 to 2.
     uint8 private lastIndex = 0;
+
+    /// @notice Time in seconds after which get() can be called again (1 hour).
+    uint32 public FETCH_TIME = 4 hours;
+
     /// @dev Last timestamp of the oracle update.
-    uint128 lastCall = 0;
+    uint128 private lastCall = 0;
 
     event FetchTimeUpdated(uint256 newFetchTime);
     event LastPriceUpdated(uint256 newLastPrice, uint8 index);
@@ -129,7 +131,7 @@ contract TapOracle is SeerUniSolo {
     /// @notice Update the time in seconds after which get() can be called again.
     /// @param _newFetchTime New time in seconds after which get() can be called again.
     function updateFetchTime(
-        uint256 _newFetchTime
+        uint32 _newFetchTime
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         FETCH_TIME = _newFetchTime;
         emit FetchTimeUpdated(_newFetchTime);
