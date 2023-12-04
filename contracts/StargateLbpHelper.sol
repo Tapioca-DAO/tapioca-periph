@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import "./interfaces/IBalancerVault.sol";
 import "./interfaces/IStargateRouter.sol";
 import "./interfaces/ILiquidityBootstrappingPool.sol";
+import "./interfaces/IStargateReceiver.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -32,6 +33,13 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 minAmountOut;
     }
 
+    struct CachedSwap {
+        address token;
+        uint256 amountLD;
+        address to;
+        bytes payload;
+    }
+
     /// @notice Stargate router address
     IStargateRouter public immutable router;
     /// @notice LBP pool address
@@ -40,6 +48,9 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     IBalancerVault public immutable lbpVault;
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
+
+    mapping(uint16 => mapping(bytes => mapping(uint256 => CachedSwap)))
+        public cachedSwapLookup; //[chainId][srcAddress][nonce]
 
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
@@ -148,6 +159,32 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             fundManagement,
             data.minAmountOut,
             (data.deadline != 0 ? data.deadline : block.timestamp)
+        );
+    }
+
+    function clearCachedSwap(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint256 _nonce
+    ) external {
+        CachedSwap memory cs = cachedSwapLookup[_srcChainId][_srcAddress][
+            _nonce
+        ];
+        require(cs.to != address(0x0), "Stargate: cache already cleared");
+        // clear the data
+        cachedSwapLookup[_srcChainId][_srcAddress][_nonce] = CachedSwap(
+            address(0x0),
+            0,
+            address(0x0),
+            ""
+        );
+        IStargateReceiver(cs.to).sgReceive(
+            _srcChainId,
+            _srcAddress,
+            _nonce,
+            cs.token,
+            cs.amountLD,
+            cs.payload
         );
     }
 
