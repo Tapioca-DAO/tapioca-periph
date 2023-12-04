@@ -234,7 +234,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### yieldBox
 
 ```solidity
-function yieldBox() external view returns (contract IYieldBox)
+function yieldBox() external view returns (contract IYieldBoxBase)
 ```
 
 
@@ -246,7 +246,7 @@ function yieldBox() external view returns (contract IYieldBox)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IYieldBox | undefined |
+| _0 | contract IYieldBoxBase | undefined |
 
 
 
@@ -302,6 +302,17 @@ error Failed()
 ```
 
 
+
+
+
+
+### InvalidSwap
+
+```solidity
+error InvalidSwap()
+```
+
+*** ERRORS ***
 
 
 

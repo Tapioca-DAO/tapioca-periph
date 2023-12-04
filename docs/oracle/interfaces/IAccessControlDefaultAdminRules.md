@@ -1,48 +1,14 @@
-# ModuleChainlinkSingle
+# IAccessControlDefaultAdminRules
 
-*Angle Core Team*
 
-> ModuleChainlinkSingle
 
-Module Contract that is going to be used to help compute Chainlink prices
 
-*This contract will help for an oracle using a single Chainlink priceAn oracle using Chainlink is either going to be a `ModuleChainlinkSingle` or a `ModuleChainlinkMulti`*
+
+
+
+*External interface of AccessControlDefaultAdminRules declared to support ERC-165 detection.*
 
 ## Methods
-
-### DEFAULT_ADMIN_ROLE
-
-```solidity
-function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### GUARDIAN_ROLE_CHAINLINK
-
-```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
 
 ### acceptDefaultAdminTransfer
 
@@ -82,23 +48,6 @@ function cancelDefaultAdminTransfer() external nonpayable
 *Cancels a {defaultAdmin} transfer previously started with {beginDefaultAdminTransfer}. A {pendingDefaultAdmin} not yet accepted can also be cancelled with this function. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminTransferCanceled event.*
 
 
-### chainlinkDecimals
-
-```solidity
-function chainlinkDecimals() external view returns (uint8)
-```
-
-Decimals for each Chainlink pairs
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
 ### changeDefaultAdminDelay
 
 ```solidity
@@ -114,22 +63,6 @@ function changeDefaultAdminDelay(uint48 newDelay) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newDelay | uint48 | undefined |
-
-### changeStalePeriod
-
-```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
-```
-
-Changes the Stale Period
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
 
 ### defaultAdmin
 
@@ -190,7 +123,7 @@ function getRoleAdmin(bytes32 role) external view returns (bytes32)
 
 
 
-*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {_setRoleAdmin}.*
+*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {AccessControl-_setRoleAdmin}.*
 
 #### Parameters
 
@@ -212,7 +145,7 @@ function grantRole(bytes32 role, address account) external nonpayable
 
 
 
-*See {AccessControl-grantRole}. Reverts for `DEFAULT_ADMIN_ROLE`.*
+*Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``&#39;s admin role.*
 
 #### Parameters
 
@@ -244,44 +177,10 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### isChainlinkMultiplied
-
-```solidity
-function isChainlinkMultiplied() external view returns (uint8)
-```
-
-Whether the rate computed using the Chainlink pool should be multiplied to the quote amount or not
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
-### owner
-
-```solidity
-function owner() external view returns (address)
-```
-
-
-
-*See {IERC5313-owner}.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### pendingDefaultAdmin
 
 ```solidity
-function pendingDefaultAdmin() external view returns (address newAdmin, uint48 schedule)
+function pendingDefaultAdmin() external view returns (address newAdmin, uint48 acceptSchedule)
 ```
 
 
@@ -294,12 +193,12 @@ function pendingDefaultAdmin() external view returns (address newAdmin, uint48 s
 | Name | Type | Description |
 |---|---|---|
 | newAdmin | address | undefined |
-| schedule | uint48 | undefined |
+| acceptSchedule | uint48 | undefined |
 
 ### pendingDefaultAdminDelay
 
 ```solidity
-function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint48 schedule)
+function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint48 effectSchedule)
 ```
 
 
@@ -312,41 +211,24 @@ function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint
 | Name | Type | Description |
 |---|---|---|
 | newDelay | uint48 | undefined |
-| schedule | uint48 | undefined |
-
-### poolChainlink
-
-```solidity
-function poolChainlink() external view returns (contract AggregatorV3Interface)
-```
-
-Chainlink pool to look for in the contract
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
+| effectSchedule | uint48 | undefined |
 
 ### renounceRole
 
 ```solidity
-function renounceRole(bytes32 role, address account) external nonpayable
+function renounceRole(bytes32 role, address callerConfirmation) external nonpayable
 ```
 
 
 
-*See {AccessControl-renounceRole}. For the `DEFAULT_ADMIN_ROLE`, it only allows renouncing in two steps by first calling {beginDefaultAdminTransfer} to the `address(0)`, so it&#39;s required that the {pendingDefaultAdmin} schedule has also passed when calling this function. After its execution, it will not be possible to call `onlyRole(DEFAULT_ADMIN_ROLE)` functions. NOTE: Renouncing `DEFAULT_ADMIN_ROLE` will leave the contract without a {defaultAdmin}, thereby disabling any functionality that is only available for it, and the possibility of reassigning a non-administrated role.*
+*Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | role | bytes32 | undefined |
-| account | address | undefined |
+| callerConfirmation | address | undefined |
 
 ### revokeRole
 
@@ -356,7 +238,7 @@ function revokeRole(bytes32 role, address account) external nonpayable
 
 
 
-*See {AccessControl-revokeRole}. Reverts for `DEFAULT_ADMIN_ROLE`.*
+*Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``&#39;s admin role.*
 
 #### Parameters
 
@@ -375,45 +257,6 @@ function rollbackDefaultAdminDelay() external nonpayable
 
 *Cancels a scheduled {defaultAdminDelay} change. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminDelayChangeCanceled event.*
 
-
-### stalePeriod
-
-```solidity
-function stalePeriod() external view returns (uint32)
-```
-
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined |
-
-### supportsInterface
-
-```solidity
-function supportsInterface(bytes4 interfaceId) external view returns (bool)
-```
-
-
-
-*See {IERC165-supportsInterface}.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| interfaceId | bytes4 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
 
 
 
@@ -603,16 +446,5 @@ error AccessControlUnauthorizedAccount(address account, bytes32 neededRole)
 |---|---|---|
 | account | address | undefined |
 | neededRole | bytes32 | undefined |
-
-### InvalidChainlinkRate
-
-```solidity
-error InvalidChainlinkRate()
-```
-
-
-
-
-
 
 

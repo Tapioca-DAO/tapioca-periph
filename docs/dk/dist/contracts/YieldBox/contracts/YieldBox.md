@@ -817,6 +817,49 @@ function registerAsset(enum TokenType tokenType, address contractAddress, contra
 |---|---|---|
 | assetId | uint256 | undefined |
 
+### revoke
+
+```solidity
+function revoke(address owner, address spender, uint256 assetId, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| assetId | uint256 | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+### revokeAll
+
+```solidity
+function revokeAll(address owner, address spender, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
 ### safeBatchTransferFrom
 
 ```solidity
@@ -1348,6 +1391,97 @@ event Withdraw(address indexed sender, address indexed from, address indexed to,
 | shareIn  | uint256 | undefined |
 | amountOut  | uint256 | undefined |
 | shareOut  | uint256 | undefined |
+
+
+
+## Errors
+
+### AmountTooLow
+
+```solidity
+error AmountTooLow()
+```
+
+
+
+
+
+
+### AssetNotValid
+
+```solidity
+error AssetNotValid()
+```
+
+
+
+
+
+
+### ForbiddenAction
+
+```solidity
+error ForbiddenAction()
+```
+
+
+
+
+
+
+### InvalidTokenType
+
+```solidity
+error InvalidTokenType()
+```
+
+
+
+
+
+
+### NotSet
+
+```solidity
+error NotSet()
+```
+
+
+
+
+
+
+### NotWrapped
+
+```solidity
+error NotWrapped()
+```
+
+
+
+
+
+
+### RefundFailed
+
+```solidity
+error RefundFailed()
+```
+
+
+
+
+
+
+### ZeroAddress
+
+```solidity
+error ZeroAddress()
+```
+
+
+
+
 
 
 

@@ -108,6 +108,31 @@ function depositAsset(uint256 assetId, address from, address to, uint256 amount,
 | amountOut | uint256 | undefined |
 | shareOut | uint256 | undefined |
 
+### depositETHAsset
+
+```solidity
+function depositETHAsset(uint256 assetId, address to, uint256 amount) external payable returns (uint256 amountOut, uint256 shareOut)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| assetId | uint256 | undefined |
+| to | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountOut | uint256 | undefined |
+| shareOut | uint256 | undefined |
+
 ### isApprovedForAll
 
 ```solidity
