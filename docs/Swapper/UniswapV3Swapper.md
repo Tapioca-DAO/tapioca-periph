@@ -101,7 +101,7 @@ function getDefaultDexOptions() external view returns (bytes)
 ### getInputAmount
 
 ```solidity
-function getInputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountIn)
+function getInputAmount(ISwapper.SwapData swapData, bytes data) external view returns (uint256 amountIn)
 ```
 
 
@@ -113,7 +113,7 @@ function getInputAmount(ISwapper.SwapData swapData, bytes) external view returns
 | Name | Type | Description |
 |---|---|---|
 | swapData | ISwapper.SwapData | undefined |
-| _1 | bytes | undefined |
+| data | bytes | undefined |
 
 #### Returns
 
@@ -124,7 +124,7 @@ function getInputAmount(ISwapper.SwapData swapData, bytes) external view returns
 ### getOutputAmount
 
 ```solidity
-function getOutputAmount(ISwapper.SwapData swapData, bytes) external view returns (uint256 amountOut)
+function getOutputAmount(ISwapper.SwapData swapData, bytes data) external view returns (uint256 amountOut)
 ```
 
 
@@ -136,7 +136,7 @@ function getOutputAmount(ISwapper.SwapData swapData, bytes) external view return
 | Name | Type | Description |
 |---|---|---|
 | swapData | ISwapper.SwapData | undefined |
-| _1 | bytes | undefined |
+| data | bytes | undefined |
 
 #### Returns
 
