@@ -306,6 +306,17 @@ error Failed()
 
 
 
+### InvalidSwap
+
+```solidity
+error InvalidSwap()
+```
+
+*** ERRORS ***
+
+
+
+
 ### NoContract
 
 ```solidity

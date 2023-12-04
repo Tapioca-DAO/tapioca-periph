@@ -214,28 +214,10 @@ function withdrawToChain(contract IYieldBoxBase yieldBox, address from, uint256 
 
 ## Events
 
-### ApprovalForAll
-
-```solidity
-event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| owner `indexed` | address | undefined |
-| operator `indexed` | address | undefined |
-| approved  | bool | undefined |
-
 ### ClusterSet
 
 ```solidity
-event ClusterSet(address indexed oldCluster, address indexed newCluster)
+event ClusterSet(contract ICluster indexed oldCluster, contract ICluster indexed newCluster)
 ```
 
 
@@ -246,8 +228,8 @@ event ClusterSet(address indexed oldCluster, address indexed newCluster)
 
 | Name | Type | Description |
 |---|---|---|
-| oldCluster `indexed` | address | undefined |
-| newCluster `indexed` | address | undefined |
+| oldCluster `indexed` | contract ICluster | undefined |
+| newCluster `indexed` | contract ICluster | undefined |
 
 ### OwnershipTransferred
 

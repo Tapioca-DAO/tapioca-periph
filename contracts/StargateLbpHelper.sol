@@ -19,6 +19,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         address targetToken;
         uint16 dstChainId;
         address peer; // StargateLbpHelper address on destination
+        address receiver; // Receiver address on destination
         uint256 amount;
         uint256 slippage;
         uint256 srcPoolId;
@@ -93,7 +94,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 dstNativeAddr: "0x0"
             }),
             abi.encodePacked(msg.sender), // StargateLbpHelper.sol destination address
-            abi.encode(lbpData, msg.sender)
+            abi.encode(lbpData, stargateData.receiver)
         );
     }
 
