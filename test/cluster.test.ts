@@ -30,7 +30,7 @@ describe('Cluster', () => {
             const { cluster, eoa1 } = await loadFixture(register);
 
             let lzChainId = await cluster.lzChainId();
-            expect(lzChainId).to.eq(1);
+            expect(lzChainId).to.eq(31337);
 
             await expect(cluster.connect(eoa1).updateLzChain(2)).to.be.reverted;
 
@@ -65,7 +65,7 @@ describe('Cluster', () => {
             ).to.not.be.reverted;
 
             isWhitelisted = await cluster.isWhitelisted(
-                1,
+                0,
                 randomContract.address,
             );
             expect(isWhitelisted).to.be.true;

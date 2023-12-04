@@ -4,6 +4,11 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, registerFork } from './test.utils';
 
 describe('UniswapV3Swapper', () => {
+    before(function () {
+        if (process.env.NODE_ENV != 'mainnet') {
+            this.skip();
+        }
+    });
     describe('getOutputAmount()', () => {
         it('should get output amount', async () => {
             const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } =
