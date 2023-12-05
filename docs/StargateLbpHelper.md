@@ -266,6 +266,17 @@ error BalanceTooLow()
 
 
 
+### NoContract
+
+```solidity
+error NoContract()
+```
+
+
+
+
+
+
 ### NotAuthorized
 
 ```solidity
