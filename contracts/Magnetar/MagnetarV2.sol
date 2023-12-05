@@ -173,7 +173,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(from);
 
                 ISendFrom(_action.target).sendFrom{value: _action.value}(
-                    msg.sender,
+                    from,
                     dstChainId,
                     to,
                     amount,
