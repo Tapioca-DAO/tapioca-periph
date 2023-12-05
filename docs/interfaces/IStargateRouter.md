@@ -49,7 +49,7 @@ function addLiquidity(uint256 _poolId, uint256 _amountLD, address _to) external 
 ### bridge
 
 ```solidity
-function bridge() external view returns (address)
+function bridge() external view returns (contract IStargateBridge)
 ```
 
 
@@ -61,7 +61,7 @@ function bridge() external view returns (address)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | contract IStargateBridge | undefined |
 
 ### createChainPath
 

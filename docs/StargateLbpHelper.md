@@ -102,6 +102,33 @@ function participate(StargateLbpHelper.StargateData stargateData, StargateLbpHel
 | stargateData | StargateLbpHelper.StargateData | undefined |
 | lbpData | StargateLbpHelper.ParticipateData | undefined |
 
+### quoteLayerZeroFee
+
+```solidity
+function quoteLayerZeroFee(uint16 _dstChainId, uint8 _functionType, bytes _toAddress, bytes, IStargateRouterBase.lzTxObj _lzTxParams) external view returns (uint256, uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _dstChainId | uint16 | undefined |
+| _functionType | uint8 | undefined |
+| _toAddress | bytes | undefined |
+| _3 | bytes | undefined |
+| _lzTxParams | IStargateRouterBase.lzTxObj | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+| _1 | uint256 | undefined |
+
 ### redeemLocal
 
 ```solidity
@@ -292,6 +319,17 @@ error RouterNotValid()
 
 ```solidity
 error TokensMismatch()
+```
+
+
+
+
+
+
+### UnsupportedFunctionType
+
+```solidity
+error UnsupportedFunctionType()
 ```
 
 
