@@ -217,7 +217,7 @@ function renounceOwnership() external nonpayable
 
 
 
-*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
 ### rescueEth
@@ -314,28 +314,10 @@ performs a withdraw operation
 
 ## Events
 
-### ApprovalForAll
-
-```solidity
-event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| owner `indexed` | address | undefined |
-| operator `indexed` | address | undefined |
-| approved  | bool | undefined |
-
 ### ClusterSet
 
 ```solidity
-event ClusterSet(address indexed oldCluster, address indexed newCluster)
+event ClusterSet(contract ICluster indexed oldCluster, contract ICluster indexed newCluster)
 ```
 
 
@@ -346,8 +328,8 @@ event ClusterSet(address indexed oldCluster, address indexed newCluster)
 
 | Name | Type | Description |
 |---|---|---|
-| oldCluster `indexed` | address | undefined |
-| newCluster `indexed` | address | undefined |
+| oldCluster `indexed` | contract ICluster | undefined |
+| newCluster `indexed` | contract ICluster | undefined |
 
 ### HelperUpdate
 
@@ -387,10 +369,32 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 ## Errors
 
+### ActionNotValid
+
+```solidity
+error ActionNotValid()
+```
+
+
+
+
+
+
 ### Failed
 
 ```solidity
 error Failed()
+```
+
+
+
+
+
+
+### ModuleNotFound
+
+```solidity
+error ModuleNotFound()
 ```
 
 
@@ -413,6 +417,17 @@ error NotAuthorized()
 
 ```solidity
 error NotValid()
+```
+
+
+
+
+
+
+### UnknownReason
+
+```solidity
+error UnknownReason()
 ```
 
 
