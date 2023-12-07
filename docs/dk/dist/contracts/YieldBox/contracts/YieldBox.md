@@ -446,6 +446,29 @@ Deposit an NFT asset
 | amountOut | uint256 | The amount deposited. |
 | shareOut | uint256 | The deposited amount repesented in shares. |
 
+### eip712Domain
+
+```solidity
+function eip712Domain() external view returns (bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
+```
+
+
+
+*See {EIP-5267}. _Available since v4.9._*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| fields | bytes1 | undefined |
+| name | string | undefined |
+| version | string | undefined |
+| chainId | uint256 | undefined |
+| verifyingContract | address | undefined |
+| salt | bytes32 | undefined |
+| extensions | uint256[] | undefined |
+
 ### ids
 
 ```solidity
@@ -816,6 +839,49 @@ function registerAsset(enum TokenType tokenType, address contractAddress, contra
 | Name | Type | Description |
 |---|---|---|
 | assetId | uint256 | undefined |
+
+### revoke
+
+```solidity
+function revoke(address owner, address spender, uint256 assetId, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| assetId | uint256 | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+### revokeAll
+
+```solidity
+function revokeAll(address owner, address spender, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
 
 ### safeBatchTransferFrom
 
@@ -1231,6 +1297,17 @@ event Deposited(address indexed sender, address indexed from, address indexed to
 | shareOut  | uint256 | undefined |
 | isNFT  | bool | undefined |
 
+### EIP712DomainChanged
+
+```solidity
+event EIP712DomainChanged()
+```
+
+
+
+*MAY be emitted to signal that the domain could have changed.*
+
+
 ### OwnershipTransferred
 
 ```solidity
@@ -1348,6 +1425,124 @@ event Withdraw(address indexed sender, address indexed from, address indexed to,
 | shareIn  | uint256 | undefined |
 | amountOut  | uint256 | undefined |
 | shareOut  | uint256 | undefined |
+
+
+
+## Errors
+
+### AmountTooLow
+
+```solidity
+error AmountTooLow()
+```
+
+
+
+
+
+
+### AssetNotValid
+
+```solidity
+error AssetNotValid()
+```
+
+
+
+
+
+
+### ForbiddenAction
+
+```solidity
+error ForbiddenAction()
+```
+
+
+
+
+
+
+### InvalidShortString
+
+```solidity
+error InvalidShortString()
+```
+
+
+
+
+
+
+### InvalidTokenType
+
+```solidity
+error InvalidTokenType()
+```
+
+
+
+
+
+
+### NotSet
+
+```solidity
+error NotSet()
+```
+
+
+
+
+
+
+### NotWrapped
+
+```solidity
+error NotWrapped()
+```
+
+
+
+
+
+
+### RefundFailed
+
+```solidity
+error RefundFailed()
+```
+
+
+
+
+
+
+### StringTooLong
+
+```solidity
+error StringTooLong(string str)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| str | string | undefined |
+
+### ZeroAddress
+
+```solidity
+error ZeroAddress()
+```
+
+
+
+
 
 
 

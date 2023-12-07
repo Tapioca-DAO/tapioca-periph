@@ -220,7 +220,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     borrowAmount,
                     false,
                     valueAmount,
-                    false
+                    false,
+                    withdrawParams.refundAddress
                 );
             }
         }
@@ -302,7 +303,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     LzLib.addressToBytes32(user),
                     collateralAmount,
                     withdrawCollateralParams.withdrawAdapterParams,
-                    valueAmount > 0 ? payable(msg.sender) : payable(this),
+                    withdrawCollateralParams.refundAddress,
                     valueAmount,
                     withdrawCollateralParams.unwrap
                 );
@@ -676,7 +677,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     _removeAmount,
                     false,
                     valueAmount,
-                    false
+                    false,
+                    removeAndRepayData.assetWithdrawData.refundAddress
                 );
             }
         }
@@ -743,7 +745,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     removeAndRepayData.collateralAmount,
                     true,
                     valueAmount,
-                    removeAndRepayData.collateralWithdrawData.unwrap
+                    removeAndRepayData.collateralWithdrawData.unwrap,
+                    removeAndRepayData.collateralWithdrawData.refundAddress
                 );
             }
         }
@@ -797,7 +800,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         // build LZ params
         bytes memory _adapterParams;
         ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
-            refundAddress: msg.value == gas ? refundAddress : payable(this),
+            refundAddress: refundAddress,
             zroPaymentAddress: address(0),
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
                 ? adapterParams
@@ -837,7 +840,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 amount,
         bool withdrawCollateral,
         uint256 valueAmount,
-        bool unwrap
+        bool unwrap,
+        address payable refundAddress
     ) private {
         if (withdrawData.length == 0) revert NotValid();
         (
@@ -855,7 +859,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             receiver,
             amount,
             adapterParams,
-            valueAmount > 0 ? payable(msg.sender) : payable(this),
+            refundAddress,
             valueAmount,
             unwrap
         );
