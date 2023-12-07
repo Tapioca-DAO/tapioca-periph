@@ -764,30 +764,22 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     ) private {
         // perform a same chain withdrawal
         if (dstChainId == 0) {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
+            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
             return;
         }
-        // perform a cross chain withdrawal
+        // perform a cross chain withdrawal, but make sure the asset supports a cross chain operation first
         (, address asset, , ) = yieldBox.assets(assetId);
-        // make sure the asset supports a cross chain operation
         try
-            IERC165(address(asset)).supportsInterface(
+            ITapiocaOFT(address(asset)).supportsInterface(
                 type(ISendFrom).interfaceId
             )
-        {} catch {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
+        returns (bool supportResult) {
+            if (!supportResult) {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+                return;
+            }
+        } catch {
+            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
             return;
         }
 
@@ -827,6 +819,22 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 callParams
             );
         }
+    }
+
+    function _withdrawOnThisChain(
+        IYieldBoxBase yieldBox,
+        uint256 assetId,
+        address from,
+        bytes32 receiver,
+        uint256 amount
+    ) private {
+        yieldBox.withdraw(
+            assetId,
+            from,
+            LzLib.bytes32ToAddress(receiver),
+            amount,
+            0
+        );
     }
 
     function _withdraw(

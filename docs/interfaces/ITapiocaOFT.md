@@ -303,6 +303,28 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 | approvals | ICommonData.IApproval[] | undefined |
 | revokes | ICommonData.IApproval[] | undefined |
 
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### totalFees
 
 ```solidity
