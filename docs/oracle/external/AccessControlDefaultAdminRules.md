@@ -1,12 +1,12 @@
-# ModuleChainlinkSingle
+# AccessControlDefaultAdminRules
 
-*Angle Core Team*
 
-> ModuleChainlinkSingle
 
-Module Contract that is going to be used to help compute Chainlink prices
 
-*This contract will help for an oracle using a single Chainlink priceAn oracle using Chainlink is either going to be a `ModuleChainlinkSingle` or a `ModuleChainlinkMulti`*
+
+
+
+*Extension of {AccessControl} that allows specifying special rules to manage the `DEFAULT_ADMIN_ROLE` holder, which is a sensitive role with special permissions over other roles that may potentially have privileged rights in the system. If a specific role doesn&#39;t have an admin role assigned, the holder of the `DEFAULT_ADMIN_ROLE` will have the ability to grant it and revoke it. This contract implements the following risk mitigations on top of {AccessControl}: * Only one account holds the `DEFAULT_ADMIN_ROLE` since deployment until it&#39;s potentially renounced. * Enforces a 2-step process to transfer the `DEFAULT_ADMIN_ROLE` to another account. * Enforces a configurable delay between the two steps, with the ability to cancel before the transfer is accepted. * The delay can be changed by scheduling, see {changeDefaultAdminDelay}. * It is not possible to use another role to manage the `DEFAULT_ADMIN_ROLE`. Example usage: ```solidity contract MyToken is AccessControlDefaultAdminRules {   constructor() AccessControlDefaultAdminRules(     3 days,     msg.sender // Explicit initial `DEFAULT_ADMIN_ROLE` holder    ) {} } ```*
 
 ## Methods
 
@@ -14,23 +14,6 @@ Module Contract that is going to be used to help compute Chainlink prices
 
 ```solidity
 function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
-### GUARDIAN_ROLE_CHAINLINK
-
-```solidity
-function GUARDIAN_ROLE_CHAINLINK() external view returns (bytes32)
 ```
 
 
@@ -82,23 +65,6 @@ function cancelDefaultAdminTransfer() external nonpayable
 *Cancels a {defaultAdmin} transfer previously started with {beginDefaultAdminTransfer}. A {pendingDefaultAdmin} not yet accepted can also be cancelled with this function. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminTransferCanceled event.*
 
 
-### chainlinkDecimals
-
-```solidity
-function chainlinkDecimals() external view returns (uint8)
-```
-
-Decimals for each Chainlink pairs
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
 ### changeDefaultAdminDelay
 
 ```solidity
@@ -114,22 +80,6 @@ function changeDefaultAdminDelay(uint48 newDelay) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newDelay | uint48 | undefined |
-
-### changeStalePeriod
-
-```solidity
-function changeStalePeriod(uint32 _stalePeriod) external nonpayable
-```
-
-Changes the Stale Period
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _stalePeriod | uint32 | New stale period (in seconds) |
 
 ### defaultAdmin
 
@@ -244,23 +194,6 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### isChainlinkMultiplied
-
-```solidity
-function isChainlinkMultiplied() external view returns (uint8)
-```
-
-Whether the rate computed using the Chainlink pool should be multiplied to the quote amount or not
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint8 | undefined |
-
 ### owner
 
 ```solidity
@@ -314,23 +247,6 @@ function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint
 | newDelay | uint48 | undefined |
 | schedule | uint48 | undefined |
 
-### poolChainlink
-
-```solidity
-function poolChainlink() external view returns (contract AggregatorV3Interface)
-```
-
-Chainlink pool to look for in the contract
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract AggregatorV3Interface | undefined |
-
 ### renounceRole
 
 ```solidity
@@ -375,23 +291,6 @@ function rollbackDefaultAdminDelay() external nonpayable
 
 *Cancels a scheduled {defaultAdminDelay} change. Requirements: - Only can be called by the current {defaultAdmin}. May emit a DefaultAdminDelayChangeCanceled event.*
 
-
-### stalePeriod
-
-```solidity
-function stalePeriod() external view returns (uint32)
-```
-
-Represent the maximum amount of time (in seconds) between each Chainlink update before the price feed is considered stale
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint32 | undefined |
 
 ### supportsInterface
 
@@ -603,16 +502,5 @@ error AccessControlUnauthorizedAccount(address account, bytes32 neededRole)
 |---|---|---|
 | account | address | undefined |
 | neededRole | bytes32 | undefined |
-
-### InvalidChainlinkRate
-
-```solidity
-error InvalidChainlinkRate()
-```
-
-
-
-
-
 
 
