@@ -21,6 +21,7 @@ export const __buildGMXOracleArgs = async (
         18, // Decimals
         ARGS_CONFIG[chainID].GMX_ORACLE.GMX_USD_CL_DATA_FEED_ADDRESS, // CL Pool
         1, // Multiply/divide CL
+        86400, // CL stale period, 1 day
         [deployerAddr], // Guardians
         hre.ethers.utils.formatBytes32String('GMX/USD'), // Description,
         ARGS_CONFIG[chainID].MISC.CL_SEQUENCER, // CL Sequencer
