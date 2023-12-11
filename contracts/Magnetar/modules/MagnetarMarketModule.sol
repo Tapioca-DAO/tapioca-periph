@@ -150,6 +150,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         ICommonData.IWithdrawParams calldata withdrawParams,
         uint256 valueAmount
     ) private {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(market)))
+            revert NotAuthorized();
+
         IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
@@ -238,6 +241,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         ICommonData.IWithdrawParams calldata withdrawCollateralParams,
         uint256 valueAmount
     ) private {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(market)))
+            revert NotAuthorized();
+
         IMarket marketInterface = IMarket(market);
         IYieldBoxBase yieldBox = IYieldBoxBase(marketInterface.yieldBox());
 
@@ -762,6 +768,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 gas,
         bool unwrap
     ) private {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(yieldBox)))
+            revert NotAuthorized();
+
         // perform a same chain withdrawal
         if (dstChainId == 0) {
             yieldBox.withdraw(
@@ -804,6 +813,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 : _adapterParams
         });
 
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(asset)))
+            revert NotAuthorized();
         // sends the asset to another layer
         if (unwrap) {
             ICommonData.IApproval[]
