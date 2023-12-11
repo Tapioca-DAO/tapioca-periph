@@ -566,12 +566,10 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     address from,
                     uint256 borrowAmount,
                     uint256 supplyAmount,
-                    uint256 minAmountOut,
-                    address swapper,
-                    bytes memory dexData
+                    bytes memory data
                 ) = abi.decode(
                         _action.call[4:],
-                        (address, uint256, uint256, uint256, address, bytes)
+                        (address, uint256, uint256, bytes)
                     );
                 _checkSender(from);
 
@@ -579,30 +577,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     from,
                     borrowAmount,
                     supplyAmount,
-                    minAmountOut,
-                    swapper,
-                    dexData
+                    data
                 );
             } else if (_action.id == MARKET_SELL_COLLATERAL) {
-                (
-                    address from,
-                    uint256 share,
-                    uint256 minAmountOut,
-                    address swapper,
-                    bytes memory dexData
-                ) = abi.decode(
-                        _action.call[4:],
-                        (address, uint256, uint256, address, bytes)
-                    );
+                (address from, uint256 share, bytes memory data) = abi.decode(
+                    _action.call[4:],
+                    (address, uint256, bytes)
+                );
                 _checkSender(from);
 
-                IMarket(_action.target).sellCollateral(
-                    from,
-                    share,
-                    minAmountOut,
-                    swapper,
-                    dexData
-                );
+                IMarket(_action.target).sellCollateral(from, share, data);
             } else if (_action.id == TAP_EXERCISE_OPTION) {
                 HelperExerciseOption memory data = abi.decode(
                     _action.call[4:],
