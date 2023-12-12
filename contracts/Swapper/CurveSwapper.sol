@@ -24,6 +24,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 /// @title Curve pool swapper
 contract CurveSwapper is BaseSwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     /// *** VARS ***
     /// ***  ***
@@ -132,7 +133,7 @@ contract CurveSwapper is BaseSwapper {
         );
         require(amountOut > 0, "CurveSwapper: amountOut is 0");
         if (swapData.yieldBoxData.depositToYb) {
-            _safeApprove(tokenOut, address(yieldBox), amountOut);
+            tokenOut.safeApprove(address(yieldBox), amountOut);
             (, shareOut) = yieldBox.depositAsset(
                 swapData.tokensData.tokenOutId,
                 address(this),
@@ -161,7 +162,7 @@ contract CurveSwapper is BaseSwapper {
 
         uint256 balanceBefore = IERC20(tokenOut).balanceOf(address(this));
 
-        _safeApprove(tokenIn, address(curvePool), amountIn);
+        tokenIn.safeApprove(address(curvePool), amountIn);
         curvePool.exchange(i, j, amountIn, amountOutMin);
 
         uint256 balanceAfter = IERC20(tokenOut).balanceOf(address(this));

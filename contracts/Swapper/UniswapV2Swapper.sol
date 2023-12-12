@@ -20,6 +20,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 contract UniswapV2Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     /// *** VARS ***
     /// ***  ***
@@ -163,11 +164,7 @@ contract UniswapV2Swapper is BaseSwapper {
         amountOut = amounts[1];
         if (swapData.yieldBoxData.depositToYb) {
             if (path[path.length - 1] != address(0)) {
-                _safeApprove(
-                    path[path.length - 1],
-                    address(yieldBox),
-                    amountOut
-                );
+                path[path.length - 1].safeApprove(address(yieldBox), amountOut);
             }
             (, shareOut) = yieldBox.depositAsset(
                 swapData.tokensData.tokenOutId,
@@ -196,7 +193,7 @@ contract UniswapV2Swapper is BaseSwapper {
         address[] memory path = _createPath(_tokenIn, _tokenOut);
 
         if (tokenIn != address(0) && tokenOut != address(0)) {
-            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            tokenIn.safeApprove(address(swapRouter), amountIn);
             amounts = swapRouter.swapExactTokensForTokens(
                 amountIn,
                 amountOutMin,
@@ -212,7 +209,7 @@ contract UniswapV2Swapper is BaseSwapper {
                 deadline
             );
         } else if (tokenIn != address(0) && tokenOut == address(0)) {
-            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            tokenIn.safeApprove(address(swapRouter), amountIn);
             amounts = swapRouter.swapExactTokensForETH(
                 amountIn,
                 amountOutMin,
