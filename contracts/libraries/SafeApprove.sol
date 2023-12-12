@@ -17,12 +17,14 @@ library SafeApprove {
             "SafeApprove: approve failed"
         );
 
-        (success, data) = token.call(
-            abi.encodeCall(IToken.approve, (to, value))
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "SafeApprove: approve failed"
-        );
+        if (value > 0) {
+            (success, data) = token.call(
+                abi.encodeCall(IToken.approve, (to, value))
+            );
+            require(
+                success && (data.length == 0 || abi.decode(data, (bool))),
+                "SafeApprove: approve failed"
+            );
+        }
     }
 }
