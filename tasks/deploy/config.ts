@@ -17,6 +17,16 @@ const GLP_ORACLE = {
     },
 };
 
+const ETH_ORACLE = {
+    [EChainID.ARBITRUM]: {
+        WETH_ORACLE: {
+            WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            WETH_USD_CL_DATA_FEED_ADDRESS:
+                '0x639fe6ab55c921f74e7fac1ee960c0b6293ba612',
+        },
+    },
+};
+
 const DAI_ORACLE = {
     [EChainID.MAINNET]: {
         DAI_ORACLE: {
@@ -51,6 +61,7 @@ export const ARGS_CONFIG = {
         ...TAP_ORACLE[EChainID.ARBITRUM],
         ...GLP_ORACLE[EChainID.ARBITRUM],
         ...GMX_ORACLE[EChainID.ARBITRUM],
+        ...ETH_ORACLE[EChainID.ARBITRUM],
         ...MISC[EChainID.ARBITRUM],
     },
     [EChainID.MAINNET]: {
