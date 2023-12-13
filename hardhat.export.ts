@@ -111,8 +111,8 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     },
     gasReporter: {},
     dodoc: {
-        runOnCompile: true,
-        freshOutput: true,
+        runOnCompile: false,
+        freshOutput: false,
     },
     mocha: {
         timeout: 4000000,
