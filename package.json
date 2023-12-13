@@ -10,7 +10,7 @@
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test",
         "test:mainnet": "NETWORK=ethereum hardhat test",
-        "test:sepolia": "NETWORK=sepolia hardhat test",
+        "test:zerox": "NETWORK=ethereum hardhat test test/zeroXSwapper.test.ts",
         "test:arb": "NETWORK=arbitrum FROM_BLOCK=145526897 hardhat test test/seer.oracle.test.ts",
         "prepare": "husky install",
         "lint:ts": "eslint . --fix --ext ts",
