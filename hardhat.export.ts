@@ -19,6 +19,7 @@ declare global {
             ALCHEMY_API_KEY: string;
             NETWORK: string;
             FROM_BLOCK: string;
+            BINANCE_WALLET_ADDRESS: string;
         }
     }
 }
@@ -111,8 +112,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     },
     gasReporter: {},
     dodoc: {
-        runOnCompile: true,
-        freshOutput: true,
+        runOnCompile: false,
     },
     mocha: {
         timeout: 4000000,
