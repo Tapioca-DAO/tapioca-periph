@@ -23,6 +23,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 slippage;
         uint256 srcPoolId;
         uint256 dstPoolId;
+        bool getDust;
     }
     struct ParticipateData {
         address assetIn;
@@ -80,6 +81,9 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         erc20.safeApprove(address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
+        uint256 balanceBefore = IERC20(stargateData.srcToken).balanceOf(
+            address(this)
+        );
         router.swap{value: msg.value}(
             stargateData.dstChainId,
             stargateData.srcPoolId,
@@ -95,6 +99,18 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             abi.encodePacked(msg.sender), // StargateLbpHelper.sol destination address
             abi.encode(lbpData, msg.sender)
         );
+
+        // check dust and send it back to the user
+        uint256 balanceAfter = IERC20(stargateData.srcToken).balanceOf(
+            address(this)
+        );
+        uint256 transferred = balanceAfter - balanceBefore;
+        if (transferred < stargateData.amount && stargateData.getDust) {
+            IERC20(stargateData.srcToken).transfer(
+                msg.sender,
+                stargateData.amount - transferred
+            );
+        }
     }
 
     /// @notice receive call for Stargate
