@@ -21,14 +21,12 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 /// @dev All of the parameters below are provided by the API response.
 /// @param sellToken the token to sell
 /// @param buyToken the token to buy
-/// @param spender the address that will spend the sellToken
 /// @param swapTarget the 0x swap proxy
 /// @param swapCallData the swap call data
 /// @return amountOut the amount of buyToken bought
 struct SZeroXSwapData {
     IERC20 sellToken;
     IERC20 buyToken;
-    address spender;
     address payable swapTarget;
     bytes swapCallData;
 }
@@ -36,7 +34,6 @@ struct SZeroXSwapData {
 /// @title ZeroX swapper
 contract ZeroXSwapper {
     using SafeERC20 for IERC20;
-
     /// ************
     /// *** VARS ***
     /// ************
@@ -63,7 +60,9 @@ contract ZeroXSwapper {
 
     /// @notice swaps a token for another, using 0x as a swap aggregator
     /// @param swapData the swap data
+    /// @param amountIn the amount of sellToken to sell
     /// @param minAmountOut the minimum amount of buyToken bought
+    /// @return amountOut the amount of buyToken bought
     function swap(
         SZeroXSwapData calldata swapData,
         uint256 amountIn,
@@ -79,7 +78,7 @@ contract ZeroXSwapper {
         );
 
         // Approve the 0x proxy to spend the sell token
-        swapData.sellToken.safeApprove(swapData.swapTarget, minAmountOut);
+        swapData.sellToken.safeApprove(swapData.swapTarget, amountIn);
         (bool success, ) = swapData.swapTarget.call(swapData.swapCallData);
         if (!success) revert SwapFailed();
 
