@@ -8,6 +8,7 @@ import { BN, register } from './test.utils';
 import { expect } from 'chai';
 import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
 import { AggregatorV3Interface } from '../typechain';
+import { __buildETHOracleArgs } from '../tasks/deploy/builds/buildETHOracle';
 
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
@@ -410,6 +411,23 @@ if (hre.network.config.chainId === 42161) {
                 gmxPrice.div((1e18).toString()).toString(),
             );
             expect(gmxPrice.div((1e18).toString())).to.be.closeTo(45, 1);
+        });
+
+        it.only('ETH/USD', async () => {
+            const { deployer } = await loadFixture(register);
+
+            const seer = await (
+                await hre.ethers.getContractFactory('SeerCLSolo')
+            ).deploy(...(await __buildETHOracleArgs(hre, deployer.address)));
+
+            await seer.changeStalePeriod(86400); // TODO Do it in the constructor and remove this
+
+            const ethPrice = (await seer.peek('0x00')).rate;
+            console.log(
+                'ETH/USD price:',
+                ethPrice.div((1e18).toString()).toString(),
+            );
+            expect(ethPrice.div((1e18).toString())).to.be.closeTo(1805, 1);
         });
     });
 }
