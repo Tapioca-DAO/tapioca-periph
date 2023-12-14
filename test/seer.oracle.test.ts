@@ -9,6 +9,8 @@ import { expect } from 'chai';
 import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
 import { AggregatorV3Interface } from '../typechain';
 import { __buildETHOracleArgs } from '../tasks/deploy/builds/buildETHOracle';
+import { __buildEthGlpOracleArgs } from '../tasks/deploy/builds/buildEthGlpOracle';
+import { __buildGLPOracleArgs } from '../tasks/deploy/builds/buildGLPOracle';
 
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
@@ -413,7 +415,7 @@ if (hre.network.config.chainId === 42161) {
             expect(gmxPrice.div((1e18).toString())).to.be.closeTo(45, 1);
         });
 
-        it.only('ETH/USD', async () => {
+        it('ETH/USD', async () => {
             const { deployer } = await loadFixture(register);
 
             const seer = await (
@@ -428,6 +430,42 @@ if (hre.network.config.chainId === 42161) {
                 ethPrice.div((1e18).toString()).toString(),
             );
             expect(ethPrice.div((1e18).toString())).to.be.closeTo(1805, 1);
+        });
+
+        it.only('ETH/GLP', async () => {
+            const { deployer } = await loadFixture(register);
+
+            const ethUsd = await (
+                await hre.ethers.getContractFactory('SeerCLSolo')
+            ).deploy(...(await __buildETHOracleArgs(hre, deployer.address)));
+            const glpUsd = await (
+                await hre.ethers.getContractFactory('GLPOracle')
+            ).deploy(...(await __buildGLPOracleArgs(hre, deployer.address)));
+
+            const seer = await (
+                await hre.ethers.getContractFactory('EthGlpOracle')
+            ).deploy(
+                ...(await __buildEthGlpOracleArgs(
+                    hre,
+                    deployer.address,
+                    ethUsd.address,
+                    glpUsd.address,
+                )),
+            );
+
+            await ethUsd.changeStalePeriod(86400); // TODO Do it in the constructor and remove this
+            await glpUsd.changeGracePeriod(86400); // TODO Do it in the constructor and remove this
+            await seer.changeGracePeriod(86400); // TODO Do it in the constructor and remove this
+
+            // Block 145526897
+            // WETH: 1805953396950000000000
+            // GLP: 1041055094190371419655569666477
+            const ethPrice = (await seer.peek('0x00')).rate;
+            console.log(
+                'ETH/GLP price:',
+                ethPrice.div((1e18).toString()).toString(),
+            );
+            expect(ethPrice.div((1e18).toString())).to.be.closeTo(1734, 1);
         });
     });
 }
