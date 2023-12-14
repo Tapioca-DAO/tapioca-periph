@@ -767,22 +767,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
             return;
         }
-        // perform a cross chain withdrawal, but make sure the asset supports a cross chain operation first
         (, address asset, , ) = yieldBox.assets(assetId);
-        try
-            ITapiocaOFT(address(asset)).supportsInterface(
-                type(ISendFrom).interfaceId
-            )
-        returns (bool supportResult) {
-            if (!supportResult) {
-                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
-                return;
-            }
-        } catch {
-            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
-            return;
-        }
-
         // withdraw from YieldBox
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
 
@@ -800,24 +785,34 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         if (unwrap) {
             ICommonData.IApproval[]
                 memory approvals = new ICommonData.IApproval[](0);
-            ITapiocaOFT(address(asset)).triggerSendFromWithParams{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams,
-                true,
-                approvals,
-                approvals
-            );
+            try
+                ITapiocaOFT(address(asset)).triggerSendFromWithParams{
+                    value: gas
+                }(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams,
+                    true,
+                    approvals,
+                    approvals
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         } else {
-            ISendFrom(address(asset)).sendFrom{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams
-            );
+            try
+                ISendFrom(address(asset)).sendFrom{value: gas}(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         }
     }
 
