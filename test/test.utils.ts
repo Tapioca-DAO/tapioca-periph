@@ -1511,6 +1511,7 @@ export async function register(staging?: boolean) {
     };
 
     const initContracts = async () => {
+        const deployerAddress = deployer.address;
         await (await weth.mintTo(deployerAddress, 1000)).wait();
 
         const mintValShare = await yieldBox.toShare(
