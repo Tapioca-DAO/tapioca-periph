@@ -19,6 +19,7 @@ declare global {
             ALCHEMY_API_KEY: string;
             NETWORK: string;
             FROM_BLOCK: string;
+            BINANCE_WALLET_ADDRESS: string;
         }
     }
 }

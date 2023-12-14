@@ -405,8 +405,6 @@ if (hre.network.config.chainId === 42161) {
                 ...(await __buildGMXOracleArgs(hre, deployer.address, false)),
             );
 
-            await seer.changeStalePeriod(86400); // TODO Do it in the constructor and remove this
-
             const gmxPrice = (await seer.peek('0x00')).rate;
             console.log(
                 'GMX/USD price:',
