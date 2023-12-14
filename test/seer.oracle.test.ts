@@ -1,16 +1,11 @@
-import {
-    loadFixture,
-    mine,
-    time,
-} from '@nomicfoundation/hardhat-network-helpers';
-import hre from 'hardhat';
-import { BN, register } from './test.utils';
+import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
-import { AggregatorV3Interface } from '../typechain';
+import hre from 'hardhat';
 import { __buildETHOracleArgs } from '../tasks/deploy/builds/buildETHOracle';
 import { __buildEthGlpOracleArgs } from '../tasks/deploy/builds/buildEthGlpOracle';
 import { __buildGLPOracleArgs } from '../tasks/deploy/builds/buildGLPOracle';
+import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
+import { register } from './test.utils';
 
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
@@ -275,7 +270,7 @@ if (hre.network.config.chainId === 42161) {
                 );
             }
 
-            await timeTravel((await seer.FETCH_TIME()).toNumber());
+            await timeTravel(await seer.FETCH_TIME());
 
             {
                 await expect(seer.get('0x00')).to.be.revertedWith(
@@ -300,7 +295,7 @@ if (hre.network.config.chainId === 42161) {
                 );
             }
 
-            await timeTravel((await seer.FETCH_TIME()).toNumber());
+            await timeTravel(await seer.FETCH_TIME());
 
             {
                 await expect(seer.get('0x00')).to.not.be.reverted;
@@ -392,7 +387,7 @@ if (hre.network.config.chainId === 42161) {
             );
 
             // Set grace period to be over
-            await time.increase((await seer.GRACE_PERIOD_TIME()).add(1));
+            await time.increase((await seer.GRACE_PERIOD_TIME()) + 1);
             await expect(seer.peek('0x00')).to.not.be.reverted;
         });
 
@@ -430,7 +425,7 @@ if (hre.network.config.chainId === 42161) {
             expect(ethPrice.div((1e18).toString())).to.be.closeTo(1805, 1);
         });
 
-        it.only('ETH/GLP', async () => {
+        it('ETH/GLP', async () => {
             const { deployer } = await loadFixture(register);
 
             const ethUsd = await (
@@ -450,10 +445,6 @@ if (hre.network.config.chainId === 42161) {
                     glpUsd.address,
                 )),
             );
-
-            await ethUsd.changeStalePeriod(86400); // TODO Do it in the constructor and remove this
-            await glpUsd.changeGracePeriod(86400); // TODO Do it in the constructor and remove this
-            await seer.changeGracePeriod(86400); // TODO Do it in the constructor and remove this
 
             // Block 145526897
             // WETH: 1805953396950000000000

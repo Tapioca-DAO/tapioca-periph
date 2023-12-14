@@ -20,6 +20,7 @@ export const __buildETHOracleArgs = async (
         18, // Decimals
         ARGS_CONFIG[chainID].WETH_ORACLE.WETH_USD_CL_DATA_FEED_ADDRESS, // CL Pool
         1, // Multiply/divide Uni
+        86400, // CL stale period, 1 day
         [deployerAddr], // Guardians
         hre.ethers.utils.formatBytes32String('ETH/USD'), // Description,
         hre.ethers.constants.AddressZero, // CL Sequencer
