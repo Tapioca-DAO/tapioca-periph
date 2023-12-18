@@ -625,7 +625,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 );
 
                 _checkSender(data.from);
-                IUSDOBase(_action.target).removeAsset(
+                IUSDOBase(_action.target).removeAsset{value: _action.value}(
                     data.from,
                     data.to,
                     data.lzDstChainId,
