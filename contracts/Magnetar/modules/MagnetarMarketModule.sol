@@ -284,7 +284,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             uint256 collateralShare = yieldBox.toShare(
                 marketInterface.collateralId(),
                 collateralAmount,
-                false
+                true
             );
             marketInterface.removeCollateral(
                 user,
