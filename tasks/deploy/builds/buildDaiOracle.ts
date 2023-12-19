@@ -22,6 +22,7 @@ export const buildDaiOracle = async (
         18, // Decimals
         ARGS_CONFIG[chainID].DAI_ORACLE.DAI_USD_CL_DATA_FEED_ADDRESS, // CL Pool
         1, // Multiply/divide Uni
+        86400, // CL stale period, 1 day
         [deployer.address], // Guardians
         hre.ethers.utils.formatBytes32String('DAI/USD'), // Description,
         hre.ethers.constants.AddressZero, // CL Sequencer
