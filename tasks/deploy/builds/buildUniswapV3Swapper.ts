@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { UniswapV3Swapper__factory } from '../../../typechain';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
 
 export const buildUniswapV3Swapper = async (
     hre: HardhatRuntimeEnvironment,
@@ -22,7 +22,11 @@ export const buildUniswapV3Swapper = async (
         throw new Error('[-] UniswapV3 Factory not found');
 
     let yb = hre.SDK.db
-        .loadGlobalDeployment(tag, 'YieldBox', chainInfo.chainId)
+        .loadGlobalDeployment(
+            tag,
+            TAPIOCA_PROJECTS_NAME.YieldBox,
+            chainInfo.chainId,
+        )
         .find((e) => e.name == 'YieldBox');
 
     if (!yb) {

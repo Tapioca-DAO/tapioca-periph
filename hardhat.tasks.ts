@@ -1,7 +1,7 @@
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
-import { deployOracle__task } from './tasks/deploy/00-deployOracle';
-import { deploySwappers__task } from './tasks/deploy/01-deploySwapper';
+import { deployOracle__task } from './tasks/deploy/deployOracle';
+import { deploySwappers__task } from './tasks/deploy/deploySwapper';
 
 task(
     'deployOracle',

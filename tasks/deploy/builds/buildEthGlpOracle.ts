@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { EthGlpOracle__factory } from '../../../typechain';
 import { nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
 
 export const __buildEthGlpOracleArgs = async (
     hre: HardhatRuntimeEnvironment,

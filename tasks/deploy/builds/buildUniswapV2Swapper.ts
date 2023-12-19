@@ -1,7 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { UniswapV2Swapper__factory } from '../../../typechain';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
+import { TAPIOCA_PROJECTS_NAME } from '../../../gitsub_tapioca-sdk/src/api/config';
 
 export const buildUniswapV2Swapper = async (
     hre: HardhatRuntimeEnvironment,
@@ -25,7 +26,11 @@ export const buildUniswapV2Swapper = async (
         throw new Error('[-] UniswapV2 Factory not found');
 
     let yb = hre.SDK.db
-        .loadGlobalDeployment(tag, 'yieldbox', chainInfo.chainId)
+        .loadGlobalDeployment(
+            tag,
+            TAPIOCA_PROJECTS_NAME.YieldBox,
+            chainInfo.chainId,
+        )
         .find((e) => e.name == 'YieldBox');
 
     if (!yb) {
