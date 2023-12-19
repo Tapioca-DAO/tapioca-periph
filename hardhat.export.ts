@@ -7,9 +7,8 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
-import { HttpNetworkConfig } from 'hardhat/types';
+import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
-import { TAPIOCA_PROJECTS_NAME } from './gitsub_tapioca-sdk/src/api/config';
 
 dotenv.config();
 
@@ -18,6 +17,9 @@ declare global {
     namespace NodeJS {
         interface ProcessEnv {
             ALCHEMY_API_KEY: string;
+            NETWORK: string;
+            FROM_BLOCK: string;
+            BINANCE_WALLET_ADDRESS: string;
         }
     }
 }
@@ -43,19 +45,26 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-let chain =
-    supportedChains[
-        process.env.NODE_ENV == 'mainnet' ? 'ethereum' : process.env.NODE_ENV
-    ];
-if (!chain) {
-    chain = supportedChains['ethereum'];
-}
+const forkNetwork = process.env.NETWORK as TNetwork;
+const forkChainInfo = supportedChains[forkNetwork];
+const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
+    ? {
+          chainId: forkChainInfo.chainId,
+          forking: {
+              url: forkChainInfo.url,
+              ...(process.env.FROM_BLOCK
+                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
+                  : {}),
+          },
+      }
+    : {};
+
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery }, //{ project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
+    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
     solidity: {
         compilers: [
             {
-                version: '0.8.18',
+                version: '0.8.19',
                 settings: {
                     viaIR: true,
                     optimizer: {
@@ -73,12 +82,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             saveDeployments: false,
-            chainId: 1,
-            // chainId: 42161,
             mining: { auto: true },
-            forking: {
-                url: chain?.url,
-            },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
@@ -88,6 +92,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                 accountsBalance: '1000000000000000000000',
             },
             tags: ['local'],
+            ...forkInfo,
         },
         ...supportedChains,
     },
@@ -107,8 +112,8 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     },
     gasReporter: {},
     dodoc: {
-        runOnCompile: true,
-        freshOutput: true,
+        runOnCompile: false,
+        freshOutput: false,
     },
     mocha: {
         timeout: 4000000,

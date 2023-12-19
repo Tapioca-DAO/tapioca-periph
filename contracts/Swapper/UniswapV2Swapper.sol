@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapV2Router02.sol";
@@ -26,6 +26,9 @@ contract UniswapV2Swapper is BaseSwapper {
     IUniswapV2Router02 public immutable swapRouter;
     IUniswapV2Factory public immutable factory;
     IYieldBox public immutable yieldBox;
+
+    /// *** ERRORS ***
+    error InvalidSwap();
 
     constructor(
         address _router,
@@ -220,7 +223,7 @@ contract UniswapV2Swapper is BaseSwapper {
                 deadline
             );
         } else {
-            revert("UniswapV2Swapper: swap not valid");
+            revert InvalidSwap();
         }
     }
 

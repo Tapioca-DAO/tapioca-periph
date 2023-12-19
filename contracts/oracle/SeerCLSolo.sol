@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 // contracts/oracle/OracleChainlinkSingle.sol
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
 import "./OracleChainlinkSingle.sol";
 import "../interfaces/IOracle.sol" as ITOracle;
@@ -27,6 +27,7 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
         uint8 _decimals,
         address _poolChainlink,
         uint8 _isChainlinkMultiplied,
+        uint32 _stalePeriod,
         address[] memory guardians,
         bytes32 _description,
         address _sequencerUptimeFeed,
@@ -36,18 +37,18 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
             _poolChainlink,
             _isChainlinkMultiplied,
             _decimals,
-            stalePeriod,
+            _stalePeriod,
             guardians,
             _description,
-            _sequencerUptimeFeed
+            _sequencerUptimeFeed,
+            _admin
         )
     {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     /// @notice Get the latest exchange rate.

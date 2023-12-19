@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
-import "@openzeppelin/contracts/access/Ownable.sol";
+pragma solidity 0.8.19;
+
 import "../interfaces/ISingularity.sol";
 import "../interfaces/IBigBang.sol";
 import "../interfaces/IOracle.sol";
@@ -12,7 +12,7 @@ import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
-contract MagnetarHelper is Ownable {
+contract MagnetarHelper {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
 
@@ -67,10 +67,6 @@ contract MagnetarHelper is Ownable {
         address mainBBMarket;
         uint256 mainBBDebtRate;
         uint256 currentDebtRate;
-    }
-
-    constructor(address _owner) {
-        transferOwnership(_owner);
     }
 
     // ******************** //

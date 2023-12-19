@@ -2,9 +2,10 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { loadVM } from '../utils';
 import inquirer from 'inquirer';
-import { buildGLPOracle } from './builds/01-buildGLPOracle';
-import { buildTapOracle } from './builds/02-buildTapOracle';
-import { buildDaiOracle } from './builds/00-buildDaiOracle';
+import { buildGLPOracle } from './builds/buildGLPOracle';
+import { buildTapOracle } from './builds/buildTapOracle';
+import { buildDaiOracle } from './builds/buildDaiOracle';
+import { buildGMXOracle } from './builds/buildGMXOracle';
 
 // hh deployOracles --network goerli
 export const deployOracle__task = async (
@@ -31,6 +32,7 @@ export const deployOracle__task = async (
         'GLPOracle',
         'TapOracle',
         'DaiOracle',
+        'GMXOracle',
         // '[-] Deprecated / ARBTriCryptoOracle',
         // '[-] Deprecated / SGOracle',
     ] as const;
@@ -54,6 +56,9 @@ export const deployOracle__task = async (
     }
     if (buildToDeploy === 'DaiOracle') {
         VM.add(await buildDaiOracle(hre));
+    }
+    if (buildToDeploy === 'GMXOracle') {
+        VM.add(await buildGMXOracle(hre));
     }
 
     const isLocal = hre.network.config.tags.includes('local');

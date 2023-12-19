@@ -1,28 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleUniswapMulti.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleUniSolo
 /// @notice Updated version of the OracleMulti contract that only uses Uniswap
-contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck {
+contract OracleUniSolo is
+    OracleAbstract,
+    ModuleUniswapMulti,
+    SequencerCheck,
+    ReentrancyGuard
+{
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
-
-    /// @notice Reentrancy check
-    bool private entered;
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     /// @notice Constructor for an oracle using both Uniswap to read from
     /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
@@ -33,6 +28,7 @@ contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck {
     /// @param guardians List of governor or guardian addresses
     /// @param _description Description of the assets concerned by the oracle
     /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _admin Address of the admin of the oracle
     constructor(
         address[] memory addressInAndOutUni,
         IUniswapV3Pool[] memory _circuitUniswap,
@@ -41,7 +37,8 @@ contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck {
         uint16 observationLength,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         ModuleUniswapMulti(
             _circuitUniswap,
@@ -51,6 +48,7 @@ contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck {
             guardians
         )
         SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         require(addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
+import {ChainlinkUtils, AggregatorV3Interface, AccessControlDefaultAdminRules} from "../../utils/ChainlinkUtils.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import "../../../interfaces/IOracle.sol" as ITOracle;
 
@@ -31,7 +31,8 @@ interface ICurvePool {
 contract ARBTriCryptoOracle is
     ITOracle.IOracle,
     ChainlinkUtils,
-    SequencerCheck
+    SequencerCheck,
+    ReentrancyGuard
 {
     string public _name;
     string public _symbol;
@@ -46,15 +47,6 @@ contract ARBTriCryptoOracle is
     uint256 public constant A0 = 2 * 3 ** 3 * 10_000;
     uint256 public constant DISCOUNT0 = 1_087_460_000_000_000; // 0.00108..
 
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
-
     constructor(
         string memory __name,
         string memory __symbol,
@@ -65,7 +57,10 @@ contract ARBTriCryptoOracle is
         AggregatorV3Interface wbtcFeed,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    )
+        SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         _name = __name;
         _symbol = __symbol;
         TRI_CRYPTO = pool;
@@ -74,8 +69,7 @@ contract ARBTriCryptoOracle is
         USDT_FEED = usdtFeed;
         WBTC_FEED = wbtcFeed;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {

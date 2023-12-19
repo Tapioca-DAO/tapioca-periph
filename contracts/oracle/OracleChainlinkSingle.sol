@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 
 // contracts/oracle/OracleChainlinkSingle.sol
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import "./modules/ModuleChainlinkSingle.sol";
 import "./OracleAbstract.sol";
 
 /// @title OracleChainlinkSingle
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
 /// @dev This contract concerns an oracle that only uses Chainlink and a single pool
 /// @dev This is mainly going to be the contract used for the USD/EUR pool (or for other fiat currencies)
@@ -17,24 +18,16 @@ import "./OracleAbstract.sol";
 contract OracleChainlinkSingle is
     OracleAbstract,
     ModuleChainlinkSingle,
-    SequencerCheck
+    SequencerCheck,
+    ReentrancyGuard
 {
-    /// @notice Reentrancy check
-    bool private entered;
-
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
-
     /// @notice Constructor for the oracle using a single Chainlink pool
     /// @param _poolChainlink Chainlink pool address
     /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
     /// in-currency amount to get the out-currency amount
     /// @param _inBase Number of units of the in-currency
     /// @param _description Description of the assets concerned by the oracle
+    /// @param _admin Address of the admin of the oracle
     constructor(
         address _poolChainlink,
         uint8 _isChainlinkMultiplied,
@@ -42,7 +35,8 @@ contract OracleChainlinkSingle is
         uint32 stalePeriod,
         address[] memory guardians,
         bytes32 _description,
-        address _sequencerUptimeFeed
+        address _sequencerUptimeFeed,
+        address _admin
     )
         ModuleChainlinkSingle(
             _poolChainlink,
@@ -51,6 +45,7 @@ contract OracleChainlinkSingle is
             guardians
         )
         SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
     {
         inBase = _inBase;
         description = _description;

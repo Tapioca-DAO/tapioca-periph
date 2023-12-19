@@ -1,32 +1,31 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-import {IOracle} from "../../../interfaces/IOracle.sol";
+import {AccessControlDefaultAdminRules} from "../../external/AccessControlDefaultAdminRules.sol";
 import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
-import {AccessControl} from "../../external/AccessControl.sol";
+import {IOracle} from "../../../interfaces/IOracle.sol";
 
-contract GLPOracle is IOracle, SequencerCheck, AccessControl {
+contract GLPOracle is
+    IOracle,
+    SequencerCheck,
+    AccessControlDefaultAdminRules,
+    ReentrancyGuard
+{
     IGmxGlpManager private immutable glpManager;
-
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     constructor(
         IGmxGlpManager glpManager_,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    )
+        SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         glpManager = glpManager_;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {

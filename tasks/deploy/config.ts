@@ -17,12 +17,32 @@ const GLP_ORACLE = {
     },
 };
 
+const ETH_ORACLE = {
+    [EChainID.ARBITRUM]: {
+        WETH_ORACLE: {
+            WETH_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            WETH_USD_CL_DATA_FEED_ADDRESS:
+                '0x639fe6ab55c921f74e7fac1ee960c0b6293ba612',
+        },
+    },
+};
+
 const DAI_ORACLE = {
     [EChainID.MAINNET]: {
         DAI_ORACLE: {
             DAI_ADDRESS: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
             DAI_USD_CL_DATA_FEED_ADDRESS:
                 '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9',
+        },
+    },
+};
+
+const GMX_ORACLE = {
+    [EChainID.ARBITRUM]: {
+        GMX_ORACLE: {
+            GMX_ADDRESS: '0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a',
+            GMX_USD_CL_DATA_FEED_ADDRESS:
+                '0xdb98056fecfff59d032ab628337a4887110df3db',
         },
     },
 };
@@ -81,6 +101,8 @@ export const ARGS_CONFIG = {
     [EChainID.ARBITRUM]: {
         ...TAP_ORACLE[EChainID.ARBITRUM],
         ...GLP_ORACLE[EChainID.ARBITRUM],
+        ...GMX_ORACLE[EChainID.ARBITRUM],
+        ...ETH_ORACLE[EChainID.ARBITRUM],
         ...MISC[EChainID.ARBITRUM],
         ...SWAPPERS_CONFIG[EChainID.ARBITRUM],
     },

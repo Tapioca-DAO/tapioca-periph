@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -47,15 +47,15 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
             observationLength,
             guardians,
             _description,
-            _sequencerUptimeFeed
+            _sequencerUptimeFeed,
+            _admin
         )
     {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _setupRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     /// @notice Get the latest exchange rate.

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {ChainlinkUtils, AggregatorV3Interface} from "../../utils/ChainlinkUtils.sol";
+import {ChainlinkUtils, AggregatorV3Interface, AccessControlDefaultAdminRules} from "../../utils/ChainlinkUtils.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import "../../../interfaces/IOracle.sol" as ITOracle;
 
@@ -19,23 +20,17 @@ interface IStargatePool {
     function token() external view returns (address);
 }
 
-/// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
-/// @dev Addresses are for Arbitrum
-contract SGOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck {
+contract SGOracle is
+    ITOracle.IOracle,
+    ChainlinkUtils,
+    SequencerCheck,
+    ReentrancyGuard
+{
     string public _name;
     string public _symbol;
 
     IStargatePool public immutable SG_POOL;
     AggregatorV3Interface public immutable UNDERLYING;
-
-    /// @notice Reentrancy check
-    bool private entered;
-    modifier nonReentrant() {
-        require(!entered, "Oracle: reentrancy");
-        entered = true;
-        _;
-        entered = false;
-    }
 
     constructor(
         string memory __name,
@@ -44,13 +39,14 @@ contract SGOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck {
         AggregatorV3Interface _underlying,
         address _sequencerUptimeFeed,
         address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) {
+    )
+        SequencerCheck(_sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         _name = __name;
         _symbol = __symbol;
         SG_POOL = pool;
         UNDERLYING = _underlying;
-
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     function decimals() external view returns (uint8) {

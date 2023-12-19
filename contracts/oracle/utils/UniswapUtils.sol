@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.7;
+pragma solidity 0.8.19;
 
+import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "../external/AccessControl.sol";
 import "./OracleMath.sol";
 
 /// @title UniswapUtils
-/// @author Angle Core Team
+/// @author Angle Core Team, modified by Tapioca
 /// @notice Utility contract that is used in the Uniswap module contract
-abstract contract UniswapUtils is AccessControl, OracleMath {
+abstract contract UniswapUtils is AccessControlDefaultAdminRules, OracleMath {
     // The parameters below are common among the different Uniswap modules contracts
 
     /// @notice Time weigthed average window that should be used for each Uniswap rate

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 //OZ
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -50,6 +50,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     error NotValid();
     error ValueMismatch();
     error Failed();
+    error ActionNotValid();
+    error ModuleNotFound();
+    error UnknownReason();
 
     constructor(
         address _cluster,
@@ -69,6 +72,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param _cluster the new address
     function setCluster(ICluster _cluster) external {
         if (address(_cluster) == address(0)) revert NotValid();
+        emit ClusterSet(cluster, _cluster);
         cluster = _cluster;
     }
 
@@ -233,9 +237,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint16 dstChainId,
                     bytes32 receiver,
                     uint256 amount,
-                    uint256 share,
                     bytes memory adapterParams,
-                    address payable refundAddress
+                    address payable refundAddress,
+                    bool unwrap
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -245,9 +249,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint16,
                             bytes32,
                             uint256,
-                            uint256,
                             bytes,
-                            address
+                            address,
+                            bool
                         )
                     );
 
@@ -255,18 +259,20 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 _executeModule(
                     Module.Market,
-                    abi.encodeWithSelector(
-                        MagnetarMarketModule.withdrawToChain.selector,
-                        yieldBox,
-                        from,
-                        assetId,
-                        dstChainId,
-                        receiver,
-                        amount,
-                        share,
-                        adapterParams,
-                        refundAddress,
-                        _action.value
+                    abi.encodeCall(
+                        MagnetarMarketModule.withdrawToChain,
+                        (
+                            IYieldBoxBase(yieldBox),
+                            from,
+                            assetId,
+                            dstChainId,
+                            receiver,
+                            amount,
+                            adapterParams,
+                            refundAddress,
+                            _action.value,
+                            unwrap
+                        )
                     )
                 );
             } else if (_action.id == MARKET_LEND) {
@@ -433,16 +439,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 _executeModule(
                     Module.Market,
-                    abi.encodeWithSelector(
-                        MagnetarMarketModule.mintFromBBAndLendOnSGL.selector,
-                        data.user,
-                        data.lendAmount,
-                        data.mintData,
-                        data.depositData,
-                        data.lockData,
-                        data.participateData,
-                        data.externalContracts,
-                        cluster
+                    abi.encodeCall(
+                        MagnetarMarketModule.mintFromBBAndLendOnSGL,
+                        (
+                            data.user,
+                            data.lendAmount,
+                            data.mintData,
+                            data.depositData,
+                            data.lockData,
+                            data.participateData,
+                            data.externalContracts,
+                            cluster
+                        )
                     )
                 );
             } else if (_action.id == MARKET_YBDEPOSIT_COLLATERAL_AND_BORROW) {
@@ -470,18 +478,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 _executeModule(
                     Module.Market,
-                    abi.encodeWithSelector(
+                    abi.encodeCall(
                         MagnetarMarketModule
-                            .depositAddCollateralAndBorrowFromMarket
-                            .selector,
-                        market,
-                        user,
-                        collateralAmount,
-                        borrowAmount,
-                        false,
-                        deposit,
-                        withdrawParams,
-                        _action.value
+                            .depositAddCollateralAndBorrowFromMarket,
+                        (
+                            IMarket(market),
+                            user,
+                            collateralAmount,
+                            borrowAmount,
+                            false,
+                            deposit,
+                            withdrawParams,
+                            _action.value
+                        )
                     )
                 );
             } else if (_action.id == MARKET_REMOVE_ASSET) {
@@ -501,15 +510,15 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 _executeModule(
                     Module.Market,
-                    abi.encodeWithSelector(
-                        MagnetarMarketModule
-                            .exitPositionAndRemoveCollateral
-                            .selector,
-                        user,
-                        externalData,
-                        removeAndRepayData,
-                        _action.value,
-                        cluster
+                    abi.encodeCall(
+                        MagnetarMarketModule.exitPositionAndRemoveCollateral,
+                        (
+                            user,
+                            externalData,
+                            removeAndRepayData,
+                            _action.value,
+                            cluster
+                        )
                     )
                 );
             } else if (_action.id == MARKET_DEPOSIT_REPAY_REMOVE_COLLATERAL) {
@@ -537,18 +546,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 _executeModule(
                     Module.Market,
-                    abi.encodeWithSelector(
+                    abi.encodeCall(
                         MagnetarMarketModule
-                            .depositRepayAndRemoveCollateralFromMarket
-                            .selector,
-                        market,
-                        user,
-                        depositAmount,
-                        repayAmount,
-                        collateralAmount,
-                        extractFromSender,
-                        withdrawCollateralParams,
-                        _action.value
+                            .depositRepayAndRemoveCollateralFromMarket,
+                        (
+                            market,
+                            user,
+                            depositAmount,
+                            repayAmount,
+                            collateralAmount,
+                            extractFromSender,
+                            withdrawCollateralParams,
+                            _action.value
+                        )
                     )
                 );
             } else if (_action.id == MARKET_BUY_COLLATERAL) {
@@ -627,7 +637,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     data.revokes
                 );
             } else {
-                revert("MagnetarV2: action not valid");
+                revert ActionNotValid();
             }
         }
 
@@ -664,18 +674,20 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _checkSender(from);
         _executeModule(
             Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.withdrawToChain.selector,
-                yieldBox,
-                from,
-                assetId,
-                dstChainId,
-                receiver,
-                amount,
-                adapterParams,
-                refundAddress,
-                gas,
-                unwrap
+            abi.encodeCall(
+                MagnetarMarketModule.withdrawToChain,
+                (
+                    yieldBox,
+                    from,
+                    assetId,
+                    dstChainId,
+                    receiver,
+                    amount,
+                    adapterParams,
+                    refundAddress,
+                    gas,
+                    unwrap
+                )
             )
         );
     }
@@ -706,18 +718,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _checkSender(user);
         _executeModule(
             Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule
-                    .depositAddCollateralAndBorrowFromMarket
-                    .selector,
-                market,
-                user,
-                collateralAmount,
-                borrowAmount,
-                extractFromSender,
-                deposit,
-                withdrawParams,
-                msg.value
+            abi.encodeCall(
+                MagnetarMarketModule.depositAddCollateralAndBorrowFromMarket,
+                (
+                    market,
+                    user,
+                    collateralAmount,
+                    borrowAmount,
+                    extractFromSender,
+                    deposit,
+                    withdrawParams,
+                    msg.value
+                )
             )
         );
     }
@@ -746,18 +758,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _checkSender(user);
         _executeModule(
             Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule
-                    .depositRepayAndRemoveCollateralFromMarket
-                    .selector,
-                market,
-                user,
-                depositAmount,
-                repayAmount,
-                collateralAmount,
-                extractFromSender,
-                withdrawCollateralParams,
-                msg.value
+            abi.encodeCall(
+                MagnetarMarketModule.depositRepayAndRemoveCollateralFromMarket,
+                (
+                    market,
+                    user,
+                    depositAmount,
+                    repayAmount,
+                    collateralAmount,
+                    extractFromSender,
+                    withdrawCollateralParams,
+                    msg.value
+                )
             )
         );
     }
@@ -790,16 +802,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _checkSender(user);
         _executeModule(
             Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.mintFromBBAndLendOnSGL.selector,
-                user,
-                lendAmount,
-                mintData,
-                depositData,
-                lockData,
-                participateData,
-                externalContracts,
-                cluster
+            abi.encodeCall(
+                MagnetarMarketModule.mintFromBBAndLendOnSGL,
+                (
+                    user,
+                    lendAmount,
+                    mintData,
+                    depositData,
+                    lockData,
+                    participateData,
+                    externalContracts,
+                    cluster
+                )
             )
         );
     }
@@ -822,13 +836,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _checkSender(user);
         _executeModule(
             Module.Market,
-            abi.encodeWithSelector(
-                MagnetarMarketModule.exitPositionAndRemoveCollateral.selector,
-                user,
-                externalData,
-                removeAndRepayData,
-                msg.value,
-                cluster
+            abi.encodeCall(
+                MagnetarMarketModule.exitPositionAndRemoveCollateral,
+                (user, externalData, removeAndRepayData, msg.value, cluster)
             )
         );
     }
@@ -947,7 +957,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         }
 
         if (module == address(0)) {
-            revert("MagnetarV2: module not found");
+            revert ModuleNotFound();
         }
 
         return module;
@@ -969,7 +979,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function _getRevertMsg(bytes memory _returnData) private pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert("MagnetarV2: Reason unknown");
+        if (_returnData.length < 68) revert UnknownReason();
 
         assembly {
             // Slice the sighash.

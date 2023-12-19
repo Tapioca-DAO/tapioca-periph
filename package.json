@@ -9,7 +9,9 @@
         "list": "npx hardhat listDeploy --network",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test",
-        "test:main": "NODE_ENV=mainnet hardhat test",
+        "test:mainnet": "NETWORK=ethereum hardhat test",
+        "test:zerox": "NETWORK=ethereum hardhat test test/zeroXSwapper.test.ts",
+        "test:arb": "NETWORK=arbitrum FROM_BLOCK=145526897 hardhat test test/seer.oracle.test.ts",
         "prepare": "husky install",
         "lint:ts": "eslint . --fix --ext ts",
         "lint:sol": "prettier --write \"./contracts/**/*.sol\" && solhint \"./contracts/**/*.sol\" --fix",
@@ -45,7 +47,7 @@
         "eth-sig-util": "^3.0.1",
         "ethereumjs-utils": "^5.2.5",
         "ethers": "^5.7.0",
-        "hardhat": "^2.13.0",
+        "hardhat": "2.13.0",
         "hardhat-contract-sizer": "^2.5.1",
         "hardhat-deploy": "^0.9.6",
         "hardhat-gas-reporter": "^1.0.8",
@@ -73,7 +75,7 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.5.3",
+        "tapioca-sdk": "^1.5.7",
         "uuid": "^9.0.0"
     }
 }
