@@ -22,7 +22,9 @@ interface IPenrose {
         address location;
         ContractType risk;
     }
-    
+
+    function viewTotalDebt() external view returns (uint256);
+
     function computeTotalDebt() external;
 
     function mintOpenInterestDebt(address twTap) external;
