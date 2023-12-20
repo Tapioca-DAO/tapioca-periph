@@ -25,7 +25,7 @@ interface IPenrose {
 
     function viewTotalDebt() external view returns (uint256);
 
-    function computeTotalDebt() external;
+    function computeTotalDebt() external returns (uint256 totalUsdoDebt);
 
     function mintOpenInterestDebt(address twTap) external;
 
