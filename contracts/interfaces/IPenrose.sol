@@ -22,6 +22,10 @@ interface IPenrose {
         address location;
         ContractType risk;
     }
+    
+    function computeTotalDebt() external;
+
+    function mintOpenInterestDebt(address twTap) external;
 
     function bigBangEthMarket() external view returns (address);
 
