@@ -61,7 +61,8 @@ contract UniswapV3Swapper is BaseSwapper {
     constructor(
         IYieldBoxBase _yieldBox,
         ISwapRouter _swapRouter,
-        IUniswapV3Factory _factory
+        IUniswapV3Factory _factory,
+        address _owner
     )
         validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
@@ -70,6 +71,7 @@ contract UniswapV3Swapper is BaseSwapper {
         yieldBox = _yieldBox;
         swapRouter = _swapRouter;
         factory = _factory;
+        transferOwnership(_owner);
     }
 
     /// *** OWNER METHODS ***

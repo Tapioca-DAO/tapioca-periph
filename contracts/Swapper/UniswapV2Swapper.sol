@@ -33,7 +33,8 @@ contract UniswapV2Swapper is BaseSwapper {
     constructor(
         address _router,
         address _factory,
-        IYieldBoxBase _yieldBox
+        IYieldBoxBase _yieldBox,
+        address _owner
     )
         validAddress(_router)
         validAddress(_factory)
@@ -42,6 +43,7 @@ contract UniswapV2Swapper is BaseSwapper {
         swapRouter = IUniswapV2Router02(_router);
         factory = IUniswapV2Factory(_factory);
         yieldBox = _yieldBox;
+        transferOwnership(_owner);
     }
 
     /// *** VIEW METHODS ***

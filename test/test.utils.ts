@@ -358,6 +358,7 @@ async function registerMultiSwapper(
         __uniRouterAddress,
         __uniFactoryAddress,
         yieldBox.address,
+        deployer.address,
     );
     log(
         `Deployed MultiSwapper ${multiSwapper.address} with args [${__uniFactoryAddress}, ${yieldBox.address}]`,
@@ -1511,6 +1512,7 @@ export async function register(staging?: boolean) {
     };
 
     const initContracts = async () => {
+        const deployerAddress = deployer.address;
         await (await weth.mintTo(deployerAddress, 1000)).wait();
 
         const mintValShare = await yieldBox.toShare(
@@ -1634,14 +1636,14 @@ export async function registerFork() {
     const factory = process.env.UniswapV2Factory!;
     const uniswapV2Swapper = await (
         await ethers.getContractFactory('UniswapV2Swapper')
-    ).deploy(router, factory, yieldBox.address);
+    ).deploy(router, factory, yieldBox.address, deployer.address);
     await uniswapV2Swapper.deployed();
 
     const routerV3 = process.env.UniswapV3Router!;
     const factoryV3 = process.env.UniswapV3Factory!;
     const uniswapV3Swapper = await (
         await ethers.getContractFactory('UniswapV3Swapper')
-    ).deploy(yieldBox.address, routerV3, factoryV3);
+    ).deploy(yieldBox.address, routerV3, factoryV3, deployer.address);
     await uniswapV3Swapper.deployed();
 
     const curve3Pool = process.env.Curve3Pool!;
