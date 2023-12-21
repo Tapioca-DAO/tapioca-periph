@@ -766,36 +766,15 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     ) private {
         // perform a same chain withdrawal
         if (dstChainId == 0) {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
+            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
             return;
         }
+
         if (msg.value > 0) {
             if (msg.value != gas) revert GasMismatch();
         }
         // perform a cross chain withdrawal
         (, address asset, , ) = yieldBox.assets(assetId);
-        // make sure the asset supports a cross chain operation
-        try
-            IERC165(address(asset)).supportsInterface(
-                type(ISendFrom).interfaceId
-            )
-        {} catch {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
-            return;
-        }
-
         // withdraw from YieldBox
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
 
@@ -813,25 +792,51 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         if (unwrap) {
             ICommonData.IApproval[]
                 memory approvals = new ICommonData.IApproval[](0);
-            ITapiocaOFT(address(asset)).triggerSendFromWithParams{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams,
-                true,
-                approvals,
-                approvals
-            );
+            try
+                ITapiocaOFT(address(asset)).triggerSendFromWithParams{
+                    value: gas
+                }(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams,
+                    true,
+                    approvals,
+                    approvals
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         } else {
-            ISendFrom(address(asset)).sendFrom{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams
-            );
+            try
+                ISendFrom(address(asset)).sendFrom{value: gas}(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         }
+    }
+
+    function _withdrawOnThisChain(
+        IYieldBoxBase yieldBox,
+        uint256 assetId,
+        address from,
+        bytes32 receiver,
+        uint256 amount
+    ) private {
+        yieldBox.withdraw(
+            assetId,
+            from,
+            LzLib.bytes32ToAddress(receiver),
+            amount,
+            0
+        );
     }
 
     function _withdraw(

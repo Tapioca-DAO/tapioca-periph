@@ -132,4 +132,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         ICommonOFT.LzCallParams calldata lzCallParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable;
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
