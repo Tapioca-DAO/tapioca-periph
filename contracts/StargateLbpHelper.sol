@@ -135,8 +135,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 SLIPPAGE_PRECISION);
 
         // approve token for Stargate router
-        erc20.safeApprove(address(router), 0);
-        erc20.safeApprove(address(router), stargateData.amount);
+        _safeApprove(address(erc20), address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
         router.swap{value: msg.value}(
