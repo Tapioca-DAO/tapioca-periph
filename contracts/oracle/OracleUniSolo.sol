@@ -65,7 +65,7 @@ contract OracleUniSolo is
     /// @dev By default even if there is a Chainlink rate, this function returns the Uniswap rate
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
     function read() external view override returns (uint256) {
-        return _readUniswapQuote(10 ** inBase);
+        return _readUniswapQuote(inBase);
     }
 
     /// @notice Converts an in-currency quote amount to out-currency using the Uniswap rate

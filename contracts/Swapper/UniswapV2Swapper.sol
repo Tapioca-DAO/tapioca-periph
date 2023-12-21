@@ -25,7 +25,7 @@ contract UniswapV2Swapper is BaseSwapper {
     /// ***  ***
     IUniswapV2Router02 public immutable swapRouter;
     IUniswapV2Factory public immutable factory;
-    IYieldBox public immutable yieldBox;
+    IYieldBoxBase public immutable yieldBox;
 
     /// *** ERRORS ***
     error InvalidSwap();
@@ -33,7 +33,8 @@ contract UniswapV2Swapper is BaseSwapper {
     constructor(
         address _router,
         address _factory,
-        IYieldBox _yieldBox
+        IYieldBoxBase _yieldBox,
+        address _owner
     )
         validAddress(_router)
         validAddress(_factory)
@@ -42,6 +43,7 @@ contract UniswapV2Swapper is BaseSwapper {
         swapRouter = IUniswapV2Router02(_router);
         factory = IUniswapV2Factory(_factory);
         yieldBox = _yieldBox;
+        transferOwnership(_owner);
     }
 
     /// *** VIEW METHODS ***
@@ -168,14 +170,20 @@ contract UniswapV2Swapper is BaseSwapper {
                     address(yieldBox),
                     amountOut
                 );
+                (, shareOut) = yieldBox.depositAsset(
+                    swapData.tokensData.tokenOutId,
+                    address(this),
+                    to,
+                    amountOut,
+                    0
+                );
+            } else {
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
+                    swapData.tokensData.tokenOutId,
+                    to,
+                    amountOut
+                );
             }
-            (, shareOut) = yieldBox.depositAsset(
-                swapData.tokensData.tokenOutId,
-                address(this),
-                to,
-                amountOut,
-                0
-            );
         }
     }
 
@@ -188,7 +196,6 @@ contract UniswapV2Swapper is BaseSwapper {
         uint256 deadline
     ) private returns (uint256[] memory amounts) {
         // Create swap path for UniswapV2Router02 operations
-
         address _tokenIn = tokenIn != address(0) ? tokenIn : swapRouter.WETH();
         address _tokenOut = tokenOut != address(0)
             ? tokenOut
