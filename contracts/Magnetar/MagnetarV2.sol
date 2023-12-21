@@ -149,7 +149,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
                 _checkSender(data.from);
                 ITapiocaOFT(_action.target).wrap{value: _action.value}(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.amount
                 );
@@ -173,7 +173,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(from);
 
                 ISendFrom(_action.target).sendFrom{value: _action.value}(
-                    msg.sender,
+                    from,
                     dstChainId,
                     to,
                     amount,
@@ -190,7 +190,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     _action.target
                 ).depositAsset(
                         data.assetId,
-                        msg.sender,
+                        data.from,
                         data.to,
                         data.amount,
                         data.share
@@ -207,7 +207,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(data.from);
 
                 IMarket(_action.target).addCollateral(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.skim,
                     data.amount,
@@ -221,7 +221,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(data.from);
 
                 (uint256 part, uint256 share) = IMarket(_action.target).borrow(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.amount
                 );
@@ -283,7 +283,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(data.from);
 
                 uint256 fraction = IMarket(_action.target).addAsset(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.skim,
                     data.share
@@ -300,7 +300,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 _checkSender(data.from);
 
                 uint256 amount = IMarket(_action.target).repay(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.skim,
                     data.part
@@ -339,7 +339,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 ITapiocaOFT(_action.target).sendToYBAndBorrow{
                     value: _action.value
                 }(
-                    msg.sender,
+                    from,
                     to,
                     lzDstChainId,
                     airdropAdapterParams,
@@ -379,7 +379,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 IUSDOBase(_action.target).sendAndLendOrRepay{
                     value: _action.value
                 }(
-                    msg.sender,
+                    from,
                     to,
                     dstChainId,
                     zroPaymentAddress,
@@ -399,7 +399,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 ITapiocaOFT(_action.target).sendToStrategy{
                     value: _action.value
                 }(
-                    msg.sender,
+                    data.from,
                     data.to,
                     data.amount,
                     data.assetId,
