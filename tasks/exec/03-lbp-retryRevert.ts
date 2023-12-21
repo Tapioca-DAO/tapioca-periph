@@ -3,7 +3,7 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 
 export const retryRevertOnLbpHelper__task = async (
-    taskArgs: {},
+    {},
     hre: HardhatRuntimeEnvironment,
 ) => {
     const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
