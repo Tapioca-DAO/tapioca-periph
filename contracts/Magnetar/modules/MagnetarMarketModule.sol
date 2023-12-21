@@ -28,6 +28,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     error tOLPTokenMismatch();
     error LockTargetMismatch();
     error Failed();
+    error GasMismatch();
 
     function withdrawToChain(
         IYieldBoxBase yieldBox,
@@ -772,6 +773,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 0
             );
             return;
+        }
+        if (msg.value > 0) {
+            if (msg.value != gas) revert GasMismatch();
         }
         // perform a cross chain withdrawal
         (, address asset, , ) = yieldBox.assets(assetId);
