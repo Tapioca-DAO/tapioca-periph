@@ -23,6 +23,12 @@ interface IPenrose {
         ContractType risk;
     }
 
+    function viewTotalDebt() external view returns (uint256);
+
+    function computeTotalDebt() external returns (uint256 totalUsdoDebt);
+
+    function mintOpenInterestDebt(address twTap) external;
+
     function bigBangEthMarket() external view returns (address);
 
     function bigBangEthDebtRate() external view returns (uint256);
