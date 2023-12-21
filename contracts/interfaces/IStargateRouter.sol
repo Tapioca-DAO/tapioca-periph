@@ -1,6 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+import "./ILayerZeroEndpoint.sol";
+
+interface IStargateBridge {
+    function quoteLayerZeroFee(
+        uint16 _chainId,
+        uint8 _functionType,
+        bytes calldata _toAddress,
+        bytes calldata _transferAndCallPayload,
+        IStargateRouterBase.lzTxObj memory _lzTxParams
+    ) external view returns (uint256, uint256);
+
+    function layerZeroEndpoint() external view returns (ILayerZeroEndpoint);
+
+    function gasLookup(uint16, uint8) external view returns (uint256);
+}
+
 interface IStargateRouterBase {
     //for Router
     struct lzTxObj {
@@ -31,6 +47,8 @@ interface IStargateRouter is IStargateRouterBase {
         uint256 _amountLD, // the amount, in Local Decimals, to be swapped
         uint256 _minAmountLD // the minimum amount accepted out on destination
     ) external payable;
+
+    function bridge() external view returns (IStargateBridge);
 
     function poolId() external view returns (uint256);
 
@@ -71,8 +89,6 @@ interface IStargateRouter is IStargateRouterBase {
         bytes calldata _to,
         lzTxObj memory _lzTxParams
     ) external payable;
-
-    function bridge() external view returns (address);
 
     function addLiquidity(
         uint256 _poolId,
