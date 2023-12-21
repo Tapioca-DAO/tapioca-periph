@@ -4,6 +4,12 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, register, registerFork } from './test.utils';
 
 describe('Cluster', () => {
+    before(function () {
+        if (process.env.NETWORK != 'ethereum') {
+            console.log('[!] Cluster tests are only for ethereum fork');
+            this.skip();
+        }
+    });
     describe('editors', () => {
         it('should update editors', async () => {
             const { cluster, eoa1 } = await loadFixture(register);

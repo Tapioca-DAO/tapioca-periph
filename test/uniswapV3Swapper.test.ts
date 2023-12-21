@@ -5,7 +5,10 @@ import { BN, registerFork } from './test.utils';
 
 describe('UniswapV3Swapper', () => {
     before(function () {
-        if (process.env.NODE_ENV != 'mainnet') {
+        if (process.env.NETWORK != 'ethereum') {
+            console.log(
+                '[!] UniswapV3Swapper tests are only for ethereum fork',
+            );
             this.skip();
         }
     });

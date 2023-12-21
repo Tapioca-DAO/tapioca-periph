@@ -5,10 +5,14 @@ import { BN, registerFork } from './test.utils';
 
 describe('UniswapV2Swapper', () => {
     before(function () {
-        if (process.env.NODE_ENV != 'mainnet') {
+        if (process.env.NETWORK != 'ethereum') {
+            console.log(
+                '[!] UniswapV2Swapper tests are only for ethereum fork',
+            );
             this.skip();
         }
     });
+
     describe('getOutputAmount()', () => {
         it('should get output amount', async () => {
             const { uniswapV2Swapper, weth, usdc, createSimpleSwapData } =

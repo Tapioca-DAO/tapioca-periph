@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import "./interfaces/IBalancerVault.sol";
 import "./interfaces/IStargateRouter.sol";
 import "./interfaces/ILiquidityBootstrappingPool.sol";
+import "./interfaces/IStargateLbpHelper.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -19,6 +20,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         address targetToken;
         uint16 dstChainId;
         address peer; // StargateLbpHelper address on destination
+        address receiver; // Receiver address on destination
         uint256 amount;
         uint256 slippage;
         uint256 srcPoolId;
@@ -40,6 +42,21 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     IBalancerVault public immutable lbpVault;
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
+
+    event ReceiveFailed(
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
+    );
+    event ReceiveSuccess(
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
+    );
 
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
@@ -77,6 +94,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 SLIPPAGE_PRECISION);
 
         // approve token for Stargate router
+        erc20.safeApprove(address(router), 0);
         erc20.safeApprove(address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
@@ -92,16 +110,16 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 dstNativeAmount: 0,
                 dstNativeAddr: "0x0"
             }),
-            abi.encodePacked(msg.sender), // StargateLbpHelper.sol destination address
-            abi.encode(lbpData, msg.sender)
+            abi.encodePacked(stargateData.peer), // StargateLbpHelper.sol destination address
+            abi.encode(lbpData, stargateData.receiver)
         );
     }
 
     /// @notice receive call for Stargate
     function sgReceive(
-        uint16, // the remote chainId sending the tokens
+        uint16 srcChainId, // the remote chainId sending the tokens
         bytes memory, // the remote Bridge address
-        uint256,
+        uint256 nonce,
         address token, // the token contract on the local chain
         uint256 amountLD, // the qty of local _token contract tokens
         bytes memory payload
@@ -109,6 +127,32 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         if (msg.sender != address(router)) revert NotAuthorized();
         // will just ignore the payload in some invalid configuration
         if (payload.length <= 40) return; // 20 + 20 + payload
+
+        try
+            IStargateLbpHelper(address(this))._sgReceive(
+                token,
+                amountLD,
+                payload
+            )
+        {
+            emit ReceiveSuccess(srcChainId, token, nonce, amountLD, payload);
+        } catch {
+            emit ReceiveFailed(srcChainId, token, nonce, amountLD, payload);
+            // decode payload
+            (, address receiver) = abi.decode(
+                payload,
+                (ParticipateData, address)
+            );
+            IERC20(token).safeTransfer(receiver, amountLD);
+        }
+    }
+
+    function _sgReceive(
+        address token, // the token contract on the local chain
+        uint256 amountLD, // the qty of local _token contract tokens
+        bytes memory payload
+    ) external {
+        if (msg.sender != address(this)) revert NotAuthorized();
 
         // decode payload
         (ParticipateData memory data, address receiver) = abi.decode(
@@ -162,55 +206,5 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 nonce
     ) external payable onlyOwner {
         router.retryRevert{value: msg.value}(srcChainId, srcAddress, nonce);
-    }
-
-    function instantRedeemLocal(
-        uint16 _srcPoolId,
-        uint256 _amountLP,
-        address _to
-    ) external onlyOwner returns (uint256 amountSD) {
-        amountSD = router.instantRedeemLocal(_srcPoolId, _amountLP, _to);
-    }
-
-    function redeemLocal(
-        uint16 _dstChainId,
-        uint256 _srcPoolId,
-        uint256 _dstPoolId,
-        address payable _refundAddress,
-        uint256 _amountLP,
-        bytes calldata _to,
-        IStargateRouter.lzTxObj memory _lzTxParams
-    ) external payable onlyOwner {
-        router.redeemLocal{value: msg.value}(
-            _dstChainId,
-            _srcPoolId,
-            _dstPoolId,
-            _refundAddress,
-            _amountLP,
-            _to,
-            _lzTxParams
-        );
-    }
-
-    function redeemRemote(
-        uint16 _dstChainId,
-        uint256 _srcPoolId,
-        uint256 _dstPoolId,
-        address payable _refundAddress,
-        uint256 _amountLP,
-        uint256 _minAmountLD,
-        bytes calldata _to,
-        IStargateRouter.lzTxObj memory _lzTxParams
-    ) external payable onlyOwner {
-        router.redeemRemote{value: msg.value}(
-            _dstChainId,
-            _srcPoolId,
-            _dstPoolId,
-            _refundAddress,
-            _amountLP,
-            _minAmountLD,
-            _to,
-            _lzTxParams
-        );
     }
 }
