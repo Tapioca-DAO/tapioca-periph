@@ -37,6 +37,7 @@ interface IWETH9 {
 /// @title UniswapV3 swapper contract
 contract UniswapV3Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     // ************ //
     // *** VARS *** //
@@ -233,7 +234,7 @@ contract UniswapV3Swapper is BaseSwapper {
         );
         if (swapData.yieldBoxData.depositToYb) {
             if (tokenOut != address(0)) {
-                _safeApprove(tokenOut, address(yieldBox), amountOut);
+                tokenOut.safeApprove(address(yieldBox), amountOut);
                 (, shareOut) = yieldBox.depositAsset(
                     swapData.tokensData.tokenOutId,
                     address(this),

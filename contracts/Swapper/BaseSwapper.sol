@@ -8,8 +8,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/ISwapper.sol";
 import "../interfaces/IYieldBoxBase.sol";
 
+import "../libraries/SafeApprove.sol";
+
 abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     /// *** ERRORS ***
     /// ***  ***
@@ -95,25 +98,6 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         swapData.tokensData = swapTokenData;
         swapData.amountData = swapAmountData;
         swapData.yieldBoxData = swapYBData;
-    }
-
-    function _safeApprove(address token, address to, uint256 value) internal {
-        if (token.code.length == 0) revert NoContract();
-        bool success;
-        bytes memory data;
-        (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, 0)));
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "BaseSwapper::safeApprove: approve failed"
-        );
-
-        (success, data) = token.call(
-            abi.encodeCall(IERC20.approve, (to, value))
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "BaseSwapper::safeApprove: approve failed"
-        );
     }
 
     function _getTokens(
