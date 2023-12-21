@@ -43,6 +43,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
 
+    uint8 internal constant PARTICIPATE_FN = 1;
     event ReceiveFailed(
         uint16 indexed srcChainId,
         address indexed token,
@@ -65,12 +66,49 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     error NotAuthorized();
     error BalanceTooLow();
     error TokensMismatch();
+    error UnsupportedFunctionType();
 
     constructor(address _router, address _lbpPool, address _vault) {
         if (_router == address(0)) revert RouterNotValid();
         router = IStargateRouter(_router);
         lbpPool = ILiquidityBootstrappingPool(_lbpPool); // address(0) for non-host chains
         lbpVault = IBalancerVault(_vault); // address(0) for non-host chains
+    }
+
+    // ********************** //
+    // *** VIEW FUNCTIONS *** //
+    // ********************** //
+    function quoteLayerZeroFee(
+        uint16 _dstChainId,
+        uint8 _functionType,
+        bytes calldata _toAddress,
+        bytes calldata,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external view returns (uint256, uint256) {
+        bytes memory payload = "";
+        if (_functionType == PARTICIPATE_FN) {
+            ParticipateData memory participateData = ParticipateData({
+                assetIn: address(0),
+                assetOut: address(0),
+                poolId: 0,
+                deadline: block.timestamp,
+                minAmountOut: 0
+            });
+            payload = abi.encode(participateData, _toAddress);
+        } else {
+            revert UnsupportedFunctionType();
+        }
+
+        IStargateBridge bridge = router.bridge();
+        ILayerZeroEndpoint endpoint = bridge.layerZeroEndpoint();
+        return
+            endpoint.estimateFees(
+                _dstChainId,
+                address(bridge),
+                payload,
+                false,
+                _txParamBuilder(_dstChainId, _functionType, _lzTxParams)
+            );
     }
 
     // ************************ //
@@ -206,5 +244,88 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 nonce
     ) external payable onlyOwner {
         router.retryRevert{value: msg.value}(srcChainId, srcAddress, nonce);
+    }
+
+    function instantRedeemLocal(
+        uint16 _srcPoolId,
+        uint256 _amountLP,
+        address _to
+    ) external onlyOwner returns (uint256 amountSD) {
+        amountSD = router.instantRedeemLocal(_srcPoolId, _amountLP, _to);
+    }
+
+    function redeemLocal(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        bytes calldata _to,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external payable onlyOwner {
+        router.redeemLocal{value: msg.value}(
+            _dstChainId,
+            _srcPoolId,
+            _dstPoolId,
+            _refundAddress,
+            _amountLP,
+            _to,
+            _lzTxParams
+        );
+    }
+
+    function redeemRemote(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        uint256 _minAmountLD,
+        bytes calldata _to,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external payable onlyOwner {
+        router.redeemRemote{value: msg.value}(
+            _dstChainId,
+            _srcPoolId,
+            _dstPoolId,
+            _refundAddress,
+            _amountLP,
+            _minAmountLD,
+            _to,
+            _lzTxParams
+        );
+    }
+
+    // ************************* //
+    // *** PRIVATE FUNCTIONS *** //
+    // ************************* //
+    function _txParamBuilder(
+        uint16 _chainId,
+        uint8 _type,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) private view returns (bytes memory) {
+        bytes memory lzTxParam;
+        address dstNativeAddr;
+        {
+            bytes memory dstNativeAddrBytes = _lzTxParams.dstNativeAddr;
+            assembly {
+                dstNativeAddr := mload(add(dstNativeAddrBytes, 20))
+            }
+        }
+
+        uint256 totalGas = router.bridge().gasLookup(_chainId, _type) +
+            _lzTxParams.dstGasForCall;
+        if (_lzTxParams.dstNativeAmount > 0 && dstNativeAddr != address(0x0)) {
+            lzTxParam = abi.encodePacked(
+                uint16(2),
+                totalGas,
+                _lzTxParams.dstNativeAmount,
+                _lzTxParams.dstNativeAddr
+            );
+        } else {
+            lzTxParam = abi.encodePacked(uint16(1), totalGas);
+        }
+
+        return lzTxParam;
     }
 }
