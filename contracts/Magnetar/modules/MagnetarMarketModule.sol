@@ -28,6 +28,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     error tOLPTokenMismatch();
     error LockTargetMismatch();
     error Failed();
+    error GasMismatch();
 
     function withdrawToChain(
         IYieldBoxBase yieldBox,
@@ -220,7 +221,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     borrowAmount,
                     false,
                     valueAmount,
-                    false
+                    false,
+                    withdrawParams.refundAddress
                 );
             }
         }
@@ -302,7 +304,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     LzLib.addressToBytes32(user),
                     collateralAmount,
                     withdrawCollateralParams.withdrawAdapterParams,
-                    valueAmount > 0 ? payable(msg.sender) : payable(this),
+                    withdrawCollateralParams.refundAddress,
                     valueAmount,
                     withdrawCollateralParams.unwrap
                 );
@@ -646,11 +648,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - if `removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
         uint256 _removeAmount = removeAndRepayData.removeAmount;
         if (removeAndRepayData.removeAssetFromSGL) {
-            uint256 share = yieldBox.toShare(
-                singularity.assetId(),
-                _removeAmount,
-                false
-            );
+            uint256 _assetId = singularity.assetId();
+            uint256 share = yieldBox.toShare(_assetId, _removeAmount, false);
 
             address removeAssetTo = removeAndRepayData
                 .assetWithdrawData
@@ -673,10 +672,11 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     withdrawAssetBytes,
                     singularity,
                     yieldBox,
-                    _removeAmount,
+                    yieldBox.toAmount(_assetId, share, false), // re-compute amount to avoid rounding issues
                     false,
                     valueAmount,
-                    false
+                    false,
+                    removeAndRepayData.assetWithdrawData.refundAddress
                 );
             }
         }
@@ -711,8 +711,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         // performs a BigBang removeCollateral operation
         // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (removeAndRepayData.removeCollateralFromBB) {
+            uint256 _collateralId = bigBang.collateralId();
             uint256 collateralShare = yieldBox.toShare(
-                bigBang.collateralId(),
+                _collateralId,
                 removeAndRepayData.collateralAmount,
                 false
             );
@@ -740,10 +741,11 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     withdrawCollateralBytes,
                     singularity,
                     yieldBox,
-                    removeAndRepayData.collateralAmount,
+                    yieldBox.toAmount(_collateralId, collateralShare, false), // re-compute amount to avoid rounding issues
                     true,
                     valueAmount,
-                    removeAndRepayData.collateralWithdrawData.unwrap
+                    removeAndRepayData.collateralWithdrawData.unwrap,
+                    removeAndRepayData.collateralWithdrawData.refundAddress
                 );
             }
         }
@@ -764,40 +766,22 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     ) private {
         // perform a same chain withdrawal
         if (dstChainId == 0) {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
-            return;
-        }
-        // perform a cross chain withdrawal
-        (, address asset, , ) = yieldBox.assets(assetId);
-        // make sure the asset supports a cross chain operation
-        try
-            IERC165(address(asset)).supportsInterface(
-                type(ISendFrom).interfaceId
-            )
-        {} catch {
-            yieldBox.withdraw(
-                assetId,
-                from,
-                LzLib.bytes32ToAddress(receiver),
-                amount,
-                0
-            );
+            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
             return;
         }
 
+        if (msg.value > 0) {
+            if (msg.value != gas) revert GasMismatch();
+        }
+        // perform a cross chain withdrawal
+        (, address asset, , ) = yieldBox.assets(assetId);
         // withdraw from YieldBox
         yieldBox.withdraw(assetId, from, address(this), amount, 0);
 
         // build LZ params
         bytes memory _adapterParams;
         ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
-            refundAddress: msg.value == gas ? refundAddress : payable(this),
+            refundAddress: refundAddress,
             zroPaymentAddress: address(0),
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
                 ? adapterParams
@@ -808,25 +792,51 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         if (unwrap) {
             ICommonData.IApproval[]
                 memory approvals = new ICommonData.IApproval[](0);
-            ITapiocaOFT(address(asset)).triggerSendFromWithParams{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams,
-                true,
-                approvals,
-                approvals
-            );
+            try
+                ITapiocaOFT(address(asset)).triggerSendFromWithParams{
+                    value: gas
+                }(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams,
+                    true,
+                    approvals,
+                    approvals
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         } else {
-            ISendFrom(address(asset)).sendFrom{value: gas}(
-                address(this),
-                dstChainId,
-                receiver,
-                amount,
-                callParams
-            );
+            try
+                ISendFrom(address(asset)).sendFrom{value: gas}(
+                    address(this),
+                    dstChainId,
+                    receiver,
+                    amount,
+                    callParams
+                )
+            {} catch {
+                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            }
         }
+    }
+
+    function _withdrawOnThisChain(
+        IYieldBoxBase yieldBox,
+        uint256 assetId,
+        address from,
+        bytes32 receiver,
+        uint256 amount
+    ) private {
+        yieldBox.withdraw(
+            assetId,
+            from,
+            LzLib.bytes32ToAddress(receiver),
+            amount,
+            0
+        );
     }
 
     function _withdraw(
@@ -837,7 +847,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 amount,
         bool withdrawCollateral,
         uint256 valueAmount,
-        bool unwrap
+        bool unwrap,
+        address payable refundAddress
     ) private {
         if (withdrawData.length == 0) revert NotValid();
         (
@@ -855,7 +866,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             receiver,
             amount,
             adapterParams,
-            valueAmount > 0 ? payable(msg.sender) : payable(this),
+            refundAddress,
             valueAmount,
             unwrap
         );

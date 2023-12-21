@@ -9,6 +9,7 @@ interface ICommonData {
         uint16 withdrawLzChainId;
         bytes withdrawAdapterParams;
         bool unwrap; // valid only for TOFTs
+        address payable refundAddress;
     }
 
     struct ISendOptions {
