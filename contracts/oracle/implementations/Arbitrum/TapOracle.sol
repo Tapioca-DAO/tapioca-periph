@@ -75,6 +75,7 @@ contract TapOracle is SeerUniSolo {
         nonReentrant
         returns (bool success, uint256 rate)
     {
+        _sequencerBeatCheck();
         (, uint256 price) = _readAll(inBase);
 
         /// @dev If the last update was more than FETCH_TIME seconds ago, update the last price.

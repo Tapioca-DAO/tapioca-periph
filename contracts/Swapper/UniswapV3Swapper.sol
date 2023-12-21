@@ -41,7 +41,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************ //
     // *** VARS *** //
     // ************ //
-    IYieldBox private immutable yieldBox;
+    IYieldBoxBase private immutable yieldBox;
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable factory;
 
@@ -59,9 +59,10 @@ contract UniswapV3Swapper is BaseSwapper {
     error UnwrapFailed();
 
     constructor(
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         ISwapRouter _swapRouter,
-        IUniswapV3Factory _factory
+        IUniswapV3Factory _factory,
+        address _owner
     )
         validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
@@ -70,6 +71,7 @@ contract UniswapV3Swapper is BaseSwapper {
         yieldBox = _yieldBox;
         swapRouter = _swapRouter;
         factory = _factory;
+        transferOwnership(_owner);
     }
 
     /// *** OWNER METHODS ***
@@ -232,14 +234,20 @@ contract UniswapV3Swapper is BaseSwapper {
         if (swapData.yieldBoxData.depositToYb) {
             if (tokenOut != address(0)) {
                 _safeApprove(tokenOut, address(yieldBox), amountOut);
+                (, shareOut) = yieldBox.depositAsset(
+                    swapData.tokensData.tokenOutId,
+                    address(this),
+                    to,
+                    amountOut,
+                    0
+                );
+            } else {
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
+                    swapData.tokensData.tokenOutId,
+                    to,
+                    amountOut
+                );
             }
-            (, shareOut) = yieldBox.depositAsset(
-                swapData.tokensData.tokenOutId,
-                address(this),
-                to,
-                amountOut,
-                0
-            );
         }
     }
 
