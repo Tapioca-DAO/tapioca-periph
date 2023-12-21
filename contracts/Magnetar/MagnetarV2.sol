@@ -425,7 +425,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 ITapiocaOFT(_action.target).retrieveFromStrategy{
                     value: _action.value
                 }(
-                    msg.sender,
+                    from,
                     amount,
                     assetId,
                     lzDstChainId,
