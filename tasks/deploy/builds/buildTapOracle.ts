@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { Seer__factory } from '../../../typechain';
 import { displaySeerArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
 
 export const buildTapOracle = async (
     hre: HardhatRuntimeEnvironment,
