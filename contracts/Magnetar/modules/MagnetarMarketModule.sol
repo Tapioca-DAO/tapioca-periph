@@ -300,15 +300,16 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 collateralShare
             );
 
+            uint256 collateralId = marketInterface.collateralId();
             //withdraw
             if (withdrawCollateralParams.withdraw) {
                 _withdrawToChain(
                     yieldBox,
                     collateralWithdrawReceiver,
-                    marketInterface.collateralId(),
+                    collateralId,
                     withdrawCollateralParams.withdrawLzChainId,
                     LzLib.addressToBytes32(user),
-                    collateralAmount,
+                    yieldBox.toAmount(collateralId, collateralShare, false),
                     withdrawCollateralParams.withdrawAdapterParams,
                     withdrawCollateralParams.refundAddress,
                     valueAmount,
