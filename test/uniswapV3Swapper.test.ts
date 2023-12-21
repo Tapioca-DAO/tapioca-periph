@@ -4,6 +4,14 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, registerFork } from './test.utils';
 
 describe('UniswapV3Swapper', () => {
+    before(function () {
+        if (process.env.NETWORK != 'ethereum') {
+            console.log(
+                '[!] UniswapV3Swapper tests are only for ethereum fork',
+            );
+            this.skip();
+        }
+    });
     describe('getOutputAmount()', () => {
         it('should get output amount', async () => {
             const { uniswapV3Swapper, weth, usdc, createSimpleSwapData } =

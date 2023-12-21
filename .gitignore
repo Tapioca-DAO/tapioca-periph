@@ -5,10 +5,15 @@ coverage.json
 typechain
 tapioca-sdk
 package-lock.json
+docs
 
 #Hardhat files
 cache
 artifacts
+
+#Forge
+cache_forge
+out
 
 #Others
 .DS_Store
