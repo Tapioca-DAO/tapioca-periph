@@ -647,11 +647,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - if `removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
         uint256 _removeAmount = removeAndRepayData.removeAmount;
         if (removeAndRepayData.removeAssetFromSGL) {
-            uint256 share = yieldBox.toShare(
-                singularity.assetId(),
-                _removeAmount,
-                false
-            );
+            uint256 _assetId = singularity.assetId();
+            uint256 share = yieldBox.toShare(_assetId, _removeAmount, false);
 
             address removeAssetTo = removeAndRepayData
                 .assetWithdrawData
@@ -674,7 +671,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     withdrawAssetBytes,
                     singularity,
                     yieldBox,
-                    _removeAmount,
+                    yieldBox.toAmount(_assetId, share, false), // re-compute amount to avoid rounding issues
                     false,
                     valueAmount,
                     false
@@ -712,8 +709,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         // performs a BigBang removeCollateral operation
         // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (removeAndRepayData.removeCollateralFromBB) {
+            uint256 _collateralId = bigBang.collateralId();
             uint256 collateralShare = yieldBox.toShare(
-                bigBang.collateralId(),
+                _collateralId,
                 removeAndRepayData.collateralAmount,
                 false
             );
@@ -741,7 +739,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     withdrawCollateralBytes,
                     singularity,
                     yieldBox,
-                    removeAndRepayData.collateralAmount,
+                    yieldBox.toAmount(_collateralId, collateralShare, false), // re-compute amount to avoid rounding issues
                     true,
                     valueAmount,
                     removeAndRepayData.collateralWithdrawData.unwrap
