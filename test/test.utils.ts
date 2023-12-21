@@ -1598,6 +1598,7 @@ export async function registerFork() {
         yieldBox.address,
         wethAddress,
     );
+    console.log('--------------------------------------A');
     await yieldBox.registerAsset(1, wethAddress, wethStrategy.address, 0);
     const wethAssetId = await yieldBox.ids(
         1,
@@ -1611,6 +1612,7 @@ export async function registerFork() {
         yieldBox.address,
         usdcAddress,
     );
+    console.log('--------------------------------------B');
     await yieldBox.registerAsset(1, usdcAddress, usdcStrategy.address, 0);
     const usdcAssetId = await yieldBox.ids(
         1,
@@ -1624,6 +1626,7 @@ export async function registerFork() {
         yieldBox.address,
         usdtAddress,
     );
+    console.log('--------------------------------------C');
     await yieldBox.registerAsset(1, usdtAddress, usdtStrategy.address, 0);
     const usdtAssetId = await yieldBox.ids(
         1,

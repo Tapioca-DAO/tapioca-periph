@@ -55,8 +55,8 @@ describe.skip('CurveSwapper', () => {
                 .transfer(deployer.address, amount);
 
             const swapData = await curveSwapper[
-                'buildSwapData(address,address,uint256,uint256,bool,bool)'
-            ](usdt.address, usdc.address, amount, 0, false, false);
+                'buildSwapData(address,address,uint256,uint256)'
+            ](usdt.address, usdc.address, amount, 0);
             const data = ethers.utils.defaultAbiCoder.encode(
                 ['uint256[]'],
                 [[2, 1]],
