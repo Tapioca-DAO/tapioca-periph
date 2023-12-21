@@ -29,11 +29,11 @@ contract CurveSwapper is BaseSwapper {
     /// *** VARS ***
     /// ***  ***
     ICurvePool public curvePool;
-    IYieldBox public immutable yieldBox;
+    IYieldBoxBase public immutable yieldBox;
 
     constructor(
         ICurvePool _curvePool,
-        IYieldBox _yieldBox
+        IYieldBoxBase _yieldBox
     ) validAddress(address(_curvePool)) validAddress(address(_yieldBox)) {
         curvePool = _curvePool;
         yieldBox = _yieldBox;

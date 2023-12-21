@@ -12,6 +12,12 @@ interface IYieldBoxBase {
         uint256 share
     ) external returns (uint256 amountOut, uint256 shareOut);
 
+    function depositETHAsset(
+        uint256 assetId,
+        address to,
+        uint256 amount
+    ) external payable returns (uint256 amountOut, uint256 shareOut);
+
     function withdraw(
         uint256 assetId,
         address from,

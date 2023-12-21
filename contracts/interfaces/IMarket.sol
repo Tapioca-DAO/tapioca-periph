@@ -80,16 +80,12 @@ interface IMarket {
         address from,
         uint256 borrowAmount,
         uint256 supplyAmount,
-        uint256 minAmountOut,
-        address swapper,
-        bytes calldata dexData
+        bytes calldata data
     ) external returns (uint256 amountOut);
 
     function sellCollateral(
         address from,
         uint256 share,
-        uint256 minAmountOut,
-        address swapper,
-        bytes calldata dexData
+        bytes calldata data
     ) external returns (uint256 amountOut);
 }

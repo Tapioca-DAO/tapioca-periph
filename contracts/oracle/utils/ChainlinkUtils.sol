@@ -28,18 +28,11 @@ abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
         uint256 castedRatio
     ) internal view returns (uint256) {
         if (castedRatio == 0) {
-            (
-                uint80 roundId,
-                int256 ratio,
-                ,
-                uint256 updatedAt,
-                uint80 answeredInRound
-            ) = feed.latestRoundData();
+            (, int256 ratio, , uint256 updatedAt, ) = feed.latestRoundData();
 
             if (
                 ratio <= feed.aggregator().minAnswer() ||
                 ratio >= feed.aggregator().maxAnswer() ||
-                roundId > answeredInRound ||
                 block.timestamp - updatedAt > stalePeriod
             ) revert InvalidChainlinkRate();
             castedRatio = uint256(ratio);
