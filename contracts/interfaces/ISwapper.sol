@@ -32,9 +32,7 @@ interface ISwapper {
         address tokenIn,
         address tokenOut,
         uint256 amountIn,
-        uint256 shareIn,
-        bool withdrawFromYb,
-        bool depositToYb
+        uint256 shareIn
     ) external view returns (SwapData memory);
 
     function buildSwapData(

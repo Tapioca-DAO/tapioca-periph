@@ -41,7 +41,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************ //
     // *** VARS *** //
     // ************ //
-    IYieldBox private immutable yieldBox;
+    IYieldBoxBase private immutable yieldBox;
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable factory;
 
@@ -59,9 +59,10 @@ contract UniswapV3Swapper is BaseSwapper {
     error UnwrapFailed();
 
     constructor(
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         ISwapRouter _swapRouter,
-        IUniswapV3Factory _factory
+        IUniswapV3Factory _factory,
+        address _owner
     )
         validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
@@ -70,6 +71,7 @@ contract UniswapV3Swapper is BaseSwapper {
         yieldBox = _yieldBox;
         swapRouter = _swapRouter;
         factory = _factory;
+        transferOwnership(_owner);
     }
 
     /// *** OWNER METHODS ***
@@ -88,19 +90,21 @@ contract UniswapV3Swapper is BaseSwapper {
         override
         returns (bytes memory)
     {
-        return abi.encode(block.timestamp + 1 hours);
+        return abi.encode(block.timestamp + 1 hours, poolFee);
     }
 
     /// @notice Computes amount out for amount in
     /// @param swapData operation data
     function getOutputAmount(
         SwapData calldata swapData,
-        bytes calldata
+        bytes calldata data
     ) external view override returns (uint256 amountOut) {
         (address tokenIn, address tokenOut) = _getTokens(
             swapData.tokensData,
             yieldBox
         );
+        uint24 fee = abi.decode(data, (uint24));
+        if (fee == 0) fee = poolFee;
 
         (uint256 amountIn, ) = _getAmounts(
             swapData.amountData,
@@ -109,7 +113,7 @@ contract UniswapV3Swapper is BaseSwapper {
             yieldBox
         );
 
-        address pool = factory.getPool(tokenIn, tokenOut, poolFee);
+        address pool = factory.getPool(tokenIn, tokenOut, fee);
         (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
 
         amountOut = OracleLibrary.getQuoteAtTick(
@@ -123,7 +127,7 @@ contract UniswapV3Swapper is BaseSwapper {
     /// @notice Comutes amount in for amount out
     function getInputAmount(
         SwapData calldata swapData,
-        bytes calldata
+        bytes calldata data
     ) external view override returns (uint256 amountIn) {
         (address tokenIn, address tokenOut) = _getTokens(
             swapData.tokensData,
@@ -137,7 +141,10 @@ contract UniswapV3Swapper is BaseSwapper {
             yieldBox
         );
 
-        address pool = factory.getPool(tokenIn, tokenOut, poolFee);
+        uint24 fee = abi.decode(data, (uint24));
+        if (fee == 0) fee = poolFee;
+
+        address pool = factory.getPool(tokenIn, tokenOut, fee);
 
         (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
         amountIn = OracleLibrary.getQuoteAtTick(
@@ -193,7 +200,8 @@ contract UniswapV3Swapper is BaseSwapper {
         if (data.length == 0) {
             data = getDefaultDexOptions();
         }
-        uint256 deadline = abi.decode(data, (uint256));
+        (uint256 deadline, uint24 fee) = abi.decode(data, (uint256, uint24));
+        if (fee == 0) fee = poolFee;
 
         address _tokenIn = tokenIn != address(0)
             ? tokenIn
@@ -205,7 +213,7 @@ contract UniswapV3Swapper is BaseSwapper {
             .ExactInputSingleParams({
                 tokenIn: _tokenIn,
                 tokenOut: _tokenOut,
-                fee: poolFee,
+                fee: fee,
                 recipient: address(this),
                 deadline: deadline,
                 amountIn: amountIn,
@@ -226,14 +234,20 @@ contract UniswapV3Swapper is BaseSwapper {
         if (swapData.yieldBoxData.depositToYb) {
             if (tokenOut != address(0)) {
                 _safeApprove(tokenOut, address(yieldBox), amountOut);
+                (, shareOut) = yieldBox.depositAsset(
+                    swapData.tokensData.tokenOutId,
+                    address(this),
+                    to,
+                    amountOut,
+                    0
+                );
+            } else {
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
+                    swapData.tokensData.tokenOutId,
+                    to,
+                    amountOut
+                );
             }
-            (, shareOut) = yieldBox.depositAsset(
-                swapData.tokensData.tokenOutId,
-                address(this),
-                to,
-                amountOut,
-                0
-            );
         }
     }
 

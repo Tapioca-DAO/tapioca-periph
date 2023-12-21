@@ -70,7 +70,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @notice updates the cluster address
     /// @dev can only be called by the owner
     /// @param _cluster the new address
-    function setCluster(ICluster _cluster) external {
+    function setCluster(ICluster _cluster) external onlyOwner {
         if (address(_cluster) == address(0)) revert NotValid();
         emit ClusterSet(cluster, _cluster);
         cluster = _cluster;

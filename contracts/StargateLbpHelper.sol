@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import "./interfaces/IBalancerVault.sol";
 import "./interfaces/IStargateRouter.sol";
 import "./interfaces/ILiquidityBootstrappingPool.sol";
+import "./interfaces/IStargateLbpHelper.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -19,6 +20,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         address targetToken;
         uint16 dstChainId;
         address peer; // StargateLbpHelper address on destination
+        address receiver; // Receiver address on destination
         uint256 amount;
         uint256 slippage;
         uint256 srcPoolId;
@@ -41,6 +43,22 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
 
+    uint8 internal constant PARTICIPATE_FN = 1;
+    event ReceiveFailed(
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
+    );
+    event ReceiveSuccess(
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
+    );
+
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
     // ************************ //
@@ -48,12 +66,49 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     error NotAuthorized();
     error BalanceTooLow();
     error TokensMismatch();
+    error UnsupportedFunctionType();
 
     constructor(address _router, address _lbpPool, address _vault) {
         if (_router == address(0)) revert RouterNotValid();
         router = IStargateRouter(_router);
         lbpPool = ILiquidityBootstrappingPool(_lbpPool); // address(0) for non-host chains
         lbpVault = IBalancerVault(_vault); // address(0) for non-host chains
+    }
+
+    // ********************** //
+    // *** VIEW FUNCTIONS *** //
+    // ********************** //
+    function quoteLayerZeroFee(
+        uint16 _dstChainId,
+        uint8 _functionType,
+        bytes calldata _toAddress,
+        bytes calldata,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external view returns (uint256, uint256) {
+        bytes memory payload = "";
+        if (_functionType == PARTICIPATE_FN) {
+            ParticipateData memory participateData = ParticipateData({
+                assetIn: address(0),
+                assetOut: address(0),
+                poolId: 0,
+                deadline: block.timestamp,
+                minAmountOut: 0
+            });
+            payload = abi.encode(participateData, _toAddress);
+        } else {
+            revert UnsupportedFunctionType();
+        }
+
+        IStargateBridge bridge = router.bridge();
+        ILayerZeroEndpoint endpoint = bridge.layerZeroEndpoint();
+        return
+            endpoint.estimateFees(
+                _dstChainId,
+                address(bridge),
+                payload,
+                false,
+                _txParamBuilder(_dstChainId, _functionType, _lzTxParams)
+            );
     }
 
     // ************************ //
@@ -77,6 +132,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 SLIPPAGE_PRECISION);
 
         // approve token for Stargate router
+        erc20.safeApprove(address(router), 0);
         erc20.safeApprove(address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
@@ -92,16 +148,16 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
                 dstNativeAmount: 0,
                 dstNativeAddr: "0x0"
             }),
-            abi.encodePacked(msg.sender), // StargateLbpHelper.sol destination address
-            abi.encode(lbpData, msg.sender)
+            abi.encodePacked(stargateData.peer), // StargateLbpHelper.sol destination address
+            abi.encode(lbpData, stargateData.receiver)
         );
     }
 
     /// @notice receive call for Stargate
     function sgReceive(
-        uint16, // the remote chainId sending the tokens
+        uint16 srcChainId, // the remote chainId sending the tokens
         bytes memory, // the remote Bridge address
-        uint256,
+        uint256 nonce,
         address token, // the token contract on the local chain
         uint256 amountLD, // the qty of local _token contract tokens
         bytes memory payload
@@ -109,6 +165,32 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         if (msg.sender != address(router)) revert NotAuthorized();
         // will just ignore the payload in some invalid configuration
         if (payload.length <= 40) return; // 20 + 20 + payload
+
+        try
+            IStargateLbpHelper(address(this))._sgReceive(
+                token,
+                amountLD,
+                payload
+            )
+        {
+            emit ReceiveSuccess(srcChainId, token, nonce, amountLD, payload);
+        } catch {
+            emit ReceiveFailed(srcChainId, token, nonce, amountLD, payload);
+            // decode payload
+            (, address receiver) = abi.decode(
+                payload,
+                (ParticipateData, address)
+            );
+            IERC20(token).safeTransfer(receiver, amountLD);
+        }
+    }
+
+    function _sgReceive(
+        address token, // the token contract on the local chain
+        uint256 amountLD, // the qty of local _token contract tokens
+        bytes memory payload
+    ) external {
+        if (msg.sender != address(this)) revert NotAuthorized();
 
         // decode payload
         (ParticipateData memory data, address receiver) = abi.decode(
@@ -212,5 +294,38 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             _to,
             _lzTxParams
         );
+    }
+
+    // ************************* //
+    // *** PRIVATE FUNCTIONS *** //
+    // ************************* //
+    function _txParamBuilder(
+        uint16 _chainId,
+        uint8 _type,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) private view returns (bytes memory) {
+        bytes memory lzTxParam;
+        address dstNativeAddr;
+        {
+            bytes memory dstNativeAddrBytes = _lzTxParams.dstNativeAddr;
+            assembly {
+                dstNativeAddr := mload(add(dstNativeAddrBytes, 20))
+            }
+        }
+
+        uint256 totalGas = router.bridge().gasLookup(_chainId, _type) +
+            _lzTxParams.dstGasForCall;
+        if (_lzTxParams.dstNativeAmount > 0 && dstNativeAddr != address(0x0)) {
+            lzTxParam = abi.encodePacked(
+                uint16(2),
+                totalGas,
+                _lzTxParams.dstNativeAmount,
+                _lzTxParams.dstNativeAddr
+            );
+        } else {
+            lzTxParam = abi.encodePacked(uint16(1), totalGas);
+        }
+
+        return lzTxParam;
     }
 }

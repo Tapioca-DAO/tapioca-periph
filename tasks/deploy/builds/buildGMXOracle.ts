@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 
 import { displaySeerCLSoloArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
 import { SeerCLSolo__factory } from '../../../typechain';
 
 export const __buildGMXOracleArgs = async (
