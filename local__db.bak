@@ -3,7 +3,7 @@
         "4002": [
             {
                 "name": "Cluster",
-                "address": "0x9c67D037e9bc36F1Df733e034f389e300Bb758b7",
+                "address": "0xA093564210161954E91e08fB4C0A0224c0832E52",
                 "meta": {
                     "args": [
                         "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
@@ -13,6 +13,11 @@
             }
         ],
         "421613": [
+            {
+                "name": "TapiocaDeployer",
+                "address": "0xACb4e8Cc03c59760CB7796de2f126162E39B977c",
+                "meta": {}
+            },
             {
                 "name": "Cluster",
                 "address": "0xBBB6aAea0d096FB840723D6B4c921Ed690a39C5F",

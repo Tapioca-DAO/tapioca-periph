@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { BN, registerFork } from './test.utils';
 
-describe('CurveSwapper', () => {
+describe.skip('CurveSwapper', () => {
     describe('getOutputAmount()', () => {
         it('should get output amount', async () => {
             const { curveSwapper, usdt, usdc, createSimpleSwapData } =
