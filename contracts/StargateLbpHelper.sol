@@ -64,6 +64,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
     // ************************ //
+    error NoContract();
     error RouterNotValid();
     error NotAuthorized();
     error BalanceTooLow();
@@ -225,8 +226,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             });
 
         // participate in the lbp
-        IERC20(data.assetIn).approve(address(lbpVault), 0);
-        IERC20(data.assetIn).approve(address(lbpVault), amountLD);
+        _safeApprove(data.assetIn, address(lbpVault), amountLD);
         lbpVault.swap(
             singleSwap,
             fundManagement,
@@ -301,6 +301,25 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
+    function _safeApprove(address token, address to, uint256 value) internal {
+        if (token.code.length == 0) revert NoContract();
+        bool success;
+        bytes memory data;
+        (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, 0)));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "StargateLbpHelper::safeApprove: approve failed"
+        );
+
+        (success, data) = token.call(
+            abi.encodeCall(IERC20.approve, (to, value))
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "StargateLbpHelper::safeApprove: approve failed"
+        );
+    }
+
     function _txParamBuilder(
         uint16 _chainId,
         uint8 _type,
