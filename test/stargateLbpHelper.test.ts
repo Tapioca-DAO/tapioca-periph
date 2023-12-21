@@ -102,12 +102,14 @@ describe.skip('StargateLbpHelper-fork test', () => {
                 slippage: (1e4).toString(),
                 srcPoolId: ethStargateUsdcPoolId, //eth usdc pool id
                 dstPoolId: arbStargateUsdcPoolId, //arb usdc pool id
+                getDust: true,
             },
             {
                 assetIn: targetUsdcAddress,
                 assetOut: ethers.constants.AddressZero, // it should be TAP address in a real situation
                 poolId: 0, //it should be the LBP pool address in a real situation
                 deadline: '9999999',
+                minAmountOut: 0,
             },
             {
                 value: ethers.utils.parseEther('2'),
