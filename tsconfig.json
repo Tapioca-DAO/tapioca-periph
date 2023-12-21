@@ -15,5 +15,5 @@
     "./typechain",
     "./tasks",
     "./deploy"
-  ]
+, "tasks/deploy/CONF.ts"  ]
 }
