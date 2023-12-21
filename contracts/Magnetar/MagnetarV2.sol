@@ -134,12 +134,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 );
             } else if (_action.id == REVOKE_YB_ALL) {
                 address spender = abi.decode(_action.call[4:], (address));
+                if (spender != msg.sender) revert NotAuthorized();
                 IYieldBoxBase(_action.target).setApprovalForAll(spender, false);
             } else if (_action.id == REVOKE_YB_ASSET) {
                 (address spender, uint256 asset) = abi.decode(
                     _action.call[4:],
                     (address, uint256)
                 );
+                if (spender != msg.sender) revert NotAuthorized();
                 IYieldBoxBase(_action.target).setApprovalForAsset(
                     spender,
                     asset,
