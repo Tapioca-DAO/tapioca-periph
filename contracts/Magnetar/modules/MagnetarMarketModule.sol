@@ -645,6 +645,13 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 }
                 tOLPId = removeAndRepayData.unlockData.tokenId;
             }
+
+            address ownerOfTOLP = IERC721(removeAndRepayData.unlockData.target)
+                .ownerOf(tOLPId);
+
+            if (ownerOfTOLP != user && ownerOfTOLP != address(this))
+                revert NotValid();
+
             ITapiocaOptionLiquidityProvision(
                 removeAndRepayData.unlockData.target
             ).unlock(tOLPId, externalData.singularity, user);
