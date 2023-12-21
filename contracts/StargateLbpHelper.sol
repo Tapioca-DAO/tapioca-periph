@@ -25,6 +25,8 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 slippage;
         uint256 srcPoolId;
         uint256 dstPoolId;
+        uint256 dstAirdropAmount;
+        uint256 dstGasLimit;
     }
     struct ParticipateData {
         address assetIn;
@@ -144,9 +146,9 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             stargateData.amount,
             amountWithSlippage,
             IStargateRouterBase.lzTxObj({
-                dstGasForCall: 0,
-                dstNativeAmount: 0,
-                dstNativeAddr: "0x0"
+                dstGasForCall: stargateData.dstGasLimit,
+                dstNativeAmount: stargateData.dstAirdropAmount,
+                dstNativeAddr: abi.encodePacked(stargateData.peer)
             }),
             abi.encodePacked(stargateData.peer), // StargateLbpHelper.sol destination address
             abi.encode(lbpData, stargateData.receiver)
