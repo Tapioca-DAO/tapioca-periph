@@ -4,12 +4,15 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IYieldBox.sol";
 
 import "../interfaces/ISwapper.sol";
+import "../interfaces/IYieldBoxBase.sol";
+
+import "../libraries/SafeApprove.sol";
 
 abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     /// *** ERRORS ***
     /// ***  ***
@@ -30,9 +33,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         address tokenIn,
         address tokenOut,
         uint256 amountIn,
-        uint256 shareIn,
-        bool withdrawFromYb,
-        bool depositToYb
+        uint256 shareIn
     ) external pure override returns (SwapData memory) {
         return
             _buildSwapData(
@@ -42,8 +43,8 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
                 0,
                 amountIn,
                 shareIn,
-                withdrawFromYb,
-                depositToYb
+                false,
+                false
             );
     }
 
@@ -99,28 +100,9 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         swapData.yieldBoxData = swapYBData;
     }
 
-    function _safeApprove(address token, address to, uint256 value) internal {
-        if (token.code.length == 0) revert NoContract();
-        bool success;
-        bytes memory data;
-        (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, 0)));
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "BaseSwapper::safeApprove: approve failed"
-        );
-
-        (success, data) = token.call(
-            abi.encodeCall(IERC20.approve, (to, value))
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "BaseSwapper::safeApprove: approve failed"
-        );
-    }
-
     function _getTokens(
         ISwapper.SwapTokensData calldata tokens,
-        IYieldBox _yieldBox
+        IYieldBoxBase _yieldBox
     ) internal view returns (address tokenIn, address tokenOut) {
         if (tokens.tokenIn != address(0) || tokens.tokenOut != address(0)) {
             tokenIn = tokens.tokenIn;
@@ -135,7 +117,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         ISwapper.SwapAmountData calldata amounts,
         uint256 tokenInId,
         uint256 tokenOutId,
-        IYieldBox _yieldBox
+        IYieldBoxBase _yieldBox
     ) internal view returns (uint256 amountIn, uint256 amountOut) {
         if (amounts.amountIn > 0 || amounts.amountOut > 0) {
             amountIn = amounts.amountIn;
@@ -156,7 +138,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
     function _extractTokens(
         ISwapper.YieldBoxData calldata ybData,
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         address token,
         uint256 tokenId,
         uint256 amount,

@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { Seer__factory } from '../../../typechain';
 import { displaySeerArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../config';
+import { ARGS_CONFIG } from '../CONF';
 
 export const buildTapOracle = async (
     hre: HardhatRuntimeEnvironment,
@@ -27,7 +27,7 @@ export const buildTapOracle = async (
             ARGS_CONFIG[chainID].TAP_ORACLE.TAP_USDC_LP_ADDRESS, /// LP TAP/USDC
         ],
         [1], // Multiply/divide Uni
-        600, // TWAP, 5min
+        3600, // TWAP, 1hr
         10, // Observation length that each Uni pool should have
         0, // Whether we need to use the last Chainlink oracle to convert to another
         // CL path

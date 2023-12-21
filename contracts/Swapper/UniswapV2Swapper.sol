@@ -20,12 +20,13 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 contract UniswapV2Swapper is BaseSwapper {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     /// *** VARS ***
     /// ***  ***
     IUniswapV2Router02 public immutable swapRouter;
     IUniswapV2Factory public immutable factory;
-    IYieldBox public immutable yieldBox;
+    IYieldBoxBase public immutable yieldBox;
 
     /// *** ERRORS ***
     error InvalidSwap();
@@ -33,7 +34,8 @@ contract UniswapV2Swapper is BaseSwapper {
     constructor(
         address _router,
         address _factory,
-        IYieldBox _yieldBox
+        IYieldBoxBase _yieldBox,
+        address _owner
     )
         validAddress(_router)
         validAddress(_factory)
@@ -42,6 +44,7 @@ contract UniswapV2Swapper is BaseSwapper {
         swapRouter = IUniswapV2Router02(_router);
         factory = IUniswapV2Factory(_factory);
         yieldBox = _yieldBox;
+        transferOwnership(_owner);
     }
 
     /// *** VIEW METHODS ***
@@ -163,19 +166,21 @@ contract UniswapV2Swapper is BaseSwapper {
         amountOut = amounts[1];
         if (swapData.yieldBoxData.depositToYb) {
             if (path[path.length - 1] != address(0)) {
-                _safeApprove(
-                    path[path.length - 1],
-                    address(yieldBox),
+                path[path.length - 1].safeApprove(address(yieldBox), amountOut);
+                (, shareOut) = yieldBox.depositAsset(
+                    swapData.tokensData.tokenOutId,
+                    address(this),
+                    to,
+                    amountOut,
+                    0
+                );
+            } else {
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
+                    swapData.tokensData.tokenOutId,
+                    to,
                     amountOut
                 );
             }
-            (, shareOut) = yieldBox.depositAsset(
-                swapData.tokensData.tokenOutId,
-                address(this),
-                to,
-                amountOut,
-                0
-            );
         }
     }
 
@@ -188,7 +193,6 @@ contract UniswapV2Swapper is BaseSwapper {
         uint256 deadline
     ) private returns (uint256[] memory amounts) {
         // Create swap path for UniswapV2Router02 operations
-
         address _tokenIn = tokenIn != address(0) ? tokenIn : swapRouter.WETH();
         address _tokenOut = tokenOut != address(0)
             ? tokenOut
@@ -196,7 +200,7 @@ contract UniswapV2Swapper is BaseSwapper {
         address[] memory path = _createPath(_tokenIn, _tokenOut);
 
         if (tokenIn != address(0) && tokenOut != address(0)) {
-            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            tokenIn.safeApprove(address(swapRouter), amountIn);
             amounts = swapRouter.swapExactTokensForTokens(
                 amountIn,
                 amountOutMin,
@@ -212,7 +216,7 @@ contract UniswapV2Swapper is BaseSwapper {
                 deadline
             );
         } else if (tokenIn != address(0) && tokenOut == address(0)) {
-            _safeApprove(tokenIn, address(swapRouter), amountIn);
+            tokenIn.safeApprove(address(swapRouter), amountIn);
             amounts = swapRouter.swapExactTokensForETH(
                 amountIn,
                 amountOutMin,
