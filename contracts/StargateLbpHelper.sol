@@ -32,7 +32,6 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     struct ParticipateData {
         address assetIn;
         address assetOut;
-        uint256 poolId;
         uint256 deadline;
         uint256 minAmountOut;
     }
@@ -94,7 +93,6 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             ParticipateData memory participateData = ParticipateData({
                 assetIn: address(0),
                 assetOut: address(0),
-                poolId: 0,
                 deadline: block.timestamp,
                 minAmountOut: 0
             });
