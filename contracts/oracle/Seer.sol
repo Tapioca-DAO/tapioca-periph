@@ -73,13 +73,22 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
     function get(
-        bytes calldata
+        bytes calldata data
     ) external virtual nonReentrant returns (bool success, uint256 rate) {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        (, uint256 high) = _readAll(inBase);
-        return (true, high);
+        (uint256 low, uint256 high) = _readAll(inBase);
+
+        if (data.length > 0) {
+            ITOracle.ISeerQuery memory query = abi.decode(
+                data,
+                (ITOracle.ISeerQuery)
+            );
+            if (query.useHigh) return (true, high);
+        }
+
+        return (true, low);
     }
 
     /// @notice Check the last exchange rate without any state changes.
@@ -88,10 +97,19 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
     function peek(
-        bytes calldata
+        bytes calldata data
     ) external view virtual returns (bool success, uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return (true, high);
+        (uint256 low, uint256 high) = _readAll(inBase);
+
+        if (data.length > 0) {
+            ITOracle.ISeerQuery memory query = abi.decode(
+                data,
+                (ITOracle.ISeerQuery)
+            );
+            if (query.useHigh) return (true, high);
+        }
+
+        return (true, low);
     }
 
     /// @notice Check the current spot exchange rate without any state changes.
@@ -99,10 +117,19 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
     function peekSpot(
-        bytes calldata
+        bytes calldata data
     ) external view virtual returns (uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return high;
+        (uint256 low, uint256 high) = _readAll(inBase);
+
+        if (data.length > 0) {
+            ITOracle.ISeerQuery memory query = abi.decode(
+                data,
+                (ITOracle.ISeerQuery)
+            );
+            if (query.useHigh) return high;
+        }
+
+        return low;
     }
 
     /// @notice Returns a human readable (short) name about this oracle.

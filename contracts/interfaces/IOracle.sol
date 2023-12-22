@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+struct ISeerQuery {
+    bool useHigh; // Whether to use the high or low value
+}
+
 interface IOracle {
     // @notice Precision of the return value.
     function decimals() external view returns (uint8);
