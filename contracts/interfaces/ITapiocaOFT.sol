@@ -70,24 +70,6 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         ICommonData.IApproval[] calldata revokes
     ) external payable;
 
-    function sendToStrategy(
-        address _from,
-        address _to,
-        uint256 amount,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        ICommonData.ISendOptions calldata options
-    ) external payable;
-
-    function retrieveFromStrategy(
-        address _from,
-        uint256 amount,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        bytes memory airdropAdapterParam
-    ) external payable;
-
     function sendForLeverage(
         uint256 amount,
         address leverageFor,

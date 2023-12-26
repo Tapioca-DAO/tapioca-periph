@@ -391,47 +391,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     withdrawParams,
                     adapterParams
                 );
-            } else if (_action.id == TOFT_DEPOSIT_TO_STRATEGY) {
-                TOFTSendToStrategyData memory data = abi.decode(
-                    _action.call[4:],
-                    (TOFTSendToStrategyData)
-                );
-                _checkSender(data.from);
-
-                ITapiocaOFT(_action.target).sendToStrategy{
-                    value: _action.value
-                }(
-                    data.from,
-                    data.to,
-                    data.amount,
-                    data.assetId,
-                    data.lzDstChainId,
-                    data.options
-                );
-            } else if (_action.id == TOFT_RETRIEVE_FROM_STRATEGY) {
-                (
-                    address from,
-                    uint256 amount,
-                    uint256 assetId,
-                    uint16 lzDstChainId,
-                    address zroPaymentAddress,
-                    bytes memory airdropAdapterParam
-                ) = abi.decode(
-                        _action.call[4:],
-                        (address, uint256, uint256, uint16, address, bytes)
-                    );
-                _checkSender(from);
-
-                ITapiocaOFT(_action.target).retrieveFromStrategy{
-                    value: _action.value
-                }(
-                    from,
-                    amount,
-                    assetId,
-                    lzDstChainId,
-                    zroPaymentAddress,
-                    airdropAdapterParam
-                );
             } else if (_action.id == MARKET_YBDEPOSIT_AND_LEND) {
                 HelperLendData memory data = abi.decode(
                     _action.call[4:],
