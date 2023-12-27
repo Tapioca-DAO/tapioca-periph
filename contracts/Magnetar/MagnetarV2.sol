@@ -241,7 +241,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     uint256 amount,
                     bytes memory adapterParams,
                     address payable refundAddress,
-                    bool unwrap
+                    bool unwrap,
+                    address zroPaymentAddress
                 ) = abi.decode(
                         _action.call[4:],
                         (
@@ -253,7 +254,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint256,
                             bytes,
                             address,
-                            bool
+                            bool,
+                            address
                         )
                     );
 
@@ -273,7 +275,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             adapterParams,
                             refundAddress,
                             _action.value,
-                            unwrap
+                            unwrap,
+                            zroPaymentAddress
                         )
                     )
                 );
@@ -604,6 +607,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param refundAddress the LZ refund address which receives the gas not used in the process
     /// @param gas the amount of gas to use for sending the asset to another layer
     /// @param unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+    /// @param zroPaymentAddress ZRO payment address
     function withdrawToChain(
         IYieldBoxBase yieldBox,
         address from,
@@ -614,7 +618,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas,
-        bool unwrap
+        bool unwrap,
+        address zroPaymentAddress
     ) external payable {
         _checkSender(from);
         _executeModule(
@@ -631,7 +636,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     adapterParams,
                     refundAddress,
                     gas,
-                    unwrap
+                    unwrap,
+                    zroPaymentAddress
                 )
             )
         );

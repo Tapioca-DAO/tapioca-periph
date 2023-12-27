@@ -20,7 +20,8 @@ interface IMagnetar {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas,
-        bool unwrap //valid only for TOFT
+        bool unwrap, //valid only for TOFT
+        address zroPaymentAddress
     ) external payable;
 
     function mintFromBBAndLendOnSGL(
