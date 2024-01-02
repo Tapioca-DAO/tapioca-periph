@@ -179,8 +179,6 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         bytes memory payload
     ) external {
         if (msg.sender != address(router)) revert NotAuthorized();
-        // will just ignore the payload in some invalid configuration
-        if (payload.length <= 40) return; // 20 + 20 + payload
 
         try
             IStargateLbpHelper(address(this))._sgReceive(
