@@ -160,7 +160,7 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         uint256 balanceAfter = IERC20(stargateData.srcToken).balanceOf(
             address(this)
         );
-        uint256 transferred = balanceAfter - balanceBefore;
+        uint256 transferred = balanceBefore - balanceAfter;
         if (transferred < stargateData.amount && stargateData.getDust) {
             IERC20(stargateData.srcToken).transfer(
                 msg.sender,
