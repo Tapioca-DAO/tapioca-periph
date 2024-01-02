@@ -250,67 +250,6 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    // *********************** //
-    // *** OWNER FUNCTIONS *** //
-    // *********************** //
-    function retryRevert(
-        uint16 srcChainId,
-        bytes calldata srcAddress,
-        uint256 nonce
-    ) external payable onlyOwner {
-        router.retryRevert{value: msg.value}(srcChainId, srcAddress, nonce);
-    }
-
-    function instantRedeemLocal(
-        uint16 _srcPoolId,
-        uint256 _amountLP,
-        address _to
-    ) external onlyOwner returns (uint256 amountSD) {
-        amountSD = router.instantRedeemLocal(_srcPoolId, _amountLP, _to);
-    }
-
-    function redeemLocal(
-        uint16 _dstChainId,
-        uint256 _srcPoolId,
-        uint256 _dstPoolId,
-        address payable _refundAddress,
-        uint256 _amountLP,
-        bytes calldata _to,
-        IStargateRouter.lzTxObj memory _lzTxParams
-    ) external payable onlyOwner {
-        router.redeemLocal{value: msg.value}(
-            _dstChainId,
-            _srcPoolId,
-            _dstPoolId,
-            _refundAddress,
-            _amountLP,
-            _to,
-            _lzTxParams
-        );
-    }
-
-    function redeemRemote(
-        uint16 _dstChainId,
-        uint256 _srcPoolId,
-        uint256 _dstPoolId,
-        address payable _refundAddress,
-        uint256 _amountLP,
-        uint256 _minAmountLD,
-        bytes calldata _to,
-        IStargateRouter.lzTxObj memory _lzTxParams
-    ) external payable onlyOwner {
-        router.redeemRemote{value: msg.value}(
-            _dstChainId,
-            _srcPoolId,
-            _dstPoolId,
-            _refundAddress,
-            _amountLP,
-            _minAmountLD,
-            _to,
-            _lzTxParams
-        );
-    }
-
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
