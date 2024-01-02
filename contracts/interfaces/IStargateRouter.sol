@@ -48,7 +48,9 @@ interface IStargateRouter is IStargateRouterBase {
         uint256 _minAmountLD // the minimum amount accepted out on destination
     ) external payable;
 
-    function bridge() external view returns (IStargateBridge);
+    function bridge() external view returns (IStargateBridge); // for StargateRouter contract
+
+    function stargateBridge() external view returns (IStargateBridge); // for StargateComposer contract
 
     function poolId() external view returns (uint256);
 
