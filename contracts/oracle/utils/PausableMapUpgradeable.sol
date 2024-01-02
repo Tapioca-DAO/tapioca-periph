@@ -9,8 +9,6 @@ pragma solidity 0.8.19;
 /// @notice It generalizes Pausable from OpenZeppelin by allowing to specify a bytes32 that
 /// should be stopped
 /// @dev This module is used through inheritance
-/// @dev In Angle's protocol, this contract is mainly used in `StableMasterFront`
-/// to prevent SLPs and new stable holders from coming in
 /// @dev The modifiers `whenNotPaused` and `whenPaused` from the original OpenZeppelin contracts were removed
 /// to save some space and because they are not used in the `StableMaster` contract where this contract
 /// is imported

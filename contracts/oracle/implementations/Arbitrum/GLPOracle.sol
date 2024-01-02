@@ -33,7 +33,7 @@ contract GLPOracle is
     }
 
     function _get() internal view returns (uint256) {
-        return glpManager.getPrice(false);
+        return glpManager.getPrice(true);
     }
 
     // Get the latest exchange rate
