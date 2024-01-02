@@ -10,6 +10,7 @@ interface ICommonData {
         bytes withdrawAdapterParams;
         bool unwrap; // valid only for TOFTs
         address payable refundAddress;
+        address zroPaymentAddress;
     }
 
     struct ISendOptions {

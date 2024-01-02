@@ -40,7 +40,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas,
-        bool unwrap
+        bool unwrap,
+        address zroPaymentAddress
     ) external payable {
         _withdrawToChain(
             yieldBox,
@@ -52,7 +53,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             adapterParams,
             refundAddress,
             gas,
-            unwrap
+            unwrap,
+            zroPaymentAddress
         );
     }
 
@@ -225,7 +227,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     false,
                     valueAmount,
                     false,
-                    withdrawParams.refundAddress
+                    withdrawParams.refundAddress,
+                    withdrawParams.zroPaymentAddress
                 );
             }
         }
@@ -313,7 +316,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     withdrawCollateralParams.withdrawAdapterParams,
                     withdrawCollateralParams.refundAddress,
                     valueAmount,
-                    withdrawCollateralParams.unwrap
+                    withdrawCollateralParams.unwrap,
+                    withdrawCollateralParams.zroPaymentAddress
                 );
             }
         }
@@ -690,7 +694,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     false,
                     valueAmount,
                     false,
-                    removeAndRepayData.assetWithdrawData.refundAddress
+                    removeAndRepayData.assetWithdrawData.refundAddress,
+                    removeAndRepayData.assetWithdrawData.zroPaymentAddress
                 );
             }
         }
@@ -759,7 +764,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     true,
                     valueAmount,
                     removeAndRepayData.collateralWithdrawData.unwrap,
-                    removeAndRepayData.collateralWithdrawData.refundAddress
+                    removeAndRepayData.collateralWithdrawData.refundAddress,
+                    removeAndRepayData.collateralWithdrawData.zroPaymentAddress
                 );
             }
         }
@@ -776,7 +782,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         bytes memory adapterParams,
         address payable refundAddress,
         uint256 gas,
-        bool unwrap
+        bool unwrap,
+        address zroPaymentAddress
     ) private {
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(yieldBox)))
             revert NotAuthorized();
@@ -799,7 +806,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         bytes memory _adapterParams;
         ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
             refundAddress: refundAddress,
-            zroPaymentAddress: address(0),
+            zroPaymentAddress: zroPaymentAddress,
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams()
                 ? adapterParams
                 : _adapterParams
@@ -867,7 +874,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         bool withdrawCollateral,
         uint256 valueAmount,
         bool unwrap,
-        address payable refundAddress
+        address payable refundAddress,
+        address zroPaymentAddress
     ) private {
         if (withdrawData.length == 0) revert NotValid();
         (
@@ -887,7 +895,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             adapterParams,
             refundAddress,
             valueAmount,
-            unwrap
+            unwrap,
+            zroPaymentAddress
         );
     }
 
