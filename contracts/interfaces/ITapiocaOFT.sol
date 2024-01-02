@@ -93,12 +93,12 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
     function triggerSendFrom(
         address from,
         uint16 dstChainId,
-        bytes32 toAddress,
+        bytes32 to,
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams
     ) external payable;
 
-    function triggerSendFromWithParams(
+    function sendFromWithParams(
         address from,
         uint16 lzDstChainId,
         bytes32 to,

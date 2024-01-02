@@ -812,9 +812,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             ICommonData.IApproval[]
                 memory approvals = new ICommonData.IApproval[](0);
             try
-                ITapiocaOFT(address(asset)).triggerSendFromWithParams{
-                    value: gas
-                }(
+                ITapiocaOFT(address(asset)).sendFromWithParams{value: gas}(
                     address(this),
                     dstChainId,
                     receiver,

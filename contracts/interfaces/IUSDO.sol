@@ -112,7 +112,7 @@ interface IUSDOBase {
     function triggerSendFrom(
         address from,
         uint16 dstChainId,
-        bytes32 toAddress,
+        bytes32 to,
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams
     ) external payable;
