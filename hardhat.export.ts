@@ -98,14 +98,26 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     },
     etherscan: {
         apiKey: {
-            goerli: process.env.BLOCKSCAN_KEY ?? '',
-            arbitrumGoerli: process.env.ARBITRUM_GOERLI_KEY ?? '',
+            sepolia: process.env.BLOCKSCAN_KEY ?? '',
+            arbitrum_sepolia: process.env.ARBITRUM_SEPOLIA_KEY ?? '',
             avalancheFujiTestnet: process.env.AVALANCHE_FUJI_KEY ?? '',
             bscTestnet: process.env.BSC_KEY ?? '',
             polygonMumbai: process.env.POLYGON_MUMBAI ?? '',
             ftmTestnet: process.env.FTM_TESTNET ?? '',
         },
-        customChains: [],
+        customChains: [
+            {
+                network: 'arbitrum_sepolia',
+                chainId: Number(
+                    SDK.API.utils.getChainBy('name', 'arbitrum_sepolia')!
+                        .chainId,
+                ),
+                urls: {
+                    apiURL: 'https://api-sepolia.arbiscan.io/api',
+                    browserURL: 'https://sepolia.arbiscan.io',
+                },
+            },
+        ],
     },
     typechain: {
         outDir: './typechain',
