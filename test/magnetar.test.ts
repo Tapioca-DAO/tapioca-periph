@@ -59,6 +59,102 @@ const symbol = 'MTKN';
 const version = '1';
 
 describe('MagnetarV2', () => {
+    describe('view', () => {
+        it('should test sgl info', async () => {
+            const {
+                deployer,
+                eoa1,
+                yieldBox,
+                createTokenEmptyStrategy,
+                deployCurveStableToUsdoBidder,
+                usd0,
+                bar,
+                __wethUsdcPrice,
+                wethUsdcOracle,
+                weth,
+                wethAssetId,
+                mediumRiskMC,
+                usdc,
+                magnetar,
+                magnetarHelper,
+            } = await loadFixture(register);
+
+            const usdoStratregy = await bar.emptyStrategies(usd0.address);
+            const usdoAssetId = await yieldBox.ids(
+                1,
+                usd0.address,
+                usdoStratregy,
+                0,
+            );
+
+            //Deploy & set Singularity
+            const SGLLiquidation = new SGLLiquidation__factory(deployer);
+            const _sglLiquidationModule = await SGLLiquidation.deploy();
+
+            const SGLCollateral = new SGLCollateral__factory(deployer);
+            const _sglCollateralModule = await SGLCollateral.deploy();
+
+            const SGLBorrow = new SGLBorrow__factory(deployer);
+            const _sglBorrowModule = await SGLBorrow.deploy();
+
+            const SGLLeverage = new SGLLeverage__factory(deployer);
+            const _sglLeverageModule = await SGLLeverage.deploy();
+
+            const collateralSwapPath = [usd0.address, weth.address];
+
+            const newPrice = __wethUsdcPrice.div(1000000);
+            await wethUsdcOracle.set(newPrice);
+
+            const sglData = new ethers.utils.AbiCoder().encode(
+                [
+                    'address',
+                    'address',
+                    'address',
+                    'address',
+                    'address',
+                    'address',
+                    'uint256',
+                    'address',
+                    'uint256',
+                    'address',
+                    'uint256',
+                    'uint256',
+                    'uint256',
+                    'address',
+                ],
+                [
+                    _sglLiquidationModule.address,
+                    _sglBorrowModule.address,
+                    _sglCollateralModule.address,
+                    _sglLeverageModule.address,
+                    bar.address,
+                    usd0.address,
+                    usdoAssetId,
+                    weth.address,
+                    wethAssetId,
+                    wethUsdcOracle.address,
+                    ethers.utils.parseEther('1'),
+                    0,
+                    0,
+                    ethers.constants.AddressZero,
+                ],
+            );
+            await bar.registerSingularity(mediumRiskMC.address, sglData, true);
+            const wethUsdoSingularity = new ethers.Contract(
+                await bar.clonesOf(
+                    mediumRiskMC.address,
+                    (await bar.clonesOfCount(mediumRiskMC.address)).sub(1),
+                ),
+                SingularityArtifact.abi,
+                ethers.provider,
+            ).connect(deployer);
+
+            const info = await magnetarHelper.singularityMarketInfo(
+                deployer.address,
+                [wethUsdoSingularity.address],
+            );
+        });
+    });
     describe('withdrawTo()', () => {
         it('should test withdrawTo', async () => {
             const {

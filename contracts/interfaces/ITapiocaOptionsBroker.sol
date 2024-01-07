@@ -10,7 +10,6 @@ interface ITapiocaOptionsBrokerCrossChain {
         address target;
         uint256 paymentTokenAmount;
         uint256 oTAPTokenID;
-        address paymentToken;
         uint256 tapAmount;
     }
     struct IExerciseLZData {

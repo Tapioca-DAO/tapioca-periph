@@ -1326,6 +1326,12 @@ export async function register(staging?: boolean) {
         `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
         staging,
     );
+
+    const magnetarHelper = await (
+        await ethers.getContractFactory('MagnetarHelper')
+    ).deploy();
+    await magnetarHelper.deployed();
+    log(`Deployed MagnetarHelper ${magnetar.address} with no args`, staging);
     // ------------------- 16 Create UniswapUsdoToWethBidder -------------------
     log('Deploying UniswapUsdoToWethBidder', staging);
     const { usdoToWethBidder } = await registerUniUsdoToWethBidder(
@@ -1425,6 +1431,7 @@ export async function register(staging?: boolean) {
         __wethUsdoMockPair,
         __tapUsdoMockPair,
         INITIAL_TIMESTAMP,
+        magnetarHelper,
     };
 
     /**
