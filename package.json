@@ -75,7 +75,7 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.5.6",
+        "tapioca-sdk": "^1.5.17",
         "uuid": "^9.0.0"
     }
 }
