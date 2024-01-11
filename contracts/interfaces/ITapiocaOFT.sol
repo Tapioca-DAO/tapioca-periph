@@ -19,6 +19,8 @@ interface ITapiocaOFTBase {
     function erc20() external view returns (address);
 
     function lzEndpoint() external view returns (address);
+
+    function vault() external view returns (address);
 }
 
 /// @dev used for generic TOFTs
