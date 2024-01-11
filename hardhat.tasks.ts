@@ -8,6 +8,12 @@ import { redeemLocalOnLbpHelper__task } from './tasks/exec/05-lbp-redeemLocal';
 import { redeemRemoteOnLbpHelper__task } from './tasks/exec/06-lbp-redeemRemote';
 import { deployOracle__task } from './tasks/deploy/deployOracle';
 import { deploySwappers__task } from './tasks/deploy/deploySwapper';
+import { pauseAll__task } from './tasks/exec/07-pause-all';
+
+task('pauseAll', 'Pause all contracts', pauseAll__task).addFlag(
+    'val',
+    'true (pause) / false (unpause)',
+);
 
 task(
     'deployOracle',
