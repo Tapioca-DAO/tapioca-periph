@@ -12,7 +12,7 @@ interface ITapiocaOFTBase {
         address fromAddress,
         address toAddress,
         uint256 amount
-    ) external payable;
+    ) external payable returns (uint256 minted);
 
     function unwrap(address _toAddress, uint256 _amount) external;
 

@@ -1,21 +1,9 @@
 {
     "default": {
-        "4002": [
-            {
-                "name": "Cluster",
-                "address": "0x6f817c0196f59be73A71dAAbA751e23a3AaD24C4",
-                "meta": {
-                    "args": [
-                        "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
-                        "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
-                    ]
-                }
-            }
-        ],
         "421614": [
             {
                 "name": "Cluster",
-                "address": "0x117Bb633e03216EB9B79FD76433e30a7874359E9",
+                "address": "0x92886dFc2357c0Fadcc1944AffDc7B38f9Ad4b08",
                 "meta": {
                     "args": [
                         "0x6098e96a28E02f27B1e6BD381f870F1C8Bd169d3",
