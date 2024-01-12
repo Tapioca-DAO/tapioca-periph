@@ -2,7 +2,7 @@
 // OpenZeppelin Contracts (last updated v5.0.0) (access/extensions/AccessControlDefaultAdminRules.sol)
 
 // Copied from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/extensions/AccessControlDefaultAdminRules.sol
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 import {IAccessControlDefaultAdminRules} from "../interfaces/IAccessControlDefaultAdminRules.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";

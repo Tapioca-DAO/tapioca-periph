@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 // contracts/oracle/OracleChainlinkSingle.sol
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 import "./OracleChainlinkSingle.sol";
 import "../interfaces/IOracle.sol" as ITOracle;

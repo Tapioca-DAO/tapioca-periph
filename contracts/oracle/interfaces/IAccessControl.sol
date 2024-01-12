@@ -2,7 +2,7 @@
 // OpenZeppelin Contracts (last updated v5.0.0) (access/IAccessControl.sol)
 
 // Copied from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/IAccessControl.sol
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 /**
  * @dev External interface of AccessControl declared to support ERC165 detection.

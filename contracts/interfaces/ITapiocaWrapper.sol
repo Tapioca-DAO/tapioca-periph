@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 interface ITapiocaWrapper {
     function mngmtFee() external view returns (uint256);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 interface ILayerZeroEndpoint {
     // @notice gets a quote in source native gas, for the amount that send() requires to pay for message delivery

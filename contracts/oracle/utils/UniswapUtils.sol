@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";

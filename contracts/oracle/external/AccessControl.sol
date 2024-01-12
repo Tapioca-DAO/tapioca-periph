@@ -2,7 +2,7 @@
 // OpenZeppelin Contracts (last updated v5.0.0) (access/AccessControl.sol)
 
 // Copied from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/AccessControl.sol
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 import {IAccessControl} from "../interfaces/IAccessControl.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity ^0.8.22;
 
 /// @notice Used for performing swap operations when bidding on LiquidationQueue
 interface IBidder {

@@ -73,6 +73,17 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     },
                 },
             },
+            {
+                version: '0.8.22',
+                settings: {
+                    viaIR: true,
+                    evmVersion: 'paris', // Latest before Shanghai
+                    optimizer: {
+                        enabled: true,
+                        runs: 500,
+                    },
+                },
+            },
         ],
     },
     namedAccounts: {
