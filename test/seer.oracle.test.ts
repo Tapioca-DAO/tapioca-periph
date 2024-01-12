@@ -7,6 +7,7 @@ import { __buildGLPOracleArgs } from '../tasks/deploy/builds/buildGLPOracle';
 import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
 import { register } from './test.utils';
 
+// TODO Foundry te
 if (hre.network.config.chainId === 1) {
     // Tests are expected to be done on forked mainnet
     describe('Seer mainnet', () => {
