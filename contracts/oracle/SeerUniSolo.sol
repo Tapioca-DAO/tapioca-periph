@@ -69,8 +69,8 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        rate = _readUniswapQuote(inBase);
-        return (true, rate);
+        (, rate) = _readAll(inBase);
+        success = true;
     }
 
     /// @notice Check the last exchange rate without any state changes.
@@ -81,8 +81,8 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     function peek(
         bytes calldata
     ) external view virtual returns (bool success, uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return (true, high);
+        (, rate) = _readAll(inBase);
+        success = true;
     }
 
     /// @notice Check the current spot exchange rate without any state changes.
@@ -92,8 +92,7 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     function peekSpot(
         bytes calldata
     ) external view virtual returns (uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return high;
+        (, rate) = _readAll(inBase);
     }
 
     /// @notice Returns a human readable (short) name about this oracle.
