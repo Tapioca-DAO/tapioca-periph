@@ -31,7 +31,8 @@ interface ITapiocaOptionsBrokerCrossChain {
         IExerciseLZData calldata lzData,
         IExerciseLZSendTapData calldata tapSendData,
         ICommonData.IApproval[] calldata approvals,
-        ICommonData.IApproval[] calldata revokes
+        ICommonData.IApproval[] calldata revokes,
+        bytes calldata adapterParams
     ) external payable;
 }
 
