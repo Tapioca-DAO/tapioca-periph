@@ -552,13 +552,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
                 IMarket(_action.target).sellCollateral(from, share, data);
             } else if (_action.id == TAP_EXERCISE_OPTION) {
-                 (
-                    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory optionsData,
-                    ITapiocaOptionsBrokerCrossChain.IExerciseLZData memory lzData,
-                    ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData memory tapSendData,
+                (
+                    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
+                        memory optionsData,
+                    ITapiocaOptionsBrokerCrossChain.IExerciseLZData
+                        memory lzData,
+                    ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+                        memory tapSendData,
                     ICommonData.IApproval[] memory approvals,
                     ICommonData.IApproval[] memory revokes,
-                    address airdropAddress, 
+                    address airdropAddress,
                     uint256 airdropAmount,
                     uint256 extraGas
                 ) = abi.decode(
@@ -576,16 +579,21 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                             uint256
                         )
                     );
-                    ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption{
-                        value: _action.value
-                    }(
-                        optionsData,
-                        lzData,
-                        tapSendData,
-                        approvals,
-                        revokes,
-                        abi.encodePacked(uint16(2), extraGas, airdropAmount, airdropAddress)
-                    );
+                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption{
+                    value: _action.value
+                }(
+                    optionsData,
+                    lzData,
+                    tapSendData,
+                    approvals,
+                    revokes,
+                    abi.encodePacked(
+                        uint16(2),
+                        extraGas,
+                        airdropAmount,
+                        airdropAddress
+                    )
+                );
             } else if (_action.id == TOFT_REMOVE_AND_REPAY) {
                 HelperTOFTRemoveAndRepayAsset memory data = abi.decode(
                     _action.call[4:],

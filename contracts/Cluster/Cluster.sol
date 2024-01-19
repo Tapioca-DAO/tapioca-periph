@@ -42,8 +42,8 @@ contract Cluster is Ownable, ICluster {
     // ************** //
     error NotAuthorized();
 
-    constructor(address lzEndpoint, address _owner) {
-        lzChainId = ILayerZeroEndpoint(lzEndpoint).getChainId();
+    constructor(uint16 _lzChainId, address _owner) {
+        lzChainId = _lzChainId;
         transferOwnership(_owner);
     }
 
