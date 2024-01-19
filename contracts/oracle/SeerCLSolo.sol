@@ -62,8 +62,8 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        (rate, ) = _quoteChainlink(inBase);
-        return (true, rate);
+        (, rate) = _readAll(inBase);
+        success = true;
     }
 
     /// @notice Check the last exchange rate without any state changes.
@@ -74,8 +74,8 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
     function peek(
         bytes calldata
     ) external view virtual returns (bool success, uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return (true, high);
+        (, rate) = _readAll(inBase);
+        success = true;
     }
 
     /// @notice Check the current spot exchange rate without any state changes.
@@ -85,8 +85,8 @@ contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
     function peekSpot(
         bytes calldata
     ) external view virtual returns (uint256 rate) {
-        (, uint256 high) = _readAll(inBase);
-        return high;
+        (, rate) = _readAll(inBase);
+        return rate;
     }
 
     /// @notice Returns a human readable (short) name about this oracle.

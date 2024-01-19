@@ -153,14 +153,6 @@ contract MagnetarV2Storage is IERC721Receiver {
         bytes withdrawData;
     }
 
-    struct HelperExerciseOption {
-        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
-        ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData;
-        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData;
-        ICommonData.IApproval[] approvals;
-        ICommonData.IApproval[] revokes;
-    }
-
     struct HelperTOFTRemoveAndRepayAsset {
         address from;
         address to;
