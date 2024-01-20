@@ -9,8 +9,10 @@ import '@primitivefi/hardhat-dodoc';
 import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
 
-import 'tapioca-sdk';
+// Tapioca
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
+import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
 
 dotenv.config();
 
@@ -64,86 +66,72 @@ const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
     : {};
 
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
+    SDK: { project: TAPIOCA_PROJECTS_NAME },
     solidity: {
         compilers: [
             {
-                version: '0.8.19',
-                settings: {
-                    viaIR: true,
-                    optimizer: {
-                        enabled: true,
-                        runs: 5,
-                    },
-                },
-            },
-            {
                 version: '0.8.22',
                 settings: {
-                    viaIR: true,
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 500,
+                        runs: 9999,
                     },
                 },
             },
         ],
     },
-    namedAccounts: {
-        deployer: 0,
+    paths: {
+        artifacts: './gen/artifacts',
+        cache: './gen/cache',
+    },
+    dodoc: {
+        runOnCompile: false,
+        freshOutput: false,
+        outputDir: 'gen/docs',
+    },
+    typechain: {
+        outDir: 'gen/typechain',
+        target: 'ethers-v5',
     },
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
-            saveDeployments: false,
-            mining: { auto: true },
-            hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
-                mnemonic:
-                    'test test test test test test test test test test test junk',
-                count: 10,
-                accountsBalance: '1000000000000000000000',
+                count: 5,
             },
-            tags: ['local'],
-            ...forkInfo,
         },
         ...supportedChains,
     },
     etherscan: {
         apiKey: {
-            sepolia: process.env.BLOCKSCAN_KEY ?? '',
-            arbitrum_sepolia: process.env.ARBITRUM_SEPOLIA_KEY ?? '',
-            avalancheFujiTestnet: process.env.AVALANCHE_FUJI_KEY ?? '',
-            bscTestnet: process.env.BSC_KEY ?? '',
-            polygonMumbai: process.env.POLYGON_MUMBAI ?? '',
-            ftmTestnet: process.env.FTM_TESTNET ?? '',
+            sepolia: process.env.SCAN_API_KEY ?? '',
+            arbitrumSepolia: process.env.SCAN_API_KEY ?? '',
+            optimismSepolia: process.env.SCAN_API_KEY ?? '',
+            avalancheFujiTestnet: process.env.SCAN_API_KEY ?? '',
+            bscTestnet: process.env.SCAN_API_KEY ?? '',
+            polygonMumbai: process.env.SCAN_API_KEY ?? '',
+            ftmTestnet: process.env.SCAN_API_KEY ?? '',
         },
         customChains: [
             {
-                network: 'arbitrum_sepolia',
-                chainId: Number(
-                    SDK.API.utils.getChainBy('name', 'arbitrum_sepolia')!
-                        .chainId,
-                ),
+                network: 'arbitrumSepolia',
+                chainId: 421614,
                 urls: {
                     apiURL: 'https://api-sepolia.arbiscan.io/api',
-                    browserURL: 'https://sepolia.arbiscan.io',
+                    browserURL: 'https://sepolia.arbiscan.io/',
+                },
+            },
+            {
+                network: 'optimismSepolia',
+                chainId: 11155420,
+                urls: {
+                    apiURL: 'https://api-sepolia-optimistic.etherscan.io/',
+                    browserURL: 'https://sepolia-optimism.etherscan.io/',
                 },
             },
         ],
-    },
-    typechain: {
-        outDir: './typechain',
-    },
-    gasReporter: {},
-    dodoc: {
-        runOnCompile: false,
-        freshOutput: false,
-    },
-    mocha: {
-        timeout: 4000000,
     },
 };
 
