@@ -39,32 +39,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     error Failed();
     error GasMismatch();
 
-    function withdrawToChain(
-        IYieldBox yieldBox,
-        address from,
-        uint256 assetId,
-        uint16 dstChainId,
-        bytes32 receiver,
-        uint256 amount,
-        bytes memory adapterParams,
-        address payable refundAddress,
-        uint256 gas,
-        bool unwrap,
-        address zroPaymentAddress
-    ) external payable {
-        _withdrawToChain(
-            yieldBox,
-            from,
-            assetId,
-            dstChainId,
-            receiver,
-            amount,
-            adapterParams,
-            refundAddress,
-            gas,
-            unwrap,
-            zroPaymentAddress
-        );
+    function withdrawToChain(WithdrawToChainData calldata _data) external payable {
+        _withdrawToChain(_data);
     }
 
     function depositAddCollateralAndBorrowFromMarket(
@@ -248,17 +224,19 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             //withdraw
             if (withdrawCollateralParams.withdraw) {
                 _withdrawToChain(
-                    yieldBox,
-                    collateralWithdrawReceiver,
-                    collateralId,
-                    withdrawCollateralParams.withdrawLzChainId,
-                    LzLib.addressToBytes32(user),
-                    yieldBox.toAmount(collateralId, collateralShare, false),
-                    withdrawCollateralParams.withdrawAdapterParams,
-                    withdrawCollateralParams.refundAddress,
-                    valueAmount,
-                    withdrawCollateralParams.unwrap,
-                    withdrawCollateralParams.zroPaymentAddress
+                    WithdrawToChainData({
+                        yieldBox: yieldBox,
+                        from: collateralWithdrawReceiver,
+                        assetId: collateralId,
+                        dstChainId: withdrawCollateralParams.withdrawLzChainId,
+                        receiver: LzLib.addressToBytes32(user),
+                        amount: yieldBox.toAmount(collateralId, collateralShare, false),
+                        adapterParams: withdrawCollateralParams.withdrawAdapterParams,
+                        refundAddress: withdrawCollateralParams.refundAddress,
+                        gas: valueAmount,
+                        unwrap: withdrawCollateralParams.unwrap,
+                        zroPaymentAddress: withdrawCollateralParams.zroPaymentAddress
+                    })
                 );
             }
         }
@@ -588,60 +566,80 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _revertYieldBoxApproval(address(bigBang), yieldBox);
     }
 
-    function _withdrawToChain(
-        IYieldBox yieldBox,
-        address from,
-        uint256 assetId,
-        uint16 dstChainId,
-        bytes32 receiver,
-        uint256 amount,
-        bytes memory adapterParams,
-        address payable refundAddress,
-        uint256 gas,
-        bool unwrap,
-        address zroPaymentAddress
-    ) private {
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(yieldBox))) {
+    /// @dev Calldata for `_withdrawToChain`
+    struct WithdrawToChainData {
+        IYieldBox yieldBox;
+        address from;
+        uint256 assetId;
+        uint16 dstChainId;
+        bytes32 receiver;
+        uint256 amount;
+        bytes adapterParams;
+        address payable refundAddress;
+        uint256 gas;
+        bool unwrap;
+        address zroPaymentAddress;
+    }
+
+    /// @notice performs a withdraw operation
+    /// @dev it can withdraw on the current chain or it can send it to another one
+    ///     - if `dstChainId` is 0 performs a same-chain withdrawal
+    ///          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
+    ///     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
+    /// @param _data.yieldBox the YieldBox address
+    /// @param _data.from user to withdraw from
+    /// @param _data.assetId the YieldBox asset id to withdraw
+    /// @param _data.dstChainId LZ chain id to withdraw to
+    /// @param _data.receiver the receiver on the destination chain
+    /// @param _data.amount the amount to withdraw
+    /// @param _data.adapterParams LZ adapter params
+    /// @param _data.refundAddress the LZ refund address which receives the gas not used in the process
+    /// @param _data.gas the amount of gas to use for sending the asset to another layer
+    /// @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+    /// @param _data.zroPaymentAddress ZRO payment address
+    function _withdrawToChain(WithdrawToChainData memory _data) private {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.yieldBox))) {
             revert NotAuthorized();
         }
 
         // perform a same chain withdrawal
-        if (dstChainId == 0) {
-            _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+        if (_data.dstChainId == 0) {
+            _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
             return;
         }
 
         if (msg.value > 0) {
-            if (msg.value != gas) revert GasMismatch();
+            if (msg.value != _data.gas) revert GasMismatch();
         }
         // perform a cross chain withdrawal
-        (, address asset,,) = yieldBox.assets(assetId);
+        (, address asset,,) = _data.yieldBox.assets(_data.assetId);
         // withdraw from YieldBox
-        yieldBox.withdraw(assetId, from, address(this), amount, 0);
+        _data.yieldBox.withdraw(_data.assetId, _data.from, address(this), _data.amount, 0);
 
         // build LZ params
-        bytes memory _adapterParams;
+        bytes memory adapterParams;
         ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
-            refundAddress: refundAddress,
-            zroPaymentAddress: zroPaymentAddress,
-            adapterParams: ISendFrom(address(asset)).useCustomAdapterParams() ? adapterParams : _adapterParams
+            refundAddress: _data.refundAddress,
+            zroPaymentAddress: _data.zroPaymentAddress,
+            adapterParams: ISendFrom(address(asset)).useCustomAdapterParams() ? adapterParams : adapterParams
         });
 
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(asset))) {
             revert NotAuthorized();
         }
         // sends the asset to another layer
-        if (unwrap) {
+        if (_data.unwrap) {
             ICommonData.IApproval[] memory approvals = new ICommonData.IApproval[](0);
-            try ITapiocaOFT(address(asset)).sendFromWithParams{value: gas}(
-                address(this), dstChainId, receiver, amount, callParams, true, approvals, approvals
+            try ITapiocaOFT(address(asset)).sendFromWithParams{value: _data.gas}(
+                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams, true, approvals, approvals
             ) {} catch {
-                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
             }
         } else {
-            try ISendFrom(address(asset)).sendFrom{value: gas}(address(this), dstChainId, receiver, amount, callParams)
-            {} catch {
-                _withdrawOnThisChain(yieldBox, assetId, from, receiver, amount);
+            try ISendFrom(address(asset)).sendFrom{value: _data.gas}(
+                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams
+            ) {} catch {
+                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
             }
         }
     }
@@ -669,17 +667,19 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
 
         _withdrawToChain(
-            yieldBox,
-            from,
-            withdrawCollateral ? market.collateralId() : market.assetId(),
-            withdrawOnOtherChain ? destChain : 0,
-            receiver,
-            amount,
-            adapterParams,
-            refundAddress,
-            valueAmount,
-            unwrap,
-            zroPaymentAddress
+            WithdrawToChainData({
+                yieldBox: yieldBox,
+                from: from,
+                assetId: withdrawCollateral ? market.collateralId() : market.assetId(),
+                dstChainId: withdrawOnOtherChain ? destChain : 0,
+                receiver: receiver,
+                amount: amount,
+                adapterParams: adapterParams,
+                refundAddress: refundAddress,
+                gas: valueAmount,
+                unwrap: unwrap,
+                zroPaymentAddress: zroPaymentAddress
+            })
         );
     }
 

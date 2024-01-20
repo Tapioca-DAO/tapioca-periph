@@ -12,10 +12,10 @@ import {
     ITapiocaOptionBrokerCrossChain,
     ITapiocaOptionBroker
 } from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
 import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {IMagnetarHelper} from "contracts/interfaces/periph/IMagnetarHelper.sol";
 import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
-import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
 import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
 import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
 import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
@@ -160,43 +160,12 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 (uint256 part, uint256 share) = IMarket(_action.target).borrow(data.from, data.to, data.amount);
                 returnData[i] = Result({success: true, returnData: abi.encode(part, share)});
             } else if (_action.id == YB_WITHDRAW_TO) {
-                (
-                    address yieldBox,
-                    address from,
-                    uint256 assetId,
-                    uint16 dstChainId,
-                    bytes32 receiver,
-                    uint256 amount,
-                    bytes memory adapterParams,
-                    address payable refundAddress,
-                    bool unwrap,
-                    address zroPaymentAddress
-                ) = abi.decode(
-                    _action.call[4:],
-                    (address, address, uint256, uint16, bytes32, uint256, bytes, address, bool, address)
-                );
-
-                _checkSender(from);
-
-                _executeModule(
-                    Module.Market,
-                    abi.encodeCall(
-                        MagnetarMarketModule.withdrawToChain,
-                        (
-                            IYieldBox(yieldBox),
-                            from,
-                            assetId,
-                            dstChainId,
-                            receiver,
-                            amount,
-                            adapterParams,
-                            refundAddress,
-                            _action.value,
-                            unwrap,
-                            zroPaymentAddress
-                        )
-                    )
-                );
+                //
+                (MagnetarMarketModule.WithdrawToChainData memory _data) =
+                    abi.decode(_action.call[4:], (MagnetarMarketModule.WithdrawToChainData));
+                _checkSender(_data.from);
+                _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.withdrawToChain, (_data)));
+                //
             } else if (_action.id == MARKET_LEND) {
                 SGLLendData memory data = abi.decode(_action.call[4:], (SGLLendData));
                 _checkSender(data.from);
@@ -454,50 +423,21 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     ///     - if `dstChainId` is 0 performs a same-chain withdrawal
     ///          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
     ///     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
-    /// @param yieldBox the YieldBox address
-    /// @param from user to withdraw from
-    /// @param assetId the YieldBox asset id to withdraw
-    /// @param dstChainId LZ chain id to withdraw to
-    /// @param receiver the receiver on the destination chain
-    /// @param amount the amount to withdraw
-    /// @param adapterParams LZ adapter params
-    /// @param refundAddress the LZ refund address which receives the gas not used in the process
-    /// @param gas the amount of gas to use for sending the asset to another layer
-    /// @param unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-    /// @param zroPaymentAddress ZRO payment address
-    function withdrawToChain(
-        IYieldBox yieldBox,
-        address from,
-        uint256 assetId,
-        uint16 dstChainId,
-        bytes32 receiver,
-        uint256 amount,
-        bytes memory adapterParams,
-        address payable refundAddress,
-        uint256 gas,
-        bool unwrap,
-        address zroPaymentAddress
-    ) external payable {
-        _checkSender(from);
-        _executeModule(
-            Module.Market,
-            abi.encodeCall(
-                MagnetarMarketModule.withdrawToChain,
-                (
-                    yieldBox,
-                    from,
-                    assetId,
-                    dstChainId,
-                    receiver,
-                    amount,
-                    adapterParams,
-                    refundAddress,
-                    gas,
-                    unwrap,
-                    zroPaymentAddress
-                )
-            )
-        );
+
+    /// @param _data.yieldBox the YieldBox address
+    /// @param _data.from user to withdraw from
+    /// @param _data.assetId the YieldBox asset id to withdraw
+    /// @param _data.dstChainId LZ chain id to withdraw to
+    /// @param _data.receiver the receiver on the destination chain
+    /// @param _data.amount the amount to withdraw
+    /// @param _data.adapterParams LZ adapter params
+    /// @param _data.refundAddress the LZ refund address which receives the gas not used in the process
+    /// @param _data.gas the amount of gas to use for sending the asset to another layer
+    /// @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+    /// @param _data.zroPaymentAddress ZRO payment address
+    function withdrawToChain(MagnetarMarketModule.WithdrawToChainData calldata _data) external payable {
+        _checkSender(_data.from);
+        _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.withdrawToChain, (_data)));
     }
 
     /// @notice helper for deposit to YieldBox, add collateral to a market, borrom from the same market and withdraw
