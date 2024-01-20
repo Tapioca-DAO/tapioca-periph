@@ -55,7 +55,8 @@ contract LiquidationQueue is ILiquidationQueue {
 
     /// @notice The actual order book. Entries are stored only once a bid has been activated
     /// @dev poolId => bidIndex => bidEntry).
-    mapping(uint256 => mapping(uint256 => OrderBookPoolEntry)) public orderBookEntries;
+    mapping(uint256 => mapping(uint256 => OrderBookPoolEntry))
+        public orderBookEntries;
     /// @notice Meta-data about the order book pool
     /// @dev poolId => poolInfo.
     mapping(uint256 => OrderBookPoolInfo) public orderBookInfos;
@@ -96,7 +97,10 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @notice Acts as a 'constructor', should be called by a Singularity market.
     /// @param  _liquidationQueueMeta Info about the liquidations.
     /// @param _singularity The Singularity market address
-    function init(LiquidationQueueMeta calldata _liquidationQueueMeta, address _singularity) external override {
+    function init(
+        LiquidationQueueMeta calldata _liquidationQueueMeta,
+        address _singularity
+    ) external override {
         require(!onlyOnce, "LQ: Initialized");
 
         liquidationQueueMeta = _liquidationQueueMeta;
@@ -109,11 +113,14 @@ contract LiquidationQueue is ILiquidationQueue {
 
         lqAssetId = marketAssetId;
 
-        IERC20(singularity.asset()).approve(address(yieldBox), type(uint256).max);
+        IERC20(singularity.asset()).approve(
+            address(yieldBox),
+            type(uint256).max
+        );
         yieldBox.setApprovalForAll(address(singularity), true);
 
         // We initialize the pools to save gas on conditionals later on.
-        for (uint256 i; i <= MAX_BID_POOLS;) {
+        for (uint256 i; i <= MAX_BID_POOLS; ) {
             _initOrderBookPoolInfo(i);
             ++i;
         }
@@ -143,14 +150,21 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @notice returns an array of 'OrderBookPoolEntry' for a pool
     /// @param pool the pool id
     /// return x order book pool entries details
-    function getOrderBookPoolEntries(uint256 pool) external view returns (OrderBookPoolEntry[] memory x) {
+    function getOrderBookPoolEntries(
+        uint256 pool
+    ) external view returns (OrderBookPoolEntry[] memory x) {
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool];
         uint256 orderBookSize = poolInfo.nextBidPush - poolInfo.nextBidPull;
 
         x = new OrderBookPoolEntry[](orderBookSize); // Initialize the return array.
 
-        mapping(uint256 => OrderBookPoolEntry) storage entries = orderBookEntries[pool];
-        for ((uint256 i, uint256 j) = (poolInfo.nextBidPull, 0); i < poolInfo.nextBidPush;) {
+        mapping(uint256 => OrderBookPoolEntry)
+            storage entries = orderBookEntries[pool];
+        for (
+            (uint256 i, uint256 j) = (poolInfo.nextBidPull, 0);
+            i < poolInfo.nextBidPush;
+
+        ) {
             x[j] = entries[i]; // Copy the entry to the return array.
 
             unchecked {
@@ -164,8 +178,13 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @return i The bid pool id.
     /// @return available True if there is at least 1 bid available across all the order books.
     /// @return totalAmount Total available liquidated asset amount.
-    function getNextAvailBidPool() public view override returns (uint256 i, bool available, uint256 totalAmount) {
-        for (; i <= MAX_BID_POOLS;) {
+    function getNextAvailBidPool()
+        public
+        view
+        override
+        returns (uint256 i, bool available, uint256 totalAmount)
+    {
+        for (; i <= MAX_BID_POOLS; ) {
             if (getOrderBookSize(i) != 0) {
                 available = true;
                 totalAmount = bidPools[i].totalAmount;
@@ -179,7 +198,10 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param pool the pool identifier
     /// @param user the user identifier
     /// @return bidder information
-    function getBidPoolUserInfo(uint256 pool, address user) external view returns (Bidder memory) {
+    function getBidPoolUserInfo(
+        uint256 pool,
+        address user
+    ) external view returns (Bidder memory) {
         return bidPools[pool].users[user];
     }
 
@@ -187,12 +209,15 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param user the user indentifier
     /// @param pool the pool identifier
     /// @return len user bids count
-    function userBidIndexLength(address user, uint256 pool) external view returns (uint256 len) {
+    function userBidIndexLength(
+        address user,
+        uint256 pool
+    ) external view returns (uint256 len) {
         uint256[] memory bidIndexes = userBidIndexes[user][pool];
 
         uint256 bidIndexesLen = bidIndexes.length;
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool];
-        for (uint256 i; i < bidIndexesLen;) {
+        for (uint256 i; i < bidIndexesLen; ) {
             if (bidIndexes[i] >= poolInfo.nextBidPull) {
                 bidIndexesLen--;
             }
@@ -216,12 +241,18 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param stableAssetId Stablecoin YieldBox asset id
     /// @param amountIn Stablecoin amount
     /// @param data Extra data for swap operations
-    function bidWithStable(address user, uint256 pool, uint256 stableAssetId, uint256 amountIn, bytes calldata data)
-        external
-        Active
-    {
+    function bidWithStable(
+        address user,
+        uint256 pool,
+        uint256 stableAssetId,
+        uint256 amountIn,
+        bytes calldata data
+    ) external Active {
         require(pool <= MAX_BID_POOLS, "LQ: premium too high");
-        require(address(liquidationQueueMeta.usdoSwapper) != address(0), "LQ: USDO swapper not set");
+        require(
+            address(liquidationQueueMeta.usdoSwapper) != address(0),
+            "LQ: USDO swapper not set"
+        );
 
         uint256 usdoAssetId = penrose.usdoAssetId();
         yieldBox.transfer(
@@ -231,15 +262,28 @@ contract LiquidationQueue is ILiquidationQueue {
             yieldBox.toShare(stableAssetId, amountIn, false)
         );
 
-        uint256 usdoAmount = liquidationQueueMeta.usdoSwapper.swap(address(singularity), stableAssetId, amountIn, data);
+        uint256 usdoAmount = liquidationQueueMeta.usdoSwapper.swap(
+            address(singularity),
+            stableAssetId,
+            amountIn,
+            data
+        );
 
         Bidder memory bidder = _bid(user, pool, usdoAmount, true);
 
         uint256 usdoValueInLqAsset = bidder.swapOnExecute
-            ? liquidationQueueMeta.bidExecutionSwapper.getOutputAmount(address(singularity), usdoAssetId, usdoAmount, data)
+            ? liquidationQueueMeta.bidExecutionSwapper.getOutputAmount(
+                address(singularity),
+                usdoAssetId,
+                usdoAmount,
+                data
+            )
             : bidder.usdoAmount;
 
-        require(usdoValueInLqAsset >= liquidationQueueMeta.minBidAmount, "LQ: bid too low");
+        require(
+            usdoValueInLqAsset >= liquidationQueueMeta.minBidAmount,
+            "LQ: bid too low"
+        );
     }
 
     /// @notice Add a bid to a bid pool.
@@ -248,13 +292,22 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param user The bidder.
     /// @param pool To which pool the bid should go.
     /// @param amount The amount in asset to bid.
-    function bid(address user, uint256 pool, uint256 amount) external override Active {
+    function bid(
+        address user,
+        uint256 pool,
+        uint256 amount
+    ) external override Active {
         require(pool <= MAX_BID_POOLS, "LQ: premium too high");
         require(amount >= liquidationQueueMeta.minBidAmount, "LQ: bid too low");
 
         // Transfer assets to the LQ contract.
         uint256 assetId = lqAssetId;
-        yieldBox.transfer(msg.sender, address(this), assetId, yieldBox.toShare(assetId, amount, false));
+        yieldBox.transfer(
+            msg.sender,
+            address(this),
+            assetId,
+            yieldBox.toShare(assetId, amount, false)
+        );
         _bid(user, pool, amount, false);
     }
 
@@ -267,7 +320,11 @@ contract LiquidationQueue is ILiquidationQueue {
         Bidder memory bidder = bidPools[pool].users[user];
 
         require(bidder.timestamp > 0, "LQ: bid not available"); //fail early
-        require(block.timestamp >= bidder.timestamp + liquidationQueueMeta.activationTime, "LQ: too soon");
+        require(
+            block.timestamp >=
+                bidder.timestamp + liquidationQueueMeta.activationTime,
+            "LQ: too soon"
+        );
 
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool]; // Info about the pool array indexes.
 
@@ -294,7 +351,10 @@ contract LiquidationQueue is ILiquidationQueue {
             : orderBookEntry.bidInfo.liquidatedAssetAmount;
         uint256 assetValue = orderBookEntry.bidInfo.swapOnExecute
             ? liquidationQueueMeta.bidExecutionSwapper.getOutputAmount(
-                address(singularity), penrose.usdoAssetId(), orderBookEntry.bidInfo.usdoAmount, ""
+                address(singularity),
+                penrose.usdoAssetId(),
+                orderBookEntry.bidInfo.usdoAmount,
+                ""
             )
             : bidAmount;
         bidPools[pool].totalAmount += assetValue;
@@ -314,7 +374,10 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param user The user to send the funds to.
     /// @param pool The pool to remove the bid from.
     /// @return amountRemoved The amount of the bid.
-    function removeBid(address user, uint256 pool) external override returns (uint256 amountRemoved) {
+    function removeBid(
+        address user,
+        uint256 pool
+    ) external override returns (uint256 amountRemoved) {
         bool isUsdo = bidPools[pool].users[msg.sender].isUsdo;
         amountRemoved = isUsdo
             ? bidPools[pool].users[msg.sender].usdoAmount
@@ -324,15 +387,28 @@ contract LiquidationQueue is ILiquidationQueue {
 
         uint256 lqAssetValue = amountRemoved;
         if (bidPools[pool].users[msg.sender].swapOnExecute) {
-            lqAssetValue = liquidationQueueMeta.bidExecutionSwapper.getOutputAmount(
-                address(singularity), penrose.usdoAssetId(), amountRemoved, ""
-            );
+            lqAssetValue = liquidationQueueMeta
+                .bidExecutionSwapper
+                .getOutputAmount(
+                    address(singularity),
+                    penrose.usdoAssetId(),
+                    amountRemoved,
+                    ""
+                );
         }
-        require(lqAssetValue >= liquidationQueueMeta.minBidAmount, "LQ: bid does not exist"); //save gas
+        require(
+            lqAssetValue >= liquidationQueueMeta.minBidAmount,
+            "LQ: bid does not exist"
+        ); //save gas
 
         // Transfer assets
         uint256 assetId = isUsdo ? penrose.usdoAssetId() : lqAssetId;
-        yieldBox.transfer(address(this), user, assetId, yieldBox.toShare(assetId, amountRemoved, false));
+        yieldBox.transfer(
+            address(this),
+            user,
+            assetId,
+            yieldBox.toShare(assetId, amountRemoved, false)
+        );
 
         emit RemoveBid(
             msg.sender,
@@ -359,7 +435,12 @@ contract LiquidationQueue is ILiquidationQueue {
         balancesDue[liquidationQueueMeta.feeCollector] += fee;
 
         uint256 assetId = liquidatedAssetId;
-        yieldBox.transfer(address(this), to, assetId, yieldBox.toShare(assetId, redeemable, false));
+        yieldBox.transfer(
+            address(this),
+            to,
+            assetId,
+            yieldBox.toShare(assetId, redeemable, false)
+        );
 
         emit Redeem(msg.sender, to, redeemable);
     }
@@ -372,7 +453,10 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param swapData Swap data necessary for swapping USDO to market asset; necessary only if bidder added USDO
     /// @return totalAmountExecuted The amount of asset that was executed.
     /// @return totalCollateralLiquidated The amount of collateral that was liquidated.
-    function executeBids(uint256 collateralAmountToLiquidate, bytes calldata swapData)
+    function executeBids(
+        uint256 collateralAmountToLiquidate,
+        bytes calldata swapData
+    )
         external
         override
         returns (uint256 totalAmountExecuted, uint256 totalCollateralLiquidated)
@@ -380,7 +464,7 @@ contract LiquidationQueue is ILiquidationQueue {
         require(msg.sender == address(singularity), "LQ: Only Singularity");
         BidExecutionData memory data;
 
-        (data.curPoolId, data.isBidAvail,) = getNextAvailBidPool();
+        (data.curPoolId, data.isBidAvail, ) = getNextAvailBidPool();
         data.exchangeRate = singularity.exchangeRate();
         // We loop through all the bids for each pools until all the collateral is liquidated
         // or no more bid are available.
@@ -390,62 +474,91 @@ contract LiquidationQueue is ILiquidationQueue {
             data.totalPoolAmountExecuted = 0;
             data.totalPoolCollateralLiquidated = 0;
             // While bid pool is not empty and we haven't liquidated enough collateral.
-            while (collateralAmountToLiquidate > 0 && data.poolInfo.nextBidPull != data.poolInfo.nextBidPush) {
+            while (
+                collateralAmountToLiquidate > 0 &&
+                data.poolInfo.nextBidPull != data.poolInfo.nextBidPush
+            ) {
                 // Get the next bid.
-                data.orderBookEntry = orderBookEntries[data.curPoolId][data.poolInfo.nextBidPull];
+                data.orderBookEntry = orderBookEntries[data.curPoolId][
+                    data.poolInfo.nextBidPull
+                ];
                 data.orderBookEntryCopy = data.orderBookEntry;
 
                 // Get the total amount of asset with the pool discount applied for the bidder.
-                data.discountedBidderAmount = _viewBidderDiscountedCollateralAmount(
-                    data.orderBookEntryCopy.bidInfo, data.exchangeRate, data.curPoolId
+                data
+                    .discountedBidderAmount = _viewBidderDiscountedCollateralAmount(
+                    data.orderBookEntryCopy.bidInfo,
+                    data.exchangeRate,
+                    data.curPoolId
                 );
 
                 // Check if the bidder can pay the remaining collateral to liquidate `collateralAmountToLiquidate`.
                 if (data.discountedBidderAmount > collateralAmountToLiquidate) {
-                    (uint256 finalDiscountedCollateralAmount, uint256 finalUsdoAmount) = _userPartiallyBidAmount(
-                        data.orderBookEntryCopy.bidInfo,
-                        collateralAmountToLiquidate,
-                        data.exchangeRate,
-                        data.curPoolId,
-                        swapData
-                    );
+                    (
+                        uint256 finalDiscountedCollateralAmount,
+                        uint256 finalUsdoAmount
+                    ) = _userPartiallyBidAmount(
+                            data.orderBookEntryCopy.bidInfo,
+                            collateralAmountToLiquidate,
+                            data.exchangeRate,
+                            data.curPoolId,
+                            swapData
+                        );
 
                     // Execute the bid.
-                    balancesDue[data.orderBookEntryCopy.bidder] += collateralAmountToLiquidate; // Write balance.
+                    balancesDue[
+                        data.orderBookEntryCopy.bidder
+                    ] += collateralAmountToLiquidate; // Write balance.
 
                     if (!data.orderBookEntry.bidInfo.isUsdo) {
-                        data.orderBookEntry.bidInfo.liquidatedAssetAmount -= finalDiscountedCollateralAmount; // Update bid entry amount.
+                        data
+                            .orderBookEntry
+                            .bidInfo
+                            .liquidatedAssetAmount -= finalDiscountedCollateralAmount; // Update bid entry amount.
                     } else {
-                        data.orderBookEntry.bidInfo.usdoAmount -= finalUsdoAmount;
+                        data
+                            .orderBookEntry
+                            .bidInfo
+                            .usdoAmount -= finalUsdoAmount;
                     }
 
                     // Update the total amount executed, the total collateral liquidated and collateral to liquidate.
-                    data.totalPoolAmountExecuted += finalDiscountedCollateralAmount;
-                    data.totalPoolCollateralLiquidated += collateralAmountToLiquidate;
+                    data
+                        .totalPoolAmountExecuted += finalDiscountedCollateralAmount;
+                    data
+                        .totalPoolCollateralLiquidated += collateralAmountToLiquidate;
                     collateralAmountToLiquidate = 0; // Since we have liquidated all the collateral.
                     data.totalUsdoAmountUsed += finalUsdoAmount;
 
-                    orderBookEntries[data.curPoolId][data.poolInfo.nextBidPull].bidInfo = data.orderBookEntry.bidInfo;
+                    orderBookEntries[data.curPoolId][data.poolInfo.nextBidPull]
+                        .bidInfo = data.orderBookEntry.bidInfo;
                 } else {
-                    (uint256 finalCollateralAmount, uint256 finalDiscountedCollateralAmount, uint256 finalUsdoAmount) =
-                    _useEntireBidAmount(
-                        data.orderBookEntryCopy.bidInfo,
-                        data.discountedBidderAmount,
-                        data.exchangeRate,
-                        data.curPoolId,
-                        swapData
-                    );
+                    (
+                        uint256 finalCollateralAmount,
+                        uint256 finalDiscountedCollateralAmount,
+                        uint256 finalUsdoAmount
+                    ) = _useEntireBidAmount(
+                            data.orderBookEntryCopy.bidInfo,
+                            data.discountedBidderAmount,
+                            data.exchangeRate,
+                            data.curPoolId,
+                            swapData
+                        );
                     // Execute the bid.
-                    balancesDue[data.orderBookEntryCopy.bidder] += finalDiscountedCollateralAmount; // Write balance.
+                    balancesDue[
+                        data.orderBookEntryCopy.bidder
+                    ] += finalDiscountedCollateralAmount; // Write balance.
                     data.orderBookEntry.bidInfo.usdoAmount = 0; // Update bid entry amount.
                     data.orderBookEntry.bidInfo.liquidatedAssetAmount = 0; // Update bid entry amount.
                     // Update the total amount executed, the total collateral liquidated and collateral to liquidate.
                     data.totalUsdoAmountUsed += finalUsdoAmount;
                     data.totalPoolAmountExecuted += finalCollateralAmount;
-                    data.totalPoolCollateralLiquidated += finalDiscountedCollateralAmount;
+                    data
+                        .totalPoolCollateralLiquidated += finalDiscountedCollateralAmount;
 
                     collateralAmountToLiquidate -= finalDiscountedCollateralAmount;
-                    orderBookEntries[data.curPoolId][data.poolInfo.nextBidPull].bidInfo = data.orderBookEntry.bidInfo;
+                    orderBookEntries[data.curPoolId][data.poolInfo.nextBidPull]
+                        .bidInfo = data.orderBookEntry.bidInfo;
                     // Since the current bid was fulfilled, get the next one.
                     unchecked {
                         ++data.poolInfo.nextBidPull;
@@ -457,7 +570,7 @@ contract LiquidationQueue is ILiquidationQueue {
             totalCollateralLiquidated += data.totalPoolCollateralLiquidated;
             orderBookInfos[data.curPoolId] = data.poolInfo; // Update the pool info for the current pool.
             // Look up for the next available bid pool.
-            (data.curPoolId, data.isBidAvail,) = getNextAvailBidPool();
+            (data.curPoolId, data.isBidAvail, ) = getNextAvailBidPool();
             bidPools[data.curPoolId].totalAmount -= totalAmountExecuted;
 
             emit ExecuteBids(
@@ -474,8 +587,20 @@ contract LiquidationQueue is ILiquidationQueue {
             uint256 toSend = totalAmountExecuted;
 
             // Transfer the assets to the Singularity.
-            yieldBox.withdraw(lqAssetId, address(this), address(this), toSend, 0);
-            yieldBox.depositAsset(marketAssetId, address(this), address(singularity), toSend, 0);
+            yieldBox.withdraw(
+                lqAssetId,
+                address(this),
+                address(this),
+                toSend,
+                0
+            );
+            yieldBox.depositAsset(
+                marketAssetId,
+                address(this),
+                address(singularity),
+                toSend,
+                0
+            );
         }
     }
 
@@ -483,7 +608,10 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param _swapper thew new ICollateralSwaper contract address
     function setBidExecutionSwapper(address _swapper) external override {
         require(msg.sender == address(singularity), "unauthorized");
-        emit BidSwapperUpdated(liquidationQueueMeta.bidExecutionSwapper, _swapper);
+        emit BidSwapperUpdated(
+            liquidationQueueMeta.bidExecutionSwapper,
+            _swapper
+        );
         liquidationQueueMeta.bidExecutionSwapper = IBidder(_swapper);
     }
 
@@ -498,18 +626,28 @@ contract LiquidationQueue is ILiquidationQueue {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
-    function _viewBidderDiscountedCollateralAmount(Bidder memory entry, uint256 exchangeRate, uint256 poolId)
-        private
-        view
-        returns (uint256)
-    {
-        uint256 bidAmount = entry.isUsdo ? entry.usdoAmount : entry.liquidatedAssetAmount;
+    function _viewBidderDiscountedCollateralAmount(
+        Bidder memory entry,
+        uint256 exchangeRate,
+        uint256 poolId
+    ) private view returns (uint256) {
+        uint256 bidAmount = entry.isUsdo
+            ? entry.usdoAmount
+            : entry.liquidatedAssetAmount;
         uint256 liquidatedAssetAmount = entry.swapOnExecute
             ? liquidationQueueMeta.bidExecutionSwapper.getOutputAmount(
-                address(singularity), penrose.usdoAssetId(), entry.usdoAmount, ""
+                address(singularity),
+                penrose.usdoAssetId(),
+                entry.usdoAmount,
+                ""
             )
             : bidAmount;
-        return _getPremiumAmount(_bidToCollateral(liquidatedAssetAmount, exchangeRate), poolId, MODE.ADD);
+        return
+            _getPremiumAmount(
+                _bidToCollateral(liquidatedAssetAmount, exchangeRate),
+                poolId,
+                MODE.ADD
+            );
     }
 
     function _useEntireBidAmount(
@@ -520,7 +658,11 @@ contract LiquidationQueue is ILiquidationQueue {
         bytes memory swapData
     )
         private
-        returns (uint256 finalCollateralAmount, uint256 finalDiscountedCollateralAmount, uint256 finalUsdoAmount)
+        returns (
+            uint256 finalCollateralAmount,
+            uint256 finalDiscountedCollateralAmount,
+            uint256 finalUsdoAmount
+        )
     {
         finalCollateralAmount = entry.liquidatedAssetAmount;
         finalDiscountedCollateralAmount = discountedBidderAmount;
@@ -534,11 +676,19 @@ contract LiquidationQueue is ILiquidationQueue {
                 yieldBox.toShare(penrose.usdoAssetId(), entry.usdoAmount, false)
             );
 
-            finalCollateralAmount = liquidationQueueMeta.bidExecutionSwapper.swap(
-                address(singularity), penrose.usdoAssetId(), entry.usdoAmount, swapData
+            finalCollateralAmount = liquidationQueueMeta
+                .bidExecutionSwapper
+                .swap(
+                    address(singularity),
+                    penrose.usdoAssetId(),
+                    entry.usdoAmount,
+                    swapData
+                );
+            finalDiscountedCollateralAmount = _getPremiumAmount(
+                _bidToCollateral(finalCollateralAmount, exchangeRate),
+                poolId,
+                MODE.ADD
             );
-            finalDiscountedCollateralAmount =
-                _getPremiumAmount(_bidToCollateral(finalCollateralAmount, exchangeRate), poolId, MODE.ADD);
         }
     }
 
@@ -548,17 +698,31 @@ contract LiquidationQueue is ILiquidationQueue {
         uint256 exchangeRate,
         uint256 poolId,
         bytes memory swapData
-    ) private returns (uint256 finalDiscountedCollateralAmount, uint256 finalUsdoAmount) {
+    )
+        private
+        returns (
+            uint256 finalDiscountedCollateralAmount,
+            uint256 finalUsdoAmount
+        )
+    {
         finalUsdoAmount = 0;
-        finalDiscountedCollateralAmount =
-            _getPremiumAmount(_collateralToBid(collateralAmountToLiquidate, exchangeRate), poolId, MODE.SUB);
+        finalDiscountedCollateralAmount = _getPremiumAmount(
+            _collateralToBid(collateralAmountToLiquidate, exchangeRate),
+            poolId,
+            MODE.SUB
+        );
 
         //Execute the swap if USDO was provided and it's different from the liqudation asset id
         uint256 usdoAssetId = penrose.usdoAssetId();
         if (entry.swapOnExecute) {
-            finalUsdoAmount = liquidationQueueMeta.bidExecutionSwapper.getInputAmount(
-                address(singularity), usdoAssetId, finalDiscountedCollateralAmount, ""
-            );
+            finalUsdoAmount = liquidationQueueMeta
+                .bidExecutionSwapper
+                .getInputAmount(
+                    address(singularity),
+                    usdoAssetId,
+                    finalDiscountedCollateralAmount,
+                    ""
+                );
 
             yieldBox.transfer(
                 address(this),
@@ -566,14 +730,27 @@ contract LiquidationQueue is ILiquidationQueue {
                 usdoAssetId,
                 yieldBox.toShare(usdoAssetId, finalUsdoAmount, false)
             );
-            uint256 returnedCollateral = liquidationQueueMeta.bidExecutionSwapper.swap(
-                address(singularity), usdoAssetId, finalUsdoAmount, swapData
+            uint256 returnedCollateral = liquidationQueueMeta
+                .bidExecutionSwapper
+                .swap(
+                    address(singularity),
+                    usdoAssetId,
+                    finalUsdoAmount,
+                    swapData
+                );
+            require(
+                returnedCollateral >= finalDiscountedCollateralAmount,
+                "need-more-collateral"
             );
-            require(returnedCollateral >= finalDiscountedCollateralAmount, "need-more-collateral");
         }
     }
 
-    function _bid(address user, uint256 pool, uint256 amount, bool isUsdo) private returns (Bidder memory bidder) {
+    function _bid(
+        address user,
+        uint256 pool,
+        uint256 amount,
+        bool isUsdo
+    ) private returns (Bidder memory bidder) {
         bidder.usdoAmount = isUsdo ? amount : 0;
         bidder.liquidatedAssetAmount = isUsdo ? 0 : amount;
         bidder.timestamp = block.timestamp;
@@ -595,7 +772,7 @@ contract LiquidationQueue is ILiquidationQueue {
         uint256[] storage bidIndexes = userBidIndexes[user][pool];
         uint256 bidIndexesLen = bidIndexes.length;
         OrderBookPoolInfo memory poolInfo = orderBookInfos[pool];
-        for (uint256 i; i < bidIndexesLen;) {
+        for (uint256 i; i < bidIndexesLen; ) {
             if (bidIndexes[i] >= poolInfo.nextBidPull) {
                 bidIndexesLen = bidIndexes.length;
                 bidIndexes[i] = bidIndexes[bidIndexesLen - 1];
@@ -619,22 +796,33 @@ contract LiquidationQueue is ILiquidationQueue {
     /// @param amount The amount of collateral to get the discount from.
     /// @param poolId The targeted pool.
     /// @param mode 0 subtract - 1 add.
-    function _getPremiumAmount(uint256 amount, uint256 poolId, MODE mode) internal pure returns (uint256) {
-        uint256 premium = (amount * poolId * PREMIUM_FACTOR) / PREMIUM_FACTOR_PRECISION;
+    function _getPremiumAmount(
+        uint256 amount,
+        uint256 poolId,
+        MODE mode
+    ) internal pure returns (uint256) {
+        uint256 premium = (amount * poolId * PREMIUM_FACTOR) /
+            PREMIUM_FACTOR_PRECISION;
         return mode == MODE.ADD ? amount + premium : amount - premium;
     }
 
     /// @notice Convert a bid amount to a collateral amount.
     /// @param amount The amount of bid to convert.
     /// @param exchangeRate The exchange rate to use.
-    function _bidToCollateral(uint256 amount, uint256 exchangeRate) internal pure returns (uint256) {
+    function _bidToCollateral(
+        uint256 amount,
+        uint256 exchangeRate
+    ) internal pure returns (uint256) {
         return (amount * exchangeRate) / EXCHANGE_RATE_PRECISION;
     }
 
     /// @notice Convert a collateral amount to a bid amount.
     /// @param collateralAmount The amount of collateral to convert.
     /// @param exchangeRate The exchange rate to use.
-    function _collateralToBid(uint256 collateralAmount, uint256 exchangeRate) internal pure returns (uint256) {
+    function _collateralToBid(
+        uint256 collateralAmount,
+        uint256 exchangeRate
+    ) internal pure returns (uint256) {
         return (collateralAmount * EXCHANGE_RATE_PRECISION) / exchangeRate;
     }
 }

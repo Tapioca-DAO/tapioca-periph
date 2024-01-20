@@ -49,10 +49,18 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     uint8 internal constant PARTICIPATE_FN = 1;
 
     event ReceiveFailed(
-        uint16 indexed srcChainId, address indexed token, uint256 indexed nonce, uint256 amountLD, bytes payload
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
     );
     event ReceiveSuccess(
-        uint16 indexed srcChainId, address indexed token, uint256 indexed nonce, uint256 amountLD, bytes payload
+        uint16 indexed srcChainId,
+        address indexed token,
+        uint256 indexed nonce,
+        uint256 amountLD,
+        bytes payload
     );
 
     // ************************ //
@@ -84,8 +92,12 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     ) external view returns (uint256, uint256) {
         bytes memory payload = "";
         if (_functionType == PARTICIPATE_FN) {
-            ParticipateData memory participateData =
-                ParticipateData({assetIn: address(0), assetOut: address(0), deadline: block.timestamp, minAmountOut: 0});
+            ParticipateData memory participateData = ParticipateData({
+                assetIn: address(0),
+                assetOut: address(0),
+                deadline: block.timestamp,
+                minAmountOut: 0
+            });
             payload = abi.encode(participateData, _toAddress);
         } else {
             revert UnsupportedFunctionType();
@@ -93,9 +105,14 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
 
         IStargateBridge bridge = router.bridge();
         ILayerZeroEndpoint endpoint = bridge.layerZeroEndpoint();
-        return endpoint.estimateFees(
-            _dstChainId, address(bridge), payload, false, _txParamBuilder(_dstChainId, _functionType, _lzTxParams)
-        );
+        return
+            endpoint.estimateFees(
+                _dstChainId,
+                address(bridge),
+                payload,
+                false,
+                _txParamBuilder(_dstChainId, _functionType, _lzTxParams)
+            );
     }
 
     // ************************ //
@@ -104,25 +121,27 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     /// @notice sends token to another layer using Stargate to participate in the LBP
     /// @param stargateData Stargate operation related data; see `StargateData` struct
     /// @param lbpData LBP related data; see 'ParticipateData' struct
-    function participate(StargateData calldata stargateData, ParticipateData calldata lbpData)
-        external
-        payable
-        nonReentrant
-    {
+    function participate(
+        StargateData calldata stargateData,
+        ParticipateData calldata lbpData
+    ) external payable nonReentrant {
         IERC20 erc20 = IERC20(stargateData.srcToken);
 
         // retrieve source token from sender
         erc20.safeTransferFrom(msg.sender, address(this), stargateData.amount);
 
         // compute min amount to be received on destination
-        uint256 amountWithSlippage =
-            stargateData.amount - ((stargateData.amount * stargateData.slippage) / SLIPPAGE_PRECISION);
+        uint256 amountWithSlippage = stargateData.amount -
+            ((stargateData.amount * stargateData.slippage) /
+                SLIPPAGE_PRECISION);
 
         // approve token for Stargate router
         _safeApprove(address(erc20), address(router), stargateData.amount);
 
         // send over to another layer using the Stargate router
-        uint256 balanceBefore = IERC20(stargateData.srcToken).balanceOf(address(this));
+        uint256 balanceBefore = IERC20(stargateData.srcToken).balanceOf(
+            address(this)
+        );
         router.swap{value: msg.value}(
             stargateData.dstChainId,
             stargateData.srcPoolId,
@@ -140,10 +159,15 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         );
 
         // check dust and send it back to the user
-        uint256 balanceAfter = IERC20(stargateData.srcToken).balanceOf(address(this));
+        uint256 balanceAfter = IERC20(stargateData.srcToken).balanceOf(
+            address(this)
+        );
         uint256 transferred = balanceBefore - balanceAfter;
         if (transferred < stargateData.amount && stargateData.getDust) {
-            IERC20(stargateData.srcToken).transfer(msg.sender, stargateData.amount - transferred);
+            IERC20(stargateData.srcToken).transfer(
+                msg.sender,
+                stargateData.amount - transferred
+            );
         }
     }
 
@@ -158,12 +182,21 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     ) external {
         if (msg.sender != address(router)) revert NotAuthorized();
 
-        try IStargateLbpHelper(address(this))._sgReceive(token, amountLD, payload) {
+        try
+            IStargateLbpHelper(address(this))._sgReceive(
+                token,
+                amountLD,
+                payload
+            )
+        {
             emit ReceiveSuccess(srcChainId, token, nonce, amountLD, payload);
         } catch {
             emit ReceiveFailed(srcChainId, token, nonce, amountLD, payload);
             // decode payload
-            (, address receiver) = abi.decode(payload, (ParticipateData, address));
+            (, address receiver) = abi.decode(
+                payload,
+                (ParticipateData, address)
+            );
             IERC20(token).safeTransfer(receiver, amountLD);
         }
     }
@@ -176,7 +209,10 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         if (msg.sender != address(this)) revert NotAuthorized();
 
         // decode payload
-        (ParticipateData memory data, address receiver) = abi.decode(payload, (ParticipateData, address));
+        (ParticipateData memory data, address receiver) = abi.decode(
+            payload,
+            (ParticipateData, address)
+        );
         if (token != data.assetIn) revert TokensMismatch();
 
         // check token's balance
@@ -184,26 +220,31 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         if (tokenBalance < amountLD) revert BalanceTooLow();
 
         // create lbp join params
-        IBalancerVault.SingleSwap memory singleSwap = IBalancerVault.SingleSwap({
-            poolId: lbpPool.getPoolId(),
-            kind: IBalancerVault.SwapKind.GIVEN_IN, //0
-            assetIn: IAsset(data.assetIn),
-            assetOut: IAsset(data.assetOut),
-            amount: amountLD,
-            userData: "0x"
-        });
+        IBalancerVault.SingleSwap memory singleSwap = IBalancerVault
+            .SingleSwap({
+                poolId: lbpPool.getPoolId(),
+                kind: IBalancerVault.SwapKind.GIVEN_IN, //0
+                assetIn: IAsset(data.assetIn),
+                assetOut: IAsset(data.assetOut),
+                amount: amountLD,
+                userData: "0x"
+            });
 
-        IBalancerVault.FundManagement memory fundManagement = IBalancerVault.FundManagement({
-            sender: address(this),
-            recipient: payable(receiver),
-            fromInternalBalance: false,
-            toInternalBalance: false
-        });
+        IBalancerVault.FundManagement memory fundManagement = IBalancerVault
+            .FundManagement({
+                sender: address(this),
+                recipient: payable(receiver),
+                fromInternalBalance: false,
+                toInternalBalance: false
+            });
 
         // participate in the lbp
         _safeApprove(data.assetIn, address(lbpVault), amountLD);
         lbpVault.swap(
-            singleSwap, fundManagement, data.minAmountOut, (data.deadline != 0 ? data.deadline : block.timestamp)
+            singleSwap,
+            fundManagement,
+            data.minAmountOut,
+            (data.deadline != 0 ? data.deadline : block.timestamp)
         );
     }
 
@@ -218,20 +259,24 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         bytes memory data;
         (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, 0)));
         require(
-            success && (data.length == 0 || abi.decode(data, (bool))), "StargateLbpHelper::safeApprove: approve failed"
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "StargateLbpHelper::safeApprove: approve failed"
         );
 
-        (success, data) = token.call(abi.encodeCall(IERC20.approve, (to, value)));
+        (success, data) = token.call(
+            abi.encodeCall(IERC20.approve, (to, value))
+        );
         require(
-            success && (data.length == 0 || abi.decode(data, (bool))), "StargateLbpHelper::safeApprove: approve failed"
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "StargateLbpHelper::safeApprove: approve failed"
         );
     }
 
-    function _txParamBuilder(uint16 _chainId, uint8 _type, IStargateRouter.lzTxObj memory _lzTxParams)
-        private
-        view
-        returns (bytes memory)
-    {
+    function _txParamBuilder(
+        uint16 _chainId,
+        uint8 _type,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) private view returns (bytes memory) {
         bytes memory lzTxParam;
         address dstNativeAddr;
         {
@@ -241,9 +286,15 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             }
         }
 
-        uint256 totalGas = router.bridge().gasLookup(_chainId, _type) + _lzTxParams.dstGasForCall;
+        uint256 totalGas = router.bridge().gasLookup(_chainId, _type) +
+            _lzTxParams.dstGasForCall;
         if (_lzTxParams.dstNativeAmount > 0 && dstNativeAddr != address(0x0)) {
-            lzTxParam = abi.encodePacked(uint16(2), totalGas, _lzTxParams.dstNativeAmount, _lzTxParams.dstNativeAddr);
+            lzTxParam = abi.encodePacked(
+                uint16(2),
+                totalGas,
+                _lzTxParams.dstNativeAmount,
+                _lzTxParams.dstNativeAddr
+            );
         } else {
             lzTxParam = abi.encodePacked(uint16(1), totalGas);
         }

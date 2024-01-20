@@ -32,9 +32,12 @@ interface IGmxGlpManager {
 
     function USDG_DECIMALS() external view returns (uint256);
 
-    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minGlp)
-        external
-        returns (uint256);
+    function addLiquidity(
+        address _token,
+        uint256 _amount,
+        uint256 _minUsdg,
+        uint256 _minGlp
+    ) external returns (uint256);
 
     function addLiquidityForAccount(
         address _fundingAccount,
@@ -57,9 +60,15 @@ interface IGmxGlpManager {
 
     function getAums() external view returns (uint256[] memory);
 
-    function getGlobalShortAveragePrice(address _token) external view returns (uint256);
+    function getGlobalShortAveragePrice(
+        address _token
+    ) external view returns (uint256);
 
-    function getGlobalShortDelta(address _token, uint256 _price, uint256 _size) external view returns (uint256, bool);
+    function getGlobalShortDelta(
+        address _token,
+        uint256 _price,
+        uint256 _size
+    ) external view returns (uint256, bool);
 
     function getPrice(bool _maximise) external view returns (uint256);
 
@@ -73,9 +82,12 @@ interface IGmxGlpManager {
 
     function lastAddedAt(address) external view returns (uint256);
 
-    function removeLiquidity(address _tokenOut, uint256 _glpAmount, uint256 _minOut, address _receiver)
-        external
-        returns (uint256);
+    function removeLiquidity(
+        address _tokenOut,
+        uint256 _glpAmount,
+        uint256 _minOut,
+        address _receiver
+    ) external returns (uint256);
 
     function removeLiquidityForAccount(
         address _account,
@@ -85,7 +97,10 @@ interface IGmxGlpManager {
         address _receiver
     ) external returns (uint256);
 
-    function setAumAdjustment(uint256 _aumAddition, uint256 _aumDeduction) external;
+    function setAumAdjustment(
+        uint256 _aumAddition,
+        uint256 _aumDeduction
+    ) external;
 
     function setCooldownDuration(uint256 _cooldownDuration) external;
 
@@ -97,7 +112,9 @@ interface IGmxGlpManager {
 
     function setShortsTracker(address _shortsTracker) external;
 
-    function setShortsTrackerAveragePriceWeight(uint256 _shortsTrackerAveragePriceWeight) external;
+    function setShortsTrackerAveragePriceWeight(
+        uint256 _shortsTrackerAveragePriceWeight
+    ) external;
 
     function shortsTracker() external view returns (address);
 

@@ -60,7 +60,9 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     }
 
     /// @notice Converts a quote amount of inToken to an outToken amount using Chainlink rates
-    function readQuoteLower(uint256 quoteAmount) external view returns (uint256) {
+    function readQuoteLower(
+        uint256 quoteAmount
+    ) external view returns (uint256) {
         return _readQuote(quoteAmount);
     }
 
@@ -75,13 +77,19 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     /// @param quoteAmount The amount for which to compute the price expressed with base decimal
     /// @return The `quoteAmount` converted in EUR
     /// @dev If `quoteAmount` is `BASE_TOKENS`, the output is the oracle rate
-    function _quoteChainlink(uint256 quoteAmount) internal view returns (uint256) {
+    function _quoteChainlink(
+        uint256 quoteAmount
+    ) internal view returns (uint256) {
         AggregatorV3Interface[2] memory circuitChainlink = _circuitChainlink();
         uint8[2] memory circuitChainIsMultiplied = _circuitChainIsMultiplied();
         uint8[2] memory chainlinkDecimals = _chainlinkDecimals();
         for (uint256 i; i < circuitChainlink.length; i++) {
-            (quoteAmount,) = _readChainlinkFeed(
-                quoteAmount, circuitChainlink[i], circuitChainIsMultiplied[i], chainlinkDecimals[i], 0
+            (quoteAmount, ) = _readChainlinkFeed(
+                quoteAmount,
+                circuitChainlink[i],
+                circuitChainIsMultiplied[i],
+                chainlinkDecimals[i],
+                0
             );
         }
         return quoteAmount;
@@ -95,7 +103,11 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     }
 
     /// @notice Returns the array of the Chainlink feeds to look at
-    function _circuitChainlink() internal pure virtual returns (AggregatorV3Interface[2] memory);
+    function _circuitChainlink()
+        internal
+        pure
+        virtual
+        returns (AggregatorV3Interface[2] memory);
 
     /// @notice Base of the inToken
     function _inBase() internal pure virtual returns (uint256);
@@ -103,12 +115,22 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     /// @notice Amount of decimals of the Chainlink feeds of interest
     /// @dev This function is initialized with a specific amounts of decimals but should be overriden
     /// if a Chainlink feed does not have 8 decimals
-    function _chainlinkDecimals() internal pure virtual returns (uint8[2] memory) {
+    function _chainlinkDecimals()
+        internal
+        pure
+        virtual
+        returns (uint8[2] memory)
+    {
         return [8, 8];
     }
 
     /// @notice Whether the Chainlink feeds should be multiplied or divided with one another
-    function _circuitChainIsMultiplied() internal pure virtual returns (uint8[2] memory) {
+    function _circuitChainIsMultiplied()
+        internal
+        pure
+        virtual
+        returns (uint8[2] memory)
+    {
         return [1, 0];
     }
 }

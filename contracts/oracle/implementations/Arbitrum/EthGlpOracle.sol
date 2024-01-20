@@ -7,11 +7,21 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 import {IOracle} from "../../../interfaces/IOracle.sol";
 
-contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
+contract EthGlpOracle is
+    IOracle,
+    SequencerCheck,
+    AccessControlDefaultAdminRules,
+    ReentrancyGuard
+{
     IOracle public wethUsdOracle;
     IOracle public glpUsdOracle;
 
-    constructor(IOracle _wethUsdOracle, IOracle _glpUsdOracle, address _sequencerUptimeFeed, address _admin)
+    constructor(
+        IOracle _wethUsdOracle,
+        IOracle _glpUsdOracle,
+        address _sequencerUptimeFeed,
+        address _admin
+    )
         SequencerCheck(_sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _admin)
     {
@@ -26,7 +36,9 @@ contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules
 
     // Get the latest exchange rate
     /// @inheritdoc IOracle
-    function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
+    function get(
+        bytes calldata
+    ) public override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
 
         (, uint256 wethUsdPrice) = wethUsdOracle.get("");
@@ -37,7 +49,9 @@ contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peek(bytes calldata) public view override returns (bool success, uint256 rate) {
+    function peek(
+        bytes calldata
+    ) public view override returns (bool success, uint256 rate) {
         (, uint256 wethUsdPrice) = wethUsdOracle.peek("");
         (, uint256 glpUsdPrice) = glpUsdOracle.peek("");
 
@@ -46,7 +60,9 @@ contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules
 
     // Check the current spot exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
+    function peekSpot(
+        bytes calldata data
+    ) external view override returns (uint256 rate) {
         (, rate) = peek(data);
     }
 
@@ -56,13 +72,17 @@ contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules
     }
 
     /// @inheritdoc IOracle
-    function symbol(bytes calldata) public pure override returns (string memory) {
+    function symbol(
+        bytes calldata
+    ) public pure override returns (string memory) {
         return "ETH/GLP";
     }
 
     /// @notice Changes the grace period for the sequencer update
     /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

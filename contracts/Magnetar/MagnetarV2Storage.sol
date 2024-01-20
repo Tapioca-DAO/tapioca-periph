@@ -210,7 +210,12 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** PUBLIC METHODS *** //
     // ********************** //
     /// @notice IERC721Receiver implementation
-    function onERC721Received(address, address, uint256, bytes memory) public virtual override returns (bytes4) {
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
         return this.onERC721Received.selector;
     }
 

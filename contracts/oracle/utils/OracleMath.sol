@@ -18,14 +18,16 @@ contract OracleMath is FullMath {
     /// @param baseAmount Amount of token to be converted
     /// @param multiply Boolean representing whether the `baseToken` has a lower address than the `quoteToken`
     /// @return quoteAmount Amount of `quoteToken` received for `baseAmount` of `baseToken`
-    function _getQuoteAtTick(int24 tick, uint256 baseAmount, uint256 multiply)
-        internal
-        pure
-        returns (uint256 quoteAmount)
-    {
+    function _getQuoteAtTick(
+        int24 tick,
+        uint256 baseAmount,
+        uint256 multiply
+    ) internal pure returns (uint256 quoteAmount) {
         uint256 ratio = _getRatioAtTick(tick);
 
-        quoteAmount = (multiply == 1) ? _mulDiv(ratio, baseAmount, 1e18) : _mulDiv(1e18, baseAmount, ratio);
+        quoteAmount = (multiply == 1)
+            ? _mulDiv(ratio, baseAmount, 1e18)
+            : _mulDiv(1e18, baseAmount, ratio);
     }
 
     /// @notice Calculates 1.0001^tick * in out ERC20 decimals
@@ -37,11 +39,14 @@ contract OracleMath is FullMath {
     /// at the given tick
     function _getRatioAtTick(int24 tick) internal pure returns (uint256 rate) {
         unchecked {
-            uint256 absTick = tick < 0 ? uint256(-int256(tick)) : uint256(int256(tick));
+            uint256 absTick = tick < 0
+                ? uint256(-int256(tick))
+                : uint256(int256(tick));
             require(absTick <= uint256(int256(_MAX_TICK)), "T");
 
-            uint256 ratio =
-                absTick & 0x1 != 0 ? 0xfff97272373d413259a46990580e213a : 0x100000000000000000000000000000000;
+            uint256 ratio = absTick & 0x1 != 0
+                ? 0xfff97272373d413259a46990580e213a
+                : 0x100000000000000000000000000000000;
             if (absTick & 0x2 != 0) {
                 ratio = (ratio * 0xfff2e50f5f656932ef12357cf3c7fdcc) >> 128;
             }
@@ -107,7 +112,9 @@ contract OracleMath is FullMath {
             // We retrieve a Q128.59 decimal. --> we have 69 bits free to reach the uint256 limit.
             // Now, 2**69 >> 10**18 so we are safe in the Decimal conversion.
 
-            uint256 price = uint256((ratio >> 69) + (ratio % (1 << 69) == 0 ? 0 : 1));
+            uint256 price = uint256(
+                (ratio >> 69) + (ratio % (1 << 69) == 0 ? 0 : 1)
+            );
             rate = ((price * 1e18) >> 59);
         }
     }

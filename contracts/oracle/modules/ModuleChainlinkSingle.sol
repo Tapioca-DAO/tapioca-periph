@@ -20,7 +20,12 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
     /// @notice Constructor for an oracle using only a single Chainlink
     /// @param _poolChainlink Chainlink pool address
     /// @param _isChainlinkMultiplied Whether we should multiply or divide the quote amount by the rate
-    constructor(address _poolChainlink, uint8 _isChainlinkMultiplied, uint32 _stalePeriod, address[] memory guardians) {
+    constructor(
+        address _poolChainlink,
+        uint8 _isChainlinkMultiplied,
+        uint32 _stalePeriod,
+        address[] memory guardians
+    ) {
         require(_poolChainlink != address(0), "105");
         poolChainlink = AggregatorV3Interface(_poolChainlink);
         chainlinkDecimals = AggregatorV3Interface(_poolChainlink).decimals();
@@ -39,8 +44,17 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
     /// @notice Reads oracle price using a single Chainlink pool
     /// @param quoteAmount Amount expressed with base decimal
     /// @dev If `quoteAmount` is base, the output is the oracle rate
-    function _quoteChainlink(uint256 quoteAmount) internal view returns (uint256, uint256) {
+    function _quoteChainlink(
+        uint256 quoteAmount
+    ) internal view returns (uint256, uint256) {
         // No need for a for loop here as there is only a single pool we are looking at
-        return _readChainlinkFeed(quoteAmount, poolChainlink, isChainlinkMultiplied, chainlinkDecimals, 0);
+        return
+            _readChainlinkFeed(
+                quoteAmount,
+                poolChainlink,
+                isChainlinkMultiplied,
+                chainlinkDecimals,
+                0
+            );
     }
 }

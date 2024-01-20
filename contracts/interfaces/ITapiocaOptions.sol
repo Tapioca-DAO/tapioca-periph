@@ -8,5 +8,7 @@ interface ITapiocaOptions {
         uint256 tOLP; // tOLP token ID
     }
 
-    function attributes(uint256 _tokenId) external view returns (address, TapOption memory);
+    function attributes(
+        uint256 _tokenId
+    ) external view returns (address, TapOption memory);
 }

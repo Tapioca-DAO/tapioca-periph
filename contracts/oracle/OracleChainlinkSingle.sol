@@ -15,7 +15,12 @@ import "./OracleAbstract.sol";
 /// @dev This is mainly going to be the contract used for the USD/EUR pool (or for other fiat currencies)
 /// @dev Like all oracle contracts, this contract is an instance of `OracleAstract` that contains some
 /// base functions
-contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, SequencerCheck, ReentrancyGuard {
+contract OracleChainlinkSingle is
+    OracleAbstract,
+    ModuleChainlinkSingle,
+    SequencerCheck,
+    ReentrancyGuard
+{
     /// @notice Constructor for the oracle using a single Chainlink pool
     /// @param _poolChainlink Chainlink pool address
     /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
@@ -33,7 +38,12 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, Sequenc
         address _sequencerUptimeFeed,
         address _admin
     )
-        ModuleChainlinkSingle(_poolChainlink, _isChainlinkMultiplied, stalePeriod, guardians)
+        ModuleChainlinkSingle(
+            _poolChainlink,
+            _isChainlinkMultiplied,
+            stalePeriod,
+            guardians
+        )
         SequencerCheck(_sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _admin)
     {
@@ -44,14 +54,16 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, Sequenc
     /// @notice Reads the rate from the Chainlink feed
     /// @return rate The current rate between the in-currency and out-currency
     function read() external view override returns (uint256 rate) {
-        (rate,) = _quoteChainlink(BASE);
+        (rate, ) = _quoteChainlink(BASE);
     }
 
     /// @notice Converts an in-currency quote amount to out-currency using Chainlink's feed
     /// @param quoteAmount Amount (in the input collateral) to be converted in out-currency
     /// @return Quote amount in out-currency from the base amount in in-currency
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function readQuote(uint256 quoteAmount) external view override returns (uint256) {
+    function readQuote(
+        uint256 quoteAmount
+    ) external view override returns (uint256) {
         return _readQuote(quoteAmount);
     }
 
@@ -60,7 +72,9 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, Sequenc
     /// @dev If quoteAmount is `inBase`, rates are returned
     /// @return The two return values are similar in this case
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readAll(uint256 quoteAmount) internal view override returns (uint256, uint256) {
+    function _readAll(
+        uint256 quoteAmount
+    ) internal view override returns (uint256, uint256) {
         uint256 quote = _readQuote(quoteAmount);
         return (quote, quote);
     }
@@ -70,14 +84,16 @@ contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, Sequenc
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
     function _readQuote(uint256 quoteAmount) internal view returns (uint256) {
         quoteAmount = (quoteAmount * BASE) / inBase;
-        (quoteAmount,) = _quoteChainlink(quoteAmount);
+        (quoteAmount, ) = _quoteChainlink(quoteAmount);
         // We return only rates with base BASE
         return quoteAmount;
     }
 
     /// @notice Changes the grace period for the sequencer update
     /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
+    function changeGracePeriod(
+        uint32 _gracePeriod
+    ) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }
