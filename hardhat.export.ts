@@ -66,7 +66,7 @@ const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
     : {};
 
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: TAPIOCA_PROJECTS_NAME },
+    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
     solidity: {
         compilers: [
             {
