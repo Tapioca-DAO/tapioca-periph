@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// contracts/oracle/OracleChainlinkSingle.sol
 pragma solidity 0.8.22;
 
-import "./OracleChainlinkSingle.sol";
-import "../interfaces/IOracle.sol" as ITOracle;
+// Tapioca
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {OracleChainlinkSingle} from "./OracleChainlinkSingle.sol";
 
 contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
     string public _name;

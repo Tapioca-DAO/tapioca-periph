@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.22;
 
-import "../external/FullMath.sol";
+// Tapioca
+import {FullMath} from "../external/FullMath.sol";
 
 /// @title OracleMath
 /// @author Forked and adapted by Angle Core Team from https://github.com/Uniswap/uniswap-v3-core/blob/main/contracts/libraries/TickMath.sol

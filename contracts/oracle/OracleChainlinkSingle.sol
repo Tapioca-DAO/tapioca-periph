@@ -3,10 +3,13 @@
 // contracts/oracle/OracleChainlinkSingle.sol
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// External
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+// Tapioca
+import {ModuleChainlinkSingle} from "./modules/ModuleChainlinkSingle.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
-import "./modules/ModuleChainlinkSingle.sol";
-import "./OracleAbstract.sol";
+import {OracleAbstract} from "./OracleAbstract.sol";
 
 /// @title OracleChainlinkSingle
 /// @author Angle Core Team, modified by Tapioca

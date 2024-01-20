@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/ICurvePool.sol";
-import "./BaseSwapper.sol";
+// External
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+// Tapioca
+import {ICurvePool} from "contracts/interfaces/curve/ICurvePool.sol";
+import {BaseSwapper} from "./BaseSwapper.sol";
 
 /*
 

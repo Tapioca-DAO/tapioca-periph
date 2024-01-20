@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-//LZ
-import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
-import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
+// External
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-//OZ
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+// LZ
+import {LzLib} from "contracts/tmp/LzLib.sol";
 
 //TAPIOCA
-import "../../interfaces/IYieldBoxBase.sol";
-import "../../interfaces/ITapiocaOptions.sol";
-
-import "../MagnetarV2Storage.sol";
+import {MagnetarV2Storage} from "contracts/interfaces/periph/MagnetarV2Storage.sol";
+import {ITapiocaOptions} from "contracts/interfaces/tap-token/ITapiocaOptions.sol";
+import {ICommonOFT} from "contracts/interfaces/periph/ICommonOFT.sol";
+import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
 
 contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     using SafeERC20 for IERC20;

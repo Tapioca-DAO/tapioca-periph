@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-//OZ
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+// External
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-//TAPIOCA
-import "./MagnetarV2Storage.sol";
-import "./modules/MagnetarMarketModule.sol";
-
-import "../interfaces/IMagnetarHelper.sol";
+// Tapioca
+import {IMagnetarHelper} from "contract/interfaces/periph/IMagnetarHelper.sol";
+import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
+import {MagnetarV2Storage} from "./MagnetarV2Storage.sol";
 
 /*
 

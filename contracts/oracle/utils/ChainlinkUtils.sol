@@ -2,8 +2,11 @@
 
 pragma solidity 0.8.22;
 
-import {AccessControlledOffchainAggregator, AggregatorV3Interface} from "../../interfaces/IAggregatorV3Interface.sol";
-
+// Tapioca
+import {
+    AccessControlledOffchainAggregator,
+    AggregatorV3Interface
+} from "contracts/interfaces/chainlink/IAggregatorV3Interface.sol";
 import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
 
 /// @title ChainlinkUtils

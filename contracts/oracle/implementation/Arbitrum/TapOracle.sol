@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "../../SeerUniSolo.sol";
+// External
+import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+
+// Tapioca
+import {SeerUniSolo} from "../../SeerUniSolo.sol";
 
 contract TapOracle is SeerUniSolo {
     /// @notice Last prices of the oracle. get() will return the average.

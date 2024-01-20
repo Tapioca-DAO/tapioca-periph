@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.22;
 
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+// External
+import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./libraries/OracleLibrary.sol";
-import "./BaseSwapper.sol";
+// Tapioca
+import {OracleLibrary} from "./libraries/OracleLibrary.sol";
+import {BaseSwapper} from "./BaseSwapper.sol";
 
 /*
 

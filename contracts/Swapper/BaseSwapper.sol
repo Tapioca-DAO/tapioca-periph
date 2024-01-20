@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+// External
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "../interfaces/ISwapper.sol";
-import "../interfaces/IYieldBoxBase.sol";
-
-import "../libraries/SafeApprove.sol";
+// Tapioca
+import {ISwapper} from "contracts/interfaces/periph/ISwapper.sol";
+import {SafeApprove} from "contracts/libraries/SafeApprove.sol";
+import {IYieldBox} from "contracts/interfaces/IYieldBox.sol";
 
 abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;

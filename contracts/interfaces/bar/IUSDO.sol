@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+// External
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./IMarket.sol";
-import "./ISingularity.sol";
-import "./ITapiocaOptionsBroker.sol";
-import "./ITapiocaOptionLiquidityProvision.sol";
-import "./ICommonData.sol";
+// Tapioca
+import {ITapiocaOptionLiquidityProvision} from "contract/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionsBroker} from "contract/interfaces/tap-token/ITapiocaOptionsBroker.sol";
+import {ICommonData} from "contract/interfaces/periph/ICommonData.sol";
+import {ISingularity} from "./ISingularity.sol";
+import {IMarket} from "./IMarket.sol";
 
 interface IUSDOBase {
     // remove and repay

@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.22;
 
-import "../utils/UniswapUtils.sol";
+// Tapioca
+import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import {UniswapUtils} from "../utils/UniswapUtils.sol";
 
 /// @title ModuleUniswapMulti
 /// @author Angle Core Team, modified by Tapioca

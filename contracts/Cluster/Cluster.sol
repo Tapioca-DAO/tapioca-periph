@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+// External
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol";
-import "../interfaces/ICluster.sol";
+// Tapioca
+import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
+import {ICluster} from "contract/interfaces/periph/ICluster.sol";
 
 contract Cluster is Ownable, ICluster {
     // ************ //

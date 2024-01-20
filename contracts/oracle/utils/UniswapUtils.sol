@@ -2,9 +2,11 @@
 
 pragma solidity 0.8.22;
 
+// External
+import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+// Tapioca
 import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "./OracleMath.sol";
+import {OracleMath} from "./OracleMath.sol";
 
 /// @title UniswapUtils
 /// @author Angle Core Team, modified by Tapioca

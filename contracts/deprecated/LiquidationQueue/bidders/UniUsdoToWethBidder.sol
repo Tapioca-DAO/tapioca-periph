@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
+// External
+import {BoringOwnable} from "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 
-import "../../interfaces/IPenrose.sol";
-import "../../interfaces/ISwapper.sol";
-import "../../interfaces/ISingularity.sol";
-import "../../interfaces/ILiquidationQueue.sol";
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IYieldBox.sol";
+// Tapioca
+import {ILiquidationQueue} from "../interfaces//ILiquidationQueue.sol";
+import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
+import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ISwapper} from "contracts/interfaces/periph/ISwapper.sol";
+import {IPenrose} from "contracts/interfaces/bar/IPenrose.sol";
 
 /*
 

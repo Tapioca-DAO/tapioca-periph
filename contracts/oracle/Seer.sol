@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./OracleMulti.sol";
-import "../interfaces/IOracle.sol" as ITOracle;
+// Tapioca
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {OracleMulti} from "./OracleMulti.sol";
 
 contract Seer is ITOracle.IOracle, OracleMulti {
     string public _name;

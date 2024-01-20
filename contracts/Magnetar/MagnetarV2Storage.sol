@@ -1,24 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-//Boring
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+// External
+import {BoringRebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-//TAPIOCA
-import "../interfaces/IOracle.sol";
-import "../interfaces/ISingularity.sol";
-import "../interfaces/ITapiocaOFT.sol";
-import "../interfaces/ICluster.sol";
-import "../interfaces/ITapiocaOptionsBroker.sol";
-import "../interfaces/ITapiocaOptionLiquidityProvision.sol";
-
-import {IUSDOBase} from "../interfaces/IUSDO.sol";
-
-//YIELDBOX
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
-
-//OZ
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+// Tapioca
+import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionsBroker} from "contracts/interfaces/tap-token/ITapiocaOptionsBroker.sol";
+import {YieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
+import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
+import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
+import {IOracle} from "contracts/interfaces/periph/IOracle.sol";
+import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 
 contract MagnetarV2Storage is IERC721Receiver {
     // ************ //

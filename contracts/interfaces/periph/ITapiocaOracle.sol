@@ -5,7 +5,7 @@ struct ISeerQuery {
     bool useHigh; // Whether to use the high or low value
 }
 
-interface IOracle {
+interface ITapiocaOracle {
     // @notice Precision of the return value.
     function decimals() external view returns (uint8);
 

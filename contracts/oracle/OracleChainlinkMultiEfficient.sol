@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.22;
 
-import "./utils/ChainlinkUtils.sol";
+// Tapioca
+import {ChainlinkUtils} from "./utils/ChainlinkUtils.sol";
 
 /// @title OracleChainlinkMultiEfficient
 /// @author Angle Core Team

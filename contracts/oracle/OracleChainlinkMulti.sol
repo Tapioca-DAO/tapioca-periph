@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.22;
 
-import "./modules/ModuleChainlinkMulti.sol";
-import "./OracleAbstract.sol";
+// Tapioca
+import {ModuleChainlinkMulti} from "./modules/ModuleChainlinkMulti.sol";
+import {OracleAbstract} from "./OracleAbstract.sol";
 
 /// @title OracleChainlinkMulti
 /// @author Angle Core Team, modified by Tapioca

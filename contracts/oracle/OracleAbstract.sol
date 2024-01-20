@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.22;
 
-import "./interfaces/IOracle.sol";
+// Tapioca
+import {IOracle} from "./interfaces/IOracle.sol";
 
 /// @title OracleAbstract
 /// @author Angle Core Team

@@ -2,12 +2,14 @@
 
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+// External
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+// Tapioca
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {OracleUniSolo} from "./OracleUniSolo.sol";
 
-import "../interfaces/IOracle.sol" as ITOracle;
-import "./OracleUniSolo.sol";
-
-contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
+contract SeerUniSolo is ITapiocaOracle, OracleUniSolo {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;

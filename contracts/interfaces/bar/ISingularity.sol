@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./IMarket.sol";
+import {IMarket} from "./IMarket.sol";
 import {IUSDOBase} from "./IUSDO.sol";
 
 interface ISingularity is IMarket {

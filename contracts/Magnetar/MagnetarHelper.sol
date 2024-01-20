@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "../interfaces/ISingularity.sol";
-import "../interfaces/IBigBang.sol";
-import "../interfaces/IOracle.sol";
-import "../interfaces/IYieldBoxBase.sol";
-import "../interfaces/IPenrose.sol";
+// External
+import {BoringRebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
-import {IUSDOBase} from "../interfaces/IUSDO.sol";
+// Tapioca
+import {YieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
+import {IOracle} from "contracts/interfaces/IYieldBoxBase.sol";
+import {IBigBang} from "contracts/interfaces/IBigBang.sol";
+import {IOracle} from "contracts/interfaces/IPenrose.sol";
+import {IUSDOBase} from "contracts/interfaces/IUSDO.sol";
+import {IOracle} from "contracts/interfaces/IOracle.sol";
 
 contract MagnetarHelper {
     using SafeERC20 for IERC20;

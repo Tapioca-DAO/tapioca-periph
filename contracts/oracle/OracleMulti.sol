@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// External
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+// Tapioca
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
-import "./modules/ModuleChainlinkMulti.sol";
-import "./modules/ModuleUniswapMulti.sol";
-import "./OracleAbstract.sol";
+import {ModuleChainlinkMulti} from "./modules/ModuleChainlinkMulti.sol";
+import {ModuleUniswapMulti} from "./modules/ModuleUniswapMulti.sol";
+import {OracleAbstract} from "./OracleAbstract.sol";
 
 /// @title OracleMulti
 /// @author Angle Core Team, modified by Tapioca

@@ -1,47 +1,46 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
+// External
 
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+// Tapioca
 import {AccessControlDefaultAdminRules} from "../../external/AccessControlDefaultAdminRules.sol";
-import {IGmxGlpManager} from "../../../interfaces/IGmxGlpManager.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IGmxGlpManager} from "contracts/interfaces/external/gmx/IGmxGlpManager.sol";
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
-import {IOracle} from "../../../interfaces/IOracle.sol";
 
-contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
-    IOracle public wethUsdOracle;
-    IOracle public glpUsdOracle;
+contract GLPOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
+    IGmxGlpManager private immutable glpManager;
 
-    constructor(IOracle _wethUsdOracle, IOracle _glpUsdOracle, address _sequencerUptimeFeed, address _admin)
+    constructor(IGmxGlpManager glpManager_, address _sequencerUptimeFeed, address _admin)
         SequencerCheck(_sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _admin)
     {
-        wethUsdOracle = _wethUsdOracle;
-        glpUsdOracle = _glpUsdOracle;
+        glpManager = glpManager_;
+
         _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
-        return 18;
+        return 30;
+    }
+
+    function _get() internal view returns (uint256) {
+        return glpManager.getPrice(true);
     }
 
     // Get the latest exchange rate
     /// @inheritdoc IOracle
     function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
-
-        (, uint256 wethUsdPrice) = wethUsdOracle.get("");
-        (, uint256 glpUsdPrice) = glpUsdOracle.get("");
-
-        return (true, (wethUsdPrice * 1e30) / glpUsdPrice);
+        return (true, _get());
     }
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
     function peek(bytes calldata) public view override returns (bool success, uint256 rate) {
-        (, uint256 wethUsdPrice) = wethUsdOracle.peek("");
-        (, uint256 glpUsdPrice) = glpUsdOracle.peek("");
-
-        return (true, (wethUsdPrice * 1e30) / glpUsdPrice);
+        return (true, _get());
     }
 
     // Check the current spot exchange rate without any state changes
@@ -52,12 +51,12 @@ contract EthGlpOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules
 
     /// @inheritdoc IOracle
     function name(bytes calldata) public pure override returns (string memory) {
-        return "ETH/GLP";
+        return "GLP/USD";
     }
 
     /// @inheritdoc IOracle
     function symbol(bytes calldata) public pure override returns (string memory) {
-        return "ETH/GLP";
+        return "GLP/USD";
     }
 
     /// @notice Changes the grace period for the sequencer update
