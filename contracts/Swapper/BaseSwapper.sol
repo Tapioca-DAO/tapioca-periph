@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -29,23 +29,13 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
     /// *** VIEW METHODS ***
     /// ***  ***
-    function buildSwapData(
-        address tokenIn,
-        address tokenOut,
-        uint256 amountIn,
-        uint256 shareIn
-    ) external pure override returns (SwapData memory) {
-        return
-            _buildSwapData(
-                tokenIn,
-                tokenOut,
-                0,
-                0,
-                amountIn,
-                shareIn,
-                false,
-                false
-            );
+    function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn)
+        external
+        pure
+        override
+        returns (SwapData memory)
+    {
+        return _buildSwapData(tokenIn, tokenOut, 0, 0, amountIn, shareIn, false, false);
     }
 
     function buildSwapData(
@@ -56,17 +46,9 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         bool withdrawFromYb,
         bool depositToYb
     ) external pure override returns (SwapData memory) {
-        return
-            _buildSwapData(
-                address(0),
-                address(0),
-                tokenInId,
-                tokenOutId,
-                amountIn,
-                shareIn,
-                withdrawFromYb,
-                depositToYb
-            );
+        return _buildSwapData(
+            address(0), address(0), tokenInId, tokenOutId, amountIn, shareIn, withdrawFromYb, depositToYb
+        );
     }
 
     /// *** INTERNAL METHODS ***
@@ -100,16 +82,17 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         swapData.yieldBoxData = swapYBData;
     }
 
-    function _getTokens(
-        ISwapper.SwapTokensData calldata tokens,
-        IYieldBoxBase _yieldBox
-    ) internal view returns (address tokenIn, address tokenOut) {
+    function _getTokens(ISwapper.SwapTokensData calldata tokens, IYieldBoxBase _yieldBox)
+        internal
+        view
+        returns (address tokenIn, address tokenOut)
+    {
         if (tokens.tokenIn != address(0) || tokens.tokenOut != address(0)) {
             tokenIn = tokens.tokenIn;
             tokenOut = tokens.tokenOut;
         } else {
-            (, tokenIn, , ) = _yieldBox.assets(tokens.tokenInId);
-            (, tokenOut, , ) = _yieldBox.assets(tokens.tokenOutId);
+            (, tokenIn,,) = _yieldBox.assets(tokens.tokenInId);
+            (, tokenOut,,) = _yieldBox.assets(tokens.tokenOutId);
         }
     }
 
@@ -124,14 +107,12 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
             amountOut = amounts.amountOut;
         } else {
             if (tokenInId > 0) {
-                amountIn = amounts.amountIn == 0
-                    ? _yieldBox.toAmount(tokenInId, amounts.shareIn, false)
-                    : amounts.amountIn;
+                amountIn =
+                    amounts.amountIn == 0 ? _yieldBox.toAmount(tokenInId, amounts.shareIn, false) : amounts.amountIn;
             }
             if (tokenOutId > 0) {
-                amountOut = amounts.amountOut == 0
-                    ? _yieldBox.toAmount(tokenOutId, amounts.shareOut, false)
-                    : amounts.amountOut;
+                amountOut =
+                    amounts.amountOut == 0 ? _yieldBox.toAmount(tokenOutId, amounts.shareOut, false) : amounts.amountOut;
             }
         }
     }
@@ -145,13 +126,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         uint256 share
     ) internal returns (uint256) {
         if (ybData.withdrawFromYb) {
-            (amount, share) = _yieldBox.withdraw(
-                tokenId,
-                address(this),
-                address(this),
-                amount,
-                share
-            );
+            (amount, share) = _yieldBox.withdraw(tokenId, address(this), address(this), amount, share);
             return amount;
         }
 
@@ -169,10 +144,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         }
     }
 
-    function _createPath(
-        address tokenIn,
-        address tokenOut
-    ) internal pure returns (address[] memory path) {
+    function _createPath(address tokenIn, address tokenOut) internal pure returns (address[] memory path) {
         path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;

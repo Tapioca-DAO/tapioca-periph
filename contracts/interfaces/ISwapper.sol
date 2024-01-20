@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 interface ISwapper {
     struct SwapTokensData {
@@ -28,12 +28,10 @@ interface ISwapper {
     }
 
     //Add more overloads if needed
-    function buildSwapData(
-        address tokenIn,
-        address tokenOut,
-        uint256 amountIn,
-        uint256 shareIn
-    ) external view returns (SwapData memory);
+    function buildSwapData(address tokenIn, address tokenOut, uint256 amountIn, uint256 shareIn)
+        external
+        view
+        returns (SwapData memory);
 
     function buildSwapData(
         uint256 tokenInId,
@@ -46,22 +44,20 @@ interface ISwapper {
 
     function getDefaultDexOptions() external view returns (bytes memory);
 
-    function getOutputAmount(
-        SwapData calldata swapData,
-        bytes calldata dexOptions
-    ) external view returns (uint256 amountOut);
+    function getOutputAmount(SwapData calldata swapData, bytes calldata dexOptions)
+        external
+        view
+        returns (uint256 amountOut);
 
-    function getInputAmount(
-        SwapData calldata swapData,
-        bytes calldata dexOptions
-    ) external view returns (uint256 amountIn);
+    function getInputAmount(SwapData calldata swapData, bytes calldata dexOptions)
+        external
+        view
+        returns (uint256 amountIn);
 
-    function swap(
-        SwapData calldata swapData,
-        uint256 amountOutMin,
-        address to,
-        bytes calldata dexOptions
-    ) external payable returns (uint256 amountOut, uint256 shareOut);
+    function swap(SwapData calldata swapData, uint256 amountOutMin, address to, bytes calldata dexOptions)
+        external
+        payable
+        returns (uint256 amountOut, uint256 shareOut);
 }
 
 interface ICurveSwapper is ISwapper {

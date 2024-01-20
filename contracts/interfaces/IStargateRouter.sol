@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "./ILayerZeroEndpoint.sol";
 
@@ -59,17 +59,11 @@ interface IStargateRouter is IStargateRouterBase {
     function stargateEthVault() external view returns (address);
 
     //StargateRouter methods only
-    function retryRevert(
-        uint16 _srcChainId,
-        bytes calldata _srcAddress,
-        uint256 _nonce
-    ) external payable;
+    function retryRevert(uint16 _srcChainId, bytes calldata _srcAddress, uint256 _nonce) external payable;
 
-    function instantRedeemLocal(
-        uint16 _srcPoolId,
-        uint256 _amountLP,
-        address _to
-    ) external returns (uint256 amountSD);
+    function instantRedeemLocal(uint16 _srcPoolId, uint256 _amountLP, address _to)
+        external
+        returns (uint256 amountSD);
 
     function redeemLocal(
         uint16 _dstChainId,
@@ -92,41 +86,19 @@ interface IStargateRouter is IStargateRouterBase {
         lzTxObj memory _lzTxParams
     ) external payable;
 
-    function addLiquidity(
-        uint256 _poolId,
-        uint256 _amountLD,
-        address _to
-    ) external;
+    function addLiquidity(uint256 _poolId, uint256 _amountLD, address _to) external;
 
-    function createChainPath(
-        uint256 _poolId,
-        uint16 _dstChainId,
-        uint256 _dstPoolId,
-        uint256 _weight
-    ) external;
+    function createChainPath(uint256 _poolId, uint16 _dstChainId, uint256 _dstPoolId, uint256 _weight) external;
 
-    function activateChainPath(
-        uint256 _poolId,
-        uint16 _dstChainId,
-        uint256 _dstPoolId
-    ) external;
+    function activateChainPath(uint256 _poolId, uint16 _dstChainId, uint256 _dstPoolId) external;
 
-    function setWeightForChainPath(
-        uint256 _poolId,
-        uint16 _dstChainId,
-        uint256 _dstPoolId,
-        uint16 _weight
-    ) external;
+    function setWeightForChainPath(uint256 _poolId, uint16 _dstChainId, uint256 _dstPoolId, uint16 _weight) external;
 
     struct CreditObj {
         uint256 credits;
         uint256 idealBalance;
     }
 
-    function creditChainPath(
-        uint16 _dstChainId,
-        uint256 _dstPoolId,
-        uint256 _srcPoolId,
-        CreditObj memory _c
-    ) external;
+    function creditChainPath(uint16 _dstChainId, uint256 _dstPoolId, uint256 _srcPoolId, CreditObj memory _c)
+        external;
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -24,8 +24,7 @@ contract SequencerCheck {
             return;
         }
 
-        (, int256 answer, uint256 startedAt, , ) = SEQUENCER_UPTIME_FEED
-            .latestRoundData();
+        (, int256 answer, uint256 startedAt,,) = SEQUENCER_UPTIME_FEED.latestRoundData();
 
         // Answer == 0: Sequencer is up
         // Answer == 1: Sequencer is down

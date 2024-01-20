@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 //Boring
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
@@ -210,12 +210,7 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** PUBLIC METHODS *** //
     // ********************** //
     /// @notice IERC721Receiver implementation
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes memory
-    ) public virtual override returns (bytes4) {
+    function onERC721Received(address, address, uint256, bytes memory) public virtual override returns (bytes4) {
         return this.onERC721Received.selector;
     }
 
@@ -223,8 +218,9 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** INTERNAL METHODS *** //
     // ************************ //
     function _checkSender(address _from) internal view {
-        if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender))
+        if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender)) {
             revert NotAuthorized();
+        }
     }
 
     receive() external payable virtual {}

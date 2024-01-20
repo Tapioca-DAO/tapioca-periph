@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -63,9 +63,7 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(
-        bytes calldata
-    ) external virtual nonReentrant returns (bool success, uint256 rate) {
+    function get(bytes calldata) external virtual nonReentrant returns (bool success, uint256 rate) {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
@@ -78,9 +76,7 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function peek(
-        bytes calldata
-    ) external view virtual returns (bool success, uint256 rate) {
+    function peek(bytes calldata) external view virtual returns (bool success, uint256 rate) {
         (, rate) = _readAll(inBase);
         success = true;
     }
@@ -89,9 +85,7 @@ contract SeerUniSolo is ITOracle.IOracle, OracleUniSolo {
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot(
-        bytes calldata
-    ) external view virtual returns (uint256 rate) {
+    function peekSpot(bytes calldata) external view virtual returns (uint256 rate) {
         (, rate) = _readAll(inBase);
     }
 

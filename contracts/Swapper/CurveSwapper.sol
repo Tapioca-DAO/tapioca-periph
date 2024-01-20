@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -31,10 +31,10 @@ contract CurveSwapper is BaseSwapper {
     ICurvePool public curvePool;
     IYieldBoxBase public immutable yieldBox;
 
-    constructor(
-        ICurvePool _curvePool,
-        IYieldBoxBase _yieldBox
-    ) validAddress(address(_curvePool)) validAddress(address(_yieldBox)) {
+    constructor(ICurvePool _curvePool, IYieldBoxBase _yieldBox)
+        validAddress(address(_curvePool))
+        validAddress(address(_yieldBox))
+    {
         curvePool = _curvePool;
         yieldBox = _yieldBox;
     }
@@ -42,42 +42,28 @@ contract CurveSwapper is BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultDexOptions()
-        public
-        pure
-        override
-        returns (bytes memory)
-    {
+    function getDefaultDexOptions() public pure override returns (bytes memory) {
         revert("CurveSwapper: not implemented");
     }
 
     /// @notice Computes amount out for amount in
     /// @param swapData operation data
     /// @param dexOptions AMM data
-    function getOutputAmount(
-        SwapData calldata swapData,
-        bytes calldata dexOptions
-    ) external view override returns (uint256 amountOut) {
+    function getOutputAmount(SwapData calldata swapData, bytes calldata dexOptions)
+        external
+        view
+        override
+        returns (uint256 amountOut)
+    {
         uint256[] memory tokenIndexes = abi.decode(dexOptions, (uint256[]));
 
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
-        amountOut = curvePool.get_dy(
-            int128(int256(tokenIndexes[0])),
-            int128(int256(tokenIndexes[1])),
-            amountIn
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
+        amountOut = curvePool.get_dy(int128(int256(tokenIndexes[0])), int128(int256(tokenIndexes[1])), amountIn);
     }
 
     /// @notice Comutes amount in for amount out
-    function getInputAmount(
-        SwapData calldata,
-        bytes calldata
-    ) external pure returns (uint256) {
+    function getInputAmount(SwapData calldata, bytes calldata) external pure returns (uint256) {
         revert("CurveSwapper: not implemented");
     }
 
@@ -89,12 +75,7 @@ contract CurveSwapper is BaseSwapper {
     /// @param amountOutMin min amount out to receive
     /// @param to receiver address
     /// @param data AMM data
-    function swap(
-        SwapData calldata swapData,
-        uint256 amountOutMin,
-        address to,
-        bytes memory data
-    )
+    function swap(SwapData calldata swapData, uint256 amountOutMin, address to, bytes memory data)
         external
         payable
         override
@@ -107,12 +88,8 @@ contract CurveSwapper is BaseSwapper {
         address tokenOut = curvePool.coins(tokenIndexes[1]);
 
         // Get tokens' amounts
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         // Retrieve tokens from sender or from YieldBox
         amountIn = _extractTokens(
@@ -126,21 +103,12 @@ contract CurveSwapper is BaseSwapper {
 
         // Swap & compute output
         amountOut = _swapTokensForTokens(
-            int128(int256(tokenIndexes[0])),
-            int128(int256(tokenIndexes[1])),
-            amountIn,
-            amountOutMin
+            int128(int256(tokenIndexes[0])), int128(int256(tokenIndexes[1])), amountIn, amountOutMin
         );
         require(amountOut > 0, "CurveSwapper: amountOut is 0");
         if (swapData.yieldBoxData.depositToYb) {
             tokenOut.safeApprove(address(yieldBox), amountOut);
-            (, shareOut) = yieldBox.depositAsset(
-                swapData.tokensData.tokenOutId,
-                address(this),
-                to,
-                amountOut,
-                0
-            );
+            (, shareOut) = yieldBox.depositAsset(swapData.tokensData.tokenOutId, address(this), to, amountOut, 0);
         } else {
             IERC20(tokenOut).safeTransfer(to, amountOut);
         }
@@ -148,12 +116,10 @@ contract CurveSwapper is BaseSwapper {
 
     /// *** PRIVATE METHODS ***
     /// ***  ***
-    function _swapTokensForTokens(
-        int128 i,
-        int128 j,
-        uint256 amountIn,
-        uint256 amountOutMin
-    ) private returns (uint256) {
+    function _swapTokensForTokens(int128 i, int128 j, uint256 amountIn, uint256 amountOutMin)
+        private
+        returns (uint256)
+    {
         address tokenIn = curvePool.coins(uint256(uint128(i)));
         address tokenOut = curvePool.coins(uint256(uint128(j)));
 

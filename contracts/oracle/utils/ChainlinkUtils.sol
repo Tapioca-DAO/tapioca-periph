@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import {AccessControlledOffchainAggregator, AggregatorV3Interface} from "../../interfaces/IAggregatorV3Interface.sol";
 
@@ -15,25 +15,20 @@ abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
     uint32 public stalePeriod = 86400; // Default to 1 day
 
     // Role for guardians and governors
-    bytes32 public constant GUARDIAN_ROLE_CHAINLINK =
-        keccak256("GUARDIAN_ROLE");
+    bytes32 public constant GUARDIAN_ROLE_CHAINLINK = keccak256("GUARDIAN_ROLE");
 
     error InvalidChainlinkRate();
 
     /// @notice Reads a Chainlink feed. Perform a sequence upbeat check if L2 chain
     /// @param feed Chainlink feed to query
     /// @return The value obtained with the Chainlink feed queried
-    function _readChainlinkBase(
-        AggregatorV3Interface feed,
-        uint256 castedRatio
-    ) internal view returns (uint256) {
+    function _readChainlinkBase(AggregatorV3Interface feed, uint256 castedRatio) internal view returns (uint256) {
         if (castedRatio == 0) {
-            (, int256 ratio, , uint256 updatedAt, ) = feed.latestRoundData();
+            (, int256 ratio,, uint256 updatedAt,) = feed.latestRoundData();
 
             if (
-                ratio <= feed.aggregator().minAnswer() ||
-                ratio >= feed.aggregator().maxAnswer() ||
-                block.timestamp - updatedAt > stalePeriod
+                ratio <= feed.aggregator().minAnswer() || ratio >= feed.aggregator().maxAnswer()
+                    || block.timestamp - updatedAt > stalePeriod
             ) revert InvalidChainlinkRate();
             castedRatio = uint256(ratio);
         }
@@ -61,17 +56,17 @@ abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
         castedRatio = _readChainlinkBase(feed, castedRatio);
 
         // Checking whether we should multiply or divide by the ratio computed
-        if (multiplied == 1)
+        if (multiplied == 1) {
             quoteAmount = (quoteAmount * castedRatio) / (10 ** decimals);
-        else quoteAmount = (quoteAmount * (10 ** decimals)) / castedRatio;
+        } else {
+            quoteAmount = (quoteAmount * (10 ** decimals)) / castedRatio;
+        }
         return (quoteAmount, castedRatio);
     }
 
     /// @notice Changes the Stale Period
     /// @param _stalePeriod New stale period (in seconds)
-    function changeStalePeriod(
-        uint32 _stalePeriod
-    ) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
+    function changeStalePeriod(uint32 _stalePeriod) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
         stalePeriod = _stalePeriod;
     }
 }

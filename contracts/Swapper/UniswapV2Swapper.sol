@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapV2Router02.sol";
@@ -31,12 +31,7 @@ contract UniswapV2Swapper is BaseSwapper {
     /// *** ERRORS ***
     error InvalidSwap();
 
-    constructor(
-        address _router,
-        address _factory,
-        IYieldBoxBase _yieldBox,
-        address _owner
-    )
+    constructor(address _router, address _factory, IYieldBoxBase _yieldBox, address _owner)
         validAddress(_router)
         validAddress(_factory)
         validAddress(address(_yieldBox))
@@ -50,53 +45,38 @@ contract UniswapV2Swapper is BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultDexOptions()
-        public
-        view
-        override
-        returns (bytes memory)
-    {
+    function getDefaultDexOptions() public view override returns (bytes memory) {
         return abi.encode(block.timestamp + 1 hours);
     }
 
     /// @notice Computes amount out for amount in
     /// @param swapData operation data
-    function getOutputAmount(
-        SwapData calldata swapData,
-        bytes calldata
-    ) external view override returns (uint256 amountOut) {
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+    function getOutputAmount(SwapData calldata swapData, bytes calldata)
+        external
+        view
+        override
+        returns (uint256 amountOut)
+    {
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
         address[] memory path = _createPath(tokenIn, tokenOut);
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         uint256[] memory amounts = swapRouter.getAmountsOut(amountIn, path);
         amountOut = amounts[1];
     }
 
     /// @notice Comutes amount in for amount out
-    function getInputAmount(
-        SwapData calldata swapData,
-        bytes calldata
-    ) external view override returns (uint256 amountIn) {
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+    function getInputAmount(SwapData calldata swapData, bytes calldata)
+        external
+        view
+        override
+        returns (uint256 amountIn)
+    {
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
         address[] memory path = _createPath(tokenIn, tokenOut);
-        (, uint256 amountOut) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (, uint256 amountOut) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         uint256[] memory amounts = swapRouter.getAmountsIn(amountOut, path);
         amountIn = amounts[0];
@@ -110,12 +90,7 @@ contract UniswapV2Swapper is BaseSwapper {
     /// @param amountOutMin min amount out to receive
     /// @param to receiver address
     /// @param data AMM data
-    function swap(
-        SwapData calldata swapData,
-        uint256 amountOutMin,
-        address to,
-        bytes memory data
-    )
+    function swap(SwapData calldata swapData, uint256 amountOutMin, address to, bytes memory data)
         external
         payable
         override
@@ -123,18 +98,11 @@ contract UniswapV2Swapper is BaseSwapper {
         returns (uint256 amountOut, uint256 shareOut)
     {
         // Get tokens' addresses
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
 
         // Get tokens' amounts
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         // Retrieve tokens from sender or from YieldBox
         amountIn = _extractTokens(
@@ -154,12 +122,7 @@ contract UniswapV2Swapper is BaseSwapper {
         // Create swap path for UniswapV2Router02 operations
         address[] memory path = _createPath(tokenIn, tokenOut);
         uint256[] memory amounts = _swap(
-            amountIn,
-            amountOutMin,
-            tokenIn,
-            tokenOut,
-            swapData.yieldBoxData.depositToYb ? address(this) : to,
-            deadline
+            amountIn, amountOutMin, tokenIn, tokenOut, swapData.yieldBoxData.depositToYb ? address(this) : to, deadline
         );
 
         // Compute outputs
@@ -167,19 +130,9 @@ contract UniswapV2Swapper is BaseSwapper {
         if (swapData.yieldBoxData.depositToYb) {
             if (path[path.length - 1] != address(0)) {
                 path[path.length - 1].safeApprove(address(yieldBox), amountOut);
-                (, shareOut) = yieldBox.depositAsset(
-                    swapData.tokensData.tokenOutId,
-                    address(this),
-                    to,
-                    amountOut,
-                    0
-                );
+                (, shareOut) = yieldBox.depositAsset(swapData.tokensData.tokenOutId, address(this), to, amountOut, 0);
             } else {
-                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
-                    swapData.tokensData.tokenOutId,
-                    to,
-                    amountOut
-                );
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(swapData.tokensData.tokenOutId, to, amountOut);
             }
         }
     }
@@ -194,36 +147,17 @@ contract UniswapV2Swapper is BaseSwapper {
     ) private returns (uint256[] memory amounts) {
         // Create swap path for UniswapV2Router02 operations
         address _tokenIn = tokenIn != address(0) ? tokenIn : swapRouter.WETH();
-        address _tokenOut = tokenOut != address(0)
-            ? tokenOut
-            : swapRouter.WETH();
+        address _tokenOut = tokenOut != address(0) ? tokenOut : swapRouter.WETH();
         address[] memory path = _createPath(_tokenIn, _tokenOut);
 
         if (tokenIn != address(0) && tokenOut != address(0)) {
             tokenIn.safeApprove(address(swapRouter), amountIn);
-            amounts = swapRouter.swapExactTokensForTokens(
-                amountIn,
-                amountOutMin,
-                path,
-                receiver,
-                deadline
-            );
+            amounts = swapRouter.swapExactTokensForTokens(amountIn, amountOutMin, path, receiver, deadline);
         } else if (tokenIn == address(0) && tokenOut != address(0)) {
-            amounts = swapRouter.swapExactETHForTokens{value: amountIn}(
-                amountOutMin,
-                path,
-                receiver,
-                deadline
-            );
+            amounts = swapRouter.swapExactETHForTokens{value: amountIn}(amountOutMin, path, receiver, deadline);
         } else if (tokenIn != address(0) && tokenOut == address(0)) {
             tokenIn.safeApprove(address(swapRouter), amountIn);
-            amounts = swapRouter.swapExactTokensForETH(
-                amountIn,
-                amountOutMin,
-                path,
-                receiver,
-                deadline
-            );
+            amounts = swapRouter.swapExactTokensForETH(amountIn, amountOutMin, path, receiver, deadline);
         } else {
             revert InvalidSwap();
         }

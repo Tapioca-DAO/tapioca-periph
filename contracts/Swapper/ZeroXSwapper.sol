@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -63,23 +63,19 @@ contract ZeroXSwapper {
     /// @param amountIn the amount of sellToken to sell
     /// @param minAmountOut the minimum amount of buyToken bought
     /// @return amountOut the amount of buyToken bought
-    function swap(
-        SZeroXSwapData calldata swapData,
-        uint256 amountIn,
-        uint256 minAmountOut
-    ) public payable returns (uint256 amountOut) {
+    function swap(SZeroXSwapData calldata swapData, uint256 amountIn, uint256 minAmountOut)
+        public
+        payable
+        returns (uint256 amountOut)
+    {
         if (swapData.swapTarget != zeroXProxy) revert InvalidProxy();
 
         // Transfer tokens to this contract
-        swapData.sellToken.safeTransferFrom(
-            msg.sender,
-            address(this),
-            amountIn
-        );
+        swapData.sellToken.safeTransferFrom(msg.sender, address(this), amountIn);
 
         // Approve the 0x proxy to spend the sell token
         swapData.sellToken.safeApprove(swapData.swapTarget, amountIn);
-        (bool success, ) = swapData.swapTarget.call(swapData.swapCallData);
+        (bool success,) = swapData.swapTarget.call(swapData.swapCallData);
         if (!success) revert SwapFailed();
 
         // Check that the amountOut is at least as much as minAmountOut

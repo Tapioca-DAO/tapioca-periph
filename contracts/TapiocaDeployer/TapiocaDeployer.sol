@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 /// @author https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Create2.sol
 contract TapiocaDeployer {
@@ -17,41 +17,25 @@ contract TapiocaDeployer {
      * - the factory must have a balance of at least `amount`.
      * - if `amount` is non-zero, `bytecode` must have a `payable` constructor.
      */
-    function deploy(
-        uint256 amount,
-        bytes32 salt,
-        bytes memory bytecode,
-        string memory contractName
-    ) external payable returns (address addr) {
+    function deploy(uint256 amount, bytes32 salt, bytes memory bytecode, string memory contractName)
+        external
+        payable
+        returns (address addr)
+    {
         require(msg.value == amount, "Create2: insufficient balance");
-        require(
-            bytecode.length != 0,
-            string.concat(
-                "Create2: bytecode length is zero for contract ",
-                contractName
-            )
-        );
+        require(bytecode.length != 0, string.concat("Create2: bytecode length is zero for contract ", contractName));
         /// @solidity memory-safe-assembly
         assembly {
             addr := create2(amount, add(bytecode, 0x20), mload(bytecode), salt)
         }
-        require(
-            addr != address(0),
-            string.concat(
-                "Create2: Failed on deploy for contract ",
-                contractName
-            )
-        );
+        require(addr != address(0), string.concat("Create2: Failed on deploy for contract ", contractName));
     }
 
     /**
      * @dev Returns the address where a contract will be stored if deployed via {deploy}. Any change in the
      * `bytecodeHash` or `salt` will result in a new destination address.
      */
-    function computeAddress(
-        bytes32 salt,
-        bytes32 bytecodeHash
-    ) external view returns (address) {
+    function computeAddress(bytes32 salt, bytes32 bytecodeHash) external view returns (address) {
         return computeAddress(salt, bytecodeHash, address(this));
     }
 
@@ -59,11 +43,7 @@ contract TapiocaDeployer {
      * @dev Returns the address where a contract will be stored if deployed via {deploy} from a contract located at
      * `deployer`. If `deployer` is this contract's address, returns the same value as {computeAddress}.
      */
-    function computeAddress(
-        bytes32 salt,
-        bytes32 bytecodeHash,
-        address deployer
-    ) public pure returns (address addr) {
+    function computeAddress(bytes32 salt, bytes32 bytecodeHash, address deployer) public pure returns (address addr) {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40) // Get free memory pointer

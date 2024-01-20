@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "../utils/ChainlinkUtils.sol";
 
@@ -39,9 +39,7 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
 
         for (uint256 i; i < circuitLength; i++) {
-            AggregatorV3Interface _pool = AggregatorV3Interface(
-                _circuitChainlink[i]
-            );
+            AggregatorV3Interface _pool = AggregatorV3Interface(_circuitChainlink[i]);
             circuitChainlink.push(_pool);
             chainlinkDecimals.push(_pool.decimals());
         }
@@ -55,18 +53,12 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
     /// @return The `quoteAmount` converted in `out-currency`
     /// @return The value obtained with the last Chainlink feed queried casted to uint
     /// @dev If `quoteAmount` is `BASE_TOKENS`, the output is the oracle rate
-    function _quoteChainlink(
-        uint256 quoteAmount
-    ) internal view returns (uint256, uint256) {
+    function _quoteChainlink(uint256 quoteAmount) internal view returns (uint256, uint256) {
         uint256 castedRatio;
         // An invariant should be that `circuitChainlink.length > 0` otherwise `castedRatio = 0`
         for (uint256 i; i < circuitChainlink.length; i++) {
             (quoteAmount, castedRatio) = _readChainlinkFeed(
-                quoteAmount,
-                circuitChainlink[i],
-                circuitChainIsMultiplied[i],
-                chainlinkDecimals[i],
-                0
+                quoteAmount, circuitChainlink[i], circuitChainIsMultiplied[i], chainlinkDecimals[i], 0
             );
         }
         return (quoteAmount, castedRatio);

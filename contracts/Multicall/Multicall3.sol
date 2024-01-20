@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -36,20 +36,16 @@ contract Multicall3 is Ownable {
         bytes returnData;
     }
 
-    function multicall(
-        Call[] calldata calls
-    ) public payable returns (Result[] memory returnData) {
+    function multicall(Call[] calldata calls) public payable returns (Result[] memory returnData) {
         uint256 length = calls.length;
         returnData = new Result[](length);
         Call memory calli;
-        for (uint256 i; i < length; ) {
+        for (uint256 i; i < length;) {
             Result memory result = returnData[i];
             calli = calls[i];
 
             require(calli.target.code.length > 0, "Multicall: no contract");
-            (result.success, result.returnData) = calli.target.call(
-                calli.callData
-            );
+            (result.success, result.returnData) = calli.target.call(calli.callData);
             if (!result.success) {
                 _getRevertMsg(result.returnData);
             }
@@ -59,14 +55,12 @@ contract Multicall3 is Ownable {
         }
     }
 
-    function multicallValue(
-        CallValue[] calldata calls
-    ) public payable returns (Result[] memory returnData) {
+    function multicallValue(CallValue[] calldata calls) public payable returns (Result[] memory returnData) {
         uint256 valAccumulator;
         uint256 length = calls.length;
         returnData = new Result[](length);
         CallValue memory calli;
-        for (uint256 i; i < length; ) {
+        for (uint256 i; i < length;) {
             Result memory result = returnData[i];
             calli = calls[i];
             uint256 val = calli.value;
@@ -75,9 +69,7 @@ contract Multicall3 is Ownable {
             unchecked {
                 valAccumulator += val;
             }
-            (result.success, result.returnData) = calli.target.call{value: val}(
-                calli.callData
-            );
+            (result.success, result.returnData) = calli.target.call{value: val}(calli.callData);
             if (!result.success) {
                 _getRevertMsg(result.returnData);
             }

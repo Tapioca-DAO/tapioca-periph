@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 interface ITapiocaOptions {
     struct TapOption {
@@ -8,7 +8,5 @@ interface ITapiocaOptions {
         uint256 tOLP; // tOLP token ID
     }
 
-    function attributes(
-        uint256 _tokenId
-    ) external view returns (address, TapOption memory);
+    function attributes(uint256 _tokenId) external view returns (address, TapOption memory);
 }

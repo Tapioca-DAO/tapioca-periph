@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "../utils/UniswapUtils.sol";
 
@@ -47,9 +47,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
         circuitUniIsMultiplied = _circuitUniIsMultiplied;
 
         for (uint256 i; i < circuitUniLength; i++) {
-            circuitUniswap[i].increaseObservationCardinalityNext(
-                observationLength
-            );
+            circuitUniswap[i].increaseObservationCardinalityNext(observationLength);
         }
     }
 
@@ -57,15 +55,9 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
     /// @param quoteAmount The amount in the in-currency base to convert using the Uniswap oracle
     /// @return The value of the oracle of the initial amount is then expressed in the decimal from
     /// the end currency
-    function _quoteUniswap(
-        uint256 quoteAmount
-    ) internal view returns (uint256) {
+    function _quoteUniswap(uint256 quoteAmount) internal view returns (uint256) {
         for (uint256 i; i < circuitUniswap.length; i++) {
-            quoteAmount = _readUniswapPool(
-                quoteAmount,
-                circuitUniswap[i],
-                circuitUniIsMultiplied[i]
-            );
+            quoteAmount = _readUniswapPool(quoteAmount, circuitUniswap[i], circuitUniIsMultiplied[i]);
         }
         // The decimal here is the one from the end currency
         return quoteAmount;
@@ -76,9 +68,7 @@ abstract contract ModuleUniswapMulti is UniswapUtils {
     /// @dev newLengthStored should be larger than all previous pools observations length
     function increaseTWAPStore(uint16 newLengthStored) external {
         for (uint256 i; i < circuitUniswap.length; i++) {
-            circuitUniswap[i].increaseObservationCardinalityNext(
-                newLengthStored
-            );
+            circuitUniswap[i].increaseObservationCardinalityNext(newLengthStored);
         }
     }
 }

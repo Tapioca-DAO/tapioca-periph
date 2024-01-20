@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import "../../SeerUniSolo.sol";
 
@@ -66,15 +66,7 @@ contract TapOracle is SeerUniSolo {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(
-        bytes calldata
-    )
-        external
-        virtual
-        override
-        nonReentrant
-        returns (bool success, uint256 rate)
-    {
+    function get(bytes calldata) external virtual override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         (, uint256 price) = _readAll(inBase);
 
@@ -95,10 +87,7 @@ contract TapOracle is SeerUniSolo {
 
     /// @notice Update the last price of the oracle. Only if the last update was more than FETCH_TIME seconds ago.
     function _updateLastPrice(uint256 _price) internal {
-        require(
-            block.timestamp - lastCall > FETCH_TIME,
-            "TapOracle: too early"
-        );
+        require(block.timestamp - lastCall > FETCH_TIME, "TapOracle: too early");
         uint8 _lastIndex = lastIndex;
         lastPrices[_lastIndex] = _price;
         lastIndex = (_lastIndex + 1) % 3;
@@ -113,9 +102,7 @@ contract TapOracle is SeerUniSolo {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function peek(
-        bytes calldata
-    ) external view virtual override returns (bool success, uint256 rate) {
+    function peek(bytes calldata) external view virtual override returns (bool success, uint256 rate) {
         return (true, _computeAverage());
     }
 
@@ -123,17 +110,13 @@ contract TapOracle is SeerUniSolo {
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot(
-        bytes calldata
-    ) external view virtual override returns (uint256 rate) {
+    function peekSpot(bytes calldata) external view virtual override returns (uint256 rate) {
         return _computeAverage();
     }
 
     /// @notice Update the time in seconds after which get() can be called again.
     /// @param _newFetchTime New time in seconds after which get() can be called again.
-    function updateFetchTime(
-        uint32 _newFetchTime
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateFetchTime(uint32 _newFetchTime) external onlyRole(DEFAULT_ADMIN_ROLE) {
         FETCH_TIME = _newFetchTime;
         emit FetchTimeUpdated(_newFetchTime);
     }

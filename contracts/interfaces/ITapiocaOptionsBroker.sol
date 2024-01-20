@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.22;
 
 import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
 import "./ICommonData.sol";
@@ -12,11 +12,13 @@ interface ITapiocaOptionsBrokerCrossChain {
         uint256 oTAPTokenID;
         uint256 tapAmount;
     }
+
     struct IExerciseLZData {
         uint16 lzDstChainId;
         address zroPaymentAddress;
         uint256 extraGas;
     }
+
     struct IExerciseLZSendTapData {
         bool withdrawOnAnotherChain;
         address tapOftAddress;
@@ -53,15 +55,9 @@ interface ITapiocaOptionsBroker {
 
     function tOLP() external view returns (address);
 
-    function exerciseOption(
-        uint256 oTAPTokenID,
-        address paymentToken,
-        uint256 tapAmount
-    ) external;
+    function exerciseOption(uint256 oTAPTokenID, address paymentToken, uint256 tapAmount) external;
 
-    function participate(
-        uint256 tOLPTokenID
-    ) external returns (uint256 oTAPTokenID);
+    function participate(uint256 tOLPTokenID) external returns (uint256 oTAPTokenID);
 
     function exitPosition(uint256 oTAPTokenID) external;
 }
