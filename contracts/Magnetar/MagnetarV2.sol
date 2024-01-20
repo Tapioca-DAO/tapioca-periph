@@ -294,14 +294,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     abi.encodeCall(
                         MagnetarMarketModule.depositAddCollateralAndBorrowFromMarket,
                         (
-                            IMarket(market),
-                            user,
-                            collateralAmount,
-                            borrowAmount,
-                            false,
-                            deposit,
-                            withdrawParams,
-                            _action.value
+                            MagnetarMarketModule.DepositAddCollateralAndBorrowFromMarketData({
+                                market: IMarket(market),
+                                user: user,
+                                collateralAmount: collateralAmount,
+                                borrowAmount: borrowAmount,
+                                extractFromSender: false,
+                                deposit: deposit,
+                                withdrawParams: withdrawParams,
+                                valueAmount: _action.value
+                            })
                         )
                     )
                 );
@@ -419,58 +421,53 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         if (msg.value != valAccumulator) revert ValueMismatch();
     }
 
-    /// @notice performs a withdraw operation
-    /// @dev it can withdraw on the current chain or it can send it to another one
-    ///     - if `dstChainId` is 0 performs a same-chain withdrawal
-    ///          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
-    ///     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
-
-    /// @param _data.yieldBox the YieldBox address
-    /// @param _data.from user to withdraw from
-    /// @param _data.assetId the YieldBox asset id to withdraw
-    /// @param _data.dstChainId LZ chain id to withdraw to
-    /// @param _data.receiver the receiver on the destination chain
-    /// @param _data.amount the amount to withdraw
-    /// @param _data.adapterParams LZ adapter params
-    /// @param _data.refundAddress the LZ refund address which receives the gas not used in the process
-    /// @param _data.gas the amount of gas to use for sending the asset to another layer
-    /// @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-    /// @param _data.zroPaymentAddress ZRO payment address
+    /**
+     * @notice performs a withdraw operation
+     * @dev it can withdraw on the current chain or it can send it to another one
+     *     - if `dstChainId` is 0 performs a same-chain withdrawal
+     *          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
+     *     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
+     *
+     * @param _data.yieldBox the YieldBox address
+     * @param _data.from user to withdraw from
+     * @param _data.assetId the YieldBox asset id to withdraw
+     * @param _data.dstChainId LZ chain id to withdraw to
+     * @param _data.receiver the receiver on the destination chain
+     * @param _data.amount the amount to withdraw
+     * @param _data.adapterParams LZ adapter params
+     * @param _data.refundAddress the LZ refund address which receives the gas not used in the process
+     * @param _data.gas the amount of gas to use for sending the asset to another layer
+     * @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+     * @param _data.zroPaymentAddress ZRO payment address
+     */
     function withdrawToChain(MagnetarMarketModule.WithdrawToChainData calldata _data) external payable {
         _checkSender(_data.from);
         _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.withdrawToChain, (_data)));
     }
 
-    /// @notice helper for deposit to YieldBox, add collateral to a market, borrom from the same market and withdraw
-    /// @dev all operations are optional:
-    ///         - if `deposit` is false it will skip the deposit to YieldBox step
-    ///         - if `withdraw` is false it will skip the withdraw step
-    ///         - if `collateralAmount == 0` it will skip the add collateral step
-    ///         - if `borrowAmount == 0` it will skip the borrow step
-    ///     - the amount deposited to YieldBox is `collateralAmount`
-    /// @param market the SGL/BigBang market
-    /// @param user the user to perform the action for
-    /// @param collateralAmount the collateral amount to add
-    /// @param borrowAmount the borrow amount
-    /// @param extractFromSender extracts collateral tokens from sender or from the user
-    /// @param deposit true/false flag for the deposit to YieldBox step
-    /// @param withdrawParams necessary data for the same chain or the cross-chain withdrawal
+    /**
+     * @notice helper for deposit to YieldBox, add collateral to a market, borrow from the same market and withdraw
+     * @dev all operations are optional:
+     *         - if `deposit` is false it will skip the deposit to YieldBox step
+     *         - if `withdraw` is false it will skip the withdraw step
+     *         - if `collateralAmount == 0` it will skip the add collateral step
+     *         - if `borrowAmount == 0` it will skip the borrow step
+     *     - the amount deposited to YieldBox is `collateralAmount`
+     *
+     * @param _data.market the SGL/BigBang market
+     * @param _data.user the user to perform the action for
+     * @param _data.collateralAmount the collateral amount to add
+     * @param _data.borrowAmount the borrow amount
+     * @param _data.extractFromSender extracts collateral tokens from sender or from the user
+     * @param _data.deposit true/false flag for the deposit to YieldBox step
+     * @param _data.withdrawParams necessary data for the same chain or the cross-chain withdrawal
+     */
     function depositAddCollateralAndBorrowFromMarket(
-        IMarket market,
-        address user,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool extractFromSender,
-        bool deposit,
-        ICommonData.IWithdrawParams calldata withdrawParams
+        MagnetarMarketModule.DepositAddCollateralAndBorrowFromMarketData calldata _data
     ) external payable {
-        _checkSender(user);
+        _checkSender(_data.user);
         _executeModule(
-            Module.Market,
-            abi.encodeCall(
-                MagnetarMarketModule.depositAddCollateralAndBorrowFromMarket,
-                (market, user, collateralAmount, borrowAmount, extractFromSender, deposit, withdrawParams, msg.value)
-            )
+            Module.Market, abi.encodeCall(MagnetarMarketModule.depositAddCollateralAndBorrowFromMarket, (_data))
         );
     }
 
@@ -514,22 +511,25 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    /// @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
-    /// @dev all steps are optional:
-    ///         - if `mintData.mint` is false, the mint operation on BB is skipped
-    ///             - add BB collateral to YB, add collateral on BB and borrow from BB are part of the mint operation
-    ///         - if `depositData.deposit` is false, the asset deposit to YB is skipped
-    ///         - if `lendAmount == 0` the addAsset operation on SGL is skipped
-    ///             - if `mintData.mint` is true, `lendAmount` will be automatically filled with the minted value
-    ///         - if `lockData.lock` is false, the tOLP lock operation is skipped
-    ///         - if `participateData.participate` is false, the tOB participate operation is skipped
-    /// @param _data.user the user to perform the operation for
-    /// @param _data.lendAmount the amount to lend on SGL
-    /// @param _data.mintData the data needed to mint on BB
-    /// @param _data.depositData the data needed for asset deposit on YieldBox
-    /// @param _data.lockData the data needed to lock on TapiocaOptionLiquidityProvision
-    /// @param _data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
-    /// @param _data.externalContracts the contracts' addresses used in all the operations performed by the helper
+    /**
+     * @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev all steps are optional:
+     *         - if `mintData.mint` is false, the mint operation on BB is skipped
+     *             - add BB collateral to YB, add collateral on BB and borrow from BB are part of the mint operation
+     *         - if `depositData.deposit` is false, the asset deposit to YB is skipped
+     *         - if `lendAmount == 0` the addAsset operation on SGL is skipped
+     *             - if `mintData.mint` is true, `lendAmount` will be automatically filled with the minted value
+     *         - if `lockData.lock` is false, the tOLP lock operation is skipped
+     *         - if `participateData.participate` is false, the tOB participate operation is skipped
+     *
+     * @param _data.user the user to perform the operation for
+     * @param _data.lendAmount the amount to lend on SGL
+     * @param _data.mintData the data needed to mint on BB
+     * @param _data.depositData the data needed for asset deposit on YieldBox
+     * @param _data.lockData the data needed to lock on TapiocaOptionLiquidityProvision
+     * @param _data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
+     * @param _data.externalContracts the contracts' addresses used in all the operations performed by the helper
+     */
     function mintFromBBAndLendOnSGL(MagnetarMarketModule.MintFromBBAndLendOnSGLData calldata _data) external payable {
         _checkSender(_data.user);
         _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.mintFromBBAndLendOnSGL, (_data)));
