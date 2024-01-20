@@ -1,22 +1,22 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import { TContract } from '../../gitsub_tapioca-sdk/src/shared';
+import { TContract } from '@tapioca-sdk/shared';
 
-import PenroseArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Penrose.json';
-import USDOArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/USDO.json';
-import OriginsArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Origins.json';
-import BigBangArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/BigBang.json';
-import SingularityArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
-import TapOFTArtifact from '../../gitsub_tapioca-sdk/src/artifacts/tap-token/TapOFT.json';
+import PenroseArtifact from '@tapioca-sdk/artifacts/tapioca-bar/Penrose.json';
+import USDOArtifact from '@tapioca-sdk/artifacts/tapioca-bar/USDO.json';
+import OriginsArtifact from '@tapioca-sdk/artifacts/tapioca-bar/Origins.json';
+import BigBangArtifact from '@tapioca-sdk/artifacts/tapioca-bar/BigBang.json';
+import SingularityArtifact from '@tapioca-sdk/artifacts/tapioca-bar/Singularity.json';
+import TapOFTArtifact from '@tapioca-sdk/artifacts/tap-token/TapOFT.json';
 import {
     BigBang,
     Origins,
     Penrose,
     Singularity,
     USDO,
-} from '../../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
-import { TapOFT } from '../../gitsub_tapioca-sdk/src/typechain/tap-token';
+} from '@tapioca-sdk/typechain/Tapioca-bar';
+import { TapOFT } from '@tapioca-sdk/typechain/tap-token';
 
 export const pauseAll__task = async (
     taskArgs: { val: boolean },

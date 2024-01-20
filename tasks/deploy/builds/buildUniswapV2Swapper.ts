@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { UniswapV2Swapper__factory } from '../../../typechain';
 import { ARGS_CONFIG } from '../CONF';
-import { TAPIOCA_PROJECTS_NAME } from '../../../gitsub_tapioca-sdk/src/api/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 
 export const buildUniswapV2Swapper = async (
     hre: HardhatRuntimeEnvironment,
