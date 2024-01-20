@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./ITapiocaOptionsBroker.sol";
-import "./ITapiocaOptionLiquidityProvision.sol";
-import "./ICommonData.sol";
-import {IUSDOBase} from "./IUSDO.sol";
-import "./IMagnetarHelper.sol";
+// Tapioca
+import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IMagnetarHelper} from "contracts/interfaces/periph/IMagnetarHelper.sol";
+import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
+import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 
 interface IMagnetar {
     function helper() external view returns (IMagnetarHelper);
@@ -30,7 +31,7 @@ interface IMagnetar {
         IUSDOBase.IMintData calldata mintData,
         ICommonData.IDepositData calldata depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts
     ) external payable;
 

@@ -11,10 +11,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {LzLib} from "contracts/tmp/LzLib.sol";
 
 //TAPIOCA
-import {MagnetarV2Storage} from "contracts/interfaces/periph/MagnetarV2Storage.sol";
-import {ITapiocaOptions} from "contracts/interfaces/tap-token/ITapiocaOptions.sol";
-import {ICommonOFT} from "contracts/interfaces/periph/ICommonOFT.sol";
+import {ITapiocaOption} from "contracts/interfaces/tap-token/ITapiocaOption.sol";
+import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
 import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
 contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     using SafeERC20 for IERC20;
@@ -100,7 +100,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         IUSDOBase.IMintData calldata mintData,
         ICommonData.IDepositData calldata depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts,
         ICluster _cluster
     ) external payable {
@@ -260,7 +260,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         IUSDOBase.IMintData memory mintData,
         ICommonData.IDepositData memory depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts,
         ICluster _cluster
     ) private {
@@ -396,9 +396,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             if (tOLPTokenId == 0) revert NotValid();
 
             IERC721(lockData.target).approve(participateData.target, tOLPTokenId);
-            uint256 oTAPTokenId = ITapiocaOptionsBroker(participateData.target).participate(tOLPTokenId);
+            uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
 
-            address oTapAddress = ITapiocaOptionsBroker(participateData.target).oTAP();
+            address oTapAddress = ITapiocaOptionBroker(participateData.target).oTAP();
             IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "0x");
         }
 
@@ -439,9 +439,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                 revert NotAuthorized();
             }
 
-            address oTapAddress = ITapiocaOptionsBroker(removeAndRepayData.exitData.target).oTAP();
-            (, ITapiocaOptions.TapOption memory oTAPPosition) =
-                ITapiocaOptions(oTapAddress).attributes(removeAndRepayData.exitData.oTAPTokenID);
+            address oTapAddress = ITapiocaOptionBroker(removeAndRepayData.exitData.target).oTAP();
+            (, ITapiocaOption.TapOption memory oTAPPosition) =
+                ITapiocaOption(oTapAddress).attributes(removeAndRepayData.exitData.oTAPTokenID);
 
             tOLPId = oTAPPosition.tOLP;
 
@@ -455,12 +455,12 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     user, address(this), removeAndRepayData.exitData.oTAPTokenID, "0x"
                 );
             }
-            ITapiocaOptionsBroker(removeAndRepayData.exitData.target).exitPosition(
+            ITapiocaOptionBroker(removeAndRepayData.exitData.target).exitPosition(
                 removeAndRepayData.exitData.oTAPTokenID
             );
 
             if (!removeAndRepayData.unlockData.unlock) {
-                address tOLPContract = ITapiocaOptionsBroker(removeAndRepayData.exitData.target).tOLP();
+                address tOLPContract = ITapiocaOptionBroker(removeAndRepayData.exitData.target).tOLP();
 
                 //transfer tOLP to the user
                 IERC721(tOLPContract).safeTransferFrom(address(this), user, tOLPId, "0x");

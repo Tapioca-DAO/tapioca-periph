@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./ILayerZeroEndpoint.sol";
+// Tapioca
+import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
 
 interface IStargateBridge {
     function quoteLayerZeroFee(

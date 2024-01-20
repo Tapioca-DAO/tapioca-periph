@@ -7,12 +7,12 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionsBroker} from "contracts/interfaces/tap-token/ITapiocaOptionsBroker.sol";
+import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {YieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
 import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
 import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
-import {IOracle} from "contracts/interfaces/periph/IOracle.sol";
 import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 
 contract MagnetarV2Storage is IERC721Receiver {
@@ -133,7 +133,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         IUSDOBase.IMintData mintData;
         ICommonData.IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
-        ITapiocaOptionsBroker.IOptionsParticipateData participateData;
+        ITapiocaOptionBroker.IOptionsParticipateData participateData;
         ICommonData.ICommonExternalContracts externalContracts;
     }
 

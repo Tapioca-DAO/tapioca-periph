@@ -5,9 +5,9 @@ pragma solidity 0.8.22;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from "contract/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionsBroker} from "contract/interfaces/tap-token/ITapiocaOptionsBroker.sol";
-import {ICommonData} from "contract/interfaces/periph/ICommonData.sol";
+import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
 import {ISingularity} from "./ISingularity.sol";
 import {IMarket} from "./IMarket.sol";
 
@@ -27,7 +27,7 @@ interface IUSDOBase {
         uint256 repayAmount; // on BB
         bool removeCollateralFromBB;
         uint256 collateralAmount; // from BB
-        ITapiocaOptionsBroker.IOptionsExitData exitData;
+        ITapiocaOptionBroker.IOptionsExitData exitData;
         ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
         ICommonData.IWithdrawParams assetWithdrawData;
         ICommonData.IWithdrawParams collateralWithdrawData;
@@ -43,7 +43,7 @@ interface IUSDOBase {
         bool removeCollateral;
         uint256 removeCollateralAmount;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
-        ITapiocaOptionsBroker.IOptionsParticipateData participateData;
+        ITapiocaOptionBroker.IOptionsParticipateData participateData;
     }
 
     //leverage data

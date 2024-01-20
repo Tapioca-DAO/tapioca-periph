@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
-import "./ICommonData.sol";
+// Tapioca
+import {ICommonData} from "../common/ICommonData.sol";
 
-interface ITapiocaOptionsBrokerCrossChain {
+interface ITapiocaOptionBrokerCrossChain {
     struct IExerciseOptionsData {
         address from;
         address target;
@@ -38,7 +38,7 @@ interface ITapiocaOptionsBrokerCrossChain {
     ) external payable;
 }
 
-interface ITapiocaOptionsBroker {
+interface ITapiocaOptionBroker {
     struct IOptionsParticipateData {
         bool participate;
         address target;

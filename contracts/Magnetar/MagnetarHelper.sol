@@ -6,13 +6,12 @@ import {BoringRebase} from "@boringcrypto/boring-solidity/contracts/libraries/Bo
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {YieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox, IYieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-import {IOracle} from "contracts/interfaces/IYieldBoxBase.sol";
-import {IBigBang} from "contracts/interfaces/IBigBang.sol";
-import {IOracle} from "contracts/interfaces/IPenrose.sol";
-import {IUSDOBase} from "contracts/interfaces/IUSDO.sol";
-import {IOracle} from "contracts/interfaces/IOracle.sol";
+import {IPenrose} from "contracts/interfaces//bar/IPenrose.sol";
+import {IBigBang} from "contracts/interfaces/bar/IBigBang.sol";
+import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 
 contract MagnetarHelper {
     using SafeERC20 for IERC20;
@@ -23,7 +22,7 @@ contract MagnetarHelper {
         uint256 collateralId;
         address asset;
         uint256 assetId;
-        IOracle oracle;
+        ITapiocaOracle oracle;
         bytes oracleData;
         uint256 totalCollateralShare;
         uint256 userCollateralShare;
@@ -257,7 +256,7 @@ contract MagnetarHelper {
 
         info.collateral = market.collateral();
         info.asset = market.asset();
-        info.oracle = IOracle(market.oracle());
+        info.oracle = ITapiocaOracle(market.oracle());
         info.oracleData = market.oracleData();
         info.totalCollateralShare = market.totalCollateralShare();
         info.userCollateralShare = market.userCollateralShare(who);
@@ -268,8 +267,8 @@ contract MagnetarHelper {
         info.userBorrowPart = market.userBorrowPart(who);
 
         info.currentExchangeRate = market.exchangeRate();
-        (, info.oracleExchangeRate) = IOracle(market.oracle()).peek(market.oracleData());
-        info.spotExchangeRate = IOracle(market.oracle()).peekSpot(market.oracleData());
+        (, info.oracleExchangeRate) = ITapiocaOracle(market.oracle()).peek(market.oracleData());
+        info.spotExchangeRate = ITapiocaOracle(market.oracle()).peekSpot(market.oracleData());
         info.totalBorrowCap = market.totalBorrowCap();
         info.assetId = market.assetId();
         info.collateralId = market.collateralId();

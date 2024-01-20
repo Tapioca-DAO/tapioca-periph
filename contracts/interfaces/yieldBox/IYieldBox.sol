@@ -7,7 +7,7 @@ pragma solidity 0.8.22;
 /// Native: These are ERC1155 tokens native to YieldBox. Protocols using YieldBox should use these is possible when simple token creation is needed.
 /// ERC20: ERC20 tokens (including rebasing tokens) can be added to the YieldBox.
 /// ERC1155: ERC1155 tokens are also supported. This can also be used to add YieldBox Native tokens to strategies since they are ERC1155 tokens.
-enum TokenType {
+enum IYieldBoxTokenType {
     Native,
     ERC20,
     ERC721,
@@ -21,7 +21,7 @@ interface IYieldBox {
     function assets(uint256 assetId)
         external
         view
-        returns (TokenType tokenType, address contractAddress, address strategy, uint256 tokenId);
+        returns (IYieldBoxTokenType tokenType, address contractAddress, address strategy, uint256 tokenId);
 
     function nativeTokens(uint256 assetId)
         external

@@ -7,7 +7,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {IMagnetarHelper} from "contract/interfaces/periph/IMagnetarHelper.sol";
+import {IMagnetarHelper} from "contracts/interfaces/periph/IMagnetarHelper.sol";
 import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
 import {MagnetarV2Storage} from "./MagnetarV2Storage.sol";
 
@@ -383,9 +383,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 IMarket(_action.target).sellCollateral(from, share, data);
             } else if (_action.id == TAP_EXERCISE_OPTION) {
                 (
-                    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory optionsData,
-                    ITapiocaOptionsBrokerCrossChain.IExerciseLZData memory lzData,
-                    ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData memory tapSendData,
+                    ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory optionsData,
+                    ITapiocaOptionBrokerCrossChain.IExerciseLZData memory lzData,
+                    ITapiocaOptionBrokerCrossChain.IExerciseLZSendTapData memory tapSendData,
                     ICommonData.IApproval[] memory approvals,
                     ICommonData.IApproval[] memory revokes,
                     address airdropAddress,
@@ -394,9 +394,9 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 ) = abi.decode(
                     _action.call[4:],
                     (
-                        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData,
-                        ITapiocaOptionsBrokerCrossChain.IExerciseLZData,
-                        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData,
+                        ITapiocaOptionBrokerCrossChain.IExerciseOptionsData,
+                        ITapiocaOptionBrokerCrossChain.IExerciseLZData,
+                        ITapiocaOptionBrokerCrossChain.IExerciseLZSendTapData,
                         ICommonData.IApproval[],
                         ICommonData.IApproval[],
                         address,
@@ -404,7 +404,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                         uint256
                     )
                 );
-                ITapiocaOptionsBrokerCrossChain(_action.target).exerciseOption{value: _action.value}(
+                ITapiocaOptionBrokerCrossChain(_action.target).exerciseOption{value: _action.value}(
                     optionsData,
                     lzData,
                     tapSendData,
@@ -582,7 +582,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         IUSDOBase.IMintData calldata mintData,
         ICommonData.IDepositData calldata depositData,
         ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionsBroker.IOptionsParticipateData calldata participateData,
+        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
         ICommonData.ICommonExternalContracts calldata externalContracts
     ) external payable {
         _checkSender(user);

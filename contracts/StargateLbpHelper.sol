@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./interfaces/IBalancerVault.sol";
-import "./interfaces/IStargateRouter.sol";
-import "./interfaces/ILiquidityBootstrappingPool.sol";
-import "./interfaces/IStargateLbpHelper.sol";
+// External
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-//OZ
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// Tapioca
+import {ILiquidityBootstrappingPool} from "contracts/interfaces/external/balancer/ILiquidityBootstrappingPool.sol";
+import {IStargateLbpHelper} from "contracts/interfaces/external/stargate/IStargateLbpHelper.sol";
+import {IStargateRouter} from "contracts/interfaces/external/stargate/IStargateRouter.sol";
+import {IBalancerVault} from "contracts/interfaces/external/balancer/IBalancerVault.sol";
 
 contract StargateLbpHelper is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;

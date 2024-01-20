@@ -6,7 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
 import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
-import {ICluster} from "contract/interfaces/periph/ICluster.sol";
+import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
 
 contract Cluster is Ownable, ICluster {
     // ************ //

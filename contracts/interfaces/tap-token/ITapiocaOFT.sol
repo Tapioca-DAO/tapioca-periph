@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "./ISendFrom.sol";
-import {IUSDOBase} from "./IUSDO.sol";
-import "./ICommonData.sol";
+// Tapioca
+import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
+import {IUSDO} from "contracts/interfaces/bar/IUSDO.sol";
+import "contracts/interfaces/common/ISendFrom.sol";
 
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);

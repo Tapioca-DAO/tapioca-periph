@@ -6,7 +6,7 @@ pragma solidity 0.8.22;
 import {
     AccessControlledOffchainAggregator,
     AggregatorV3Interface
-} from "contracts/interfaces/chainlink/IAggregatorV3Interface.sol";
+} from "contracts/interfaces/external/chainlink/IAggregatorV3Interface.sol";
 import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAdminRules.sol";
 
 /// @title ChainlinkUtils
