@@ -263,14 +263,15 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     abi.encodeCall(
                         MagnetarMarketModule.mintFromBBAndLendOnSGL,
                         (
-                            data.user,
-                            data.lendAmount,
-                            data.mintData,
-                            data.depositData,
-                            data.lockData,
-                            data.participateData,
-                            data.externalContracts,
-                            cluster
+                            MagnetarMarketModule.MintFromBBAndLendOnSGLData({
+                                user: data.user,
+                                lendAmount: data.lendAmount,
+                                mintData: data.mintData,
+                                depositData: data.depositData,
+                                lockData: data.lockData,
+                                participateData: data.participateData,
+                                externalContracts: data.externalContracts
+                            })
                         )
                     )
                 );
@@ -522,30 +523,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     ///             - if `mintData.mint` is true, `lendAmount` will be automatically filled with the minted value
     ///         - if `lockData.lock` is false, the tOLP lock operation is skipped
     ///         - if `participateData.participate` is false, the tOB participate operation is skipped
-    /// @param user the user to perform the operation for
-    /// @param lendAmount the amount to lend on SGL
-    /// @param mintData the data needed to mint on BB
-    /// @param depositData the data needed for asset deposit on YieldBox
-    /// @param lockData the data needed to lock on TapiocaOptionLiquidityProvision
-    /// @param participateData the data needed to perform a participate operation on TapiocaOptionsBroker
-    /// @param externalContracts the contracts' addresses used in all the operations performed by the helper
-    function mintFromBBAndLendOnSGL(
-        address user,
-        uint256 lendAmount,
-        IUSDOBase.IMintData calldata mintData,
-        ICommonData.IDepositData calldata depositData,
-        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
-        ICommonData.ICommonExternalContracts calldata externalContracts
-    ) external payable {
-        _checkSender(user);
-        _executeModule(
-            Module.Market,
-            abi.encodeCall(
-                MagnetarMarketModule.mintFromBBAndLendOnSGL,
-                (user, lendAmount, mintData, depositData, lockData, participateData, externalContracts, cluster)
-            )
-        );
+    /// @param _data.user the user to perform the operation for
+    /// @param _data.lendAmount the amount to lend on SGL
+    /// @param _data.mintData the data needed to mint on BB
+    /// @param _data.depositData the data needed for asset deposit on YieldBox
+    /// @param _data.lockData the data needed to lock on TapiocaOptionLiquidityProvision
+    /// @param _data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
+    /// @param _data.externalContracts the contracts' addresses used in all the operations performed by the helper
+    function mintFromBBAndLendOnSGL(MagnetarMarketModule.MintFromBBAndLendOnSGLData calldata _data) external payable {
+        _checkSender(_data.user);
+        _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.mintFromBBAndLendOnSGL, (_data)));
     }
 
     /// @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw

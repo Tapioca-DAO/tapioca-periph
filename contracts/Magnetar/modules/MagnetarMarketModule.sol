@@ -80,19 +80,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         );
     }
 
-    function mintFromBBAndLendOnSGL(
-        address user,
-        uint256 lendAmount,
-        IUSDOBase.IMintData calldata mintData,
-        ICommonData.IDepositData calldata depositData,
-        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
-        ICommonData.ICommonExternalContracts calldata externalContracts,
-        ICluster _cluster
-    ) external payable {
-        _mintFromBBAndLendOnSGL(
-            user, lendAmount, mintData, depositData, lockData, participateData, externalContracts, _cluster
-        );
+    function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData calldata _data) external payable {
+        _mintFromBBAndLendOnSGL(_data);
     }
 
     function exitPositionAndRemoveCollateral(
@@ -108,6 +97,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     // *********************** //
     // *** PRIVATE METHODS *** //
     // *********************** //
+
     function _depositAddCollateralAndBorrowFromMarket(
         IMarket market,
         address user,
@@ -242,25 +232,47 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
-    function _mintFromBBAndLendOnSGL(
-        address user,
-        uint256 lendAmount,
-        IUSDOBase.IMintData memory mintData,
-        ICommonData.IDepositData memory depositData,
-        ITapiocaOptionLiquidityProvision.IOptionsLockData calldata lockData,
-        ITapiocaOptionBroker.IOptionsParticipateData calldata participateData,
-        ICommonData.ICommonExternalContracts calldata externalContracts,
-        ICluster _cluster
-    ) private {
-        IMarket bigBang = IMarket(externalContracts.bigBang);
-        ISingularity singularity = ISingularity(externalContracts.singularity);
+    struct MintFromBBAndLendOnSGLData {
+        address user;
+        uint256 lendAmount;
+        IUSDOBase.IMintData mintData;
+        ICommonData.IDepositData depositData;
+        ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
+        ITapiocaOptionBroker.IOptionsParticipateData participateData;
+        ICommonData.ICommonExternalContracts externalContracts;
+    }
+
+    /**
+     * @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev all steps are optional:
+     *         - if `mintData.mint` is false, the mint operation on BB is skipped
+     *             - add BB collateral to YB, add collateral on BB and borrow from BB are part of the mint operation
+     *         - if `depositData.deposit` is false, the asset deposit to YB is skipped
+     *         - if `lendAmount == 0` the addAsset operation on SGL is skipped
+     *             - if `mintData.mint` is true, `lendAmount` will be automatically filled with the minted value
+     *         - if `lockData.lock` is false, the tOLP lock operation is skipped
+     *         - if `participateData.participate` is false, the tOB participate operation is skipped
+     *
+     * @param _data.user the user to perform the operation for
+     * @param _data.lendAmount the amount to lend on SGL
+     * @param _data.mintData the data needed to mint on BB
+     * @param _data.depositData the data needed for asset deposit on YieldBox
+     * @param _data.lockData the data needed to lock on TapiocaOptionLiquidityProvision
+     * @param _data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
+     * @param _data.externalContracts the contracts' addresses used in all the operations performed by the helper
+     */
+    function _mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData memory _data) private {
+        IMarket bigBang = IMarket(_data.externalContracts.bigBang);
+        ISingularity singularity = ISingularity(_data.externalContracts.singularity);
         IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
-        if (externalContracts.bigBang != address(0)) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), externalContracts.bigBang)) revert NotAuthorized();
+        if (_data.externalContracts.bigBang != address(0)) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalContracts.bigBang)) revert NotAuthorized();
         }
-        if (externalContracts.singularity != address(0)) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), externalContracts.singularity)) revert NotAuthorized();
+        if (_data.externalContracts.singularity != address(0)) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalContracts.singularity)) {
+                revert NotAuthorized();
+            }
         }
 
         if (address(singularity) != address(0)) {
@@ -274,120 +286,122 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //  - extracts & deposits collateral to YB
         //  - performs bigBang.addCollateral
         //  - performs bigBang.borrow
-        if (mintData.mint) {
+        if (_data.mintData.mint) {
             uint256 bbCollateralId = bigBang.collateralId();
             (, address bbCollateralAddress,,) = yieldBox.assets(bbCollateralId);
-            uint256 bbCollateralShare = yieldBox.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
+            uint256 bbCollateralShare =
+                yieldBox.toShare(bbCollateralId, _data.mintData.collateralDepositData.amount, false);
             // deposit collateral to YB
-            if (mintData.collateralDepositData.deposit) {
-                mintData.collateralDepositData.amount = _extractTokens(
-                    mintData.collateralDepositData.extractFromSender ? msg.sender : user,
+            if (_data.mintData.collateralDepositData.deposit) {
+                _data.mintData.collateralDepositData.amount = _extractTokens(
+                    _data.mintData.collateralDepositData.extractFromSender ? msg.sender : _data.user,
                     bbCollateralAddress,
-                    mintData.collateralDepositData.amount
+                    _data.mintData.collateralDepositData.amount
                 );
-                bbCollateralShare = yieldBox.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
+                bbCollateralShare = yieldBox.toShare(bbCollateralId, _data.mintData.collateralDepositData.amount, false);
 
                 IERC20(bbCollateralAddress).approve(address(yieldBox), 0);
-                IERC20(bbCollateralAddress).approve(address(yieldBox), mintData.collateralDepositData.amount);
+                IERC20(bbCollateralAddress).approve(address(yieldBox), _data.mintData.collateralDepositData.amount);
                 yieldBox.depositAsset(
-                    bbCollateralId, address(this), address(this), mintData.collateralDepositData.amount, 0
+                    bbCollateralId, address(this), address(this), _data.mintData.collateralDepositData.amount, 0
                 );
             }
 
             // add collateral to BB
-            if (mintData.collateralDepositData.amount > 0) {
+            if (_data.mintData.collateralDepositData.amount > 0) {
                 //add collateral to BingBang
                 _setApprovalForYieldBox(address(bigBang), yieldBox);
                 bigBang.addCollateral(
-                    mintData.collateralDepositData.deposit ? address(this) : user,
-                    user,
+                    _data.mintData.collateralDepositData.deposit ? address(this) : _data.user,
+                    _data.user,
                     false,
-                    mintData.collateralDepositData.amount,
+                    _data.mintData.collateralDepositData.amount,
                     bbCollateralShare
                 );
             }
 
             // mints from BB
-            bigBang.borrow(user, user, mintData.mintAmount);
+            bigBang.borrow(_data.user, _data.user, _data.mintData.mintAmount);
         }
 
         // if `depositData.deposit`:
-        //      - deposit SGL asset to YB for `user`
+        //      - deposit SGL asset to YB for `_data.user`
         uint256 sglAssetId = singularity.assetId();
         (, address sglAssetAddress,,) = yieldBox.assets(sglAssetId);
-        if (depositData.deposit) {
-            depositData.amount =
-                _extractTokens(depositData.extractFromSender ? msg.sender : user, sglAssetAddress, depositData.amount);
+        if (_data.depositData.deposit) {
+            _data.depositData.amount = _extractTokens(
+                _data.depositData.extractFromSender ? msg.sender : _data.user, sglAssetAddress, _data.depositData.amount
+            );
 
             IERC20(sglAssetAddress).approve(address(yieldBox), 0);
-            IERC20(sglAssetAddress).approve(address(yieldBox), depositData.amount);
-            yieldBox.depositAsset(sglAssetId, address(this), user, depositData.amount, 0);
+            IERC20(sglAssetAddress).approve(address(yieldBox), _data.depositData.amount);
+            yieldBox.depositAsset(sglAssetId, address(this), _data.user, _data.depositData.amount, 0);
         }
 
         // if `lendAmount` > 0:
         //      - add asset to SGL
         uint256 fraction = 0;
-        if (lendAmount == 0 && depositData.deposit) {
-            lendAmount = depositData.amount;
+        if (_data.lendAmount == 0 && _data.depositData.deposit) {
+            _data.lendAmount = _data.depositData.amount;
         }
-        if (lendAmount > 0) {
-            uint256 lendShare = yieldBox.toShare(sglAssetId, lendAmount, false);
-            fraction = singularity.addAsset(user, user, false, lendShare);
+        if (_data.lendAmount > 0) {
+            uint256 lendShare = yieldBox.toShare(sglAssetId, _data.lendAmount, false);
+            fraction = singularity.addAsset(_data.user, _data.user, false, lendShare);
         }
 
         // if `lockData.lock`:
-        //      - transfer `fraction` from user to `address(this)
+        //      - transfer `fraction` from _data.user to `address(this)
         //      - deposits `fraction` to YB for `address(this)`
         //      - performs tOLP.lock
         uint256 tOLPTokenId = 0;
-        if (lockData.lock) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), lockData.target)) {
+        if (_data.lockData.lock) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.lockData.target)) {
                 revert NotAuthorized();
             }
-            if (lockData.fraction > 0) {
-                fraction = lockData.fraction;
+            if (_data.lockData.fraction > 0) {
+                fraction = _data.lockData.fraction;
             }
             // retrieve and deposit SGLAssetId registered in tOLP
             (uint256 tOLPSglAssetId,,) =
-                ITapiocaOptionLiquidityProvision(lockData.target).activeSingularities(address(singularity));
+                ITapiocaOptionLiquidityProvision(_data.lockData.target).activeSingularities(address(singularity));
             if (fraction == 0) revert NotValid();
-            IERC20(address(singularity)).safeTransferFrom(user, address(this), fraction);
+            IERC20(address(singularity)).safeTransferFrom(_data.user, address(this), fraction);
             IERC20(address(singularity)).approve(address(yieldBox), 0);
             IERC20(address(singularity)).approve(address(yieldBox), fraction);
             yieldBox.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
-            _setApprovalForYieldBox(lockData.target, yieldBox);
-            address lockTo = participateData.participate ? address(this) : user;
-            tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target).lock(
-                lockTo, address(singularity), lockData.lockDuration, lockData.amount
+            _setApprovalForYieldBox(_data.lockData.target, yieldBox);
+            address lockTo = _data.participateData.participate ? address(this) : _data.user;
+            tOLPTokenId = ITapiocaOptionLiquidityProvision(_data.lockData.target).lock(
+                lockTo, address(singularity), _data.lockData.lockDuration, _data.lockData.amount
             );
-            _revertYieldBoxApproval(lockData.target, yieldBox);
+            _revertYieldBoxApproval(_data.lockData.target, yieldBox);
         }
 
         // if `participateData.participate`:
         //      - verify tOLPTokenId
         //      - performs tOB.participate
-        //      - transfer `oTAPTokenId` to user
-        if (participateData.participate) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), participateData.target)) revert NotAuthorized();
+        //      - transfer `oTAPTokenId` to _data.user
+        if (_data.participateData.participate) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.participateData.target)) revert NotAuthorized();
 
-            if (participateData.tOLPTokenId != 0) {
+            if (_data.participateData.tOLPTokenId != 0) {
                 if (tOLPTokenId != 0) {
-                    if (participateData.tOLPTokenId != tOLPTokenId) {
+                    if (_data.participateData.tOLPTokenId != tOLPTokenId) {
                         revert tOLPTokenMismatch();
                     }
                 }
 
-                tOLPTokenId = participateData.tOLPTokenId;
+                tOLPTokenId = _data.participateData.tOLPTokenId;
             }
-            if (lockData.target == address(0)) revert LockTargetMismatch();
+            if (_data.lockData.target == address(0)) revert LockTargetMismatch();
             if (tOLPTokenId == 0) revert NotValid();
 
-            IERC721(lockData.target).approve(participateData.target, tOLPTokenId);
-            uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
+            IERC721(_data.lockData.target).approve(_data.participateData.target, tOLPTokenId);
+            uint256 oTAPTokenId = ITapiocaOptionBroker(_data.participateData.target).participate(tOLPTokenId);
 
-            address oTapAddress = ITapiocaOptionBroker(participateData.target).oTAP();
-            IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "0x");
+            address oTapAddress = ITapiocaOptionBroker(_data.participateData.target).oTAP();
+            IERC721(oTapAddress).safeTransferFrom(address(this), _data.user, oTAPTokenId, "0x");
         }
 
         if (address(singularity) != address(0)) {
@@ -581,22 +595,25 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         address zroPaymentAddress;
     }
 
-    /// @notice performs a withdraw operation
-    /// @dev it can withdraw on the current chain or it can send it to another one
-    ///     - if `dstChainId` is 0 performs a same-chain withdrawal
-    ///          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
-    ///     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
-    /// @param _data.yieldBox the YieldBox address
-    /// @param _data.from user to withdraw from
-    /// @param _data.assetId the YieldBox asset id to withdraw
-    /// @param _data.dstChainId LZ chain id to withdraw to
-    /// @param _data.receiver the receiver on the destination chain
-    /// @param _data.amount the amount to withdraw
-    /// @param _data.adapterParams LZ adapter params
-    /// @param _data.refundAddress the LZ refund address which receives the gas not used in the process
-    /// @param _data.gas the amount of gas to use for sending the asset to another layer
-    /// @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-    /// @param _data.zroPaymentAddress ZRO payment address
+    /**
+     * @notice performs a withdraw operation
+     * @dev it can withdraw on the current chain or it can send it to another one
+     *     - if `dstChainId` is 0 performs a same-chain withdrawal
+     *          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
+     *     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
+     *
+     * @param _data.yieldBox the YieldBox address
+     * @param _data.from user to withdraw from
+     * @param _data.assetId the YieldBox asset id to withdraw
+     * @param _data.dstChainId LZ chain id to withdraw to
+     * @param _data.receiver the receiver on the destination chain
+     * @param _data.amount the amount to withdraw
+     * @param _data.adapterParams LZ adapter params
+     * @param _data.refundAddress the LZ refund address which receives the gas not used in the process
+     * @param _data.gas the amount of gas to use for sending the asset to another layer
+     * @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+     * @param _data.zroPaymentAddress ZRO payment address
+     */
     function _withdrawToChain(WithdrawToChainData memory _data) private {
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.yieldBox))) {
             revert NotAuthorized();
