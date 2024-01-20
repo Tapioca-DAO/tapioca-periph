@@ -6,9 +6,11 @@ import { HardhatUserConfig } from 'hardhat/config';
 import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
-import SDK from 'tapioca-sdk';
 import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
+
+import 'tapioca-sdk';
+import { SDK, loadEnv } from 'tapioca-sdk';
 
 dotenv.config();
 
@@ -23,6 +25,8 @@ declare global {
         }
     }
 }
+
+loadEnv();
 
 type TNetwork = ReturnType<
     typeof SDK.API.utils.getSupportedChains

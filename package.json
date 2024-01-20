@@ -47,7 +47,7 @@
         "eth-sig-util": "^3.0.1",
         "ethereumjs-utils": "^5.2.5",
         "ethers": "^5.7.0",
-        "hardhat": "2.13.0",
+        "hardhat": "2.19.4",
         "hardhat-contract-sizer": "^2.5.1",
         "hardhat-deploy": "^0.9.6",
         "hardhat-gas-reporter": "^1.0.8",
@@ -75,7 +75,7 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.5.18",
+        "tapioca-sdk": "^1.5.20-nightly-9",
         "uuid": "^9.0.0"
     }
 }
