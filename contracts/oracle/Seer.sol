@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+// External
+import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+
 // Tapioca
-import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {ITapiocaOracle, ISeerQuery} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {OracleMulti} from "./OracleMulti.sol";
 
-contract Seer is ITOracle.IOracle, OracleMulti {
+contract Seer is ITapiocaOracle, OracleMulti {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;
@@ -80,7 +83,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
+            ISeerQuery memory query = abi.decode(data, (ISeerQuery));
             if (query.useHigh) return (true, high);
         }
 
@@ -96,7 +99,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
+            ISeerQuery memory query = abi.decode(data, (ISeerQuery));
             if (query.useHigh) return (true, high);
         }
 
@@ -111,7 +114,7 @@ contract Seer is ITOracle.IOracle, OracleMulti {
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
+            ISeerQuery memory query = abi.decode(data, (ISeerQuery));
             if (query.useHigh) return high;
         }
 

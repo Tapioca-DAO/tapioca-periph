@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-interface IAsset {
+interface IBalancerAsset {
 // solhint-disable-previous-line no-empty-blocks
 }
 
@@ -21,8 +21,8 @@ interface IBalancerVault {
     struct SingleSwap {
         bytes32 poolId;
         SwapKind kind;
-        IAsset assetIn;
-        IAsset assetOut;
+        IBalancerAsset assetIn;
+        IBalancerAsset assetOut;
         uint256 amount;
         bytes userData;
     }

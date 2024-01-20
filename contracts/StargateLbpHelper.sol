@@ -8,10 +8,15 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
+import {
+    IStargateRouter,
+    IStargateBridge,
+    IStargateRouterBase
+} from "contracts/interfaces/external/stargate/IStargateRouter.sol";
 import {ILiquidityBootstrappingPool} from "contracts/interfaces/external/balancer/ILiquidityBootstrappingPool.sol";
+import {IBalancerVault, IBalancerAsset} from "contracts/interfaces/external/balancer/IBalancerVault.sol";
+import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
 import {IStargateLbpHelper} from "contracts/interfaces/external/stargate/IStargateLbpHelper.sol";
-import {IStargateRouter} from "contracts/interfaces/external/stargate/IStargateRouter.sol";
-import {IBalancerVault} from "contracts/interfaces/external/balancer/IBalancerVault.sol";
 
 contract StargateLbpHelper is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -188,8 +193,8 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         IBalancerVault.SingleSwap memory singleSwap = IBalancerVault.SingleSwap({
             poolId: lbpPool.getPoolId(),
             kind: IBalancerVault.SwapKind.GIVEN_IN, //0
-            assetIn: IAsset(data.assetIn),
-            assetOut: IAsset(data.assetOut),
+            assetIn: IBalancerAsset(data.assetIn),
+            assetOut: IBalancerAsset(data.assetOut),
             amount: amountLD,
             userData: "0x"
         });

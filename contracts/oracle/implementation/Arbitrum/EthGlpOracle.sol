@@ -11,13 +11,15 @@ import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 
 contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
-    IOracle public wethUsdOracle;
-    IOracle public glpUsdOracle;
+    ITapiocaOracle public wethUsdOracle;
+    ITapiocaOracle public glpUsdOracle;
 
-    constructor(IOracle _wethUsdOracle, IOracle _glpUsdOracle, address _sequencerUptimeFeed, address _admin)
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
-    {
+    constructor(
+        ITapiocaOracle _wethUsdOracle,
+        ITapiocaOracle _glpUsdOracle,
+        address _sequencerUptimeFeed,
+        address _admin
+    ) SequencerCheck(_sequencerUptimeFeed) AccessControlDefaultAdminRules(3 days, _admin) {
         wethUsdOracle = _wethUsdOracle;
         glpUsdOracle = _glpUsdOracle;
         _grantRole(SEQUENCER_ROLE, _admin);
@@ -28,7 +30,7 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
     }
 
     // Get the latest exchange rate
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
 
@@ -39,7 +41,7 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
     }
 
     // Check the last exchange rate without any state changes
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function peek(bytes calldata) public view override returns (bool success, uint256 rate) {
         (, uint256 wethUsdPrice) = wethUsdOracle.peek("");
         (, uint256 glpUsdPrice) = glpUsdOracle.peek("");
@@ -48,17 +50,17 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
     }
 
     // Check the current spot exchange rate without any state changes
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
         (, rate) = peek(data);
     }
 
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function name(bytes calldata) public pure override returns (string memory) {
         return "ETH/GLP";
     }
 
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function symbol(bytes calldata) public pure override returns (string memory) {
         return "ETH/GLP";
     }

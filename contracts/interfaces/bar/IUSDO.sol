@@ -8,6 +8,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
+import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
 import {ISingularity} from "./ISingularity.sol";
 import {IMarket} from "./IMarket.sol";
 

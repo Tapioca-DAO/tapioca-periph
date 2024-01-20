@@ -2,13 +2,13 @@
 pragma solidity 0.8.22;
 
 // External
-import {BoringRebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
+import {RebaseLibrary, Rebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
 import {IYieldBox, IYieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
 import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
-import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
+import {ISingularity, IMarket} from "contracts/interfaces/bar/ISingularity.sol";
 import {IPenrose} from "contracts/interfaces//bar/IPenrose.sol";
 import {IBigBang} from "contracts/interfaces/bar/IBigBang.sol";
 import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
@@ -36,11 +36,11 @@ contract MagnetarHelper {
         uint256 totalYieldBoxCollateralAmount;
         uint256 totalYieldBoxAssetShare;
         uint256 totalYieldBoxAssetAmount;
-        TokenType yieldBoxCollateralTokenType;
+        IYieldBoxTokenType yieldBoxCollateralTokenType;
         address yieldBoxCollateralContractAddress;
         address yieldBoxCollateralStrategyAddress;
         uint256 yieldBoxCollateralTokenId;
-        TokenType yieldBoxAssetTokenType;
+        IYieldBoxTokenType yieldBoxAssetTokenType;
         address yieldBoxAssetContractAddress;
         address yieldBoxAssetStrategyAddress;
         uint256 yieldBoxAssetTokenId;
@@ -98,7 +98,7 @@ contract MagnetarHelper {
     /// @param share The shares.
     /// @return amount The amount.
     function getCollateralAmountForShare(IMarket market, uint256 share) external view returns (uint256 amount) {
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market.yieldBox());
         return yieldBox.toAmount(market.collateralId(), share, false);
     }
 
@@ -117,7 +117,7 @@ contract MagnetarHelper {
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market.yieldBox());
         uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
 
         uint256 val = (borrowAmount * collateralizationRatePrecision * market.exchangeRate())
@@ -162,7 +162,7 @@ contract MagnetarHelper {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity.totalAsset();
         (uint128 totalBorrowElastic,) = singularity.totalBorrow();
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         uint256 allShare = totalAssetElastic + yieldBox.toShare(singularity.assetId(), totalBorrowElastic, true);
 
@@ -179,7 +179,7 @@ contract MagnetarHelper {
         (uint128 totalBorrowElastic,) = singularity.totalBorrow();
         uint256 assetId = singularity.assetId();
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         uint256 share = yieldBox.toShare(assetId, amount, false);
         uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, true);
@@ -274,7 +274,7 @@ contract MagnetarHelper {
         info.collateralId = market.collateralId();
         info.collateralizationRate = market.collateralizationRate();
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market.yieldBox());
 
         (info.totalYieldBoxCollateralShare, info.totalYieldBoxCollateralAmount) =
             yieldBox.assetTotals(info.collateralId);

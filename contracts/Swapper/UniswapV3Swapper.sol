@@ -4,11 +4,13 @@ pragma solidity 0.8.22;
 // External
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
+import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {SafeApprove} from "contracts/libraries/SafeApprove.sol";
 import {OracleLibrary} from "./libraries/OracleLibrary.sol";
 import {BaseSwapper} from "./BaseSwapper.sol";
 
@@ -43,7 +45,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************ //
     // *** VARS *** //
     // ************ //
-    IYieldBoxBase private immutable yieldBox;
+    IYieldBox private immutable yieldBox;
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable factory;
 
@@ -60,7 +62,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************** //
     error UnwrapFailed();
 
-    constructor(IYieldBoxBase _yieldBox, ISwapRouter _swapRouter, IUniswapV3Factory _factory, address _owner)
+    constructor(IYieldBox _yieldBox, ISwapRouter _swapRouter, IUniswapV3Factory _factory, address _owner)
         validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
         validAddress(address(_factory))

@@ -2,6 +2,7 @@
 pragma solidity 0.8.22;
 
 // External
+import {RebaseLibrary, Rebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -11,9 +12,18 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {LzLib} from "contracts/tmp/LzLib.sol";
 
 //TAPIOCA
+import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "contracts/interfaces/tap-token/ITapiocaOption.sol";
+import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
+import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
 import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
 import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ISendFrom} from "contracts/interfaces/common/ISendFrom.sol";
+import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
+import {IMarket} from "contracts/interfaces/bar/IMarket.sol";
+import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
 contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
@@ -30,7 +40,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     error GasMismatch();
 
     function withdrawToChain(
-        IYieldBoxBase yieldBox,
+        IYieldBox yieldBox,
         address from,
         uint256 assetId,
         uint16 dstChainId,
@@ -136,7 +146,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             revert NotAuthorized();
         }
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
         (, address collateralAddress,,) = yieldBox.assets(collateralId);
@@ -207,7 +217,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
 
         IMarket marketInterface = IMarket(market);
-        IYieldBoxBase yieldBox = IYieldBoxBase(marketInterface.yieldBox());
+        IYieldBox yieldBox = IYieldBox(marketInterface.yieldBox());
 
         uint256 assetId = marketInterface.assetId();
         (, address assetAddress,,) = yieldBox.assets(assetId);
@@ -266,7 +276,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     ) private {
         IMarket bigBang = IMarket(externalContracts.bigBang);
         ISingularity singularity = ISingularity(externalContracts.singularity);
-        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         if (externalContracts.bigBang != address(0)) {
             if (!_cluster.isWhitelisted(_cluster.lzChainId(), externalContracts.bigBang)) revert NotAuthorized();
@@ -426,7 +436,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
         IMarket bigBang = IMarket(externalData.bigBang);
         ISingularity singularity = ISingularity(externalData.singularity);
-        IYieldBoxBase yieldBox = IYieldBoxBase(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
@@ -579,7 +589,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     }
 
     function _withdrawToChain(
-        IYieldBoxBase yieldBox,
+        IYieldBox yieldBox,
         address from,
         uint256 assetId,
         uint16 dstChainId,
@@ -636,13 +646,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
-    function _withdrawOnThisChain(
-        IYieldBoxBase yieldBox,
-        uint256 assetId,
-        address from,
-        bytes32 receiver,
-        uint256 amount
-    ) private {
+    function _withdrawOnThisChain(IYieldBox yieldBox, uint256 assetId, address from, bytes32 receiver, uint256 amount)
+        private
+    {
         yieldBox.withdraw(assetId, from, LzLib.bytes32ToAddress(receiver), amount, 0);
     }
 
@@ -650,7 +656,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         address from,
         bytes memory withdrawData,
         IMarket market,
-        IYieldBoxBase yieldBox,
+        IYieldBox yieldBox,
         uint256 amount,
         bool withdrawCollateral,
         uint256 valueAmount,
@@ -677,14 +683,14 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         );
     }
 
-    function _setApprovalForYieldBox(address target, IYieldBoxBase yieldBox) private {
+    function _setApprovalForYieldBox(address target, IYieldBox yieldBox) private {
         bool isApproved = yieldBox.isApprovedForAll(address(this), target);
         if (!isApproved) {
             yieldBox.setApprovalForAll(target, true);
         }
     }
 
-    function _revertYieldBoxApproval(address target, IYieldBoxBase yieldBox) private {
+    function _revertYieldBoxApproval(address target, IYieldBox yieldBox) private {
         bool isApproved = yieldBox.isApprovedForAll(address(this), address(target));
         if (isApproved) {
             yieldBox.setApprovalForAll(address(target), false);

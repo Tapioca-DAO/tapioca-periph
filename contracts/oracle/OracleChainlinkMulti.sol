@@ -3,6 +3,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
+import {AccessControlDefaultAdminRules} from "./external/AccessControlDefaultAdminRules.sol";
 import {ModuleChainlinkMulti} from "./modules/ModuleChainlinkMulti.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";
 

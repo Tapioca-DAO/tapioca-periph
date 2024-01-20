@@ -2,13 +2,27 @@
 pragma solidity 0.8.22;
 
 // External
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {RebaseLibrary, Rebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
+import {
+    ITapiocaOptionBrokerCrossChain,
+    ITapiocaOptionBroker
+} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {IMagnetarHelper} from "contracts/interfaces/periph/IMagnetarHelper.sol";
+import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
 import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
+import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
+import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
+import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+import {ISendFrom} from "contracts/interfaces/common/ISendFrom.sol";
+import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
+import {IMarket} from "contracts/interfaces/bar/IMarket.sol";
+import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
 import {MagnetarV2Storage} from "./MagnetarV2Storage.sol";
 
 /*
@@ -107,11 +121,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             } else if (_action.id == REVOKE_YB_ALL) {
                 address spender = abi.decode(_action.call[4:], (address));
                 if (spender != msg.sender) revert NotAuthorized();
-                IYieldBoxBase(_action.target).setApprovalForAll(spender, false);
+                IYieldBox(_action.target).setApprovalForAll(spender, false);
             } else if (_action.id == REVOKE_YB_ASSET) {
                 (address spender, uint256 asset) = abi.decode(_action.call[4:], (address, uint256));
                 if (spender != msg.sender) revert NotAuthorized();
-                IYieldBoxBase(_action.target).setApprovalForAsset(spender, asset, false);
+                IYieldBox(_action.target).setApprovalForAsset(spender, asset, false);
             } else if (_action.id == TOFT_WRAP) {
                 WrapData memory data = abi.decode(_action.call[4:], (WrapData));
                 _checkSender(data.from);
@@ -131,9 +145,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 YieldBoxDepositData memory data = abi.decode(_action.call[4:], (YieldBoxDepositData));
                 _checkSender(data.from);
 
-                (uint256 amountOut, uint256 shareOut) = IYieldBoxBase(_action.target).depositAsset(
-                    data.assetId, data.from, data.to, data.amount, data.share
-                );
+                (uint256 amountOut, uint256 shareOut) =
+                    IYieldBox(_action.target).depositAsset(data.assetId, data.from, data.to, data.amount, data.share);
                 returnData[i] = Result({success: true, returnData: abi.encode(amountOut, shareOut)});
             } else if (_action.id == MARKET_ADD_COLLATERAL) {
                 SGLAddCollateralData memory data = abi.decode(_action.call[4:], (SGLAddCollateralData));
@@ -170,7 +183,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     abi.encodeCall(
                         MagnetarMarketModule.withdrawToChain,
                         (
-                            IYieldBoxBase(yieldBox),
+                            IYieldBox(yieldBox),
                             from,
                             assetId,
                             dstChainId,
@@ -453,7 +466,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     /// @param unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
     /// @param zroPaymentAddress ZRO payment address
     function withdrawToChain(
-        IYieldBoxBase yieldBox,
+        IYieldBox yieldBox,
         address from,
         uint256 assetId,
         uint16 dstChainId,

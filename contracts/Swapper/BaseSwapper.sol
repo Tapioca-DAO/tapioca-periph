@@ -83,7 +83,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         swapData.yieldBoxData = swapYBData;
     }
 
-    function _getTokens(ISwapper.SwapTokensData calldata tokens, IYieldBoxBase _yieldBox)
+    function _getTokens(ISwapper.SwapTokensData calldata tokens, IYieldBox _yieldBox)
         internal
         view
         returns (address tokenIn, address tokenOut)
@@ -101,7 +101,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
         ISwapper.SwapAmountData calldata amounts,
         uint256 tokenInId,
         uint256 tokenOutId,
-        IYieldBoxBase _yieldBox
+        IYieldBox _yieldBox
     ) internal view returns (uint256 amountIn, uint256 amountOut) {
         if (amounts.amountIn > 0 || amounts.amountOut > 0) {
             amountIn = amounts.amountIn;
@@ -120,7 +120,7 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
 
     function _extractTokens(
         ISwapper.YieldBoxData calldata ybData,
-        IYieldBoxBase _yieldBox,
+        IYieldBox _yieldBox,
         address token,
         uint256 tokenId,
         uint256 amount,

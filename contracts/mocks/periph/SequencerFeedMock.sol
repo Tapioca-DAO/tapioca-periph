@@ -2,7 +2,10 @@
 pragma solidity 0.8.22;
 
 // External
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {
+    AccessControlledOffchainAggregator,
+    AggregatorV3Interface
+} from "contracts/interfaces/external/chainlink/IAggregatorV3Interface.sol";
 
 struct RoundData {
     uint80 roundId;
@@ -42,4 +45,6 @@ contract SequencerFeedMock is AggregatorV3Interface {
             roundData[_roundId].answeredInRound
         );
     }
+
+    function aggregator() external view override returns (AccessControlledOffchainAggregator) {}
 }

@@ -7,6 +7,7 @@ pragma solidity 0.8.22;
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Tapioca
+import {AccessControlDefaultAdminRules} from "./external/AccessControlDefaultAdminRules.sol";
 import {ModuleChainlinkSingle} from "./modules/ModuleChainlinkSingle.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";

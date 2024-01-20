@@ -10,7 +10,7 @@ import {IGmxGlpManager} from "contracts/interfaces/external/gmx/IGmxGlpManager.s
 import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 
-contract GLPOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
+contract GLPOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
     IGmxGlpManager private immutable glpManager;
 
     constructor(IGmxGlpManager glpManager_, address _sequencerUptimeFeed, address _admin)
@@ -31,30 +31,30 @@ contract GLPOracle is IOracle, SequencerCheck, AccessControlDefaultAdminRules, R
     }
 
     // Get the latest exchange rate
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         return (true, _get());
     }
 
     // Check the last exchange rate without any state changes
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function peek(bytes calldata) public view override returns (bool success, uint256 rate) {
         return (true, _get());
     }
 
     // Check the current spot exchange rate without any state changes
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
         (, rate) = peek(data);
     }
 
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function name(bytes calldata) public pure override returns (string memory) {
         return "GLP/USD";
     }
 
-    /// @inheritdoc IOracle
+    /// @inheritdoc ITapiocaOracle
     function symbol(bytes calldata) public pure override returns (string memory) {
         return "GLP/USD";
     }

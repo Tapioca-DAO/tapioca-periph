@@ -6,7 +6,7 @@ pragma solidity 0.8.22;
 import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
 import {OracleChainlinkSingle} from "./OracleChainlinkSingle.sol";
 
-contract SeerCLSolo is ITOracle.IOracle, OracleChainlinkSingle {
+contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;
