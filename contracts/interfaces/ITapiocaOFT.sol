@@ -8,11 +8,7 @@ import "./ICommonData.sol";
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);
 
-    function wrap(
-        address fromAddress,
-        address toAddress,
-        uint256 amount
-    ) external payable returns (uint256 minted);
+    function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
 
     function unwrap(address _toAddress, uint256 _amount) external;
 
@@ -48,10 +44,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
 
     function balanceOf(address _holder) external view returns (uint256);
 
-    function isTrustedRemote(
-        uint16 lzChainId,
-        bytes calldata path
-    ) external view returns (bool);
+    function isTrustedRemote(uint16 lzChainId, bytes calldata path) external view returns (bool);
 
     function approve(address _spender, uint256 _amount) external returns (bool);
 

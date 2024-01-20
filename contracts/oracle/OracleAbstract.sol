@@ -40,7 +40,7 @@ abstract contract OracleAbstract is IOracle {
     /// regardless of the value of the `lower` parameter
     /// @dev The rate returned is expressed with base `BASE` (and not the base of the out-currency)
     function readLower() external view override returns (uint256 rate) {
-        (rate, ) = _readAll(inBase);
+        (rate,) = _readAll(inBase);
     }
 
     /// @notice Reads rates from the circuit of both Uniswap and Chainlink if there are both circuits
@@ -60,19 +60,15 @@ abstract contract OracleAbstract is IOracle {
     /// @dev Like in the read function, if the oracle involves a Uniswap and a Chainlink price, this function
     /// will use the Uniswap price to compute the out quoteAmount
     /// @dev The rate returned is expressed with base `BASE` (and not the base of the out-currency)
-    function readQuote(
-        uint256 quoteAmount
-    ) external view virtual override returns (uint256);
+    function readQuote(uint256 quoteAmount) external view virtual override returns (uint256);
 
     /// @notice Returns the lowest quote amount between Uniswap and Chainlink circuits (if possible). If the oracle
     /// contract only involves a single feed, then this returns the value of this feed
     /// @param quoteAmount Amount (in the input collateral) to be converted
     /// @return The lowest quote amount from the quote amount in in-currency
     /// @dev The rate returned is expressed with base `BASE` (and not the base of the out-currency)
-    function readQuoteLower(
-        uint256 quoteAmount
-    ) external view override returns (uint256) {
-        (uint256 quoteSmall, ) = _readAll(quoteAmount);
+    function readQuoteLower(uint256 quoteAmount) external view override returns (uint256) {
+        (uint256 quoteSmall,) = _readAll(quoteAmount);
         return quoteSmall;
     }
 
@@ -82,7 +78,5 @@ abstract contract OracleAbstract is IOracle {
     /// @dev If `quoteAmount` is `inBase`, rates are returned
     /// @return The first return value is the lowest value and the second parameter is the highest
     /// @dev The rate returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readAll(
-        uint256 quoteAmount
-    ) internal view virtual returns (uint256, uint256) {}
+    function _readAll(uint256 quoteAmount) internal view virtual returns (uint256, uint256) {}
 }

@@ -18,27 +18,14 @@ interface ITapiocaOptionLiquidityProvision {
 
     function yieldBox() external view returns (address);
 
-    function activeSingularities(
-        address singularity
-    )
+    function activeSingularities(address singularity)
         external
         view
-        returns (
-            uint256 sglAssetId,
-            uint256 totalDeposited,
-            uint256 poolWeight
-        );
+        returns (uint256 sglAssetId, uint256 totalDeposited, uint256 poolWeight);
 
-    function lock(
-        address to,
-        address singularity,
-        uint128 lockDuration,
-        uint128 amount
-    ) external returns (uint256 tokenId);
+    function lock(address to, address singularity, uint128 lockDuration, uint128 amount)
+        external
+        returns (uint256 tokenId);
 
-    function unlock(
-        uint256 tokenId,
-        address singularity,
-        address to
-    ) external returns (uint256 sharesOut);
+    function unlock(uint256 tokenId, address singularity, address to) external returns (uint256 sharesOut);
 }

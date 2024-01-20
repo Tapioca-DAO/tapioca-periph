@@ -11,11 +11,7 @@ import "../../../interfaces/IOracle.sol" as ITOracle;
 interface ICurvePool {
     function coins(uint256 i) external view returns (address);
 
-    function get_dy(
-        int128 i,
-        int128 j,
-        uint256 dx
-    ) external view returns (uint256);
+    function get_dy(int128 i, int128 j, uint256 dx) external view returns (uint256);
 
     function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
 
@@ -28,12 +24,7 @@ interface ICurvePool {
 
 /// @notice Courtesy of https://gist.github.com/0xShaito/f01f04cb26d0f89a0cead15cff3f7047
 /// @dev Addresses are for Arbitrum
-contract ARBTriCryptoOracle is
-    ITOracle.IOracle,
-    ChainlinkUtils,
-    SequencerCheck,
-    ReentrancyGuard
-{
+contract ARBTriCryptoOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck, ReentrancyGuard {
     string public _name;
     string public _symbol;
 
@@ -57,10 +48,7 @@ contract ARBTriCryptoOracle is
         AggregatorV3Interface wbtcFeed,
         address _sequencerUptimeFeed,
         address _admin
-    )
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
-    {
+    ) SequencerCheck(_sequencerUptimeFeed) AccessControlDefaultAdminRules(3 days, _admin) {
         _name = __name;
         _symbol = __symbol;
         TRI_CRYPTO = pool;
@@ -81,9 +69,7 @@ contract ARBTriCryptoOracle is
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(
-        bytes calldata
-    ) external virtual nonReentrant returns (bool success, uint256 rate) {
+    function get(bytes calldata) external virtual nonReentrant returns (bool success, uint256 rate) {
         return (true, _get());
     }
 
@@ -92,9 +78,7 @@ contract ARBTriCryptoOracle is
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function peek(
-        bytes calldata
-    ) external view virtual returns (bool success, uint256 rate) {
+    function peek(bytes calldata) external view virtual returns (bool success, uint256 rate) {
         return (true, _get());
     }
 
@@ -102,9 +86,7 @@ contract ARBTriCryptoOracle is
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot(
-        bytes calldata
-    ) external view virtual returns (uint256 rate) {
+    function peekSpot(bytes calldata) external view virtual returns (uint256 rate) {
         return _get();
     }
 
@@ -138,9 +120,7 @@ contract ARBTriCryptoOracle is
         uint256 _ethPrice = _readChainlinkBase(ETH_FEED, 0) * 1e10;
         uint256 _usdtPrice = _readChainlinkBase(USDT_FEED, 0) * 1e10;
 
-        uint256 _minWbtcPrice = (_wbtcPrice < 1e18)
-            ? (_wbtcPrice * _btcPrice) / 1e18
-            : _btcPrice;
+        uint256 _minWbtcPrice = (_wbtcPrice < 1e18) ? (_wbtcPrice * _btcPrice) / 1e18 : _btcPrice;
 
         uint256 _basePrices = (_minWbtcPrice * _ethPrice * _usdtPrice);
 
@@ -158,9 +138,7 @@ contract ARBTriCryptoOracle is
 
     /// @notice Changes the grace period for the sequencer update
     /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(
-        uint32 _gracePeriod
-    ) external override onlyRole(SEQUENCER_ROLE) {
+    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

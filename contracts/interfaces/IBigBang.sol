@@ -7,10 +7,7 @@ interface IBigBang {
         uint64 lastAccrued;
     }
 
-    function accrueInfo()
-        external
-        view
-        returns (uint64 debtRate, uint64 lastAccrued);
+    function accrueInfo() external view returns (uint64 debtRate, uint64 lastAccrued);
 
     function minDebtRate() external view returns (uint256);
 

@@ -14,33 +14,18 @@ interface ISingularity is IMarket {
     function accrueInfo()
         external
         view
-        returns (
-            uint64 interestPerSecond,
-            uint64 lastBlockAccrued,
-            uint128 feesEarnedFraction
-        );
+        returns (uint64 interestPerSecond, uint64 lastBlockAccrued, uint128 feesEarnedFraction);
 
     function totalAsset() external view returns (uint128 elastic, uint128 base);
 
-    function removeAsset(
-        address from,
-        address to,
-        uint256 fraction
-    ) external returns (uint256 share);
+    function removeAsset(address from, address to, uint256 fraction) external returns (uint256 share);
 
     function name() external view returns (string memory);
 
     function nonces(address) external view returns (uint256);
 
-    function permit(
-        address owner_,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
+    function permit(address owner_, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external;
 
     function allowance(address, address) external view returns (uint256);
 
@@ -50,15 +35,9 @@ interface ISingularity is IMarket {
 
     function liquidationQueue() external view returns (address payable);
 
-    function computeAllowedLendShare(
-        uint256 amount,
-        uint256 tokenId
-    ) external view returns (uint256 share);
+    function computeAllowedLendShare(uint256 amount, uint256 tokenId) external view returns (uint256 share);
 
-    function getInterestDetails()
-        external
-        view
-        returns (AccrueInfo memory _accrueInfo, uint256 utilization);
+    function getInterestDetails() external view returns (AccrueInfo memory _accrueInfo, uint256 utilization);
 
     function minimumTargetUtilization() external view returns (uint256);
 

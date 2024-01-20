@@ -58,12 +58,7 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************** //
     error UnwrapFailed();
 
-    constructor(
-        IYieldBoxBase _yieldBox,
-        ISwapRouter _swapRouter,
-        IUniswapV3Factory _factory,
-        address _owner
-    )
+    constructor(IYieldBoxBase _yieldBox, ISwapRouter _swapRouter, IUniswapV3Factory _factory, address _owner)
         validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
         validAddress(address(_factory))
@@ -84,75 +79,50 @@ contract UniswapV3Swapper is BaseSwapper {
     /// *** VIEW METHODS ***
     /// ***  ***
     /// @notice returns default bytes swap data
-    function getDefaultDexOptions()
-        public
-        view
-        override
-        returns (bytes memory)
-    {
+    function getDefaultDexOptions() public view override returns (bytes memory) {
         return abi.encode(block.timestamp + 1 hours, poolFee);
     }
 
     /// @notice Computes amount out for amount in
     /// @param swapData operation data
-    function getOutputAmount(
-        SwapData calldata swapData,
-        bytes calldata data
-    ) external view override returns (uint256 amountOut) {
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+    function getOutputAmount(SwapData calldata swapData, bytes calldata data)
+        external
+        view
+        override
+        returns (uint256 amountOut)
+    {
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
         uint24 fee = abi.decode(data, (uint24));
         if (fee == 0) fee = poolFee;
 
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         address pool = factory.getPool(tokenIn, tokenOut, fee);
-        (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
+        (int24 tick,) = OracleLibrary.consult(pool, twapDuration);
 
-        amountOut = OracleLibrary.getQuoteAtTick(
-            tick,
-            uint128(amountIn),
-            tokenIn,
-            tokenOut
-        );
+        amountOut = OracleLibrary.getQuoteAtTick(tick, uint128(amountIn), tokenIn, tokenOut);
     }
 
     /// @notice Comutes amount in for amount out
-    function getInputAmount(
-        SwapData calldata swapData,
-        bytes calldata data
-    ) external view override returns (uint256 amountIn) {
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+    function getInputAmount(SwapData calldata swapData, bytes calldata data)
+        external
+        view
+        override
+        returns (uint256 amountIn)
+    {
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
 
-        (, uint256 amountOut) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (, uint256 amountOut) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         uint24 fee = abi.decode(data, (uint24));
         if (fee == 0) fee = poolFee;
 
         address pool = factory.getPool(tokenIn, tokenOut, fee);
 
-        (int24 tick, ) = OracleLibrary.consult(pool, twapDuration);
-        amountIn = OracleLibrary.getQuoteAtTick(
-            tick,
-            uint128(amountOut),
-            tokenOut,
-            tokenIn
-        );
+        (int24 tick,) = OracleLibrary.consult(pool, twapDuration);
+        amountIn = OracleLibrary.getQuoteAtTick(tick, uint128(amountOut), tokenOut, tokenIn);
     }
 
     /// *** PUBLIC METHODS ***
@@ -162,25 +132,18 @@ contract UniswapV3Swapper is BaseSwapper {
     /// @param amountOutMin min amount out to receive
     /// @param to receiver address
     /// @param data AMM data
-    function swap(
-        SwapData calldata swapData,
-        uint256 amountOutMin,
-        address to,
-        bytes memory data
-    ) external payable override returns (uint256 amountOut, uint256 shareOut) {
+    function swap(SwapData calldata swapData, uint256 amountOutMin, address to, bytes memory data)
+        external
+        payable
+        override
+        returns (uint256 amountOut, uint256 shareOut)
+    {
         // Get tokens' addresses
-        (address tokenIn, address tokenOut) = _getTokens(
-            swapData.tokensData,
-            yieldBox
-        );
+        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
 
         // Get tokens' amounts
-        (uint256 amountIn, ) = _getAmounts(
-            swapData.amountData,
-            swapData.tokensData.tokenInId,
-            swapData.tokensData.tokenOutId,
-            yieldBox
-        );
+        (uint256 amountIn,) =
+            _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         // Retrieve tokens from sender or from YieldBox
         amountIn = _extractTokens(
@@ -203,60 +166,38 @@ contract UniswapV3Swapper is BaseSwapper {
         (uint256 deadline, uint24 fee) = abi.decode(data, (uint256, uint24));
         if (fee == 0) fee = poolFee;
 
-        address _tokenIn = tokenIn != address(0)
-            ? tokenIn
-            : ISwapRouterReader(address(swapRouter)).WETH9();
-        address _tokenOut = tokenOut != address(0)
-            ? tokenOut
-            : ISwapRouterReader(address(swapRouter)).WETH9();
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
-            .ExactInputSingleParams({
-                tokenIn: _tokenIn,
-                tokenOut: _tokenOut,
-                fee: fee,
-                recipient: address(this),
-                deadline: deadline,
-                amountIn: amountIn,
-                amountOutMinimum: amountOutMin,
-                sqrtPriceLimitX96: 0
-            });
+        address _tokenIn = tokenIn != address(0) ? tokenIn : ISwapRouterReader(address(swapRouter)).WETH9();
+        address _tokenOut = tokenOut != address(0) ? tokenOut : ISwapRouterReader(address(swapRouter)).WETH9();
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+            tokenIn: _tokenIn,
+            tokenOut: _tokenOut,
+            fee: fee,
+            recipient: address(this),
+            deadline: deadline,
+            amountIn: amountIn,
+            amountOutMinimum: amountOutMin,
+            sqrtPriceLimitX96: 0
+        });
 
         // Compute outputs
         if (tokenIn == address(0)) {
             if (msg.value != amountIn) revert NotValid();
         }
-        amountOut = _swap(
-            tokenOut,
-            params,
-            swapData.yieldBoxData.depositToYb,
-            to
-        );
+        amountOut = _swap(tokenOut, params, swapData.yieldBoxData.depositToYb, to);
         if (swapData.yieldBoxData.depositToYb) {
             if (tokenOut != address(0)) {
                 tokenOut.safeApprove(address(yieldBox), amountOut);
-                (, shareOut) = yieldBox.depositAsset(
-                    swapData.tokensData.tokenOutId,
-                    address(this),
-                    to,
-                    amountOut,
-                    0
-                );
+                (, shareOut) = yieldBox.depositAsset(swapData.tokensData.tokenOutId, address(this), to, amountOut, 0);
             } else {
-                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(
-                    swapData.tokensData.tokenOutId,
-                    to,
-                    amountOut
-                );
+                (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(swapData.tokensData.tokenOutId, to, amountOut);
             }
         }
     }
 
-    function _swap(
-        address tokenOut,
-        ISwapRouter.ExactInputSingleParams memory params,
-        bool depositToYb,
-        address to
-    ) private returns (uint256 amountOut) {
+    function _swap(address tokenOut, ISwapRouter.ExactInputSingleParams memory params, bool depositToYb, address to)
+        private
+        returns (uint256 amountOut)
+    {
         address weth = ISwapRouterReader(address(swapRouter)).WETH9();
         amountOut = swapRouter.exactInputSingle{value: msg.value}(params);
         if (params.tokenOut == weth && tokenOut == address(0)) {
@@ -264,7 +205,7 @@ contract UniswapV3Swapper is BaseSwapper {
             if (address(this).balance < amountOut) revert UnwrapFailed();
 
             if (!depositToYb) {
-                (bool sent, ) = to.call{value: amountOut}("");
+                (bool sent,) = to.call{value: amountOut}("");
                 if (!sent) revert Failed();
             }
         } else {

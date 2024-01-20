@@ -18,23 +18,15 @@ contract Cluster is Ownable, ICluster {
     mapping(address editor => bool status) public isEditor;
     /// @notice returns the whitelist status for an address
     /// @dev LZ chain id => contract => status
-    mapping(uint32 lzChainId => mapping(address _contract => bool status))
-        private _whitelisted;
+    mapping(uint32 lzChainId => mapping(address _contract => bool status)) private _whitelisted;
 
     /// @notice event emitted when LZ chain id is updated
     event LzChainUpdate(uint256 indexed _oldChain, uint256 indexed _newChain);
     /// @notice event emitted when an editor status is updated
-    event EditorUpdated(
-        address indexed _editor,
-        bool indexed _oldStatus,
-        bool indexed _newStatus
-    );
+    event EditorUpdated(address indexed _editor, bool indexed _oldStatus, bool indexed _newStatus);
     /// @notice event emitted when a contract status is updated
     event ContractUpdated(
-        address indexed _contract,
-        uint32 indexed _lzChainId,
-        bool indexed _oldStatus,
-        bool _newStatus
+        address indexed _contract, uint32 indexed _lzChainId, bool indexed _oldStatus, bool _newStatus
     );
 
     // ************** //
@@ -53,10 +45,7 @@ contract Cluster is Ownable, ICluster {
     /// @notice returns the whitelist status of a contract
     /// @param _lzChainId LayerZero chain id
     /// @param _addr the contract's address
-    function isWhitelisted(
-        uint32 _lzChainId,
-        address _addr
-    ) external view override returns (bool) {
+    function isWhitelisted(uint32 _lzChainId, address _addr) external view override returns (bool) {
         if (_lzChainId == 0) {
             _lzChainId = lzChainId;
         }
@@ -72,13 +61,10 @@ contract Cluster is Ownable, ICluster {
     /// @param _lzChainId LayerZero chain id
     /// @param _addresses the contracts addresses
     /// @param _status the new whitelist status
-    function batchUpdateContracts(
-        uint32 _lzChainId,
-        address[] memory _addresses,
-        bool _status
-    ) external override {
-        if (!isEditor[msg.sender] && msg.sender != owner())
+    function batchUpdateContracts(uint32 _lzChainId, address[] memory _addresses, bool _status) external override {
+        if (!isEditor[msg.sender] && msg.sender != owner()) {
             revert NotAuthorized();
+        }
 
         if (_lzChainId == 0) {
             //set lz chain as the current one
@@ -86,12 +72,7 @@ contract Cluster is Ownable, ICluster {
         }
 
         for (uint256 i; i < _addresses.length; i++) {
-            emit ContractUpdated(
-                _addresses[i],
-                _lzChainId,
-                _whitelisted[_lzChainId][_addresses[i]],
-                _status
-            );
+            emit ContractUpdated(_addresses[i], _lzChainId, _whitelisted[_lzChainId][_addresses[i]], _status);
             _whitelisted[_lzChainId][_addresses[i]] = _status;
         }
     }
@@ -101,25 +82,17 @@ contract Cluster is Ownable, ICluster {
     /// @param _lzChainId LayerZero chain id
     /// @param _addr the contract's address
     /// @param _status the new whitelist status
-    function updateContract(
-        uint32 _lzChainId,
-        address _addr,
-        bool _status
-    ) external override {
-        if (!isEditor[msg.sender] && msg.sender != owner())
+    function updateContract(uint32 _lzChainId, address _addr, bool _status) external override {
+        if (!isEditor[msg.sender] && msg.sender != owner()) {
             revert NotAuthorized();
+        }
 
         if (_lzChainId == 0) {
             //set lz chain as the current one
             _lzChainId = lzChainId;
         }
 
-        emit ContractUpdated(
-            _addr,
-            _lzChainId,
-            _whitelisted[_lzChainId][_addr],
-            _status
-        );
+        emit ContractUpdated(_addr, _lzChainId, _whitelisted[_lzChainId][_addr], _status);
         _whitelisted[_lzChainId][_addr] = _status;
     }
 

@@ -24,8 +24,7 @@ contract SequencerCheck {
             return;
         }
 
-        (, int256 answer, uint256 startedAt, , ) = SEQUENCER_UPTIME_FEED
-            .latestRoundData();
+        (, int256 answer, uint256 startedAt,,) = SEQUENCER_UPTIME_FEED.latestRoundData();
 
         // Answer == 0: Sequencer is up
         // Answer == 1: Sequencer is down

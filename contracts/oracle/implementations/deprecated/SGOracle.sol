@@ -20,12 +20,7 @@ interface IStargatePool {
     function token() external view returns (address);
 }
 
-contract SGOracle is
-    ITOracle.IOracle,
-    ChainlinkUtils,
-    SequencerCheck,
-    ReentrancyGuard
-{
+contract SGOracle is ITOracle.IOracle, ChainlinkUtils, SequencerCheck, ReentrancyGuard {
     string public _name;
     string public _symbol;
 
@@ -39,10 +34,7 @@ contract SGOracle is
         AggregatorV3Interface _underlying,
         address _sequencerUptimeFeed,
         address _admin
-    )
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
-    {
+    ) SequencerCheck(_sequencerUptimeFeed) AccessControlDefaultAdminRules(3 days, _admin) {
         _name = __name;
         _symbol = __symbol;
         SG_POOL = pool;
@@ -60,8 +52,7 @@ contract SGOracle is
         require(SG_POOL.totalSupply() > 0, "SGOracle: supply 0");
 
         uint256 underlyingPrice = _readChainlinkBase(UNDERLYING, 0);
-        uint256 lpPrice = (SG_POOL.totalLiquidity() *
-            uint256(underlyingPrice)) / SG_POOL.totalSupply();
+        uint256 lpPrice = (SG_POOL.totalLiquidity() * uint256(underlyingPrice)) / SG_POOL.totalSupply();
 
         return lpPrice;
     }
@@ -71,9 +62,7 @@ contract SGOracle is
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(
-        bytes calldata
-    ) external virtual nonReentrant returns (bool success, uint256 rate) {
+    function get(bytes calldata) external virtual nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         return (true, _get());
     }
@@ -83,9 +72,7 @@ contract SGOracle is
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function peek(
-        bytes calldata
-    ) external view virtual returns (bool success, uint256 rate) {
+    function peek(bytes calldata) external view virtual returns (bool success, uint256 rate) {
         return (true, _get());
     }
 
@@ -93,9 +80,7 @@ contract SGOracle is
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot(
-        bytes calldata
-    ) external view virtual returns (uint256 rate) {
+    function peekSpot(bytes calldata) external view virtual returns (uint256 rate) {
         return _get();
     }
 

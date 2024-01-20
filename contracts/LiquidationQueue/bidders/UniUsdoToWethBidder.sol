@@ -63,27 +63,16 @@ contract UniUsdoToWethBidder is BoringOwnable {
     /// @param tokenInId Input token YieldBox id
     /// @param amountOut Token out amount
     /// @return amount out
-    function getInputAmount(
-        ISingularity singularity,
-        uint256 tokenInId,
-        uint256 amountOut,
-        bytes calldata
-    ) external view returns (uint256) {
-        require(
-            tokenInId == IPenrose(singularity.penrose()).usdoAssetId(),
-            "token not valid"
-        );
+    function getInputAmount(ISingularity singularity, uint256 tokenInId, uint256 amountOut, bytes calldata)
+        external
+        view
+        returns (uint256)
+    {
+        require(tokenInId == IPenrose(singularity.penrose()).usdoAssetId(), "token not valid");
         IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
         uint256 shareOut = yieldBox.toShare(wethId, amountOut, false);
 
-        ISwapper.SwapData memory swapData = univ2Swapper.buildSwapData(
-            tokenInId,
-            wethId,
-            0,
-            0,
-            true,
-            true
-        );
+        ISwapper.SwapData memory swapData = univ2Swapper.buildSwapData(tokenInId, wethId, 0, 0, true, true);
         swapData.amountData.shareOut = shareOut;
 
         return univ2Swapper.getInputAmount(swapData, "");
@@ -94,26 +83,16 @@ contract UniUsdoToWethBidder is BoringOwnable {
     /// @param tokenInId Token in YielxBox id
     /// @param amountIn Stablecoin amount
     /// @return input amount
-    function getOutputAmount(
-        ISingularity singularity,
-        uint256 tokenInId,
-        uint256 amountIn,
-        bytes calldata
-    ) external view returns (uint256) {
-        require(
-            IPenrose(singularity.penrose()).usdoToken() != address(0),
-            "USDO not set"
-        );
+    function getOutputAmount(ISingularity singularity, uint256 tokenInId, uint256 amountIn, bytes calldata)
+        external
+        view
+        returns (uint256)
+    {
+        require(IPenrose(singularity.penrose()).usdoToken() != address(0), "USDO not set");
         uint256 usdoAssetId = IPenrose(singularity.penrose()).usdoAssetId();
         require(tokenInId == usdoAssetId, "token not valid");
 
-        return
-            _uniswapOutputAmount(
-                IYieldBox(singularity.yieldBox()),
-                usdoAssetId,
-                wethId,
-                amountIn
-            );
+        return _uniswapOutputAmount(IYieldBox(singularity.yieldBox()), usdoAssetId, wethId, amountIn);
     }
 
     // ************************ //
@@ -125,22 +104,15 @@ contract UniUsdoToWethBidder is BoringOwnable {
     /// @param amountIn Stablecoin amount
     /// @param data extra data used for the swap operation
     /// @return obtained amount
-    function swap(
-        ISingularity singularity,
-        uint256 tokenInId,
-        uint256 amountIn,
-        bytes calldata data
-    ) external returns (uint256) {
+    function swap(ISingularity singularity, uint256 tokenInId, uint256 amountIn, bytes calldata data)
+        external
+        returns (uint256)
+    {
         IPenrose penrose = IPenrose(singularity.penrose());
         require(penrose.usdoToken() != address(0), "USDO not set");
-        require(
-            penrose.isMarketRegistered(address(singularity)),
-            "Market not valid"
-        );
+        require(penrose.isMarketRegistered(address(singularity)), "Market not valid");
         IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
-        ILiquidationQueue liquidationQueue = ILiquidationQueue(
-            singularity.liquidationQueue()
-        );
+        ILiquidationQueue liquidationQueue = ILiquidationQueue(singularity.liquidationQueue());
 
         uint256 usdoAssetId = IPenrose(singularity.penrose()).usdoAssetId();
         require(tokenInId == usdoAssetId, "token not valid");
@@ -152,22 +124,9 @@ contract UniUsdoToWethBidder is BoringOwnable {
             assetMin = abi.decode(data, (uint256));
         }
 
-        yieldBox.transfer(
-            address(this),
-            address(univ2Swapper),
-            tokenInId,
-            yieldBox.toShare(tokenInId, amountIn, false)
-        );
+        yieldBox.transfer(address(this), address(univ2Swapper), tokenInId, yieldBox.toShare(tokenInId, amountIn, false));
 
-        return
-            _uniswapSwap(
-                yieldBox,
-                usdoAssetId,
-                wethId,
-                amountIn,
-                assetMin,
-                address(liquidationQueue)
-            );
+        return _uniswapSwap(yieldBox, usdoAssetId, wethId, amountIn, assetMin, address(liquidationQueue));
     }
 
     // *********************** //
@@ -192,51 +151,34 @@ contract UniUsdoToWethBidder is BoringOwnable {
         uint256 minAmount,
         address to
     ) private returns (uint256) {
-        (, address tokenInAddress, , ) = yieldBox.assets(tokenInId);
-        (, address tokenOutAddress, , ) = yieldBox.assets(tokenOutId);
+        (, address tokenInAddress,,) = yieldBox.assets(tokenInId);
+        (, address tokenOutAddress,,) = yieldBox.assets(tokenOutId);
         address[] memory swapPath = new address[](2);
         swapPath[0] = tokenInAddress;
         swapPath[1] = tokenOutAddress;
-        uint256 tokenInShare = yieldBox.toShare(
-            tokenInId,
-            tokenInAmount,
-            false
-        );
+        uint256 tokenInShare = yieldBox.toShare(tokenInId, tokenInAmount, false);
 
-        ISwapper.SwapData memory swapData = univ2Swapper.buildSwapData(
-            tokenInId,
-            tokenOutId,
-            0,
-            tokenInShare,
-            true,
-            true
-        );
-        (uint256 outAmount, ) = univ2Swapper.swap(swapData, minAmount, to, "");
+        ISwapper.SwapData memory swapData =
+            univ2Swapper.buildSwapData(tokenInId, tokenOutId, 0, tokenInShare, true, true);
+        (uint256 outAmount,) = univ2Swapper.swap(swapData, minAmount, to, "");
 
         return outAmount;
     }
 
-    function _uniswapOutputAmount(
-        IYieldBox yieldBox,
-        uint256 tokenInId,
-        uint256 tokenOutId,
-        uint256 amountIn
-    ) private view returns (uint256) {
-        (, address tokenInAddress, , ) = yieldBox.assets(tokenInId);
-        (, address tokenOutAddress, , ) = yieldBox.assets(tokenOutId);
+    function _uniswapOutputAmount(IYieldBox yieldBox, uint256 tokenInId, uint256 tokenOutId, uint256 amountIn)
+        private
+        view
+        returns (uint256)
+    {
+        (, address tokenInAddress,,) = yieldBox.assets(tokenInId);
+        (, address tokenOutAddress,,) = yieldBox.assets(tokenOutId);
         address[] memory swapPath = new address[](2);
         swapPath[0] = tokenInAddress;
         swapPath[1] = tokenOutAddress;
         uint256 tokenInShare = yieldBox.toShare(tokenInId, amountIn, false);
 
-        ISwapper.SwapData memory swapData = univ2Swapper.buildSwapData(
-            tokenInId,
-            tokenOutId,
-            0,
-            tokenInShare,
-            true,
-            true
-        );
+        ISwapper.SwapData memory swapData =
+            univ2Swapper.buildSwapData(tokenInId, tokenOutId, 0, tokenInShare, true, true);
 
         return univ2Swapper.getOutputAmount(swapData, "");
     }

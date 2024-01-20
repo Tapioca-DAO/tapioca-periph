@@ -72,19 +72,14 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(
-        bytes calldata data
-    ) external virtual nonReentrant returns (bool success, uint256 rate) {
+    function get(bytes calldata data) external virtual nonReentrant returns (bool success, uint256 rate) {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(
-                data,
-                (ITOracle.ISeerQuery)
-            );
+            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
             if (query.useHigh) return (true, high);
         }
 
@@ -96,16 +91,11 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function peek(
-        bytes calldata data
-    ) external view virtual returns (bool success, uint256 rate) {
+    function peek(bytes calldata data) external view virtual returns (bool success, uint256 rate) {
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(
-                data,
-                (ITOracle.ISeerQuery)
-            );
+            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
             if (query.useHigh) return (true, high);
         }
 
@@ -116,16 +106,11 @@ contract Seer is ITOracle.IOracle, OracleMulti {
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot(
-        bytes calldata data
-    ) external view virtual returns (uint256 rate) {
+    function peekSpot(bytes calldata data) external view virtual returns (uint256 rate) {
         (uint256 low, uint256 high) = _readAll(inBase);
 
         if (data.length > 0) {
-            ITOracle.ISeerQuery memory query = abi.decode(
-                data,
-                (ITOracle.ISeerQuery)
-            );
+            ITOracle.ISeerQuery memory query = abi.decode(data, (ITOracle.ISeerQuery));
             if (query.useHigh) return high;
         }
 

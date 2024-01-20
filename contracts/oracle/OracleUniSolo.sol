@@ -10,12 +10,7 @@ import "./OracleAbstract.sol";
 
 /// @title OracleUniSolo
 /// @notice Updated version of the OracleMulti contract that only uses Uniswap
-contract OracleUniSolo is
-    OracleAbstract,
-    ModuleUniswapMulti,
-    SequencerCheck,
-    ReentrancyGuard
-{
+contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck, ReentrancyGuard {
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
 
@@ -40,13 +35,7 @@ contract OracleUniSolo is
         address _sequencerUptimeFeed,
         address _admin
     )
-        ModuleUniswapMulti(
-            _circuitUniswap,
-            _circuitUniIsMultiplied,
-            _twapPeriod,
-            observationLength,
-            guardians
-        )
+        ModuleUniswapMulti(_circuitUniswap, _circuitUniIsMultiplied, _twapPeriod, observationLength, guardians)
         SequencerCheck(_sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _admin)
     {
@@ -73,9 +62,7 @@ contract OracleUniSolo is
     /// @return Quote amount in out-currency from the base amount in in-currency
     /// @dev Like in the `read` function, this function returns the Uniswap quote
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function readQuote(
-        uint256 quoteAmount
-    ) external view override returns (uint256) {
+    function readQuote(uint256 quoteAmount) external view override returns (uint256) {
         return _readUniswapQuote(quoteAmount);
     }
 
@@ -84,9 +71,7 @@ contract OracleUniSolo is
     /// @dev If quoteAmount is `inBase`, rates are returned
     /// @return The first parameter is the lowest value and the second parameter is the highest
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readAll(
-        uint256 quoteAmount
-    ) internal view override returns (uint256, uint256) {
+    function _readAll(uint256 quoteAmount) internal view override returns (uint256, uint256) {
         uint256 quoteAmountUni = _readUniswapQuote(quoteAmount);
         return (quoteAmountUni, quoteAmountUni);
     }
@@ -95,9 +80,7 @@ contract OracleUniSolo is
     /// @param quoteAmount Amount (in the input collateral) to be converted in out-currency using Uniswap
     /// @return uniAmount Quote amount in out-currency from the base amount in in-currency
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readUniswapQuote(
-        uint256 quoteAmount
-    ) internal view returns (uint256 uniAmount) {
+    function _readUniswapQuote(uint256 quoteAmount) internal view returns (uint256 uniAmount) {
         uniAmount = _quoteUniswap(quoteAmount);
         // The current uni rate is in outBase we want our rate to all be in base
         uniAmount = (uniAmount * BASE) / outBase;
@@ -105,9 +88,7 @@ contract OracleUniSolo is
 
     /// @notice Changes the grace period for the sequencer update
     /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(
-        uint32 _gracePeriod
-    ) external override onlyRole(SEQUENCER_ROLE) {
+    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

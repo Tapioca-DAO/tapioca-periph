@@ -16,13 +16,7 @@ import "./OracleAbstract.sol";
 /// @dev This is going to be used for like ETH/EUR oracles
 /// @dev Like all oracle contracts, this contract is an instance of `OracleAstract` that contains some
 /// base functions
-contract OracleMulti is
-    OracleAbstract,
-    ModuleChainlinkMulti,
-    ModuleUniswapMulti,
-    SequencerCheck,
-    ReentrancyGuard
-{
+contract OracleMulti is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti, SequencerCheck, ReentrancyGuard {
     /// @notice Whether the final rate obtained with Uniswap should be multiplied to last rate from Chainlink
     uint8 public immutable uniFinalCurrency;
 
@@ -60,19 +54,8 @@ contract OracleMulti is
         address _sequencerUptimeFeed,
         address _admin
     )
-        ModuleUniswapMulti(
-            _circuitUniswap,
-            _circuitUniIsMultiplied,
-            _twapPeriod,
-            observationLength,
-            guardians
-        )
-        ModuleChainlinkMulti(
-            _circuitChainlink,
-            _circuitChainIsMultiplied,
-            _stalePeriod,
-            guardians
-        )
+        ModuleUniswapMulti(_circuitUniswap, _circuitUniIsMultiplied, _twapPeriod, observationLength, guardians)
+        ModuleChainlinkMulti(_circuitChainlink, _circuitChainIsMultiplied, _stalePeriod, guardians)
         SequencerCheck(_sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _admin)
     {
@@ -100,9 +83,7 @@ contract OracleMulti is
     /// @return Quote amount in out-currency from the base amount in in-currency
     /// @dev Like in the `read` function, this function returns the Uniswap quote
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function readQuote(
-        uint256 quoteAmount
-    ) external view override returns (uint256) {
+    function readQuote(uint256 quoteAmount) external view override returns (uint256) {
         return _readUniswapQuote(quoteAmount);
     }
 
@@ -111,9 +92,7 @@ contract OracleMulti is
     /// @dev If quoteAmount is `inBase`, rates are returned
     /// @return The first parameter is the lowest value and the second parameter is the highest
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readAll(
-        uint256 quoteAmount
-    ) internal view override returns (uint256, uint256) {
+    function _readAll(uint256 quoteAmount) internal view override returns (uint256, uint256) {
         uint256 quoteAmountUni = _quoteUniswap(quoteAmount);
 
         // The current uni rate is in `outBase` we want our rate to all be in base `BASE`
@@ -139,12 +118,9 @@ contract OracleMulti is
     /// @param quoteAmountUni End quote computed from Uniswap's circuit
     /// @dev We use the last Chainlink rate to correct the value obtained with Uniswap. It may for instance be used
     /// to get a Uniswap price in EUR (ex: ETH -> USDC and we use this to do USDC -> EUR)
-    function _changeUniswapNotFinal(
-        uint256 ratio,
-        uint256 quoteAmountUni
-    ) internal view returns (uint256) {
+    function _changeUniswapNotFinal(uint256 ratio, uint256 quoteAmountUni) internal view returns (uint256) {
         uint256 idxLastPoolCL = circuitChainlink.length - 1;
-        (quoteAmountUni, ) = _readChainlinkFeed(
+        (quoteAmountUni,) = _readChainlinkFeed(
             quoteAmountUni,
             circuitChainlink[idxLastPoolCL],
             circuitChainIsMultiplied[idxLastPoolCL],
@@ -160,9 +136,7 @@ contract OracleMulti is
     /// at the end of the funnel
     /// @return uniAmount Quote amount in out-currency from the base amount in in-currency
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readUniswapQuote(
-        uint256 quoteAmount
-    ) internal view returns (uint256 uniAmount) {
+    function _readUniswapQuote(uint256 quoteAmount) internal view returns (uint256 uniAmount) {
         uniAmount = _quoteUniswap(quoteAmount);
         // The current uni rate is in outBase we want our rate to all be in base
         uniAmount = (uniAmount * BASE) / outBase;
@@ -173,9 +147,7 @@ contract OracleMulti is
 
     /// @notice Changes the grace period for the sequencer update
     /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(
-        uint32 _gracePeriod
-    ) external override onlyRole(SEQUENCER_ROLE) {
+    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
         GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

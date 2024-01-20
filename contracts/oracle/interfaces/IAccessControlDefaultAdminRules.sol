@@ -37,10 +37,7 @@ interface IAccessControlDefaultAdminRules is IAccessControl {
      * address to become the {defaultAdmin} by calling {acceptDefaultAdminTransfer} only after `acceptSchedule`
      * passes.
      */
-    event DefaultAdminTransferScheduled(
-        address indexed newAdmin,
-        uint48 acceptSchedule
-    );
+    event DefaultAdminTransferScheduled(address indexed newAdmin, uint48 acceptSchedule);
 
     /**
      * @dev Emitted when a {pendingDefaultAdmin} is reset if it was never accepted, regardless of its schedule.
@@ -51,10 +48,7 @@ interface IAccessControlDefaultAdminRules is IAccessControl {
      * @dev Emitted when a {defaultAdminDelay} change is started, setting `newDelay` as the next
      * delay to be applied between default admin transfer after `effectSchedule` has passed.
      */
-    event DefaultAdminDelayChangeScheduled(
-        uint48 newDelay,
-        uint48 effectSchedule
-    );
+    event DefaultAdminDelayChangeScheduled(uint48 newDelay, uint48 effectSchedule);
 
     /**
      * @dev Emitted when a {pendingDefaultAdminDelay} is reset if its schedule didn't pass.
@@ -76,10 +70,7 @@ interface IAccessControlDefaultAdminRules is IAccessControl {
      *
      * NOTE: A zero address `newAdmin` means that {defaultAdmin} is being renounced.
      */
-    function pendingDefaultAdmin()
-        external
-        view
-        returns (address newAdmin, uint48 acceptSchedule);
+    function pendingDefaultAdmin() external view returns (address newAdmin, uint48 acceptSchedule);
 
     /**
      * @dev Returns the delay required to schedule the acceptance of a {defaultAdmin} transfer started.
@@ -103,10 +94,7 @@ interface IAccessControlDefaultAdminRules is IAccessControl {
      * NOTE: A zero value only for `newDelay` means that the next {defaultAdminDelay}
      * will be zero after the effect schedule.
      */
-    function pendingDefaultAdminDelay()
-        external
-        view
-        returns (uint48 newDelay, uint48 effectSchedule);
+    function pendingDefaultAdminDelay() external view returns (uint48 newDelay, uint48 effectSchedule);
 
     /**
      * @dev Starts a {defaultAdmin} transfer by setting a {pendingDefaultAdmin} scheduled for acceptance

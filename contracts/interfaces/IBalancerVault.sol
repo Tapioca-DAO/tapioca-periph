@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 interface IAsset {
-    // solhint-disable-previous-line no-empty-blocks
+// solhint-disable-previous-line no-empty-blocks
 }
 
 interface IBalancerVault {
@@ -27,10 +27,8 @@ interface IBalancerVault {
         bytes userData;
     }
 
-    function swap(
-        SingleSwap memory singleSwap,
-        FundManagement memory funds,
-        uint256 limit,
-        uint256 deadline
-    ) external payable returns (uint256 amountCalculated);
+    function swap(SingleSwap memory singleSwap, FundManagement memory funds, uint256 limit, uint256 deadline)
+        external
+        payable
+        returns (uint256 amountCalculated);
 }
