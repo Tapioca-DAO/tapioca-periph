@@ -1,18 +1,18 @@
+import '@nomicfoundation/hardhat-toolbox';
 import * as dotenv from 'dotenv';
 
-import '@nomicfoundation/hardhat-toolbox';
 import '@nomicfoundation/hardhat-chai-matchers';
-import { HardhatUserConfig } from 'hardhat/config';
-import 'hardhat-deploy';
-import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
+import 'hardhat-contract-sizer';
+import 'hardhat-deploy';
+import { HardhatUserConfig } from 'hardhat/config';
 import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
 
 // Tapioca
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
+import { SDK, deleteDefaultTasks, loadEnv } from 'tapioca-sdk';
 
 dotenv.config();
 
@@ -29,6 +29,7 @@ declare global {
 }
 
 loadEnv();
+// deleteDefaultTasks();
 
 type TNetwork = ReturnType<
     typeof SDK.API.utils.getSupportedChains
@@ -85,6 +86,14 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         artifacts: './gen/artifacts',
         cache: './gen/cache',
         tests: './hardhat_test',
+    },
+    watcher: {
+        test: {
+            tasks: ['test'],
+            files: ['./contracts', './hardhat_test'],
+            verbose: true,
+            clearOnStart: true,
+        },
     },
     dodoc: {
         runOnCompile: false,

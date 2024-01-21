@@ -1864,7 +1864,7 @@ check-error@^1.0.2, check-error@^1.0.3:
   dependencies:
     get-func-name "^2.0.2"
 
-chokidar@3.5.3, chokidar@^3.4.0, chokidar@^3.5.2:
+chokidar@3.5.3, chokidar@^3.4.0, chokidar@^3.5.2, chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
@@ -3165,7 +3165,7 @@ hardhat-gas-reporter@^1.0.8:
     eth-gas-reporter "^0.2.25"
     sha1 "^1.1.1"
 
-hardhat-tracer@^2.2.2:
+hardhat-tracer@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/hardhat-tracer/-/hardhat-tracer-2.7.0.tgz#af04e5cd7ec2525c24a70634f6d1051252992d03"
   integrity sha512-H+30jj6bCyX7NfhY7Umbzq535jhi9Wd5fGNli9qWcQ+5iOB477Nm8XdGtPtgOV1vQ7VQzIwKFzoEbqy+BuxTlg==
@@ -3174,7 +3174,14 @@ hardhat-tracer@^2.2.2:
     debug "^4.3.4"
     ethers "^5.6.1"
 
-hardhat@2.19.4:
+hardhat-watcher@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/hardhat-watcher/-/hardhat-watcher-2.5.0.tgz#3ee76c3cb5b99f2875b78d176207745aa484ed4a"
+  integrity sha512-Su2qcSMIo2YO2PrmJ0/tdkf+6pSt8zf9+4URR5edMVti6+ShI8T3xhPrwugdyTOFuyj8lKHrcTZNKUFYowYiyA==
+  dependencies:
+    chokidar "^3.5.3"
+
+hardhat@^2.19.4:
   version "2.19.4"
   resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.19.4.tgz#5112c30295d8be2e18e55d847373c50483ed1902"
   integrity sha512-fTQJpqSt3Xo9Mn/WrdblNGAfcANM6XC3tAEi6YogB4s02DmTf93A8QsGb8uR0KR8TFcpcS8lgiW4ugAIYpnbrQ==
@@ -5122,10 +5129,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.5.20-nightly-9:
-  version "1.5.20-nightly-9"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.5.20-nightly-9.tgz#25be9f5c0b45bb571ebb2fa37574810e5b792696"
-  integrity sha512-553J4hlCGc2wMf2T1Ihr9gS82oRZ69Cx3iMGUaQdqNPfkg7ggKtsy+u/tlf2o8CNm2MDP3A9mo8pyQS4Z2xdng==
+tapioca-sdk@^1.5.20-nightly-11:
+  version "1.5.20-nightly-11"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.5.20-nightly-11.tgz#c74e6333284d3594c65199fe85aa0ffbafda7efe"
+  integrity sha512-sWjI6Fi9XlkYRSEWJUOzErW/gs6NpntUyUsz4QIO4feNl48kSeDktOPc49CCROanHpSXMm99zyygW2/98eR52g==
   dependencies:
     dotenv "^16.3.2"
     ethers "^5.4.7"
