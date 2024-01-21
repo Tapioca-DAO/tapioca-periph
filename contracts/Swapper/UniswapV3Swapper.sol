@@ -129,6 +129,16 @@ contract UniswapV3Swapper is BaseSwapper {
         amountIn = OracleLibrary.getQuoteAtTick(tick, uint128(amountOut), tokenOut, tokenIn);
     }
 
+    // TODO explain this
+    struct _SwapMemoryData {
+        address tokenIn;
+        address tokenOut;
+        uint256 amountIn;
+        address _tokenIn;
+        address _tokenOut;
+        ISwapRouter.ExactInputSingleParams params;
+    }
+
     /// *** PUBLIC METHODS ***
     /// ***  ***
     /// @notice swaps amount in
@@ -142,25 +152,27 @@ contract UniswapV3Swapper is BaseSwapper {
         override
         returns (uint256 amountOut, uint256 shareOut)
     {
+        _SwapMemoryData memory swapMemoryData;
+
         // Get tokens' addresses
-        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
+        (swapMemoryData.tokenIn, swapMemoryData.tokenOut) = _getTokens(swapData.tokensData, yieldBox);
 
         // Get tokens' amounts
-        (uint256 amountIn,) =
+        (swapMemoryData.amountIn,) =
             _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         // Retrieve tokens from sender or from YieldBox
-        amountIn = _extractTokens(
+        swapMemoryData.amountIn = _extractTokens(
             swapData.yieldBoxData,
             yieldBox,
-            tokenIn,
+            swapMemoryData.tokenIn,
             swapData.tokensData.tokenInId,
-            amountIn,
+            swapMemoryData.amountIn,
             swapData.amountData.shareIn
         );
 
-        if (tokenIn != address(0)) {
-            TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
+        if (swapMemoryData.tokenIn != address(0)) {
+            TransferHelper.safeApprove(swapMemoryData.tokenIn, address(swapRouter), swapMemoryData.amountIn);
         }
 
         // Perform the swap operation
@@ -170,27 +182,33 @@ contract UniswapV3Swapper is BaseSwapper {
         (uint256 deadline, uint24 fee) = abi.decode(data, (uint256, uint24));
         if (fee == 0) fee = poolFee;
 
-        address _tokenIn = tokenIn != address(0) ? tokenIn : ISwapRouterReader(address(swapRouter)).WETH9();
-        address _tokenOut = tokenOut != address(0) ? tokenOut : ISwapRouterReader(address(swapRouter)).WETH9();
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
-            tokenIn: _tokenIn,
-            tokenOut: _tokenOut,
+        swapMemoryData._tokenIn = swapMemoryData.tokenIn != address(0)
+            ? swapMemoryData.tokenIn
+            : ISwapRouterReader(address(swapRouter)).WETH9();
+        swapMemoryData._tokenOut = swapMemoryData.tokenOut != address(0)
+            ? swapMemoryData.tokenOut
+            : ISwapRouterReader(address(swapRouter)).WETH9();
+        swapMemoryData.params = ISwapRouter.ExactInputSingleParams({
+            tokenIn: swapMemoryData._tokenIn,
+            tokenOut: swapMemoryData._tokenOut,
             fee: fee,
             recipient: address(this),
             deadline: deadline,
-            amountIn: amountIn,
+            amountIn: swapMemoryData.amountIn,
             amountOutMinimum: amountOutMin,
             sqrtPriceLimitX96: 0
         });
 
         // Compute outputs
-        if (tokenIn == address(0)) {
-            if (msg.value != amountIn) revert NotValid();
+        if (swapMemoryData.tokenIn == address(0)) {
+            if (msg.value != swapMemoryData.amountIn) revert NotValid();
         }
-        amountOut = _swap(tokenOut, params, swapData.yieldBoxData.depositToYb, to);
+
+        amountOut = _swap(swapMemoryData.tokenOut, swapMemoryData.params, swapData.yieldBoxData.depositToYb, to);
+
         if (swapData.yieldBoxData.depositToYb) {
-            if (tokenOut != address(0)) {
-                tokenOut.safeApprove(address(yieldBox), amountOut);
+            if (swapMemoryData.tokenOut != address(0)) {
+                swapMemoryData.tokenOut.safeApprove(address(yieldBox), amountOut);
                 (, shareOut) = yieldBox.depositAsset(swapData.tokensData.tokenOutId, address(this), to, amountOut, 0);
             } else {
                 (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(swapData.tokensData.tokenOutId, to, amountOut);
