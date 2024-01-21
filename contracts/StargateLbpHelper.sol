@@ -81,18 +81,21 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     // ********************** //
     // *** VIEW FUNCTIONS *** //
     // ********************** //
-    function quoteLayerZeroFee(
-        uint16 _dstChainId,
-        uint8 _functionType,
-        bytes calldata _toAddress,
-        bytes calldata,
-        IStargateRouter.lzTxObj memory _lzTxParams
-    ) external view returns (uint256, uint256) {
+
+    struct QuoteLayerZeroFeeData {
+        uint16 dstChainId;
+        uint8 functionType;
+        bytes toAddress;
+        bytes _empty; // TODO check what's that. Not sure for why this is here
+        IStargateRouter.lzTxObj lzTxParams;
+    }
+
+    function quoteLayerZeroFee(QuoteLayerZeroFeeData calldata _data) external view returns (uint256, uint256) {
         bytes memory payload = "";
-        if (_functionType == PARTICIPATE_FN) {
+        if (_data.functionType == PARTICIPATE_FN) {
             ParticipateData memory participateData =
                 ParticipateData({assetIn: address(0), assetOut: address(0), deadline: block.timestamp, minAmountOut: 0});
-            payload = abi.encode(participateData, _toAddress);
+            payload = abi.encode(participateData, _data.toAddress);
         } else {
             revert UnsupportedFunctionType();
         }
@@ -100,7 +103,11 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
         IStargateBridge bridge = router.bridge();
         ILayerZeroEndpoint endpoint = bridge.layerZeroEndpoint();
         return endpoint.estimateFees(
-            _dstChainId, address(bridge), payload, false, _txParamBuilder(_dstChainId, _functionType, _lzTxParams)
+            _data.dstChainId,
+            address(bridge),
+            payload,
+            false,
+            _txParamBuilder(_data.dstChainId, _data.functionType, _data.lzTxParams)
         );
     }
 
