@@ -136,6 +136,20 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
 
         // send over to another layer using the Stargate router
         uint256 balanceBefore = IERC20(stargateData.srcToken).balanceOf(address(this));
+
+        IStargateRouterBase.lzTxObj memory lzTxParams;
+        bytes memory to;
+        bytes memory payload;
+        {
+            lzTxParams = IStargateRouterBase.lzTxObj({
+                dstGasForCall: stargateData.dstGasLimit,
+                dstNativeAmount: stargateData.dstAirdropAmount,
+                dstNativeAddr: abi.encodePacked(stargateData.peer)
+            });
+            to = abi.encodePacked(stargateData.peer); // StargateLbpHelper.sol destination address
+            payload = abi.encode(lbpData, stargateData.receiver);
+        }
+
         router.swap{value: msg.value}(
             stargateData.dstChainId,
             stargateData.srcPoolId,
@@ -143,13 +157,9 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
             payable(msg.sender), //refund address
             stargateData.amount,
             amountWithSlippage,
-            IStargateRouterBase.lzTxObj({
-                dstGasForCall: stargateData.dstGasLimit,
-                dstNativeAmount: stargateData.dstAirdropAmount,
-                dstNativeAddr: abi.encodePacked(stargateData.peer)
-            }),
-            abi.encodePacked(stargateData.peer), // StargateLbpHelper.sol destination address
-            abi.encode(lbpData, stargateData.receiver)
+            lzTxParams,
+            to, // StargateLbpHelper.sol destination address
+            payload
         );
 
         // check dust and send it back to the user
