@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
 // Tapioca
-import {SeerUniSolo} from "../../SeerUniSolo.sol";
+import {SeerUniSolo, OracleUniSoloConstructorData} from "../../SeerUniSolo.sol";
 
 contract TapOracle is SeerUniSolo {
     /// @notice Last prices of the oracle. get() will return the average.
@@ -27,43 +27,20 @@ contract TapOracle is SeerUniSolo {
     /// @param __name Name of the oracle
     /// @param __symbol Symbol of the oracle
     /// @param _decimals Number of decimals of the oracle
-    /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
-    /// @param _circuitUniswap Path of the Uniswap pools
-    /// @param _circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
-    /// @param _twapPeriod Time weighted average window for all Uniswap pools
-    /// @param observationLength Number of observations that each pool should have stored
-    /// @param guardians List of governor or guardian addresses
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _oracleUniSoloConstructorData.addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
+    /// @param _oracleUniSoloConstructorData._circuitUniswap Path of the Uniswap pools
+    /// @param _oracleUniSoloConstructorData._circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
+    /// @param _oracleUniSoloConstructorData._twapPeriod Time weighted average window for all Uniswap pools
+    /// @param _oracleUniSoloConstructorData.observationLength Number of observations that each pool should have stored
+    /// @param _oracleUniSoloConstructorData.guardians List of governor or guardian addresses
+    /// @param _oracleUniSoloConstructorData._description Description of the assets concerned by the oracle
+    /// @param _oracleUniSoloConstructorData._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
     constructor(
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
-        address[] memory addressInAndOutUni,
-        IUniswapV3Pool[] memory _circuitUniswap,
-        uint8[] memory _circuitUniIsMultiplied,
-        uint32 _twapPeriod,
-        uint16 observationLength,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        SeerUniSolo(
-            __name,
-            __symbol,
-            _decimals,
-            addressInAndOutUni,
-            _circuitUniswap,
-            _circuitUniIsMultiplied,
-            _twapPeriod,
-            observationLength,
-            guardians,
-            _description,
-            _sequencerUptimeFeed,
-            _admin
-        )
-    {}
+        OracleUniSoloConstructorData memory _oracleUniSoloConstructorData
+    ) SeerUniSolo(__name, __symbol, _decimals, _oracleUniSoloConstructorData) {}
 
     /// @notice Get the latest exchange rate.
     /// For example:

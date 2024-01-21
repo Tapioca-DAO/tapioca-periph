@@ -12,6 +12,17 @@ import {ModuleChainlinkSingle} from "./modules/ModuleChainlinkSingle.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";
 
+struct OracleChainlinkSingleConstructorData {
+    address _poolChainlink;
+    uint8 _isChainlinkMultiplied;
+    uint256 _inBase;
+    uint32 stalePeriod;
+    address[] guardians;
+    bytes32 _description;
+    address _sequencerUptimeFeed;
+    address _admin;
+}
+
 /// @title OracleChainlinkSingle
 /// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
@@ -21,28 +32,19 @@ import {OracleAbstract} from "./OracleAbstract.sol";
 /// base functions
 contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, SequencerCheck, ReentrancyGuard {
     /// @notice Constructor for the oracle using a single Chainlink pool
-    /// @param _poolChainlink Chainlink pool address
-    /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
+    /// @param _data._poolChainlink Chainlink pool address
+    /// @param _data._isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
     /// in-currency amount to get the out-currency amount
-    /// @param _inBase Number of units of the in-currency
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _admin Address of the admin of the oracle
-    constructor(
-        address _poolChainlink,
-        uint8 _isChainlinkMultiplied,
-        uint256 _inBase,
-        uint32 stalePeriod,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        ModuleChainlinkSingle(_poolChainlink, _isChainlinkMultiplied, stalePeriod, guardians)
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
+    /// @param _data._inBase Number of units of the in-currency
+    /// @param _data._description Description of the assets concerned by the oracle
+    /// @param _data._admin Address of the admin of the oracle
+    constructor(OracleChainlinkSingleConstructorData memory _data)
+        ModuleChainlinkSingle(_data._poolChainlink, _data._isChainlinkMultiplied, _data.stalePeriod, _data.guardians)
+        SequencerCheck(_data._sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _data._admin)
     {
-        inBase = _inBase;
-        description = _description;
+        inBase = _data._inBase;
+        description = _data._description;
     }
 
     /// @notice Reads the rate from the Chainlink feed

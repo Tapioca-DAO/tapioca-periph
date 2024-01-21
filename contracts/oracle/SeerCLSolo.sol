@@ -3,8 +3,8 @@
 pragma solidity 0.8.22;
 
 // Tapioca
+import {OracleChainlinkSingle, OracleChainlinkSingleConstructorData} from "./OracleChainlinkSingle.sol";
 import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
-import {OracleChainlinkSingle} from "./OracleChainlinkSingle.sol";
 
 contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle {
     string public _name;
@@ -15,40 +15,23 @@ contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle {
     /// @param __name Name of the oracle
     /// @param __symbol Symbol of the oracle
     /// @param _decimals Number of decimals of the oracle
-    /// @param _poolChainlink Chainlink pool address
-    /// @param _isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
+    /// @param _oracleChainlinkConstructorData._poolChainlink Chainlink pool address
+    /// @param _oracleChainlinkConstructorData._isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the
     /// in-currency amount to get the out-currency amount
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
-    /// @param _admin Address of the admin of the oracle
+    /// @param _oracleChainlinkConstructorData._description Description of the assets concerned by the oracle
+    /// @param _oracleChainlinkConstructorData._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _oracleChainlinkConstructorData._admin Address of the admin of the oracle
     constructor(
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
-        address _poolChainlink,
-        uint8 _isChainlinkMultiplied,
-        uint32 _stalePeriod,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        OracleChainlinkSingle(
-            _poolChainlink,
-            _isChainlinkMultiplied,
-            _decimals,
-            _stalePeriod,
-            guardians,
-            _description,
-            _sequencerUptimeFeed,
-            _admin
-        )
-    {
+        OracleChainlinkSingleConstructorData memory _oracleChainlinkConstructorData
+    ) OracleChainlinkSingle(_oracleChainlinkConstructorData) {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;
 
-        _grantRole(SEQUENCER_ROLE, _admin);
+        _grantRole(SEQUENCER_ROLE, _oracleChainlinkConstructorData._admin);
     }
 
     /// @notice Get the latest exchange rate.

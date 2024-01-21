@@ -6,66 +6,40 @@ import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Po
 
 // Tapioca
 import {ITapiocaOracle, ISeerQuery} from "contracts/interfaces/periph/ITapiocaOracle.sol";
-import {OracleMulti} from "./OracleMulti.sol";
+import {OracleMulti, OracleMultiConstructorData} from "./OracleMulti.sol";
 
 contract Seer is ITapiocaOracle, OracleMulti {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;
 
-    /// @notice Constructor for the oracle using a mix of ChainLink and Uniswap
-    /// @param __name Name of the oracle
-    /// @param __symbol Symbol of the oracle
-    /// @param _decimals Number of decimals of the oracle
-    /// @param addressInAndOutUni Array of contract addresses used the Uniswap pool
-    /// @param _circuitUniswap Array of Uniswap pool addresses to use
-    /// @param _circuitUniIsMultiplied Array of booleans indicating whether we should multiply or divide by the Uniswap rate the
-    /// in-currency amount to get the out-currency amount
-    /// @param _twapPeriod Time weighted average window for all Uniswap pools, in seconds
-    /// @param observationLength Number of observations that each pool should have stored
-    /// @param _uniFinalCurrency Whether we need to use the last ChainLink oracle to convert to another
-    /// currency / asset (Forex for instance)
-    /// @param _circuitChainlink ChainLink pool addresses put in order
-    /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
-    /// @param _stalePeriod Time in seconds after which the oracle is considered stale
-    /// @param guardians List of governor or guardian addresses
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
-    /// @param _admin Address of the admin of the oracle
+    /**
+     * @notice Constructor for the oracle using a mix of ChainLink and Uniswap
+     * @param __name Name of the oracle
+     * @param __symbol Symbol of the oracle
+     * @param _decimals Number of decimals of the oracle
+     * @param _oracleMultiConstructorData.addressInAndOutUni Array of contract addresses used the Uniswap pool
+     * @param _oracleMultiConstructorData._circuitUniswap Array of Uniswap pool addresses to use
+     * @param _oracleMultiConstructorData._circuitUniIsMultiplied Array of booleans indicating whether we should multiply or divide by the Uniswap rate the
+     * in-currency amount to get the out-currency amount
+     * @param _oracleMultiConstructorData._twapPeriod Time weighted average window for all Uniswap pools, in seconds
+     * @param _oracleMultiConstructorData.observationLength Number of observations that each pool should have stored
+     * @param _oracleMultiConstructorData._uniFinalCurrency Whether we need to use the last ChainLink oracle to convert to another
+     * currency / asset (Forex for instance)
+     * @param _oracleMultiConstructorData._circuitChainlink ChainLink pool addresses put in order
+     * @param _oracleMultiConstructorData._circuitChainIsMultiplied Whether we should multiply or divide by this rate
+     * @param _oracleMultiConstructorData._stalePeriod Time in seconds after which the oracle is considered stale
+     * @param _oracleMultiConstructorData.guardians List of governor or guardian addresses
+     * @param _oracleMultiConstructorData._description Description of the assets concerned by the oracle
+     * @param _oracleMultiConstructorData._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+     * @param _oracleMultiConstructorData._admin Address of the admin of the oracle
+     */
     constructor(
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
-        address[] memory addressInAndOutUni,
-        IUniswapV3Pool[] memory _circuitUniswap,
-        uint8[] memory _circuitUniIsMultiplied,
-        uint32 _twapPeriod,
-        uint16 observationLength,
-        uint8 _uniFinalCurrency,
-        address[] memory _circuitChainlink,
-        uint8[] memory _circuitChainIsMultiplied,
-        uint32 _stalePeriod,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        OracleMulti(
-            addressInAndOutUni,
-            _circuitUniswap,
-            _circuitUniIsMultiplied,
-            _twapPeriod,
-            observationLength,
-            _uniFinalCurrency,
-            _circuitChainlink,
-            _circuitChainIsMultiplied,
-            _stalePeriod,
-            guardians,
-            _description,
-            _sequencerUptimeFeed,
-            _admin
-        )
-    {
+        OracleMultiConstructorData memory _oracleMultiConstructorData
+    ) OracleMulti(_oracleMultiConstructorData) {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;

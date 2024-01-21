@@ -13,6 +13,18 @@ import {ModuleUniswapMulti} from "./modules/ModuleUniswapMulti.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";
 
+struct OracleUniSoloConstructorData {
+    address[] addressInAndOutUni;
+    IUniswapV3Pool[] _circuitUniswap;
+    uint8[] _circuitUniIsMultiplied;
+    uint32 _twapPeriod;
+    uint16 observationLength;
+    address[] guardians;
+    bytes32 _description;
+    address _sequencerUptimeFeed;
+    address _admin;
+}
+
 /// @title OracleUniSolo
 /// @notice Updated version of the OracleMulti contract that only uses Uniswap
 contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck, ReentrancyGuard {
@@ -20,38 +32,34 @@ contract OracleUniSolo is OracleAbstract, ModuleUniswapMulti, SequencerCheck, Re
     uint256 public immutable outBase;
 
     /// @notice Constructor for an oracle using both Uniswap to read from
-    /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
-    /// @param _circuitUniswap Path of the Uniswap pools
-    /// @param _circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
-    /// @param _twapPeriod Time weighted average window for all Uniswap pools
-    /// @param observationLength Number of observations that each pool should have stored
-    /// @param guardians List of governor or guardian addresses
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
-    /// @param _admin Address of the admin of the oracle
-    constructor(
-        address[] memory addressInAndOutUni,
-        IUniswapV3Pool[] memory _circuitUniswap,
-        uint8[] memory _circuitUniIsMultiplied,
-        uint32 _twapPeriod,
-        uint16 observationLength,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        ModuleUniswapMulti(_circuitUniswap, _circuitUniIsMultiplied, _twapPeriod, observationLength, guardians)
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
+    /// @param _data.addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
+    /// @param _data._circuitUniswap Path of the Uniswap pools
+    /// @param _data._circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
+    /// @param _data._twapPeriod Time weighted average window for all Uniswap pools
+    /// @param _data.observationLength Number of observations that each pool should have stored
+    /// @param _data.guardians List of governor or guardian addresses
+    /// @param _data._description Description of the assets concerned by the oracle
+    /// @param _data._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _data._admin Address of the admin of the oracle
+    constructor(OracleUniSoloConstructorData memory _data)
+        ModuleUniswapMulti(
+            _data._circuitUniswap,
+            _data._circuitUniIsMultiplied,
+            _data._twapPeriod,
+            _data.observationLength,
+            _data.guardians
+        )
+        SequencerCheck(_data._sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _data._admin)
     {
-        require(addressInAndOutUni.length == 2, "107");
+        require(_data.addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals
-        IERC20Metadata inCur = IERC20Metadata(addressInAndOutUni[0]);
-        IERC20Metadata outCur = IERC20Metadata(addressInAndOutUni[1]);
+        IERC20Metadata inCur = IERC20Metadata(_data.addressInAndOutUni[0]);
+        IERC20Metadata outCur = IERC20Metadata(_data.addressInAndOutUni[1]);
         inBase = 10 ** (inCur.decimals());
         outBase = 10 ** (outCur.decimals());
 
-        description = _description;
+        description = _data._description;
     }
 
     /// @notice Reads the Uniswap rate using the circuit given

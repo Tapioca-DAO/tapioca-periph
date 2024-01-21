@@ -14,6 +14,22 @@ import {ModuleUniswapMulti} from "./modules/ModuleUniswapMulti.sol";
 import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";
 
+struct OracleMultiConstructorData {
+    address[] addressInAndOutUni;
+    IUniswapV3Pool[] _circuitUniswap;
+    uint8[] _circuitUniIsMultiplied;
+    uint32 _twapPeriod;
+    uint16 observationLength;
+    uint8 _uniFinalCurrency;
+    address[] _circuitChainlink;
+    uint8[] _circuitChainIsMultiplied;
+    uint32 _stalePeriod;
+    address[] guardians;
+    bytes32 _description;
+    address _sequencerUptimeFeed;
+    address _admin;
+}
+
 /// @title OracleMulti
 /// @author Angle Core Team, modified by Tapioca
 /// @notice Oracle contract, one contract is deployed per collateral/stablecoin pair
@@ -28,51 +44,46 @@ contract OracleMulti is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti
     /// @notice Unit out Uniswap currency
     uint256 public immutable outBase;
 
-    /// @notice Constructor for an oracle using both Uniswap and Chainlink with multiple pools to read from
-    /// @param addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
-    /// @param _circuitUniswap Path of the Uniswap pools
-    /// @param _circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
-    /// @param _twapPeriod Time weighted average window for all Uniswap pools
-    /// @param observationLength Number of observations that each pool should have stored
-    /// @param _uniFinalCurrency Whether we need to use the last Chainlink oracle to convert to another
-    /// currency / asset (Forex for instance)
-    /// @param _circuitChainlink Chainlink pool addresses put in order
-    /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
-    /// @param guardians List of governor or guardian addresses
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _admin Address of the admin of the oracle
-    /// @dev When deploying this contract, it is important to check in the case where Uniswap circuit is not final whether
-    /// Chainlink and Uniswap circuits are compatible. If Chainlink is UNI-WBTC and WBTC-USD and Uniswap is just UNI-WETH,
-    /// then Chainlink cannot be the final circuit
-    constructor(
-        address[] memory addressInAndOutUni,
-        IUniswapV3Pool[] memory _circuitUniswap,
-        uint8[] memory _circuitUniIsMultiplied,
-        uint32 _twapPeriod,
-        uint16 observationLength,
-        uint8 _uniFinalCurrency,
-        address[] memory _circuitChainlink,
-        uint8[] memory _circuitChainIsMultiplied,
-        uint32 _stalePeriod,
-        address[] memory guardians,
-        bytes32 _description,
-        address _sequencerUptimeFeed,
-        address _admin
-    )
-        ModuleUniswapMulti(_circuitUniswap, _circuitUniIsMultiplied, _twapPeriod, observationLength, guardians)
-        ModuleChainlinkMulti(_circuitChainlink, _circuitChainIsMultiplied, _stalePeriod, guardians)
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
+    /**
+     * @notice Constructor for an oracle using both Uniswap and Chainlink with multiple pools to read from
+     *
+     * @param _data.addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
+     * @param _data._circuitUniswap Path of the Uniswap pools
+     * @param _data._circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
+     * @param _data._twapPeriod Time weighted average window for all Uniswap pools
+     * @param _data.observationLength Number of observations that each pool should have stored
+     * @param _data._uniFinalCurrency Whether we need to use the last Chainlink oracle to convert to another
+     * currency / asset (Forex for instance)
+     * @param _data._circuitChainlink Chainlink pool addresses put in order
+     * @param _data._circuitChainIsMultiplied Whether we should multiply or divide by this rate
+     * @param _data.guardians List of governor or guardian addresses
+     * @param _data._description Description of the assets concerned by the oracle
+     * @param _data._admin Address of the admin of the oracle
+     * @dev When deploying this contract, it is important to check in the case where Uniswap circuit is not final whether
+     * Chainlink and Uniswap circuits are compatible. If Chainlink is UNI-WBTC and WBTC-USD and Uniswap is just UNI-WETH,
+     * then Chainlink cannot be the final circuit
+     */
+    constructor(OracleMultiConstructorData memory _data)
+        ModuleUniswapMulti(
+            _data._circuitUniswap,
+            _data._circuitUniIsMultiplied,
+            _data._twapPeriod,
+            _data.observationLength,
+            _data.guardians
+        )
+        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data._stalePeriod, _data.guardians)
+        SequencerCheck(_data._sequencerUptimeFeed)
+        AccessControlDefaultAdminRules(3 days, _data._admin)
     {
-        require(addressInAndOutUni.length == 2, "107");
+        require(_data.addressInAndOutUni.length == 2, "107");
         // Using the tokens' metadata to get the in and out currencies decimals
-        IERC20Metadata inCur = IERC20Metadata(addressInAndOutUni[0]);
-        IERC20Metadata outCur = IERC20Metadata(addressInAndOutUni[1]);
+        IERC20Metadata inCur = IERC20Metadata(_data.addressInAndOutUni[0]);
+        IERC20Metadata outCur = IERC20Metadata(_data.addressInAndOutUni[1]);
         inBase = 10 ** (inCur.decimals());
         outBase = 10 ** (outCur.decimals());
 
-        uniFinalCurrency = _uniFinalCurrency;
-        description = _description;
+        uniFinalCurrency = _data._uniFinalCurrency;
+        description = _data._description;
     }
 
     /// @notice Reads the Uniswap rate using the circuit given
