@@ -2,8 +2,8 @@ import { impersonateAccount } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import * as dotenv from 'dotenv';
 import { ethers } from 'hardhat';
-import { WETH9Mock__factory } from '../gitsub_tapioca-sdk/src/typechain/YieldBox';
-import { IERC20__factory } from '../typechain';
+import { WETH9Mock__factory } from '@tapioca-sdk/typechain/YieldBox';
+import { IERC20__factory } from '@typechain/index';
 
 interface ZeroXQueryParams {
     sellToken: string;

@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import { register, impersonateAccount } from './test.utils';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import _ from 'lodash';
-import { BalancerPoolMock__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-strategies';
-import { BalancerVaultMock__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+import { BalancerPoolMock__factory } from '@tapioca-sdk/typechain/tapioca-strategies';
+import { BalancerVaultMock__factory } from '@tapioca-sdk/typechain/tapioca-mocks';
 
 //this won't work due to the local setup,
 describe.skip('StargateLbpHelper-fork test', () => {

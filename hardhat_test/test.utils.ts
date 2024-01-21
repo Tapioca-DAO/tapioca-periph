@@ -2,15 +2,15 @@ import { time, reset } from '@nomicfoundation/hardhat-network-helpers';
 import { BigNumber, BigNumberish, Signature, Wallet } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
 import { splitSignature } from 'ethers/lib/utils';
-import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
-import BigBangArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/BigBang.json';
+import SingularityArtifact from '@tapioca-sdk/artifacts/tapioca-bar/Singularity.json';
+import BigBangArtifact from '@tapioca-sdk/artifacts/tapioca-bar/BigBang.json';
 
 import {
     YieldBox__factory,
     YieldBoxURIBuilder__factory,
     ERC20WithoutStrategy__factory,
     YieldBox,
-} from '../gitsub_tapioca-sdk/src/typechain/YieldBox';
+} from '@tapioca-sdk/typechain/YieldBox';
 import {
     Singularity,
     Penrose,
@@ -34,7 +34,7 @@ import {
     USDOMarketDestinationModule__factory,
     USDOOptionsDestinationModule__factory,
     USDOGenericModule__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/Tapioca-bar';
+} from '@tapioca-sdk/typechain/Tapioca-bar';
 
 import {
     OracleMock__factory,
@@ -47,12 +47,8 @@ import {
     UniswapV2Factory,
     UniswapV2Router02,
     CurvePoolMock__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
-import {
-    CurveSwapper__factory,
-    UniswapV2Swapper,
-    UniswapV2Swapper__factory,
-} from '../typechain';
+} from '@tapioca-sdk/typechain/tapioca-mocks';
+import { CurveSwapper__factory } from '@typechain/index';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { CurveStableToUsdoBidder } from 'tapioca-sdk/dist/typechain/tapioca-periphery';
 
@@ -344,38 +340,6 @@ async function registerUniswapV2(deployer: any, staging?: boolean) {
     );
 
     return { __uniFactory, __uniFactoryFee, __uniRouter };
-}
-
-async function registerMultiSwapper(
-    deployer: any,
-    yieldBox: YieldBox,
-    __uniFactoryAddress: string,
-    __uniRouterAddress: string,
-    staging?: boolean,
-) {
-    const MultiSwapper = new UniswapV2Swapper__factory(deployer);
-    const multiSwapper = await MultiSwapper.deploy(
-        __uniRouterAddress,
-        __uniFactoryAddress,
-        yieldBox.address,
-        deployer.address,
-    );
-    log(
-        `Deployed MultiSwapper ${multiSwapper.address} with args [${__uniFactoryAddress}, ${yieldBox.address}]`,
-        staging,
-    );
-
-    //todo: set swapper
-    //await (await bar.setSwapper(multiSwapper.address, true)).wait();
-    log('Swapper was set on Penrose', staging);
-
-    await verifyEtherscan(
-        multiSwapper.address,
-        [ethers.constants.AddressZero, __uniFactoryAddress, yieldBox.address],
-        staging,
-    );
-
-    return { multiSwapper };
 }
 
 async function deployMediumRiskMC(
@@ -694,107 +658,6 @@ async function addUniV2Liquidity(
         deployerAddress,
         ethers.utils.parseEther('10'),
     );
-}
-
-async function addUniV2UsdoWethLiquidity(
-    deployerAddress: string,
-    usdo: ERC20Mock,
-    weth: ERC20Mock,
-    __uniFactory: UniswapV2Factory,
-    __uniRouter: UniswapV2Router02,
-) {
-    const wethPairAmount = ethers.BigNumber.from(1e6).mul((1e18).toString());
-    const usdoPairAmount = wethPairAmount.mul(
-        __wethUsdcPrice.div((1e18).toString()),
-    );
-    await addUniV2Liquidity(
-        deployerAddress,
-        weth,
-        usdo,
-        wethPairAmount,
-        usdoPairAmount,
-        __uniFactory,
-        __uniRouter,
-    );
-}
-
-async function createUniV2Usd0Pairs(
-    deployerAddress: string,
-    uniFactory: UniswapV2Factory,
-    uniRouter: UniswapV2Router02,
-    weth: ERC20Mock,
-    tap: ERC20Mock,
-    usdo: USDO,
-) {
-    // Create WETH<>USDO pair
-    const wethPairAmount = ethers.BigNumber.from(1e6).mul((1e18).toString());
-    const usdoPairAmount = wethPairAmount.mul(
-        __wethUsdcPrice.div((1e18).toString()),
-    );
-    await addUniV2Liquidity(
-        deployerAddress,
-        weth,
-        usdo,
-        wethPairAmount,
-        usdoPairAmount,
-        uniFactory,
-        uniRouter,
-        true,
-    );
-
-    const __wethUsdoMockPair = await uniFactory.getPair(
-        weth.address,
-        usdo.address,
-    );
-
-    // Create TAP<>USDO pair
-    const tapPairAmount = ethers.BigNumber.from(1e6).mul((1e18).toString());
-    const usdoTapPairAmount = ethers.BigNumber.from(1e6).mul((1e18).toString());
-
-    await addUniV2Liquidity(
-        deployerAddress,
-        tap,
-        usdo,
-        tapPairAmount,
-        usdoTapPairAmount,
-        uniFactory,
-        uniRouter,
-        true,
-    );
-
-    const __tapUsdoMockPair = await uniFactory.getPair(
-        tap.address,
-        usdo.address,
-    );
-
-    return { __wethUsdoMockPair, __tapUsdoMockPair };
-}
-
-async function registerUniUsdoToWethBidder(
-    deployer: any,
-    uniSwapper: UniswapV2Swapper,
-    wethAssetId: BigNumber,
-    staging?: boolean,
-) {
-    const UniUsdoToWethBidderFactory = await ethers.getContractFactory(
-        'UniUsdoToWethBidder',
-    );
-    const usdoToWethBidder = await UniUsdoToWethBidderFactory.deploy(
-        uniSwapper.address,
-        wethAssetId,
-    );
-    log(
-        `Deployed UniUsdoToWethBidder ${usdoToWethBidder.address} with args [${uniSwapper.address},${wethAssetId}]`,
-        staging,
-    );
-
-    await verifyEtherscan(
-        usdoToWethBidder.address,
-        [uniSwapper.address, wethAssetId],
-        staging,
-    );
-
-    return { usdoToWethBidder };
 }
 
 async function deployCurveStableToUsdoBidder(
@@ -1163,12 +1026,13 @@ export async function register(staging?: boolean) {
     );
     const cluster = await (
         await ethers.getContractFactory('Cluster')
-    ).deploy(clusterLzEndpoint.address, deployer.address);
+    ).deploy(await hre.getChainId(), deployer.address);
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
     // ------------------- 2.2 Deploy Penrose -------------------
     log('Deploying Penrose', staging);
+
     const { bar } = await registerPenrose(
         deployer,
         yieldBox.address,
@@ -1191,26 +1055,6 @@ export async function register(staging?: boolean) {
         `Penrose assets were set USDC: ${usdcAssetId}, WETH: ${wethAssetId}`,
         staging,
     );
-
-    // -------------------  4 Deploy UNIV2 env -------------------
-    log('Deploying UNIV2 Environment', staging);
-    const { __wethUsdcMockPair, __wethTapMockPair, __uniFactory, __uniRouter } =
-        await uniV2EnvironnementSetup(deployer, weth, usdc, tap, staging);
-    log(
-        `Deployed UNIV2 Environment WethUsdcMockPair: ${__wethUsdcMockPair}, WethTapMockPar: ${__wethTapMockPair}, UniswapV2Factory: ${__uniFactory.address}, UniswapV2Router02: ${__uniRouter.address}`,
-        staging,
-    );
-
-    // ------------------- 5 Deploy MultiSwapper -------------------
-    log('Registering MultiSwapper', staging);
-    const { multiSwapper } = await registerMultiSwapper(
-        deployer,
-        yieldBox,
-        __uniFactory.address,
-        __uniRouter.address,
-        staging,
-    );
-    log(`Deployed MultiSwapper ${multiSwapper.address}`, staging);
 
     // ------------------- 6 Deploy MediumRisk master contract -------------------
     log('Deploying MediumRiskMC', staging);
@@ -1295,22 +1139,6 @@ export async function register(staging?: boolean) {
     await usd0.setMinterStatus(wethBigBangMarket.address, true);
     await usd0.setBurnerStatus(wethBigBangMarket.address, true);
 
-    // ------------------- 14 Create weth-usd0 pair -------------------
-    log('Creating WethUSDO and TapUSDO pairs', staging);
-    const { __wethUsdoMockPair, __tapUsdoMockPair } =
-        await createUniV2Usd0Pairs(
-            deployer.address,
-            __uniFactory,
-            __uniRouter,
-            weth,
-            tap,
-            usd0,
-        );
-    log(
-        `WethUSDO ${__wethUsdoMockPair} & TapUSDO ${__tapUsdoMockPair} pairs created`,
-        staging,
-    );
-
     // ------------------- 15 Create Magnetar -------------------
     log('Deploying MagnetarV2', staging);
     const magnetarMarketModule = await (
@@ -1332,18 +1160,6 @@ export async function register(staging?: boolean) {
     ).deploy();
     await magnetarHelper.deployed();
     log(`Deployed MagnetarHelper ${magnetar.address} with no args`, staging);
-    // ------------------- 16 Create UniswapUsdoToWethBidder -------------------
-    log('Deploying UniswapUsdoToWethBidder', staging);
-    const { usdoToWethBidder } = await registerUniUsdoToWethBidder(
-        deployer,
-        multiSwapper,
-        wethAssetId,
-        staging,
-    );
-    log(
-        `Deployed UniswapUsdoToWethBidder ${usdoToWethBidder.address}`,
-        staging,
-    );
 
     if (staging) {
         //------------------- 17 Create CurveStableToUsdoBidder -------------------
@@ -1420,16 +1236,8 @@ export async function register(staging?: boolean) {
         magnetar,
         cluster,
         eoa1,
-        multiSwapper,
-        usdoToWethBidder,
         mediumRiskMC,
         registerSingularity,
-        __uniFactory,
-        __uniRouter,
-        __wethUsdcMockPair,
-        __wethTapMockPair,
-        __wethUsdoMockPair,
-        __tapUsdoMockPair,
         INITIAL_TIMESTAMP,
         magnetarHelper,
     };
@@ -1559,7 +1367,6 @@ export async function register(staging?: boolean) {
         timeTravel,
         deployCurveStableToUsdoBidder,
         registerUsd0Contract,
-        addUniV2UsdoWethLiquidity,
         createWethUsd0Singularity,
         createTokenEmptyStrategy,
     };

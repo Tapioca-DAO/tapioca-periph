@@ -4,7 +4,7 @@ import {
     ContractThatReverts__factory,
     TapiocaDeployerMock__factory,
     ContractThatCannotBeDeployed__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks/factories';
+} from '@tapioca-sdk/typechain/tapioca-mocks/factories';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { register } from './test.utils';
 
