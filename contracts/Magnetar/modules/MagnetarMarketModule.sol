@@ -50,26 +50,11 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _depositAddCollateralAndBorrowFromMarket(_data);
     }
 
-    function depositRepayAndRemoveCollateralFromMarket(
-        address market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        uint256 collateralAmount,
-        bool extractFromSender,
-        ICommonData.IWithdrawParams calldata withdrawCollateralParams,
-        uint256 valueAmount
-    ) external payable {
-        _depositRepayAndRemoveCollateralFromMarket(
-            market,
-            user,
-            depositAmount,
-            repayAmount,
-            collateralAmount,
-            extractFromSender,
-            withdrawCollateralParams,
-            valueAmount
-        );
+    function depositRepayAndRemoveCollateralFromMarket(DepositRepayAndRemoveCollateralFromMarketData calldata _data)
+        external
+        payable
+    {
+        _depositRepayAndRemoveCollateralFromMarket(_data);
     }
 
     function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData calldata _data) external payable {
@@ -184,64 +169,85 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _revertYieldBoxApproval(address(_data.market), yieldBox);
     }
 
-    function _depositRepayAndRemoveCollateralFromMarket(
-        address market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        uint256 collateralAmount,
-        bool extractFromSender,
-        ICommonData.IWithdrawParams calldata withdrawCollateralParams,
-        uint256 valueAmount
-    ) private {
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(market))) {
+    struct DepositRepayAndRemoveCollateralFromMarketData {
+        IMarket market;
+        address user;
+        uint256 depositAmount;
+        uint256 repayAmount;
+        uint256 collateralAmount;
+        bool extractFromSender;
+        ICommonData.IWithdrawParams withdrawCollateralParams;
+        uint256 valueAmount;
+    }
+
+    /**
+     * @notice helper for deposit asset to YieldBox, repay on a market, remove collateral and withdraw
+     * @dev all steps are optional:
+     *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
+     *         - if `repayAmount` is 0, the repay step is skipped
+     *         - if `collateralAmount` is 0, the add collateral step is skipped
+     *
+     * @param _data.market the SGL/BigBang market
+     * @param _data.user the user to perform the action for
+     * @param _data.depositAmount the amount to deposit to YieldBox
+     * @param _data.repayAmount the amount to repay to the market
+     * @param _data.collateralAmount the amount to withdraw from the market
+     * @param _data.extractFromSender extracts collateral tokens from sender or from the user
+     * @param _data.withdrawCollateralParams withdraw specific params
+     */
+    function _depositRepayAndRemoveCollateralFromMarket(DepositRepayAndRemoveCollateralFromMarketData memory _data)
+        private
+    {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) {
             revert NotAuthorized();
         }
 
-        IMarket marketInterface = IMarket(market);
-        IYieldBox yieldBox = IYieldBox(marketInterface.yieldBox());
+        IYieldBox yieldBox = IYieldBox(_data.market.yieldBox());
 
-        uint256 assetId = marketInterface.assetId();
+        uint256 assetId = _data.market.assetId();
         (, address assetAddress,,) = yieldBox.assets(assetId);
 
         // deposit to YieldBox
-        if (depositAmount > 0) {
-            depositAmount = _extractTokens(extractFromSender ? msg.sender : user, assetAddress, depositAmount);
+        if (_data.depositAmount > 0) {
+            _data.depositAmount =
+                _extractTokens(_data.extractFromSender ? msg.sender : _data.user, assetAddress, _data.depositAmount);
             IERC20(assetAddress).approve(address(yieldBox), 0);
-            IERC20(assetAddress).approve(address(yieldBox), depositAmount);
-            yieldBox.depositAsset(assetId, address(this), address(this), depositAmount, 0);
+            IERC20(assetAddress).approve(address(yieldBox), _data.depositAmount);
+            yieldBox.depositAsset(assetId, address(this), address(this), _data.depositAmount, 0);
         }
 
         // performs a repay operation for the specified market
-        if (repayAmount > 0) {
-            _setApprovalForYieldBox(market, yieldBox);
-            marketInterface.repay(depositAmount > 0 ? address(this) : user, user, false, repayAmount);
-            _revertYieldBoxApproval(market, yieldBox);
+        if (_data.repayAmount > 0) {
+            _setApprovalForYieldBox(address(_data.market), yieldBox);
+            _data.market.repay(
+                _data.depositAmount > 0 ? address(this) : _data.user, _data.user, false, _data.repayAmount
+            );
+            _revertYieldBoxApproval(address(_data.market), yieldBox);
         }
 
         // performs a removeCollateral operation on the market
         // if `withdrawCollateralParams.withdraw` it uses `withdrawTo` to withdraw collateral on the same chain or to another one
-        if (collateralAmount > 0) {
-            address collateralWithdrawReceiver = withdrawCollateralParams.withdraw ? address(this) : user;
-            uint256 collateralShare = yieldBox.toShare(marketInterface.collateralId(), collateralAmount, false);
-            marketInterface.removeCollateral(user, collateralWithdrawReceiver, collateralShare);
+        if (_data.collateralAmount > 0) {
+            address collateralWithdrawReceiver = _data.withdrawCollateralParams.withdraw ? address(this) : _data.user;
+            uint256 collateralShare = yieldBox.toShare(_data.market.collateralId(), _data.collateralAmount, false);
+            _data.market.removeCollateral(_data.user, collateralWithdrawReceiver, collateralShare);
 
-            uint256 collateralId = marketInterface.collateralId();
+            uint256 collateralId = _data.market.collateralId();
             //withdraw
-            if (withdrawCollateralParams.withdraw) {
+            if (_data.withdrawCollateralParams.withdraw) {
                 _withdrawToChain(
                     WithdrawToChainData({
                         yieldBox: yieldBox,
                         from: collateralWithdrawReceiver,
                         assetId: collateralId,
-                        dstChainId: withdrawCollateralParams.withdrawLzChainId,
-                        receiver: LzLib.addressToBytes32(user),
+                        dstChainId: _data.withdrawCollateralParams.withdrawLzChainId,
+                        receiver: LzLib.addressToBytes32(_data.user),
                         amount: yieldBox.toAmount(collateralId, collateralShare, false),
-                        adapterParams: withdrawCollateralParams.withdrawAdapterParams,
-                        refundAddress: withdrawCollateralParams.refundAddress,
-                        gas: valueAmount,
-                        unwrap: withdrawCollateralParams.unwrap,
-                        zroPaymentAddress: withdrawCollateralParams.zroPaymentAddress
+                        adapterParams: _data.withdrawCollateralParams.withdrawAdapterParams,
+                        refundAddress: _data.withdrawCollateralParams.refundAddress,
+                        gas: _data.valueAmount,
+                        unwrap: _data.withdrawCollateralParams.unwrap,
+                        zroPaymentAddress: _data.withdrawCollateralParams.zroPaymentAddress
                     })
                 );
             }

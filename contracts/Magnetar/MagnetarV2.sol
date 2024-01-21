@@ -343,14 +343,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     abi.encodeCall(
                         MagnetarMarketModule.depositRepayAndRemoveCollateralFromMarket,
                         (
-                            market,
-                            user,
-                            depositAmount,
-                            repayAmount,
-                            collateralAmount,
-                            extractFromSender,
-                            withdrawCollateralParams,
-                            _action.value
+                            MagnetarMarketModule.DepositRepayAndRemoveCollateralFromMarketData({
+                                market: IMarket(market),
+                                user: user,
+                                depositAmount: depositAmount,
+                                repayAmount: repayAmount,
+                                collateralAmount: collateralAmount,
+                                extractFromSender: extractFromSender,
+                                withdrawCollateralParams: withdrawCollateralParams,
+                                valueAmount: _action.value
+                            })
                         )
                     )
                 );
@@ -471,43 +473,27 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         );
     }
 
-    /// @notice helper for deposit asset to YieldBox, repay on a market, remove collateral and withdraw
-    /// @dev all steps are optional:
-    ///         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
-    ///         - if `repayAmount` is 0, the repay step is skipped
-    ///         - if `collateralAmount` is 0, the add collateral step is skipped
-    /// @param market the SGL/BigBang market
-    /// @param user the user to perform the action for
-    /// @param depositAmount the amount to deposit to YieldBox
-    /// @param repayAmount the amount to repay to the market
-    /// @param collateralAmount the amount to withdraw from the market
-    /// @param extractFromSender extracts collateral tokens from sender or from the user
-    /// @param withdrawCollateralParams withdraw specific params
+    /**
+     * @notice helper for deposit asset to YieldBox, repay on a market, remove collateral and withdraw
+     * @dev all steps are optional:
+     *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
+     *         - if `repayAmount` is 0, the repay step is skipped
+     *         - if `collateralAmount` is 0, the add collateral step is skipped
+     *
+     * @param _data.market the SGL/BigBang market
+     * @param _data.user the user to perform the action for
+     * @param _data.depositAmount the amount to deposit to YieldBox
+     * @param _data.repayAmount the amount to repay to the market
+     * @param _data.collateralAmount the amount to withdraw from the market
+     * @param _data.extractFromSender extracts collateral tokens from sender or from the user
+     * @param _data.withdrawCollateralParams withdraw specific params
+     */
     function depositRepayAndRemoveCollateralFromMarket(
-        address market,
-        address user,
-        uint256 depositAmount,
-        uint256 repayAmount,
-        uint256 collateralAmount,
-        bool extractFromSender,
-        ICommonData.IWithdrawParams calldata withdrawCollateralParams
+        MagnetarMarketModule.DepositRepayAndRemoveCollateralFromMarketData calldata _data
     ) external payable {
-        _checkSender(user);
+        _checkSender(_data.user);
         _executeModule(
-            Module.Market,
-            abi.encodeCall(
-                MagnetarMarketModule.depositRepayAndRemoveCollateralFromMarket,
-                (
-                    market,
-                    user,
-                    depositAmount,
-                    repayAmount,
-                    collateralAmount,
-                    extractFromSender,
-                    withdrawCollateralParams,
-                    msg.value
-                )
-            )
+            Module.Market, abi.encodeCall(MagnetarMarketModule.depositRepayAndRemoveCollateralFromMarket, (_data))
         );
     }
 
