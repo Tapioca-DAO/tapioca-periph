@@ -145,23 +145,28 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             _data.market.borrow(_data.user, borrowReceiver, _data.borrowAmount);
 
             if (_data.withdrawParams.withdraw) {
-                bytes memory withdrawAssetBytes = abi.encode(
-                    _data.withdrawParams.withdrawOnOtherChain,
-                    _data.withdrawParams.withdrawLzChainId,
-                    LzLib.addressToBytes32(_data.user),
-                    _data.withdrawParams.withdrawAdapterParams
-                );
+                bytes memory withdrawAssetBytes;
+                {
+                    withdrawAssetBytes = abi.encode(
+                        _data.withdrawParams.withdrawOnOtherChain,
+                        _data.withdrawParams.withdrawLzChainId,
+                        LzLib.addressToBytes32(_data.user),
+                        _data.withdrawParams.withdrawAdapterParams
+                    );
+                }
                 _withdraw(
-                    borrowReceiver,
-                    withdrawAssetBytes,
-                    _data.market,
-                    yieldBox,
-                    _data.borrowAmount,
-                    false,
-                    _data.valueAmount,
-                    false,
-                    _data.withdrawParams.refundAddress,
-                    _data.withdrawParams.zroPaymentAddress
+                    WithdrawData({
+                        from: borrowReceiver,
+                        withdrawData: withdrawAssetBytes,
+                        market: _data.market,
+                        yieldBox: yieldBox,
+                        amount: _data.borrowAmount,
+                        withdrawCollateral: false,
+                        valueAmount: _data.valueAmount,
+                        unwrap: false,
+                        refundAddress: _data.withdrawParams.refundAddress,
+                        zroPaymentAddress: _data.withdrawParams.zroPaymentAddress
+                    })
                 );
             }
         }
@@ -540,16 +545,18 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     removeAndRepayData.assetWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
-                    address(this),
-                    withdrawAssetBytes,
-                    singularity,
-                    yieldBox,
-                    yieldBox.toAmount(_assetId, share, false), // re-compute amount to avoid rounding issues
-                    false,
-                    valueAmount,
-                    false,
-                    removeAndRepayData.assetWithdrawData.refundAddress,
-                    removeAndRepayData.assetWithdrawData.zroPaymentAddress
+                    WithdrawData({
+                        from: address(this),
+                        withdrawData: withdrawAssetBytes,
+                        market: singularity,
+                        yieldBox: yieldBox,
+                        amount: yieldBox.toAmount(_assetId, share, false), // re-compute amount to avoid rounding issues
+                        withdrawCollateral: false,
+                        valueAmount: valueAmount,
+                        unwrap: false,
+                        refundAddress: removeAndRepayData.assetWithdrawData.refundAddress,
+                        zroPaymentAddress: removeAndRepayData.assetWithdrawData.zroPaymentAddress
+                    })
                 );
             }
         }
@@ -586,16 +593,18 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     removeAndRepayData.collateralWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
-                    address(this),
-                    withdrawCollateralBytes,
-                    singularity,
-                    yieldBox,
-                    yieldBox.toAmount(_collateralId, collateralShare, false), // re-compute amount to avoid rounding issues
-                    true,
-                    valueAmount,
-                    removeAndRepayData.collateralWithdrawData.unwrap,
-                    removeAndRepayData.collateralWithdrawData.refundAddress,
-                    removeAndRepayData.collateralWithdrawData.zroPaymentAddress
+                    WithdrawData({
+                        from: address(this),
+                        withdrawData: withdrawCollateralBytes,
+                        market: singularity,
+                        yieldBox: yieldBox,
+                        amount: yieldBox.toAmount(_collateralId, collateralShare, false), // re-compute amount to avoid rounding issues
+                        withdrawCollateral: true,
+                        valueAmount: valueAmount,
+                        unwrap: removeAndRepayData.collateralWithdrawData.unwrap,
+                        refundAddress: removeAndRepayData.collateralWithdrawData.refundAddress,
+                        zroPaymentAddress: removeAndRepayData.collateralWithdrawData.zroPaymentAddress
+                    })
                 );
             }
         }
@@ -689,35 +698,37 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         yieldBox.withdraw(assetId, from, LzLib.bytes32ToAddress(receiver), amount, 0);
     }
 
-    function _withdraw(
-        address from,
-        bytes memory withdrawData,
-        IMarket market,
-        IYieldBox yieldBox,
-        uint256 amount,
-        bool withdrawCollateral,
-        uint256 valueAmount,
-        bool unwrap,
-        address payable refundAddress,
-        address zroPaymentAddress
-    ) private {
-        if (withdrawData.length == 0) revert NotValid();
+    struct WithdrawData {
+        address from;
+        bytes withdrawData;
+        IMarket market;
+        IYieldBox yieldBox;
+        uint256 amount;
+        bool withdrawCollateral;
+        uint256 valueAmount;
+        bool unwrap;
+        address payable refundAddress;
+        address zroPaymentAddress;
+    }
+
+    function _withdraw(WithdrawData memory _data) private {
+        if (_data.withdrawData.length == 0) revert NotValid();
         (bool withdrawOnOtherChain, uint16 destChain, bytes32 receiver, bytes memory adapterParams) =
-            abi.decode(withdrawData, (bool, uint16, bytes32, bytes));
+            abi.decode(_data.withdrawData, (bool, uint16, bytes32, bytes));
 
         _withdrawToChain(
             WithdrawToChainData({
-                yieldBox: yieldBox,
-                from: from,
-                assetId: withdrawCollateral ? market.collateralId() : market.assetId(),
+                yieldBox: _data.yieldBox,
+                from: _data.from,
+                assetId: _data.withdrawCollateral ? _data.market.collateralId() : _data.market.assetId(),
                 dstChainId: withdrawOnOtherChain ? destChain : 0,
                 receiver: receiver,
-                amount: amount,
+                amount: _data.amount,
                 adapterParams: adapterParams,
-                refundAddress: refundAddress,
-                gas: valueAmount,
-                unwrap: unwrap,
-                zroPaymentAddress: zroPaymentAddress
+                refundAddress: _data.refundAddress,
+                gas: _data.valueAmount,
+                unwrap: _data.unwrap,
+                zroPaymentAddress: _data.zroPaymentAddress
             })
         );
     }
