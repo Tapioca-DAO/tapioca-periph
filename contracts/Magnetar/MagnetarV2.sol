@@ -359,7 +359,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                     Module.Market,
                     abi.encodeCall(
                         MagnetarMarketModule.exitPositionAndRemoveCollateral,
-                        (user, externalData, removeAndRepayData, _action.value, cluster)
+                        (
+                            MagnetarMarketModule.ExitPositionAndRemoveCollateralData({
+                                user: user,
+                                externalData: externalData,
+                                removeAndRepayData: removeAndRepayData,
+                                valueAmount: _action.value
+                            })
+                        )
                     )
                 );
             }
@@ -569,29 +576,24 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.mintFromBBAndLendOnSGL, (_data)));
     }
 
-    /// @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
-    /// @dev all steps are optional:
-    ///         - if `removeAndRepayData.exitData.exit` is false, the exit operation is skipped
-    ///         - if `removeAndRepayData.unlockData.unlock` is false, the unlock operation is skipped
-    ///         - if `removeAndRepayData.removeAssetFromSGL` is false, the removeAsset operation is skipped
-    ///         - if `!removeAndRepayData.assetWithdrawData.withdraw && removeAndRepayData.repayAssetOnBB`, the repay operation is performed
-    ///         - if `removeAndRepayData.removeCollateralFromBB` is false, the rmeove collateral is skipped
-    ///     - the helper can either stop at the remove asset from SGL step or it can continue until is removes & withdraws collateral from BB
-    ///         - removed asset can be withdrawn by providing `removeAndRepayData.assetWithdrawData`
-    ///     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
-    function exitPositionAndRemoveCollateral(
-        address user,
-        ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData
-    ) external payable {
-        _checkSender(user);
-        _executeModule(
-            Module.Market,
-            abi.encodeCall(
-                MagnetarMarketModule.exitPositionAndRemoveCollateral,
-                (user, externalData, removeAndRepayData, msg.value, cluster)
-            )
-        );
+    /**
+     * @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
+     * @dev all steps are optional:
+     *         - if `removeAndRepayData.exitData.exit` is false, the exit operation is skipped
+     *         - if `removeAndRepayData.unlockData.unlock` is false, the unlock operation is skipped
+     *         - if `removeAndRepayData.removeAssetFromSGL` is false, the removeAsset operation is skipped
+     *         - if `!removeAndRepayData.assetWithdrawData.withdraw && removeAndRepayData.repayAssetOnBB`, the repay operation is performed
+     *         - if `removeAndRepayData.removeCollateralFromBB` is false, the rmeove collateral is skipped
+     *     - the helper can either stop at the remove asset from SGL step or it can continue until is removes & withdraws collateral from BB
+     *         - removed asset can be withdrawn by providing `removeAndRepayData.assetWithdrawData`
+     *     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
+     */
+    function exitPositionAndRemoveCollateral(MagnetarMarketModule.ExitPositionAndRemoveCollateralData calldata _data)
+        external
+        payable
+    {
+        _checkSender(_data.user);
+        _executeModule(Module.Market, abi.encodeCall(MagnetarMarketModule.exitPositionAndRemoveCollateral, (_data)));
     }
 
     // ********************* //

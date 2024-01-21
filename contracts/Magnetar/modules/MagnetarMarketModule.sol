@@ -61,14 +61,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _mintFromBBAndLendOnSGL(_data);
     }
 
-    function exitPositionAndRemoveCollateral(
-        address user,
-        ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        uint256 valueAmount,
-        ICluster _cluster
-    ) external payable {
-        _exitPositionAndRemoveCollateral(user, externalData, removeAndRepayData, valueAmount, _cluster);
+    function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData calldata _data) external payable {
+        _exitPositionAndRemoveCollateral(_data);
     }
 
     // *********************** //
@@ -439,22 +433,23 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
-    function _exitPositionAndRemoveCollateral(
-        address user,
-        ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        uint256 valueAmount,
-        ICluster _cluster
-    ) private {
-        if (externalData.bigBang != address(0)) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), externalData.bigBang)) revert NotAuthorized();
+    struct ExitPositionAndRemoveCollateralData {
+        address user;
+        ICommonData.ICommonExternalContracts externalData;
+        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+        uint256 valueAmount;
+    }
+
+    function _exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory _data) private {
+        if (_data.externalData.bigBang != address(0)) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.bigBang)) revert NotAuthorized();
         }
-        if (externalData.singularity != address(0)) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), externalData.singularity)) revert NotAuthorized();
+        if (_data.externalData.singularity != address(0)) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.singularity)) revert NotAuthorized();
         }
 
-        IMarket bigBang = IMarket(externalData.bigBang);
-        ISingularity singularity = ISingularity(externalData.singularity);
+        IMarket bigBang = IMarket(_data.externalData.bigBang);
+        ISingularity singularity = ISingularity(_data.externalData.singularity);
         IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
@@ -462,87 +457,86 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         //      - tOB.exitPosition
         //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
         uint256 tOLPId = 0;
-        if (removeAndRepayData.exitData.exit) {
-            if (removeAndRepayData.exitData.oTAPTokenID == 0) revert NotValid();
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), removeAndRepayData.exitData.target)) {
+        if (_data.removeAndRepayData.exitData.exit) {
+            if (_data.removeAndRepayData.exitData.oTAPTokenID == 0) revert NotValid();
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.removeAndRepayData.exitData.target)) {
                 revert NotAuthorized();
             }
 
-            address oTapAddress = ITapiocaOptionBroker(removeAndRepayData.exitData.target).oTAP();
+            address oTapAddress = ITapiocaOptionBroker(_data.removeAndRepayData.exitData.target).oTAP();
             (, ITapiocaOption.TapOption memory oTAPPosition) =
-                ITapiocaOption(oTapAddress).attributes(removeAndRepayData.exitData.oTAPTokenID);
+                ITapiocaOption(oTapAddress).attributes(_data.removeAndRepayData.exitData.oTAPTokenID);
 
             tOLPId = oTAPPosition.tOLP;
 
-            address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(removeAndRepayData.exitData.oTAPTokenID);
+            address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(_data.removeAndRepayData.exitData.oTAPTokenID);
 
-            if (ownerOfTapTokenId != user && ownerOfTapTokenId != address(this)) {
+            if (ownerOfTapTokenId != _data.user && ownerOfTapTokenId != address(this)) {
                 revert NotValid();
             }
-            if (ownerOfTapTokenId == user) {
+            if (ownerOfTapTokenId == _data.user) {
                 IERC721(oTapAddress).safeTransferFrom(
-                    user, address(this), removeAndRepayData.exitData.oTAPTokenID, "0x"
+                    _data.user, address(this), _data.removeAndRepayData.exitData.oTAPTokenID, "0x"
                 );
             }
-            ITapiocaOptionBroker(removeAndRepayData.exitData.target).exitPosition(
-                removeAndRepayData.exitData.oTAPTokenID
+            ITapiocaOptionBroker(_data.removeAndRepayData.exitData.target).exitPosition(
+                _data.removeAndRepayData.exitData.oTAPTokenID
             );
 
-            if (!removeAndRepayData.unlockData.unlock) {
-                address tOLPContract = ITapiocaOptionBroker(removeAndRepayData.exitData.target).tOLP();
+            if (!_data.removeAndRepayData.unlockData.unlock) {
+                address tOLPContract = ITapiocaOptionBroker(_data.removeAndRepayData.exitData.target).tOLP();
 
-                //transfer tOLP to the user
-                IERC721(tOLPContract).safeTransferFrom(address(this), user, tOLPId, "0x");
+                //transfer tOLP to the _data.user
+                IERC721(tOLPContract).safeTransferFrom(address(this), _data.user, tOLPId, "0x");
             }
         }
 
         // performs a tOLP.unlock operation
-        if (removeAndRepayData.unlockData.unlock) {
-            if (!_cluster.isWhitelisted(_cluster.lzChainId(), removeAndRepayData.unlockData.target)) {
+        if (_data.removeAndRepayData.unlockData.unlock) {
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.removeAndRepayData.unlockData.target)) {
                 revert NotAuthorized();
             }
 
-            if (removeAndRepayData.unlockData.tokenId != 0) {
+            if (_data.removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
-                    if (tOLPId != removeAndRepayData.unlockData.tokenId) {
+                    if (tOLPId != _data.removeAndRepayData.unlockData.tokenId) {
                         revert tOLPTokenMismatch();
                     }
                 }
-                tOLPId = removeAndRepayData.unlockData.tokenId;
+                tOLPId = _data.removeAndRepayData.unlockData.tokenId;
             }
 
-            address ownerOfTOLP = IERC721(removeAndRepayData.unlockData.target).ownerOf(tOLPId);
+            address ownerOfTOLP = IERC721(_data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
 
-            if (ownerOfTOLP != user && ownerOfTOLP != address(this)) {
+            if (ownerOfTOLP != _data.user && ownerOfTOLP != address(this)) {
                 revert NotValid();
             }
 
-            ITapiocaOptionLiquidityProvision(removeAndRepayData.unlockData.target).unlock(
-                tOLPId, externalData.singularity, user
+            ITapiocaOptionLiquidityProvision(_data.removeAndRepayData.unlockData.target).unlock(
+                tOLPId, _data.externalData.singularity, _data.user
             );
         }
 
-        // if `removeAndRepayData.removeAssetFromSGL` performs the follow operations:
+        // if `_data.removeAndRepayData.removeAssetFromSGL` performs the follow operations:
         //      - removeAsset from SGL
-        //      - if `removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
-        uint256 _removeAmount = removeAndRepayData.removeAmount;
-        if (removeAndRepayData.removeAssetFromSGL) {
+        //      - if `_data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
+        uint256 _removeAmount = _data.removeAndRepayData.removeAmount;
+        if (_data.removeAndRepayData.removeAssetFromSGL) {
             uint256 _assetId = singularity.assetId();
             uint256 share = yieldBox.toShare(_assetId, _removeAmount, false);
 
-            address removeAssetTo = removeAndRepayData.assetWithdrawData.withdraw || removeAndRepayData.repayAssetOnBB
-                ? address(this)
-                : user;
+            address removeAssetTo = _data.removeAndRepayData.assetWithdrawData.withdraw
+                || _data.removeAndRepayData.repayAssetOnBB ? address(this) : _data.user;
 
-            singularity.removeAsset(user, removeAssetTo, share);
+            singularity.removeAsset(_data.user, removeAssetTo, share);
 
             //withdraw
-            if (removeAndRepayData.assetWithdrawData.withdraw) {
+            if (_data.removeAndRepayData.assetWithdrawData.withdraw) {
                 bytes memory withdrawAssetBytes = abi.encode(
-                    removeAndRepayData.assetWithdrawData.withdrawOnOtherChain,
-                    removeAndRepayData.assetWithdrawData.withdrawLzChainId,
-                    LzLib.addressToBytes32(user),
-                    removeAndRepayData.assetWithdrawData.withdrawAdapterParams
+                    _data.removeAndRepayData.assetWithdrawData.withdrawOnOtherChain,
+                    _data.removeAndRepayData.assetWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(_data.user),
+                    _data.removeAndRepayData.assetWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
                     WithdrawData({
@@ -552,24 +546,24 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                         yieldBox: yieldBox,
                         amount: yieldBox.toAmount(_assetId, share, false), // re-compute amount to avoid rounding issues
                         withdrawCollateral: false,
-                        valueAmount: valueAmount,
+                        valueAmount: _data.valueAmount,
                         unwrap: false,
-                        refundAddress: removeAndRepayData.assetWithdrawData.refundAddress,
-                        zroPaymentAddress: removeAndRepayData.assetWithdrawData.zroPaymentAddress
+                        refundAddress: _data.removeAndRepayData.assetWithdrawData.refundAddress,
+                        zroPaymentAddress: _data.removeAndRepayData.assetWithdrawData.zroPaymentAddress
                     })
                 );
             }
         }
 
         // performs a BigBang repay operation
-        if (!removeAndRepayData.assetWithdrawData.withdraw && removeAndRepayData.repayAssetOnBB) {
+        if (!_data.removeAndRepayData.assetWithdrawData.withdraw && _data.removeAndRepayData.repayAssetOnBB) {
             _setApprovalForYieldBox(address(bigBang), yieldBox);
-            uint256 repayed = bigBang.repay(address(this), user, false, removeAndRepayData.repayAmount);
-            // transfer excess amount to the user
+            uint256 repayed = bigBang.repay(address(this), _data.user, false, _data.removeAndRepayData.repayAmount);
+            // transfer excess amount to the _data.user
             if (repayed < _removeAmount) {
                 yieldBox.transfer(
                     address(this),
-                    user,
+                    _data.user,
                     bigBang.assetId(),
                     yieldBox.toShare(bigBang.assetId(), _removeAmount - repayed, false)
                 );
@@ -577,20 +571,21 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
 
         // performs a BigBang removeCollateral operation
-        // if `removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
-        if (removeAndRepayData.removeCollateralFromBB) {
+        // if `_data.removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
+        if (_data.removeAndRepayData.removeCollateralFromBB) {
             uint256 _collateralId = bigBang.collateralId();
-            uint256 collateralShare = yieldBox.toShare(_collateralId, removeAndRepayData.collateralAmount, false);
-            address removeCollateralTo = removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : user;
-            bigBang.removeCollateral(user, removeCollateralTo, collateralShare);
+            uint256 collateralShare = yieldBox.toShare(_collateralId, _data.removeAndRepayData.collateralAmount, false);
+            address removeCollateralTo =
+                _data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : _data.user;
+            bigBang.removeCollateral(_data.user, removeCollateralTo, collateralShare);
 
             //withdraw
-            if (removeAndRepayData.collateralWithdrawData.withdraw) {
+            if (_data.removeAndRepayData.collateralWithdrawData.withdraw) {
                 bytes memory withdrawCollateralBytes = abi.encode(
-                    removeAndRepayData.collateralWithdrawData.withdrawOnOtherChain,
-                    removeAndRepayData.collateralWithdrawData.withdrawLzChainId,
-                    LzLib.addressToBytes32(user),
-                    removeAndRepayData.collateralWithdrawData.withdrawAdapterParams
+                    _data.removeAndRepayData.collateralWithdrawData.withdrawOnOtherChain,
+                    _data.removeAndRepayData.collateralWithdrawData.withdrawLzChainId,
+                    LzLib.addressToBytes32(_data.user),
+                    _data.removeAndRepayData.collateralWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
                     WithdrawData({
@@ -600,10 +595,10 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                         yieldBox: yieldBox,
                         amount: yieldBox.toAmount(_collateralId, collateralShare, false), // re-compute amount to avoid rounding issues
                         withdrawCollateral: true,
-                        valueAmount: valueAmount,
-                        unwrap: removeAndRepayData.collateralWithdrawData.unwrap,
-                        refundAddress: removeAndRepayData.collateralWithdrawData.refundAddress,
-                        zroPaymentAddress: removeAndRepayData.collateralWithdrawData.zroPaymentAddress
+                        valueAmount: _data.valueAmount,
+                        unwrap: _data.removeAndRepayData.collateralWithdrawData.unwrap,
+                        refundAddress: _data.removeAndRepayData.collateralWithdrawData.refundAddress,
+                        zroPaymentAddress: _data.removeAndRepayData.collateralWithdrawData.zroPaymentAddress
                     })
                 );
             }
