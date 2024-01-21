@@ -1,72 +1,53 @@
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import hre, { ethers, config } from 'hardhat';
-import { BN, register, getSGLPermitSignature } from './test.utils';
 import { signTypedMessage } from 'eth-sig-util';
 import { fromRpcSig } from 'ethereumjs-utils';
-import {
-    loadFixture,
-    takeSnapshot,
-} from '@nomicfoundation/hardhat-network-helpers';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import hre, { config, ethers } from 'hardhat';
+import { BN, getSGLPermitSignature, register } from './test.utils';
 
-import LZEndpointMockArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-mocks/LZEndpointMock.json';
-import SingularityArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapioca-bar/Singularity.json';
-import TapiocaOFTArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/TapiocaOFT.json';
-import BaseTOFTLeverageModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTLeverageModule.json';
-import BaseTOFTMarketModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTMarketModule.json';
-import BaseTOFTOptionsModuleArtifact from '../gitsub_tapioca-sdk/src/artifacts/tapiocaz/BaseTOFTOptionsModule.json';
+import SingularityArtifact from '@tapioca-sdk/artifacts/tapioca-bar/Singularity.json';
+import LZEndpointMockArtifact from '@tapioca-sdk/artifacts/tapioca-mocks/LZEndpointMock.json';
+import TapiocaOFTArtifact from '@tapioca-sdk/artifacts/tapiocaz/TapiocaOFT.json';
 
 import {
-    SGLCollateral__factory,
     SGLBorrow__factory,
+    SGLCollateral__factory,
     SGLLeverage__factory,
     SGLLiquidation__factory,
     Singularity,
-    USDO__factory,
-    USDOLeverageModule__factory,
-    USDOMarketModule__factory,
-    USDOOptionsModule__factory,
     USDOGenericModule__factory,
     USDOLeverageDestinationModule__factory,
+    USDOLeverageModule__factory,
     USDOMarketDestinationModule__factory,
+    USDOMarketModule__factory,
     USDOOptionsDestinationModule__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/Tapioca-Bar';
+    USDOOptionsModule__factory,
+    USDO__factory,
+} from '@tapioca-sdk/typechain/Tapioca-bar';
 import {
     ERC20WithoutStrategy__factory,
     YieldBox,
-} from '../gitsub_tapioca-sdk/src/typechain/YieldBox';
+} from '@tapioca-sdk/typechain/YieldBox';
 import {
     ERC20Mock__factory,
     LZEndpointMock__factory,
     OracleMock__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
-import {
-    BaseTOFT,
-    TapiocaOFT__factory,
-    BaseTOFTLeverageModule__factory,
-    BaseTOFTMarketModule__factory,
-    BaseTOFTOptionsModule__factory,
-    BaseTOFTLeverageDestinationModule__factory,
-    BaseTOFTMarketDestinationModule__factory,
-    BaseTOFTOptionsDestinationModule__factory,
-    BaseTOFTGenericModule__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapiocaz';
-import { ITapiocaOFT__factory } from '../typechain';
+} from '@tapioca-sdk/typechain/tapioca-mocks';
+import { TapiocaOFT__factory } from '@tapioca-sdk/typechain/tapiocaz';
+import { MagnetarV2 } from '@typechain/index';
 
 const MAX_DEADLINE = 9999999999999;
 
 const symbol = 'MTKN';
 const version = '1';
 
-describe('MagnetarV2', () => {
+describe.only('MagnetarV2', () => {
     describe('view', () => {
         it('should test sgl info', async () => {
             const {
                 deployer,
-                eoa1,
                 yieldBox,
-                createTokenEmptyStrategy,
-                deployCurveStableToUsdoBidder,
                 usd0,
                 bar,
                 __wethUsdcPrice,
@@ -74,9 +55,6 @@ describe('MagnetarV2', () => {
                 weth,
                 wethAssetId,
                 mediumRiskMC,
-                usdc,
-                magnetar,
-                magnetarHelper,
             } = await loadFixture(register);
 
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
@@ -99,8 +77,6 @@ describe('MagnetarV2', () => {
 
             const SGLLeverage = new SGLLeverage__factory(deployer);
             const _sglLeverageModule = await SGLLeverage.deploy();
-
-            const collateralSwapPath = [usd0.address, weth.address];
 
             const newPrice = __wethUsdcPrice.div(1000000);
             await wethUsdcOracle.set(newPrice);
@@ -140,29 +116,13 @@ describe('MagnetarV2', () => {
                 ],
             );
             await bar.registerSingularity(mediumRiskMC.address, sglData, true);
-            const wethUsdoSingularity = new ethers.Contract(
-                await bar.clonesOf(
-                    mediumRiskMC.address,
-                    (await bar.clonesOfCount(mediumRiskMC.address)).sub(1),
-                ),
-                SingularityArtifact.abi,
-                ethers.provider,
-            ).connect(deployer);
-
-            const info = await magnetarHelper.singularityMarketInfo(
-                deployer.address,
-                [wethUsdoSingularity.address],
-            );
         });
     });
     describe('withdrawTo()', () => {
         it('should test withdrawTo', async () => {
             const {
                 deployer,
-                eoa1,
                 yieldBox,
-                createTokenEmptyStrategy,
-                deployCurveStableToUsdoBidder,
                 usd0,
                 bar,
                 __wethUsdcPrice,
@@ -170,10 +130,9 @@ describe('MagnetarV2', () => {
                 weth,
                 wethAssetId,
                 mediumRiskMC,
-                usdc,
                 magnetar,
-                initContracts,
                 timeTravel,
+                cluster,
             } = await loadFixture(register);
 
             const usdoStratregy = await bar.emptyStrategies(usd0.address);
@@ -243,27 +202,11 @@ describe('MagnetarV2', () => {
                 SingularityArtifact.abi,
                 ethers.provider,
             ).connect(deployer);
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
 
             //Deploy & set LiquidationQueue
             await usd0.setMinterStatus(wethUsdoSingularity.address, true);
             await usd0.setBurnerStatus(wethUsdoSingularity.address, true);
-
-            const LiquidationQueueFactory = await ethers.getContractFactory(
-                'LiquidationQueue',
-            );
-            const liquidationQueue = await LiquidationQueueFactory.deploy();
-
-            const feeCollector = new ethers.Wallet(
-                ethers.Wallet.createRandom().privateKey,
-                ethers.provider,
-            );
-
-            const { stableToUsdoBidder } = await deployCurveStableToUsdoBidder(
-                deployer,
-                bar,
-                usdc,
-                usd0,
-            );
 
             const usdoAmount = ethers.BigNumber.from((1e18).toString()).mul(10);
             const usdoShare = await yieldBox.toShare(
@@ -340,23 +283,33 @@ describe('MagnetarV2', () => {
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
-            const borrowFn = magnetar.interface.encodeFunctionData(
-                'depositAddCollateralAndBorrowFromMarket',
-                [
-                    wethUsdoSingularity.address,
-                    deployer.address,
-                    wethMintVal,
-                    0,
-                    true,
-                    true,
-                    {
+            const depositAddCollateralAndBorrowFromMarketData: Parameters<
+                MagnetarV2['depositAddCollateralAndBorrowFromMarket']
+            > = [
+                {
+                    market: wethUsdoSingularity.address,
+                    user: deployer.address,
+                    collateralAmount: wethMintVal,
+                    borrowAmount: borrowAmount,
+                    extractFromSender: true,
+                    deposit: true,
+                    withdrawParams: {
                         withdraw: false,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        refundAddress: deployer.address,
+                        unwrap: false,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
-                ],
+                    valueAmount: 0,
+                },
+            ];
+
+            const borrowFn = magnetar.interface.encodeFunctionData(
+                'depositAddCollateralAndBorrowFromMarket',
+                depositAddCollateralAndBorrowFromMarketData,
             );
 
             let borrowPart = await wethUsdoSingularity.userBorrowPart(
@@ -387,8 +340,6 @@ describe('MagnetarV2', () => {
             );
             expect(collateralAmpunt.eq(wethMintVal)).to.be.true;
 
-            const totalAsset = await wethUsdoSingularity.totalSupply();
-
             await wethUsdoSingularity
                 .connect(deployer)
                 .borrow(deployer.address, deployer.address, borrowAmount);
@@ -399,19 +350,19 @@ describe('MagnetarV2', () => {
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
             const receiverSplit = deployer.address.split('0x');
-            await magnetar.withdrawToChain(
-                yieldBox.address,
-                deployer.address,
-                usdoAssetId,
-                0,
-                '0x'.concat(receiverSplit[1].padStart(64, '0')),
-                borrowAmount,
-                '0x00',
-                deployer.address,
-                0,
-                false,
-                ethers.constants.AddressZero,
-            );
+            await magnetar.withdrawToChain({
+                yieldBox: yieldBox.address,
+                from: deployer.address,
+                assetId: usdoAssetId,
+                dstChainId: 0,
+                receiver: '0x'.concat(receiverSplit[1].padStart(64, '0')), // address to bytes32
+                amount: borrowAmount,
+                adapterParams: '0x',
+                refundAddress: deployer.address,
+                gas: 0,
+                unwrap: false,
+                zroPaymentAddress: ethers.constants.AddressZero,
+            });
 
             const usdoBalanceOfDeployer = await usd0.balanceOf(
                 deployer.address,
@@ -436,27 +387,19 @@ describe('MagnetarV2', () => {
                 cluster,
             } = await loadFixture(register);
 
-            const {
-                singularitySrc,
-                singularityDst,
-                lzEndpointSrc,
-                lzEndpointDst,
-                usd0Src,
-                usd0Dst,
-                usd0DstId,
-                usd0SrcId,
-            } = await setupUsd0Environment(
-                mediumRiskMC,
-                yieldBox,
-                cluster.address,
-                bar,
-                usdc,
-                weth,
-                wethAssetId,
-                createWethUsd0Singularity,
-                deployCurveStableToUsdoBidder,
-                deployer,
-            );
+            const { lzEndpointSrc, lzEndpointDst, usd0Src, usd0Dst } =
+                await setupUsd0Environment(
+                    mediumRiskMC,
+                    yieldBox,
+                    cluster.address,
+                    bar,
+                    usdc,
+                    weth,
+                    wethAssetId,
+                    createWethUsd0Singularity,
+                    deployCurveStableToUsdoBidder,
+                    deployer,
+                );
             const adapterParams = ethers.utils.solidityPack(
                 ['uint16', 'uint256'],
                 [1, 2250000],
@@ -531,14 +474,6 @@ describe('MagnetarV2', () => {
                 deployer.address,
             );
 
-            const tokenTwo = await ERC20Mock.deploy(
-                'TestTokenTwo',
-                'TWO',
-                0,
-                18,
-                deployer.address,
-            );
-
             const chainId = await getChainId();
             const value = BN(42).toNumber();
             const nonce = 0;
@@ -602,13 +537,8 @@ describe('MagnetarV2', () => {
 
     describe('ybDeposit()', () => {
         it('should execute YB deposit asset', async () => {
-            const {
-                deployer,
-                eoa1,
-                yieldBox,
-                magnetar,
-                createTokenEmptyStrategy,
-            } = await loadFixture(register);
+            const { deployer, yieldBox, magnetar, createTokenEmptyStrategy } =
+                await loadFixture(register);
 
             const name = 'Token One';
 
@@ -768,10 +698,7 @@ describe('MagnetarV2', () => {
         it('should lend', async () => {
             const {
                 deployer,
-                eoa1,
                 yieldBox,
-                createTokenEmptyStrategy,
-                deployCurveStableToUsdoBidder,
                 usd0,
                 bar,
                 __wethUsdcPrice,
@@ -779,7 +706,6 @@ describe('MagnetarV2', () => {
                 weth,
                 wethAssetId,
                 mediumRiskMC,
-                usdc,
                 magnetar,
             } = await loadFixture(register);
 
@@ -803,8 +729,6 @@ describe('MagnetarV2', () => {
 
             const SGLLeverage = new SGLLeverage__factory(deployer);
             const _sglLeverageModule = await SGLLeverage.deploy();
-
-            const collateralSwapPath = [usd0.address, weth.address];
 
             const newPrice = __wethUsdcPrice.div(1000000);
             await wethUsdcOracle.set(newPrice);
@@ -856,9 +780,6 @@ describe('MagnetarV2', () => {
             //Deploy & set LiquidationQueue
             await usd0.setMinterStatus(wethUsdoSingularity.address, true);
             await usd0.setBurnerStatus(wethUsdoSingularity.address, true);
-            const LiquidationQueueFactory = await ethers.getContractFactory(
-                'LiquidationQueue',
-            );
 
             const usdoAmount = ethers.BigNumber.from((1e6).toString());
             const usdoShare = await yieldBox.toShare(
@@ -1017,7 +938,6 @@ describe('MagnetarV2', () => {
         it('Should deposit to yieldBox & add asset', async () => {
             const {
                 weth,
-                yieldBox,
                 wethUsdcSingularity,
                 deployer,
                 initContracts,
@@ -1036,10 +956,10 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
             await cluster.updateContract(0, wethUsdcSingularity.address, true);
-            await magnetar.mintFromBBAndLendOnSGL(
-                deployer.address,
-                mintVal,
-                {
+            await magnetar.mintFromBBAndLendOnSGL({
+                user: deployer.address,
+                lendAmount: mintVal,
+                mintData: {
                     mint: false,
                     mintAmount: 0,
                     collateralDepositData: {
@@ -1048,29 +968,29 @@ describe('MagnetarV2', () => {
                         extractFromSender: false,
                     },
                 },
-                {
+                depositData: {
                     deposit: true,
                     amount: mintVal,
                     extractFromSender: true,
                 },
-                {
+                lockData: {
                     lock: false,
                     amount: 0,
                     lockDuration: 0,
                     target: ethers.constants.AddressZero,
                     fraction: 0,
                 },
-                {
+                participateData: {
                     participate: false,
                     target: ethers.constants.AddressZero,
                     tOLPTokenId: 0,
                 },
-                {
+                externalContracts: {
                     singularity: wethUsdcSingularity.address,
                     magnetar: magnetar.address,
                     bigBang: ethers.constants.AddressZero,
                 },
-            );
+            });
         });
 
         it('Should deposit to yieldBox & add asset to singularity through burst', async () => {
@@ -1099,38 +1019,40 @@ describe('MagnetarV2', () => {
             const lendFn = magnetar.interface.encodeFunctionData(
                 'mintFromBBAndLendOnSGL',
                 [
-                    deployer.address,
-                    mintVal,
                     {
-                        mint: false,
-                        mintAmount: 0,
-                        collateralDepositData: {
-                            deposit: false,
-                            amount: 0,
-                            extractFromSender: false,
+                        user: deployer.address,
+                        lendAmount: mintVal,
+                        mintData: {
+                            mint: false,
+                            mintAmount: 0,
+                            collateralDepositData: {
+                                deposit: false,
+                                amount: 0,
+                                extractFromSender: false,
+                            },
                         },
-                    },
-                    {
-                        deposit: true,
-                        amount: mintVal,
-                        extractFromSender: false,
-                    },
-                    {
-                        lock: false,
-                        amount: 0,
-                        lockDuration: 0,
-                        target: ethers.constants.AddressZero,
-                        fraction: 0,
-                    },
-                    {
-                        participate: false,
-                        target: ethers.constants.AddressZero,
-                        tOLPTokenId: 0,
-                    },
-                    {
-                        singularity: wethUsdcSingularity.address,
-                        magnetar: magnetar.address,
-                        bigBang: ethers.constants.AddressZero,
+                        depositData: {
+                            deposit: true,
+                            amount: mintVal,
+                            extractFromSender: true,
+                        },
+                        lockData: {
+                            lock: false,
+                            amount: 0,
+                            lockDuration: 0,
+                            target: ethers.constants.AddressZero,
+                            fraction: 0,
+                        },
+                        participateData: {
+                            participate: false,
+                            target: ethers.constants.AddressZero,
+                            tOLPTokenId: 0,
+                        },
+                        externalContracts: {
+                            singularity: wethUsdcSingularity.address,
+                            magnetar: magnetar.address,
+                            bigBang: ethers.constants.AddressZero,
+                        },
                     },
                 ],
             );
@@ -1568,7 +1490,6 @@ describe('MagnetarV2', () => {
         it('should deposit, add collateral, borrow and withdraw through burst', async () => {
             const {
                 weth,
-                deployer,
                 wethUsdcSingularity,
                 usdc,
                 eoa1,
@@ -1577,10 +1498,7 @@ describe('MagnetarV2', () => {
                 __wethUsdcPrice,
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
-                yieldBox,
             } = await loadFixture(register);
-
-            const collateralId = await wethUsdcSingularity.collateralId();
 
             await initContracts(); // To prevent `Singularity: below minimum`
 
@@ -1608,22 +1526,27 @@ describe('MagnetarV2', () => {
             const borrowFn = magnetar.interface.encodeFunctionData(
                 'depositAddCollateralAndBorrowFromMarket',
                 [
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
                     {
-                        withdraw: true,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        collateralAmount: usdcMintVal,
+                        borrowAmount: borrowAmount,
+                        extractFromSender: true,
+                        deposit: true,
+                        withdrawParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: '0x',
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
                 ],
             );
-
             let borrowPart = await wethUsdcSingularity.userBorrowPart(
                 eoa1.address,
             );
@@ -1649,9 +1572,7 @@ describe('MagnetarV2', () => {
         it('should deposit, add collateral and borrow through Magnetar', async () => {
             const {
                 weth,
-                yieldBox,
                 wethUsdcSingularity,
-                deployer,
                 usdc,
                 eoa1,
                 initContracts,
@@ -1662,9 +1583,6 @@ describe('MagnetarV2', () => {
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
-
-            const assetId = await wethUsdcSingularity.assetId();
-            const collateralId = await wethUsdcSingularity.collateralId();
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
             const wethMintVal = ethers.BigNumber.from((1e18).toString()).mul(
@@ -1688,27 +1606,30 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
-                    {
+                .depositAddCollateralAndBorrowFromMarket({
+                    market: wethUsdcSingularity.address,
+                    user: eoa1.address,
+                    collateralAmount: usdcMintVal,
+                    borrowAmount: borrowAmount,
+                    extractFromSender: true,
+                    deposit: true,
+                    withdrawParams: {
                         withdraw: false,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawAdapterParams: '0x',
+                        unwrap: false,
+                        refundAddress: eoa1.address,
+                        zroPaymentAddress: hre.ethers.constants.AddressZero,
                     },
-                );
+                    valueAmount: 0,
+                });
         });
 
         it('should deposit, add collateral, borrow and withdraw through Magnetar', async () => {
             const {
                 weth,
-                deployer,
                 wethUsdcSingularity,
                 usdc,
                 eoa1,
@@ -1717,10 +1638,7 @@ describe('MagnetarV2', () => {
                 __wethUsdcPrice,
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
-                yieldBox,
             } = await loadFixture(register);
-
-            const collateralId = await wethUsdcSingularity.collateralId();
 
             await initContracts(); // To prevent `Singularity: below minimum`
 
@@ -1747,27 +1665,30 @@ describe('MagnetarV2', () => {
 
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
-                    {
+                .depositAddCollateralAndBorrowFromMarket({
+                    market: wethUsdcSingularity.address,
+                    user: eoa1.address,
+                    collateralAmount: usdcMintVal,
+                    borrowAmount: borrowAmount,
+                    extractFromSender: true,
+                    deposit: true,
+                    withdrawParams: {
                         withdraw: true,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawAdapterParams: '0x',
+                        unwrap: false,
+                        refundAddress: eoa1.address,
+                        zroPaymentAddress: hre.ethers.constants.AddressZero,
                     },
-                );
+                    valueAmount: 0,
+                });
         });
 
         it('should deposit, add collateral, borrow and withdraw through Magnetar without withdraw', async () => {
             const {
                 weth,
-                deployer,
                 wethUsdcSingularity,
                 usdc,
                 eoa1,
@@ -1776,10 +1697,7 @@ describe('MagnetarV2', () => {
                 __wethUsdcPrice,
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
-                yieldBox,
             } = await loadFixture(register);
-
-            const collateralId = await wethUsdcSingularity.collateralId();
 
             await initContracts(); // To prevent `Singularity: below minimum`
 
@@ -1805,27 +1723,30 @@ describe('MagnetarV2', () => {
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             await magnetar
                 .connect(eoa1)
-                .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
-                    {
+                .depositAddCollateralAndBorrowFromMarket({
+                    market: wethUsdcSingularity.address,
+                    user: eoa1.address,
+                    collateralAmount: usdcMintVal,
+                    borrowAmount: borrowAmount,
+                    extractFromSender: true,
+                    deposit: true,
+                    withdrawParams: {
                         withdraw: false,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        withdrawAdapterParams: '0x',
+                        unwrap: false,
+                        refundAddress: eoa1.address,
+                        zroPaymentAddress: hre.ethers.constants.AddressZero,
                     },
-                );
+                    valueAmount: 0,
+                });
         });
 
         it('should add collateral, borrow and withdraw through Magnetar', async () => {
             const {
                 weth,
-                deployer,
                 wethUsdcSingularity,
                 usdc,
                 usdcAssetId,
@@ -1836,11 +1757,8 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 yieldBox,
-                usdcDepositAndAddCollateral,
             } = await loadFixture(register);
 
-            const collateralId = await wethUsdcSingularity.collateralId();
-            const assetId = await wethUsdcSingularity.assetId();
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
@@ -1880,22 +1798,44 @@ describe('MagnetarV2', () => {
             await magnetar
                 .connect(eoa1)
                 .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    false,
                     {
-                        withdraw: true,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.solidityPack(
-                            ['uint16', 'uint256'],
-                            [1, 1000000],
-                        ),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        collateralAmount: usdcMintVal,
+                        borrowAmount: borrowAmount,
+                        extractFromSender: true,
+                        deposit: false,
+                        withdrawParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: ethers.utils.solidityPack(
+                                ['uint16', 'uint256'],
+                                [1, 1000000],
+                            ),
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
+                    // wethUsdcSingularity.address,
+                    // eoa1.address,
+                    // usdcMintVal,
+                    // borrowAmount,
+                    // true,
+                    // false,
+                    // {
+                    //     withdraw: true,
+                    //     withdrawLzFeeAmount: 0,
+                    //     withdrawOnOtherChain: false,
+                    //     withdrawLzChainId: 0,
+                    // withdrawAdapterParams: ethers.utils.solidityPack(
+                    //     ['uint16', 'uint256'],
+                    //     [1, 1000000],
+                    // ),
+                    // },
                 );
         });
     });
@@ -1907,7 +1847,6 @@ describe('MagnetarV2', () => {
                 wethUsdcSingularity,
                 usdc,
                 eoa1,
-                deployer,
                 initContracts,
                 magnetar,
                 __wethUsdcPrice,
@@ -1917,7 +1856,6 @@ describe('MagnetarV2', () => {
             } = await loadFixture(register);
 
             const assetId = await wethUsdcSingularity.assetId();
-            const collateralId = await wethUsdcSingularity.collateralId();
             await initContracts(); // To prevent `Singularity: below minimum`
 
             const borrowAmount = ethers.BigNumber.from((1e17).toString());
@@ -1943,19 +1881,38 @@ describe('MagnetarV2', () => {
             await magnetar
                 .connect(eoa1)
                 .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
                     {
-                        withdraw: true,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        collateralAmount: usdcMintVal,
+                        borrowAmount: borrowAmount,
+                        extractFromSender: true,
+                        deposit: true,
+                        withdrawParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
+                    // wethUsdcSingularity.address,
+                    // eoa1.address,
+                    // usdcMintVal,
+                    // borrowAmount,
+                    // true,
+                    // true,
+                    // {
+                    //     withdraw: true,
+                    //     withdrawLzFeeAmount: 0,
+                    //     withdrawOnOtherChain: false,
+                    //     withdrawLzChainId: 0,
+                    //     withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    // },
                 );
 
             const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
@@ -1979,19 +1936,38 @@ describe('MagnetarV2', () => {
             await magnetar
                 .connect(eoa1)
                 .depositRepayAndRemoveCollateralFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    userBorrowPart.mul(2),
-                    userBorrowPart,
-                    0,
-                    true,
                     {
-                        withdraw: false,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        depositAmount: userBorrowPart.mul(2),
+                        repayAmount: userBorrowPart,
+                        collateralAmount: 0,
+                        extractFromSender: true,
+                        withdrawCollateralParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
+                    // wethUsdcSingularity.address,
+                    // eoa1.address,
+                    // userBorrowPart.mul(2),
+                    // userBorrowPart,
+                    // 0,
+                    // true,
+                    // {
+                    //     withdraw: false,
+                    //     withdrawLzFeeAmount: 0,
+                    //     withdrawOnOtherChain: false,
+                    //     withdrawLzChainId: 0,
+                    //     withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    // },
                 );
         });
 
@@ -2001,7 +1977,6 @@ describe('MagnetarV2', () => {
                 weth,
                 wethUsdcSingularity,
                 usdc,
-                deployer,
                 eoa1,
                 initContracts,
                 yieldBox,
@@ -2038,19 +2013,38 @@ describe('MagnetarV2', () => {
             await magnetar
                 .connect(eoa1)
                 .depositAddCollateralAndBorrowFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    usdcMintVal,
-                    borrowAmount,
-                    true,
-                    true,
                     {
-                        withdraw: true,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        collateralAmount: usdcMintVal,
+                        borrowAmount: borrowAmount,
+                        extractFromSender: true,
+                        deposit: true,
+                        withdrawParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
+                    // wethUsdcSingularity.address,
+                    // eoa1.address,
+                    // usdcMintVal,
+                    // borrowAmount,
+                    // true,
+                    // true,
+                    // {
+                    //     withdraw: true,
+                    //     withdrawLzFeeAmount: 0,
+                    //     withdrawOnOtherChain: false,
+                    //     withdrawLzChainId: 0,
+                    //     withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    // },
                 );
 
             const userBorrowPart = await wethUsdcSingularity.userBorrowPart(
@@ -2064,7 +2058,6 @@ describe('MagnetarV2', () => {
                 collateralShare,
                 false,
             );
-            const usdcBalanceBefore = await usdc.balanceOf(eoa1.address);
 
             await weth.connect(eoa1).freeMint(userBorrowPart.mul(2));
 
@@ -2086,19 +2079,38 @@ describe('MagnetarV2', () => {
             await magnetar
                 .connect(eoa1)
                 .depositRepayAndRemoveCollateralFromMarket(
-                    wethUsdcSingularity.address,
-                    eoa1.address,
-                    userBorrowPart.mul(2),
-                    userBorrowPart,
-                    collateralAmount,
-                    true,
                     {
-                        withdraw: false,
-                        withdrawLzFeeAmount: 0,
-                        withdrawOnOtherChain: false,
-                        withdrawLzChainId: 0,
-                        withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        market: wethUsdcSingularity.address,
+                        user: eoa1.address,
+                        depositAmount: userBorrowPart.mul(2),
+                        repayAmount: userBorrowPart,
+                        collateralAmount,
+                        extractFromSender: true,
+                        withdrawCollateralParams: {
+                            withdraw: true,
+                            withdrawLzFeeAmount: 0,
+                            withdrawOnOtherChain: false,
+                            withdrawLzChainId: 0,
+                            withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                            unwrap: false,
+                            refundAddress: eoa1.address,
+                            zroPaymentAddress: hre.ethers.constants.AddressZero,
+                        },
+                        valueAmount: 0,
                     },
+                    // wethUsdcSingularity.address,
+                    // eoa1.address,
+                    // userBorrowPart.mul(2),
+                    // userBorrowPart,
+                    // collateralAmount,
+                    // true,
+                    // {
+                    //     withdraw: false,
+                    //     withdrawLzFeeAmount: 0,
+                    //     withdrawOnOtherChain: false,
+                    //     withdrawLzChainId: 0,
+                    //     withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                    // },
                 );
         });
     });
@@ -2200,41 +2212,43 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await cluster.updateContract(0, wethBigBangMarket.address, true);
-            await magnetar.mintFromBBAndLendOnSGL(
-                deployer.address,
-                borrowAmount,
-                {
+            await magnetar.mintFromBBAndLendOnSGL({
+                user: deployer.address,
+                lendAmount: borrowAmount,
+                mintData: {
                     mint: true,
-                    mintAmount: borrowAmount,
+                    mintAmount: wethMintVal,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,
                         extractFromSender: true,
                     },
                 },
-                {
+                depositData: {
                     deposit: false,
                     amount: 0,
                     extractFromSender: false,
                 },
-                {
+                lockData: {
                     lock: false,
                     amount: 0,
                     lockDuration: 0,
                     target: ethers.constants.AddressZero,
                     fraction: 0,
                 },
-                {
+
+                participateData: {
                     participate: false,
                     target: ethers.constants.AddressZero,
                     tOLPTokenId: 0,
                 },
-                {
+
+                externalContracts: {
                     singularity: wethUsdoSingularity.address,
                     magnetar: magnetar.address,
                     bigBang: wethBigBangMarket.address,
                 },
-            );
+            });
 
             const bingBangCollateralShare =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
@@ -2382,41 +2396,43 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await cluster.updateContract(0, wethBigBangMarket.address, true);
-            await magnetar.mintFromBBAndLendOnSGL(
-                deployer.address,
-                borrowAmount,
-                {
+            await magnetar.mintFromBBAndLendOnSGL({
+                user: deployer.address,
+                lendAmount: borrowAmount,
+                mintData: {
                     mint: true,
-                    mintAmount: borrowAmount,
+                    mintAmount: wethMintVal,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,
                         extractFromSender: true,
                     },
                 },
-                {
+                depositData: {
                     deposit: false,
                     amount: 0,
                     extractFromSender: false,
                 },
-                {
+                lockData: {
                     lock: false,
                     amount: 0,
                     lockDuration: 0,
                     target: ethers.constants.AddressZero,
                     fraction: 0,
                 },
-                {
+
+                participateData: {
                     participate: false,
                     target: ethers.constants.AddressZero,
                     tOLPTokenId: 0,
                 },
-                {
+
+                externalContracts: {
                     singularity: wethUsdoSingularity.address,
                     magnetar: magnetar.address,
                     bigBang: wethBigBangMarket.address,
                 },
-            );
+            });
 
             await usd0.approve(yieldBox.address, ethers.constants.MaxUint256);
             await yieldBox.depositAsset(
@@ -2489,14 +2505,14 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);
-            await magnetar.exitPositionAndRemoveCollateral(
-                deployer.address,
-                {
+            await magnetar.exitPositionAndRemoveCollateral({
+                user: deployer.address,
+                externalData: {
                     magnetar: magnetar.address,
                     singularity: wethUsdoSingularity.address,
                     bigBang: wethBigBangMarket.address,
                 },
-                {
+                removeAndRepayData: {
                     removeAssetFromSGL: true,
                     removeAmount: fractionAmount.div(2),
                     repayAssetOnBB: true,
@@ -2523,6 +2539,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        unwrap: false,
                     },
                     collateralWithdrawData: {
                         withdraw: true,
@@ -2530,9 +2549,13 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        unwrap: false,
                     },
                 },
-            );
+                valueAmount: 0,
+            });
 
             const wethBalanceAfter = await weth.balanceOf(deployer.address);
 
@@ -2635,41 +2658,41 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethBigBangMarket.address, true);
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
-            await magnetar.mintFromBBAndLendOnSGL(
-                deployer.address,
-                borrowAmount,
-                {
+            await magnetar.mintFromBBAndLendOnSGL({
+                user: deployer.address,
+                lendAmount: borrowAmount,
+                mintData: {
                     mint: true,
-                    mintAmount: borrowAmount,
+                    mintAmount: wethMintVal,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,
                         extractFromSender: true,
                     },
                 },
-                {
+                depositData: {
                     deposit: false,
                     amount: 0,
                     extractFromSender: false,
                 },
-                {
+                lockData: {
                     lock: false,
                     amount: 0,
                     lockDuration: 0,
                     target: ethers.constants.AddressZero,
                     fraction: 0,
                 },
-                {
+                participateData: {
                     participate: false,
                     target: ethers.constants.AddressZero,
                     tOLPTokenId: 0,
                 },
-                {
+                externalContracts: {
                     singularity: wethUsdoSingularity.address,
                     magnetar: magnetar.address,
                     bigBang: wethBigBangMarket.address,
                 },
-            );
+            });
 
             await usd0.approve(yieldBox.address, ethers.constants.MaxUint256);
             await yieldBox.depositAsset(
@@ -2699,14 +2722,14 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);
-            await magnetar.exitPositionAndRemoveCollateral(
-                deployer.address,
-                {
+            await magnetar.exitPositionAndRemoveCollateral({
+                user: deployer.address,
+                externalData: {
                     magnetar: magnetar.address,
                     singularity: wethUsdoSingularity.address,
                     bigBang: wethBigBangMarket.address,
                 },
-                {
+                removeAndRepayData: {
                     removeAssetFromSGL: true,
                     removeAmount: fractionAmount.div(2),
                     repayAssetOnBB: true,
@@ -2733,6 +2756,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        unwrap: false,
                     },
                     collateralWithdrawData: {
                         withdraw: false,
@@ -2740,9 +2766,13 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        unwrap: false,
                     },
                 },
-            );
+                valueAmount: 0,
+            });
             const wethCollateralAfter =
                 await wethBigBangMarket.userCollateralShare(deployer.address);
 
@@ -2860,32 +2890,6 @@ const Permit = [
     { name: 'nonce', type: 'uint256' },
     { name: 'deadline', type: 'uint256' },
 ];
-
-const PermitAll = [
-    { name: 'owner', type: 'address' },
-    { name: 'spender', type: 'address' },
-    { name: 'nonce', type: 'uint256' },
-    { name: 'deadline', type: 'uint256' },
-];
-
-function encodeMagnetarWithdrawData(
-    otherChain: boolean,
-    destChain: number,
-    receiver: string,
-    adapterParams: string,
-) {
-    const receiverSplit = receiver.split('0x');
-
-    return ethers.utils.defaultAbiCoder.encode(
-        ['bool', 'uint16', 'bytes32', 'bytes'],
-        [
-            otherChain,
-            destChain,
-            '0x'.concat(receiverSplit[1].padStart(64, '0')),
-            adapterParams,
-        ],
-    );
-}
 
 async function getChainId(): Promise<number> {
     const chainIdHex = await hre.network.provider.send('eth_chainId', []);

@@ -689,18 +689,6 @@ async function deployCurveStableToUsdoBidder(
         staging,
     );
 
-    const CurveStableToUsdoBidderFactory = await ethers.getContractFactory(
-        'CurveStableToUsdoBidder',
-    );
-    const stableToUsdoBidder = await CurveStableToUsdoBidderFactory.deploy(
-        curveSwapper.address,
-        2,
-    );
-    log(
-        `Deployed CurveStableToUsdoBidder ${stableToUsdoBidder.address} with args [${curveSwapper.address},2]`,
-        staging,
-    );
-
     await verifyEtherscan(
         curvePoolMock.address,
         [usdo.address, usdc.address],
@@ -711,13 +699,8 @@ async function deployCurveStableToUsdoBidder(
         [curvePoolMock.address, bar.address],
         staging,
     );
-    await verifyEtherscan(
-        stableToUsdoBidder.address,
-        [curveSwapper.address, 2],
-        staging,
-    );
 
-    return { stableToUsdoBidder, curveSwapper };
+    return { curveSwapper };
 }
 
 async function createWethUsd0Singularity(
@@ -1030,6 +1013,8 @@ export async function register(staging?: boolean) {
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
+    await cluster.updateContract(0, yieldBox.address, true);
+
     // ------------------- 2.2 Deploy Penrose -------------------
     log('Deploying Penrose', staging);
 
@@ -1086,6 +1071,7 @@ export async function register(staging?: boolean) {
         staging,
     );
     const wethUsdcSingularity = wethUsdcSingularityData.singularityMarket;
+    await cluster.updateContract(0, wethUsdcSingularity.address, true);
     const SGLCollateral = new SGLCollateral__factory(deployer);
     const _sglCollateralModule = await SGLCollateral.deploy();
 
