@@ -7,13 +7,13 @@ tapioca-sdk
 package-lock.json
 docs
 
-#Hardhat files
+#Hardhat & foundry files
+gen
 cache
 artifacts
-
-#Forge
-cache_forge
 out
+cache_forge
+
 
 #Others
 .DS_Store
