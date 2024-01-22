@@ -36,6 +36,7 @@ interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
         uint256 borrowAmount;
         address marketHelper;
         address market;
+        bool deposit;
     }
 
     function totalFees() external view returns (uint256);
