@@ -1,13 +1,17 @@
-import '@nomicfoundation/hardhat-toolbox';
 import * as dotenv from 'dotenv';
+import fs from 'fs';
 
+// hardhat
+import '@nomicfoundation/hardhat-toolbox';
 import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-foundry';
 import '@primitivefi/hardhat-dodoc';
 import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
-import { HardhatUserConfig } from 'hardhat/config';
-import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
 import 'hardhat-tracer';
+import { HardhatUserConfig, subtask } from 'hardhat/config';
+import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
+import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 
 // Tapioca
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
@@ -30,6 +34,15 @@ declare global {
 
 loadEnv();
 deleteDefaultTasks();
+
+// Solves the hardhat error [Error HH415: Two different source names]
+subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
+    // Get the list of source paths that would normally be passed to the Solidity compiler
+    const remappings = await runSuper();
+    fs.cpSync('contracts/', 'gen/contracts/', { recursive: true });
+    remappings['tapioca-periph/'] = 'gen/contracts/';
+    return remappings;
+});
 
 type TNetwork = ReturnType<
     typeof SDK.API.utils.getSupportedChains

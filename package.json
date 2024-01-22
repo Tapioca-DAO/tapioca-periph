@@ -23,6 +23,7 @@
         "@ethersproject/abi": "^5.7.0",
         "@ethersproject/providers": "^5.7.0",
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
+        "@nomicfoundation/hardhat-foundry": "^1.1.1",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
         "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@nomiclabs/hardhat-ethers": "^2.1.1",
