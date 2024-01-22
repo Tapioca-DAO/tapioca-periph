@@ -173,6 +173,7 @@ describe('MagnetarV2', () => {
                 usdc,
                 magnetar,
                 initContracts,
+                cluster,
                 timeTravel,
             } = await loadFixture(register);
 
@@ -340,6 +341,13 @@ describe('MagnetarV2', () => {
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
+            await cluster.updateContract(
+                31337,
+                wethUsdoSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, magnetar.address, true);
+            await cluster.updateContract(31337, yieldBox.address, true);
             const borrowFn = magnetar.interface.encodeFunctionData(
                 'depositAddCollateralAndBorrowFromMarket',
                 [
@@ -355,6 +363,8 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 ],
             );
@@ -1578,6 +1588,7 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 yieldBox,
+                cluster,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1604,7 +1615,13 @@ describe('MagnetarV2', () => {
             await wethUsdcSingularity
                 .connect(eoa1)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
-
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, magnetar.address, true);
             const borrowFn = magnetar.interface.encodeFunctionData(
                 'depositAddCollateralAndBorrowFromMarket',
                 [
@@ -1620,6 +1637,8 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 ],
             );
@@ -1659,6 +1678,7 @@ describe('MagnetarV2', () => {
                 __wethUsdcPrice,
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
+                cluster,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1682,6 +1702,13 @@ describe('MagnetarV2', () => {
             await approveTokensAndSetBarApproval();
             await wethDepositAndAddAsset(wethMintVal);
 
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, magnetar.address, true);
             await usdc.connect(eoa1).approve(magnetar.address, usdcMintVal);
             await wethUsdcSingularity
                 .connect(eoa1)
@@ -1701,6 +1728,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -1718,6 +1748,7 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 yieldBox,
+                cluster,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1739,7 +1770,13 @@ describe('MagnetarV2', () => {
             // We lend WETH as deployer
             await approveTokensAndSetBarApproval();
             await wethDepositAndAddAsset(wethMintVal);
-
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, magnetar.address, true);
             await usdc.connect(eoa1).approve(magnetar.address, usdcMintVal);
             await wethUsdcSingularity
                 .connect(eoa1)
@@ -1760,6 +1797,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -1777,6 +1817,7 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 yieldBox,
+                cluster,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1799,6 +1840,13 @@ describe('MagnetarV2', () => {
             await approveTokensAndSetBarApproval();
             await wethDepositAndAddAsset(wethMintVal);
 
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, magnetar.address, true);
             await usdc.connect(eoa1).approve(magnetar.address, usdcMintVal);
             await wethUsdcSingularity
                 .connect(eoa1)
@@ -1818,6 +1866,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -1837,6 +1888,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 usdcDepositAndAddCollateral,
+                cluster,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1874,6 +1926,13 @@ describe('MagnetarV2', () => {
                     0,
                 );
 
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(31337, magnetar.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
             await wethUsdcSingularity
                 .connect(eoa1)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
@@ -1895,6 +1954,9 @@ describe('MagnetarV2', () => {
                             ['uint16', 'uint256'],
                             [1, 1000000],
                         ),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -1914,6 +1976,7 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 yieldBox,
+                cluster,
             } = await loadFixture(register);
 
             const assetId = await wethUsdcSingularity.assetId();
@@ -1931,6 +1994,14 @@ describe('MagnetarV2', () => {
             // We get asset
             await weth.freeMint(wethMintVal);
             await usdc.connect(eoa1).freeMint(usdcMintVal);
+
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(31337, magnetar.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
 
             // We lend WETH as deployer
             await approveTokensAndSetBarApproval();
@@ -1955,6 +2026,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
 
@@ -1991,6 +2065,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -2009,6 +2086,7 @@ describe('MagnetarV2', () => {
                 __wethUsdcPrice,
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
+                cluster,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -2035,6 +2113,13 @@ describe('MagnetarV2', () => {
                 .connect(eoa1)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
+            await cluster.updateContract(31337, yieldBox.address, true);
+            await cluster.updateContract(31337, magnetar.address, true);
+            await cluster.updateContract(
+                31337,
+                wethUsdcSingularity.address,
+                true,
+            );
             await magnetar
                 .connect(eoa1)
                 .depositAddCollateralAndBorrowFromMarket(
@@ -2050,6 +2135,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
 
@@ -2098,6 +2186,9 @@ describe('MagnetarV2', () => {
                         withdrawOnOtherChain: false,
                         withdrawLzChainId: 0,
                         withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 );
         });
@@ -2489,6 +2580,18 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);
+            await cluster.updateContract(1, yieldBox.address, true);
+            await cluster.updateContract(
+                31337,
+                wethBigBangMarket.address,
+                true,
+            );
+            await cluster.updateContract(
+                31337,
+                wethUsdoSingularity.address,
+                true,
+            );
+            await cluster.updateContract(31337, yieldBox.address, true);
             await magnetar.exitPositionAndRemoveCollateral(
                 deployer.address,
                 {
@@ -2523,6 +2626,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                     collateralWithdrawData: {
                         withdraw: true,
@@ -2530,6 +2636,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 },
             );
@@ -2733,6 +2842,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                     collateralWithdrawData: {
                         withdraw: false,
@@ -2740,6 +2852,9 @@ describe('MagnetarV2', () => {
                         withdrawLzChainId: 0,
                         withdrawLzFeeAmount: 0,
                         withdrawOnOtherChain: false,
+                        unwrap: false,
+                        refundAddress: deployer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
                     },
                 },
             );
