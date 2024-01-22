@@ -2212,12 +2212,13 @@ describe.only('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await cluster.updateContract(0, wethBigBangMarket.address, true);
+
             await magnetar.mintFromBBAndLendOnSGL({
                 user: deployer.address,
                 lendAmount: borrowAmount,
                 mintData: {
                     mint: true,
-                    mintAmount: wethMintVal,
+                    mintAmount: borrowAmount,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,
@@ -2401,7 +2402,7 @@ describe.only('MagnetarV2', () => {
                 lendAmount: borrowAmount,
                 mintData: {
                     mint: true,
-                    mintAmount: wethMintVal,
+                    mintAmount: borrowAmount,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,
@@ -2663,7 +2664,7 @@ describe.only('MagnetarV2', () => {
                 lendAmount: borrowAmount,
                 mintData: {
                     mint: true,
-                    mintAmount: wethMintVal,
+                    mintAmount: borrowAmount,
                     collateralDepositData: {
                         deposit: true,
                         amount: wethMintVal,

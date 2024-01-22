@@ -34,6 +34,7 @@ import {
     USDOMarketDestinationModule__factory,
     USDOOptionsDestinationModule__factory,
     USDOGenericModule__factory,
+    BigBang,
 } from '@tapioca-sdk/typechain/Tapioca-bar';
 
 import {
@@ -794,7 +795,7 @@ async function createWethUsd0Singularity(
         ),
         SingularityArtifact.abi,
         ethers.provider,
-    ).connect(deployer);
+    ).connect(deployer) as Singularity;
     log(
         `Deployed WethUsd0Singularity at ${wethUsdoSingularity.address} with no arguments`,
         staging,
@@ -900,7 +901,7 @@ async function registerBigBangMarket(
         ),
         BigBangArtifact.abi,
         ethers.provider,
-    ).connect(deployer);
+    ).connect(deployer) as BigBang;
 
     const OracleMock = new OracleMock__factory(deployer);
     log('Deploying USDOUSDC mock oracle', staging);
