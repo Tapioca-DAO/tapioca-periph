@@ -5,8 +5,8 @@ pragma solidity 0.8.22;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
-import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
+import {ILayerZeroEndpoint} from "tapioca-periph/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 contract Cluster is Ownable, ICluster {
     // ************ //

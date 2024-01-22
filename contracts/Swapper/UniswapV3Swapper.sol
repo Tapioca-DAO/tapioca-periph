@@ -9,8 +9,8 @@ import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRoute
 import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 
 // Tapioca
-import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {SafeApprove} from "contracts/libraries/SafeApprove.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {OracleLibrary} from "./libraries/OracleLibrary.sol";
 import {BaseSwapper} from "./BaseSwapper.sol";
 

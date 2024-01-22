@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
 // Tapioca
-import {ITapiocaOracle, ISeerQuery} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {ITapiocaOracle, ISeerQuery} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 import {OracleMulti, OracleMultiConstructorData} from "./OracleMulti.sol";
 
 contract Seer is ITapiocaOracle, OracleMulti {

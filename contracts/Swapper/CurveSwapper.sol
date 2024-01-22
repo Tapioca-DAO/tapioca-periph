@@ -6,9 +6,9 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Tapioca
-import {ICurvePool} from "contracts/interfaces/external/curve/ICurvePool.sol";
-import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {SafeApprove} from "contracts/libraries/SafeApprove.sol";
+import {ICurvePool} from "tapioca-periph/interfaces/external/curve/ICurvePool.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {BaseSwapper} from "./BaseSwapper.sol";
 
 /*

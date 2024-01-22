@@ -7,9 +7,9 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {ISwapper} from "contracts/interfaces/periph/ISwapper.sol";
-import {SafeApprove} from "contracts/libraries/SafeApprove.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 
 abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;

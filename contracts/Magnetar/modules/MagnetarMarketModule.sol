@@ -9,21 +9,22 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // LZ
-import {LzLib} from "contracts/tmp/LzLib.sol";
+import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 
 //TAPIOCA
-import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOption} from "contracts/interfaces/tap-token/ITapiocaOption.sol";
-import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
-import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
-import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {ISendFrom} from "contracts/interfaces/common/ISendFrom.sol";
-import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
-import {IMarket} from "contracts/interfaces/bar/IMarket.sol";
-import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
+import {ITapiocaOptionLiquidityProvision} from
+    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
 contract MagnetarMarketModule is Ownable, MagnetarV2Storage {

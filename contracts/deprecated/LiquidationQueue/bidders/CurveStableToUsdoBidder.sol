@@ -5,12 +5,12 @@ pragma solidity 0.8.22;
 // import {BoringOwnable} from "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 
 // // Tapioca
-// import {ISwapper, ICurveSwapper} from "contracts/interfaces/periph/ISwapper.sol";
-// import {ICurvePool} from "contracts/interfaces/external/curve/ICurvePool.sol";
+// import {ISwapper, ICurveSwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
+// import {ICurvePool} from "tapioca-periph/interfaces/external/curve/ICurvePool.sol";
 // import {ILiquidationQueue} from "../interfaces//ILiquidationQueue.sol";
-// import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-// import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-// import {IPenrose} from "contracts/interfaces/bar/IPenrose.sol";
+// import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+// import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+// import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 
 // /*
 

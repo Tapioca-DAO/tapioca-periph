@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
+import {ILayerZeroEndpoint} from "tapioca-periph/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
 
 interface IStargateBridge {
     function quoteLayerZeroFee(

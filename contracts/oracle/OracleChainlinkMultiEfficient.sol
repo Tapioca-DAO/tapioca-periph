@@ -3,7 +3,7 @@
 pragma solidity 0.8.22;
 
 // External
-import {AggregatorV3Interface} from "contracts/interfaces/external/chainlink/IAggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "tapioca-periph/interfaces/external/chainlink/IAggregatorV3Interface.sol";
 
 // Tapioca
 import {ChainlinkUtils} from "./utils/ChainlinkUtils.sol";

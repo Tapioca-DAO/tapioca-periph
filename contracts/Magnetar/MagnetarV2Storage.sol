@@ -6,15 +6,16 @@ import {RebaseLibrary} from "@boringcrypto/boring-solidity/contracts/libraries/B
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {IYieldBoxTokenType} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
-import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
-import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
-import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
+import {ITapiocaOptionLiquidityProvision} from
+    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 contract MagnetarV2Storage is IERC721Receiver {
     // ************ //

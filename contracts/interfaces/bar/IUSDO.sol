@@ -5,10 +5,11 @@ pragma solidity 0.8.22;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionBroker} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
-import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
+import {ITapiocaOptionLiquidityProvision} from
+    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {ISingularity} from "./ISingularity.sol";
 import {IMarket} from "./IMarket.sol";
 

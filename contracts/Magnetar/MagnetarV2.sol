@@ -11,18 +11,19 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {
     ITapiocaOptionBrokerCrossChain,
     ITapiocaOptionBroker
-} from "contracts/interfaces/tap-token/ITapiocaOptionBroker.sol";
+} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
-import {ITapiocaOptionLiquidityProvision} from "contracts/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {IMagnetarHelper} from "contracts/interfaces/periph/IMagnetarHelper.sol";
-import {ITapiocaOFT} from "contracts/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
-import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
-import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-import {ISendFrom} from "contracts/interfaces/common/ISendFrom.sol";
-import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
-import {IMarket} from "contracts/interfaces/bar/IMarket.sol";
-import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
+import {ITapiocaOptionLiquidityProvision} from
+    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {MagnetarV2Storage} from "./MagnetarV2Storage.sol";
 
 /*

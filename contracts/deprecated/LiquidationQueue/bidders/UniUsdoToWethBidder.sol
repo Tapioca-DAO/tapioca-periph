@@ -6,10 +6,10 @@ pragma solidity 0.8.22;
 
 // // Tapioca
 // import {ILiquidationQueue} from "../interfaces//ILiquidationQueue.sol";
-// import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-// import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
-// import {ISwapper} from "contracts/interfaces/periph/ISwapper.sol";
-// import {IPenrose} from "contracts/interfaces/bar/IPenrose.sol";
+// import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+// import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+// import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
+// import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 
 // /*
 

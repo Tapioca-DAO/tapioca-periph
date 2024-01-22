@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {
     AccessControlledOffchainAggregator,
     AggregatorV3Interface
-} from "contracts/interfaces/external/chainlink/IAggregatorV3Interface.sol";
+} from "tapioca-periph/interfaces/external/chainlink/IAggregatorV3Interface.sol";
 
 struct RoundData {
     uint80 roundId;

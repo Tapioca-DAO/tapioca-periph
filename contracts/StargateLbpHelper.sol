@@ -12,11 +12,11 @@ import {
     IStargateRouter,
     IStargateBridge,
     IStargateRouterBase
-} from "contracts/interfaces/external/stargate/IStargateRouter.sol";
-import {ILiquidityBootstrappingPool} from "contracts/interfaces/external/balancer/ILiquidityBootstrappingPool.sol";
-import {IBalancerVault, IBalancerAsset} from "contracts/interfaces/external/balancer/IBalancerVault.sol";
-import {ILayerZeroEndpoint} from "contracts/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
-import {IStargateLbpHelper} from "contracts/interfaces/external/stargate/IStargateLbpHelper.sol";
+} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
+import {ILiquidityBootstrappingPool} from "tapioca-periph/interfaces/external/balancer/ILiquidityBootstrappingPool.sol";
+import {IBalancerVault, IBalancerAsset} from "tapioca-periph/interfaces/external/balancer/IBalancerVault.sol";
+import {ILayerZeroEndpoint} from "tapioca-periph/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
+import {IStargateLbpHelper} from "tapioca-periph/interfaces/external/stargate/IStargateLbpHelper.sol";
 
 contract StargateLbpHelper is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;

@@ -4,7 +4,7 @@ pragma solidity 0.8.22;
 
 // Tapioca
 import {OracleChainlinkSingle, OracleChainlinkSingleConstructorData} from "./OracleChainlinkSingle.sol";
-import {ITapiocaOracle} from "contracts/interfaces/periph/ITapiocaOracle.sol";
+import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 
 contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle {
     string public _name;

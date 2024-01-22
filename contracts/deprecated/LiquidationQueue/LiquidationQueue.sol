@@ -4,13 +4,13 @@ pragma solidity 0.8.22;
 // import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 // import "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
 
-// import {ISingularity} from "contracts/interfaces/bar/ISingularity.sol";
-// import {IPenrose} from "contracts/interfaces/bar/IPenrose.sol";
+// import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+// import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 // import {ILiquidationQueue} from "../interfaces//ILiquidationQueue.sol";
 // import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IStrategy.sol";
 // import "tapioca-sdk/dist/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
 
-// import {IYieldBox} from "contracts/interfaces/yieldBox/IYieldBox.sol";
+// import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
 
 // /// @title LiquidationQueue
 // /// @author @0xRektora, TapiocaDAO

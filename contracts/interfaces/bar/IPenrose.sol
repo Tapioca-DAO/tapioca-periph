@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {ICluster} from "contracts/interfaces/periph/ICluster.sol";
-import {ISwapper} from "contracts/interfaces/periph/ISwapper.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 
 interface IPenrose {
     /// @notice swap extra data

@@ -2,10 +2,10 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {ICommonData} from "contracts/interfaces/common/ICommonData.sol";
-import {ICommonOFT} from "contracts/interfaces/common/ICommonOFT.sol";
-import {ISendFrom} from "contracts/interfaces/common/ISendFrom.sol";
-import {IUSDOBase} from "contracts/interfaces/bar/IUSDO.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
+import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);
