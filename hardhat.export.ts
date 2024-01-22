@@ -29,7 +29,7 @@ declare global {
 }
 
 loadEnv();
-// deleteDefaultTasks();
+deleteDefaultTasks();
 
 type TNetwork = ReturnType<
     typeof SDK.API.utils.getSupportedChains
