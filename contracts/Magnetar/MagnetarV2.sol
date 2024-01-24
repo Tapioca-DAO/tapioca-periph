@@ -2,8 +2,6 @@
 pragma solidity 0.8.22;
 
 // External
-import {RebaseLibrary, Rebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
-import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -12,17 +10,15 @@ import {
     ITapiocaOptionBrokerCrossChain,
     ITapiocaOptionBroker
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOptionLiquidityProvision} from
-    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOFT, ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
+import {MagnetarMarketModule1} from "./modules/MagnetarMarketModule1.sol";
+import {MagnetarMarketModule2} from "./modules/MagnetarMarketModule2.sol";
 import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
-import {MagnetarMarketModule} from "./modules/MagnetarMarketModule.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
@@ -46,9 +42,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 contract MagnetarV2 is Ownable, MagnetarV2Storage {
-    using SafeERC20 for IERC20;
-    using RebaseLibrary for Rebase;
-
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -66,11 +59,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     error ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
     error FailRescueEth();
 
-    constructor(address _cluster, address _owner, address payable _marketModule, address _permitModule) {
+    constructor(
+        address _cluster,
+        address _owner,
+        address payable _marketModule1,
+        address payable _marketModule2,
+        address _yieldboxModule
+    ) {
         cluster = ICluster(_cluster);
         transferOwnership(_owner);
 
-        modules[Module.Market] = _marketModule;
+        modules[Module.Market1] = _marketModule1;
+        modules[Module.Market2] = _marketModule2;
+        modules[Module.Yieldbox] = _yieldboxModule;
     }
 
     // ********************** //
@@ -122,14 +123,15 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             /// @dev We use modules for complex operations in contrary to PERMIT/TOFT actions singular, direct operation to the target.
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.YieldboxModule) {
-                _executeModule(Module.Yieldbox, _action.call);
+                _executeModule(Module.Yieldbox, _action);
                 continue; // skip the rest of the loop
             }
 
             /// @dev We use modules for complex operations in contrary to PERMIT/TOFT actions singular, direct operation to the target.
             /// @dev Modules will not return result data.
+            /// @dev Special use case for MarketModule, the module is split in two contracts, we need to check the funcSig to know which one to call.
             if (_action.id == MagnetarAction.MarketModule) {
-                _executeModule(Module.Market, _action.call);
+                _handleMarketModuleCall(_action);
                 continue; // skip the rest of the loop
             }
             // If no valid action was found, revert
@@ -310,6 +312,30 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             return;
         }
         revert ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
+    }
+
+    /**
+     * @dev Special handler for MarketModule call. The module was split into 2 contracts because of the total size of it.
+     * @dev This function will check the funcSig and call the right contract.
+     */
+    function _handleMarketModuleCall(Call calldata call) internal {
+        bytes4 funcSig = bytes4(call.call[:4]);
+        // Check `MagnetarMarketModule1` fallBack handler
+        if (
+            funcSig == MagnetarMarketModule1.depositAddCollateralAndBorrowFromMarket.selector
+                || funcSig == MagnetarMarketModule1.mintFromBBAndLendOnSGL.selector
+        ) {
+            _executeModule(Module.Market1, call);
+            return;
+        }
+        // Check `MagnetarMarketModule2` fallBack handler
+        if (
+            funcSig == MagnetarMarketModule2.depositRepayAndRemoveCollateralFromMarket.selector
+                || funcSig == MagnetarMarketModule2.exitPositionAndRemoveCollateral.selector
+        ) {
+            _executeModule(Module.Market2, call);
+            return;
+        }
     }
 
     /**
