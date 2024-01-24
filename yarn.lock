@@ -556,6 +556,11 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@layerzerolabs/solidity-bytes-utils@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/solidity-bytes-utils/-/solidity-bytes-utils-0.8.0.tgz#9173a8597ece5f8d0e8e5e5b970e3f2159c883a5"
+  integrity sha512-lrqilEQGqcYViMh63vVjjyamwGhOJuqykUv7cad56Epx2vEcJtcKZytw2K4eebUREYpNHpsMNxO9iLmp06aEqg==
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
