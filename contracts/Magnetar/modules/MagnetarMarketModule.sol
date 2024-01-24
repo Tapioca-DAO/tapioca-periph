@@ -9,6 +9,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // LZ
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 
 //TAPIOCA
@@ -23,8 +24,10 @@ import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
 import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {MagnetarYieldboxModule} from "./MagnetarYieldboxModule.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
+
 import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
 contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
@@ -37,39 +40,39 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
     error NotValid();
     error tOLPTokenMismatch();
     error LockTargetMismatch();
-    error Failed();
-    error GasMismatch();
+    error ExtractTokenFail(); // failed to extract tokens from sender or user. See `_extractTokens()`
 
-    function withdrawToChain(WithdrawToChainData calldata _data) external payable {
-        _withdrawToChain(_data);
-    }
+    /// @dev Parse a burst call
+    fallback() external payable {
+        Call memory call = abi.decode(msg.data, (Call));
+        bytes4 funcSig = bytes4(BytesLib.slice(call.call, 0, 4));
+        bytes memory callWithoutSelector = BytesLib.slice(call.call, 4, call.call.length);
 
-    function depositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory _data)
-        external
-        payable
-    {
-        _depositAddCollateralAndBorrowFromMarket(_data);
-    }
-
-    function depositRepayAndRemoveCollateralFromMarket(DepositRepayAndRemoveCollateralFromMarketData calldata _data)
-        external
-        payable
-    {
-        _depositRepayAndRemoveCollateralFromMarket(_data);
-    }
-
-    function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData calldata _data) external payable {
-        _mintFromBBAndLendOnSGL(_data);
-    }
-
-    function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData calldata _data) external payable {
-        _exitPositionAndRemoveCollateral(_data);
+        if (funcSig == this.mintFromBBAndLendOnSGL.selector) {
+            mintFromBBAndLendOnSGL(abi.decode(callWithoutSelector, (MintFromBBAndLendOnSGLData)));
+        }
+        if (funcSig == this.depositAddCollateralAndBorrowFromMarket.selector) {
+            depositAddCollateralAndBorrowFromMarket(
+                abi.decode(callWithoutSelector, (DepositAddCollateralAndBorrowFromMarketData))
+            );
+        }
+        if (funcSig == this.exitPositionAndRemoveCollateral.selector) {
+            exitPositionAndRemoveCollateral(abi.decode(callWithoutSelector, (ExitPositionAndRemoveCollateralData)));
+        }
+        if (funcSig == this.depositRepayAndRemoveCollateralFromMarket.selector) {
+            depositRepayAndRemoveCollateralFromMarket(
+                abi.decode(callWithoutSelector, (DepositRepayAndRemoveCollateralFromMarketData))
+            );
+        }
     }
 
     // *********************** //
-    // *** PRIVATE METHODS *** //
+    // *** PUBLIC METHODS ***  //
     // *********************** //
 
+    /**
+     * @dev `depositAddCollateralAndBorrowFromMarket` calldata
+     */
     struct DepositAddCollateralAndBorrowFromMarketData {
         IMarket market;
         address user;
@@ -98,11 +101,16 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
      * @param _data.deposit true/false flag for the deposit to YieldBox step
      * @param _data.withdrawParams necessary data for the same chain or the cross-chain withdrawal
      */
-    function _depositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory _data)
-        private
+    function depositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory _data)
+        public
+        payable
     {
+        // Check sender
+        _checkSender(_data.user);
+
+        // Check targets
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) {
-            revert NotAuthorized();
+            revert TargetNotWhitelisted(address(_data.market));
         }
 
         IYieldBox yieldBox = IYieldBox(_data.market.yieldBox());
@@ -150,7 +158,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     );
                 }
                 _withdraw(
-                    WithdrawData({
+                    _WithdrawData({
                         from: borrowReceiver,
                         withdrawData: withdrawAssetBytes,
                         market: _data.market,
@@ -169,6 +177,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _revertYieldBoxApproval(address(_data.market), yieldBox);
     }
 
+    /**
+     * @dev `depositRepayAndRemoveCollateralFromMarket` calldata
+     */
     struct DepositRepayAndRemoveCollateralFromMarketData {
         IMarket market;
         address user;
@@ -195,11 +206,16 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
      * @param _data.extractFromSender extracts collateral tokens from sender or from the user
      * @param _data.withdrawCollateralParams withdraw specific params
      */
-    function _depositRepayAndRemoveCollateralFromMarket(DepositRepayAndRemoveCollateralFromMarketData memory _data)
-        private
+    function depositRepayAndRemoveCollateralFromMarket(DepositRepayAndRemoveCollateralFromMarketData memory _data)
+        public
+        payable
     {
+        // Check sender
+        _checkSender(_data.user);
+
+        // Check target
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) {
-            revert NotAuthorized();
+            revert TargetNotWhitelisted(address(_data.market));
         }
 
         IYieldBox yieldBox = IYieldBox(_data.market.yieldBox());
@@ -235,8 +251,8 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             uint256 collateralId = _data.market.collateralId();
             //withdraw
             if (_data.withdrawCollateralParams.withdraw) {
-                _withdrawToChain(
-                    WithdrawToChainData({
+                _yieldBoxModule__WithdrawToChain(
+                    MagnetarYieldboxModule.WithdrawToChainData({
                         yieldBox: yieldBox,
                         from: collateralWithdrawReceiver,
                         assetId: collateralId,
@@ -254,6 +270,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
+    /**
+     * @dev `mintFromBBAndLendOnSGL` calldata
+     */
     struct MintFromBBAndLendOnSGLData {
         address user;
         uint256 lendAmount;
@@ -283,19 +302,25 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
      * @param _data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
      * @param _data.externalContracts the contracts' addresses used in all the operations performed by the helper
      */
-    function _mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData memory _data) private {
-        IMarket bigBang = IMarket(_data.externalContracts.bigBang);
-        ISingularity singularity = ISingularity(_data.externalContracts.singularity);
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
+    function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData memory _data) public payable {
+        // Check sender
+        _checkSender(_data.user);
 
+        // Check targets
         if (_data.externalContracts.bigBang != address(0)) {
-            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalContracts.bigBang)) revert NotAuthorized();
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalContracts.bigBang)) {
+                revert TargetNotWhitelisted(_data.externalContracts.bigBang);
+            }
         }
         if (_data.externalContracts.singularity != address(0)) {
             if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalContracts.singularity)) {
-                revert NotAuthorized();
+                revert TargetNotWhitelisted(_data.externalContracts.singularity);
             }
         }
+
+        IMarket bigBang = IMarket(_data.externalContracts.bigBang);
+        ISingularity singularity = ISingularity(_data.externalContracts.singularity);
+        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         if (address(singularity) != address(0)) {
             _setApprovalForYieldBox(address(singularity), yieldBox);
@@ -378,7 +403,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 tOLPTokenId = 0;
         if (_data.lockData.lock) {
             if (!cluster.isWhitelisted(cluster.lzChainId(), _data.lockData.target)) {
-                revert NotAuthorized();
+                revert TargetNotWhitelisted(_data.lockData.target);
             }
             if (_data.lockData.fraction > 0) {
                 fraction = _data.lockData.fraction;
@@ -400,13 +425,18 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
             _revertYieldBoxApproval(_data.lockData.target, yieldBox);
         }
 
+        // TODO improve this
         // if `participateData.participate`:
         //      - verify tOLPTokenId
         //      - performs tOB.participate
         //      - transfer `oTAPTokenId` to _data.user
         if (_data.participateData.participate) {
-            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.participateData.target)) revert NotAuthorized();
+            // Check whitelisted
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.participateData.target)) {
+                revert TargetNotWhitelisted(_data.participateData.target);
+            }
 
+            // Check tOLPTokenId
             if (_data.participateData.tOLPTokenId != 0) {
                 if (tOLPTokenId != 0) {
                     if (_data.participateData.tOLPTokenId != tOLPTokenId) {
@@ -416,7 +446,6 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
 
                 tOLPTokenId = _data.participateData.tOLPTokenId;
             }
-            if (_data.lockData.target == address(0)) revert LockTargetMismatch();
             if (tOLPTokenId == 0) revert NotValid();
 
             IERC721(_data.lockData.target).approve(_data.participateData.target, tOLPTokenId);
@@ -434,6 +463,9 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
+    /**
+     * @dev `exitPositionAndRemoveCollateral` calldata
+     */
     struct ExitPositionAndRemoveCollateralData {
         address user;
         ICommonData.ICommonExternalContracts externalData;
@@ -441,12 +473,32 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         uint256 valueAmount;
     }
 
-    function _exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory _data) private {
+    /**
+     * @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
+     * @dev all steps are optional:
+     *         - if `removeAndRepayData.exitData.exit` is false, the exit operation is skipped
+     *         - if `removeAndRepayData.unlockData.unlock` is false, the unlock operation is skipped
+     *         - if `removeAndRepayData.removeAssetFromSGL` is false, the removeAsset operation is skipped
+     *         - if `!removeAndRepayData.assetWithdrawData.withdraw && removeAndRepayData.repayAssetOnBB`, the repay operation is performed
+     *         - if `removeAndRepayData.removeCollateralFromBB` is false, the rmeove collateral is skipped
+     *     - the helper can either stop at the remove asset from SGL step or it can continue until is removes & withdraws collateral from BB
+     *         - removed asset can be withdrawn by providing `removeAndRepayData.assetWithdrawData`
+     *     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
+     */
+    function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory _data) public payable {
+        // Check sender
+        _checkSender(_data.user);
+
+        // Check whitelisted
         if (_data.externalData.bigBang != address(0)) {
-            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.bigBang)) revert NotAuthorized();
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.bigBang)) {
+                revert TargetNotWhitelisted(_data.externalData.bigBang);
+            }
         }
         if (_data.externalData.singularity != address(0)) {
-            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.singularity)) revert NotAuthorized();
+            if (!cluster.isWhitelisted(cluster.lzChainId(), _data.externalData.singularity)) {
+                revert TargetNotWhitelisted(_data.externalData.singularity);
+            }
         }
 
         IMarket bigBang = IMarket(_data.externalData.bigBang);
@@ -461,7 +513,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         if (_data.removeAndRepayData.exitData.exit) {
             if (_data.removeAndRepayData.exitData.oTAPTokenID == 0) revert NotValid();
             if (!cluster.isWhitelisted(cluster.lzChainId(), _data.removeAndRepayData.exitData.target)) {
-                revert NotAuthorized();
+                revert TargetNotWhitelisted(_data.removeAndRepayData.exitData.target);
             }
 
             address oTapAddress = ITapiocaOptionBroker(_data.removeAndRepayData.exitData.target).oTAP();
@@ -495,7 +547,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         // performs a tOLP.unlock operation
         if (_data.removeAndRepayData.unlockData.unlock) {
             if (!cluster.isWhitelisted(cluster.lzChainId(), _data.removeAndRepayData.unlockData.target)) {
-                revert NotAuthorized();
+                revert TargetNotWhitelisted(_data.removeAndRepayData.unlockData.target);
             }
 
             if (_data.removeAndRepayData.unlockData.tokenId != 0) {
@@ -540,7 +592,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     _data.removeAndRepayData.assetWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
-                    WithdrawData({
+                    _WithdrawData({
                         from: address(this),
                         withdrawData: withdrawAssetBytes,
                         market: singularity,
@@ -589,7 +641,7 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
                     _data.removeAndRepayData.collateralWithdrawData.withdrawAdapterParams
                 );
                 _withdraw(
-                    WithdrawData({
+                    _WithdrawData({
                         from: address(this),
                         withdrawData: withdrawCollateralBytes,
                         market: singularity,
@@ -607,94 +659,14 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         _revertYieldBoxApproval(address(bigBang), yieldBox);
     }
 
-    /// @dev Calldata for `_withdrawToChain`
-    struct WithdrawToChainData {
-        IYieldBox yieldBox;
-        address from;
-        uint256 assetId;
-        uint16 dstChainId;
-        bytes32 receiver;
-        uint256 amount;
-        bytes adapterParams;
-        address payable refundAddress;
-        uint256 gas;
-        bool unwrap;
-        address zroPaymentAddress;
-    }
+    // ************************* //
+    // *** INTERNAL METHODS ***  //
+    // ************************* //
 
     /**
-     * @notice performs a withdraw operation
-     * @dev it can withdraw on the current chain or it can send it to another one
-     *     - if `dstChainId` is 0 performs a same-chain withdrawal
-     *          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
-     *     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
-     *
-     * @param _data.yieldBox the YieldBox address
-     * @param _data.from user to withdraw from
-     * @param _data.assetId the YieldBox asset id to withdraw
-     * @param _data.dstChainId LZ chain id to withdraw to
-     * @param _data.receiver the receiver on the destination chain
-     * @param _data.amount the amount to withdraw
-     * @param _data.adapterParams LZ adapter params
-     * @param _data.refundAddress the LZ refund address which receives the gas not used in the process
-     * @param _data.gas the amount of gas to use for sending the asset to another layer
-     * @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-     * @param _data.zroPaymentAddress ZRO payment address
+     * @dev `_withdraw` calldata
      */
-    function _withdrawToChain(WithdrawToChainData memory _data) private {
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.yieldBox))) {
-            revert NotAuthorized();
-        }
-
-        // perform a same chain withdrawal
-        if (_data.dstChainId == 0) {
-            _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            return;
-        }
-
-        if (msg.value > 0) {
-            if (msg.value != _data.gas) revert GasMismatch();
-        }
-        // perform a cross chain withdrawal
-        (, address asset,,) = _data.yieldBox.assets(_data.assetId);
-        // withdraw from YieldBox
-        _data.yieldBox.withdraw(_data.assetId, _data.from, address(this), _data.amount, 0);
-
-        // build LZ params
-        bytes memory adapterParams;
-        ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
-            refundAddress: _data.refundAddress,
-            zroPaymentAddress: _data.zroPaymentAddress,
-            adapterParams: ISendFrom(address(asset)).useCustomAdapterParams() ? adapterParams : adapterParams
-        });
-
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(asset))) {
-            revert NotAuthorized();
-        }
-        // sends the asset to another layer
-        if (_data.unwrap) {
-            ICommonData.IApproval[] memory approvals = new ICommonData.IApproval[](0);
-            try ITapiocaOFT(address(asset)).sendFromWithParams{value: _data.gas}(
-                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams, true, approvals, approvals
-            ) {} catch {
-                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            }
-        } else {
-            try ISendFrom(address(asset)).sendFrom{value: _data.gas}(
-                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams
-            ) {} catch {
-                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            }
-        }
-    }
-
-    function _withdrawOnThisChain(IYieldBox yieldBox, uint256 assetId, address from, bytes32 receiver, uint256 amount)
-        private
-    {
-        yieldBox.withdraw(assetId, from, LzLib.bytes32ToAddress(receiver), amount, 0);
-    }
-
-    struct WithdrawData {
+    struct _WithdrawData {
         address from;
         bytes withdrawData;
         IMarket market;
@@ -707,26 +679,44 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         address zroPaymentAddress;
     }
 
-    function _withdraw(WithdrawData memory _data) private {
+    /**
+     * @dev Performs a YieldBox withdrawal.
+     * Can withdraw asset or collateral, on the same chain or on another one.
+     *
+     */
+    function _withdraw(_WithdrawData memory _data) private {
         if (_data.withdrawData.length == 0) revert NotValid();
         (bool withdrawOnOtherChain, uint16 destChain, bytes32 receiver, bytes memory adapterParams) =
             abi.decode(_data.withdrawData, (bool, uint16, bytes32, bytes));
 
-        _withdrawToChain(
-            WithdrawToChainData({
-                yieldBox: _data.yieldBox,
-                from: _data.from,
-                assetId: _data.withdrawCollateral ? _data.market.collateralId() : _data.market.assetId(),
-                dstChainId: withdrawOnOtherChain ? destChain : 0,
-                receiver: receiver,
-                amount: _data.amount,
-                adapterParams: adapterParams,
-                refundAddress: _data.refundAddress,
-                gas: _data.valueAmount,
-                unwrap: _data.unwrap,
-                zroPaymentAddress: _data.zroPaymentAddress
-            })
-        );
+        // Prepare the call to the withdrawToChain method.
+        // Most fields are not needed, we just to pass the encoded data
+        MagnetarYieldboxModule.WithdrawToChainData memory withdrawToChainData = MagnetarYieldboxModule
+            .WithdrawToChainData({
+            yieldBox: _data.yieldBox,
+            from: _data.from,
+            assetId: _data.withdrawCollateral ? _data.market.collateralId() : _data.market.assetId(),
+            dstChainId: withdrawOnOtherChain ? destChain : 0,
+            receiver: receiver,
+            amount: _data.amount,
+            adapterParams: adapterParams,
+            refundAddress: _data.refundAddress,
+            gas: _data.valueAmount,
+            unwrap: _data.unwrap,
+            zroPaymentAddress: _data.zroPaymentAddress
+        });
+        _yieldBoxModule__WithdrawToChain(withdrawToChainData);
+    }
+
+    /**
+     * @dev Call internally the withdrawToChain method of the YieldBox module.
+     */
+    function _yieldBoxModule__WithdrawToChain(MagnetarYieldboxModule.WithdrawToChainData memory _data) internal {
+        // Prepare the call to the withdrawToChain method.
+        // Most fields are not needed, we just to pass the encoded data
+        Call memory call;
+        call.call = abi.encodeWithSelector(MagnetarYieldboxModule.withdrawToChain.selector, _data);
+        _executeModule(Module.Yieldbox, abi.encode(call));
     }
 
     function _setApprovalForYieldBox(address target, IYieldBox yieldBox) private {
@@ -743,11 +733,14 @@ contract MagnetarMarketModule is Ownable, MagnetarV2Storage {
         }
     }
 
+    /**
+     * @dev Extracts ERC20 tokens from `_from` to this contract.
+     */
     function _extractTokens(address _from, address _token, uint256 _amount) private returns (uint256) {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
-        if (balanceAfter <= balanceBefore) revert Failed();
+        if (balanceAfter <= balanceBefore) revert ExtractTokenFail();
         return balanceAfter - balanceBefore;
     }
 }
