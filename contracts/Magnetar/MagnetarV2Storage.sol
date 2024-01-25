@@ -37,7 +37,17 @@ contract MagnetarV2Storage is IERC721Receiver {
         YieldboxModule // YieldBox module related operations.
 
     }
+
+    // Helpers for external usage. Not used in the contract.
+    uint8 public constant MAGNETAR_ACTION_PERMIT = 0;
+    uint8 public constant MAGNETAR_ACTION_TOFT = 1;
+    uint8 public constant MAGNETAR_ACTION_MARKET = 2;
+    uint8 public constant MAGNETAR_ACTION_TAP_TOKEN = 3;
+    uint8 public constant MAGNETAR_ACTION_MARKET_MODULE = 4;
+    uint8 public constant MAGNETAR_ACTION_YIELDBOX_MODULE = 5;
+
     // --- MODULES IDS ----
+
     enum Module {
         Market1,
         Market2,
