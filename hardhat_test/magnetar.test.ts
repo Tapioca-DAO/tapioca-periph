@@ -35,7 +35,12 @@ import {
     OracleMock__factory,
 } from '@tapioca-sdk/typechain/tapioca-mocks';
 import { TapiocaOFT__factory } from '@tapioca-sdk/typechain/tapiocaz';
-import { MagnetarV2 } from '@typechain/index';
+import {
+    MagnetarMarketModule1,
+    MagnetarMarketModule1__factory,
+    MagnetarYieldboxModule,
+    MagnetarYieldboxModule__factory,
+} from '@typechain/index';
 
 const MAX_DEADLINE = 9999999999999;
 
@@ -119,7 +124,7 @@ describe.only('MagnetarV2', () => {
         });
     });
     describe('withdrawTo()', () => {
-        it('should test withdrawTo', async () => {
+        it.only('should test withdrawTo', async () => {
             const {
                 deployer,
                 yieldBox,
@@ -216,10 +221,21 @@ describe.only('MagnetarV2', () => {
             );
             await usd0.mint(deployer.address, usdoAmount);
 
-            const depositAssetEncoded = yieldBox.interface.encodeFunctionData(
-                'depositAsset',
-                [usdoAssetId, deployer.address, deployer.address, 0, usdoShare],
-            );
+            const depositAssetEncodedData: MagnetarYieldboxModule.YieldBoxDepositDataStruct =
+                {
+                    yieldbox: yieldBox.address,
+                    assetId: usdoAssetId,
+                    from: deployer.address,
+                    to: deployer.address,
+                    amount: 0,
+                    share: usdoShare,
+                };
+
+            const depositAssetEncoded =
+                MagnetarYieldboxModule__factory.createInterface().encodeFunctionData(
+                    'depositAsset',
+                    [depositAssetEncodedData],
+                );
 
             const sglLendEncoded =
                 wethUsdoSingularity.interface.encodeFunctionData('addAsset', [
@@ -246,14 +262,14 @@ describe.only('MagnetarV2', () => {
             );
             const calls = [
                 {
-                    id: 100,
+                    id: await magnetar.MAGNETAR_ACTION_YIELDBOX_MODULE(),
                     target: yieldBox.address,
                     value: 0,
                     allowFailure: false,
                     call: depositAssetEncoded,
                 },
                 {
-                    id: 203,
+                    id: await magnetar.MAGNETAR_ACTION_MARKET(),
                     target: wethUsdoSingularity.address,
                     value: 0,
                     allowFailure: false,
@@ -283,9 +299,7 @@ describe.only('MagnetarV2', () => {
                 .connect(deployer)
                 .approveBorrow(magnetar.address, ethers.constants.MaxUint256);
 
-            const depositAddCollateralAndBorrowFromMarketData: Parameters<
-                MagnetarV2['depositAddCollateralAndBorrowFromMarket']
-            > = [
+            const depositAddCollateralAndBorrowFromMarketData: MagnetarMarketModule1.DepositAddCollateralAndBorrowFromMarketDataStruct =
                 {
                     market: wethUsdoSingularity.address,
                     user: deployer.address,
@@ -304,13 +318,13 @@ describe.only('MagnetarV2', () => {
                         zroPaymentAddress: ethers.constants.AddressZero,
                     },
                     valueAmount: 0,
-                },
-            ];
+                };
 
-            const borrowFn = magnetar.interface.encodeFunctionData(
-                'depositAddCollateralAndBorrowFromMarket',
-                depositAddCollateralAndBorrowFromMarketData,
-            );
+            const borrowFn =
+                MagnetarMarketModule1__factory.createInterface().encodeFunctionData(
+                    'depositAddCollateralAndBorrowFromMarket',
+                    [depositAddCollateralAndBorrowFromMarketData],
+                );
 
             let borrowPart = await wethUsdoSingularity.userBorrowPart(
                 deployer.address,
@@ -319,7 +333,7 @@ describe.only('MagnetarV2', () => {
             await magnetar.connect(deployer).burst(
                 [
                     {
-                        id: 206,
+                        id: await magnetar.MAGNETAR_ACTION_MARKET_MODULE(),
                         target: magnetar.address,
                         value: ethers.utils.parseEther('2'),
                         allowFailure: false,
@@ -350,19 +364,32 @@ describe.only('MagnetarV2', () => {
             expect(borrowPart.gte(borrowAmount)).to.be.true;
 
             const receiverSplit = deployer.address.split('0x');
-            await magnetar.withdrawToChain({
-                yieldBox: yieldBox.address,
-                from: deployer.address,
-                assetId: usdoAssetId,
-                dstChainId: 0,
-                receiver: '0x'.concat(receiverSplit[1].padStart(64, '0')), // address to bytes32
-                amount: borrowAmount,
-                adapterParams: '0x',
-                refundAddress: deployer.address,
-                gas: 0,
-                unwrap: false,
-                zroPaymentAddress: ethers.constants.AddressZero,
-            });
+            const withdrawToChainData: MagnetarYieldboxModule.WithdrawToChainDataStruct =
+                {
+                    yieldBox: yieldBox.address,
+                    from: deployer.address,
+                    assetId: usdoAssetId,
+                    dstChainId: 0,
+                    receiver: '0x'.concat(receiverSplit[1].padStart(64, '0')), // address to bytes32
+                    amount: borrowAmount,
+                    adapterParams: '0x',
+                    refundAddress: deployer.address,
+                    gas: 0,
+                    unwrap: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                };
+            await magnetar.burst([
+                {
+                    id: await magnetar.MAGNETAR_ACTION_YIELDBOX_MODULE(),
+                    target: yieldBox.address,
+                    value: 0,
+                    allowFailure: false,
+                    call: MagnetarYieldboxModule__factory.createInterface().encodeFunctionData(
+                        'withdrawToChain',
+                        [withdrawToChainData],
+                    ),
+                },
+            ]);
 
             const usdoBalanceOfDeployer = await usd0.balanceOf(
                 deployer.address,
