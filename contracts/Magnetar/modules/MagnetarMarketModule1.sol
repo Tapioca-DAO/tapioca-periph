@@ -139,8 +139,8 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
                         _data.withdrawParams.withdrawAdapterParams
                     );
                 }
-                _withdraw(
-                    _WithdrawData({
+                _withdrawPrepare(
+                    _WithdrawPrepareData({
                         from: borrowReceiver,
                         withdrawData: withdrawAssetBytes,
                         market: _data.market,

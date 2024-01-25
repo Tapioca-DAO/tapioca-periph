@@ -127,7 +127,7 @@ contract MagnetarMarketModule2 is MagnetarMarketModuleBase {
             uint256 collateralId = _data.market.collateralId();
             //withdraw
             if (_data.withdrawCollateralParams.withdraw) {
-                _yieldBoxModule__WithdrawToChain(
+                _withdrawToChain(
                     MagnetarYieldboxModule.WithdrawToChainData({
                         yieldBox: yieldBox,
                         from: collateralWithdrawReceiver,
@@ -274,8 +274,8 @@ contract MagnetarMarketModule2 is MagnetarMarketModuleBase {
                     LzLib.addressToBytes32(_data.user),
                     _data.removeAndRepayData.assetWithdrawData.withdrawAdapterParams
                 );
-                _withdraw(
-                    _WithdrawData({
+                _withdrawPrepare(
+                    _WithdrawPrepareData({
                         from: address(this),
                         withdrawData: withdrawAssetBytes,
                         market: singularity,
@@ -323,8 +323,8 @@ contract MagnetarMarketModule2 is MagnetarMarketModuleBase {
                     LzLib.addressToBytes32(_data.user),
                     _data.removeAndRepayData.collateralWithdrawData.withdrawAdapterParams
                 );
-                _withdraw(
-                    _WithdrawData({
+                _withdrawPrepare(
+                    _WithdrawPrepareData({
                         from: address(this),
                         withdrawData: withdrawCollateralBytes,
                         market: singularity,
