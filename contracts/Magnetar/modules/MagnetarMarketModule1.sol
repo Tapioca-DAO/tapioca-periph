@@ -36,7 +36,7 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
     fallback() external payable {
         Call memory call = abi.decode(msg.data, (Call));
         bytes4 funcSig = bytes4(BytesLib.slice(call.call, 0, 4));
-        bytes memory callWithoutSelector = BytesLib.slice(call.call, 4, call.call.length);
+        bytes memory callWithoutSelector = BytesLib.slice(call.call, 4, call.call.length - 4);
 
         if (funcSig == this.depositAddCollateralAndBorrowFromMarket.selector) {
             depositAddCollateralAndBorrowFromMarket(
