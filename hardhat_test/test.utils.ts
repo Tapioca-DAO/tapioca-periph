@@ -944,6 +944,7 @@ export async function register(staging?: boolean) {
     const deployer = (await ethers.getSigners())[0];
     const eoas = await ethers.getSigners();
     eoas.shift(); //remove deployer
+    hre.tracer.nameTags[deployer.address] = 'deployer';
 
     const INITIAL_TIMESTAMP = (await hre.ethers.provider.getBlock('latest'))
         .timestamp;
@@ -952,6 +953,7 @@ export async function register(staging?: boolean) {
         ethers.Wallet.createRandom().privateKey,
         ethers.provider,
     );
+    hre.tracer.nameTags[eoa1.address] = 'eoa1';
 
     if (!staging) {
         await setBalance(eoa1.address, 100000);
@@ -1164,6 +1166,7 @@ export async function register(staging?: boolean) {
         `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
         staging,
     );
+    await cluster.updateContract(0, magnetar.address, true);
 
     const magnetarHelper = await (
         await ethers.getContractFactory('MagnetarHelper')
