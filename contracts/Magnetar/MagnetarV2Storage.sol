@@ -71,7 +71,7 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** ERRORS *** //
     // ************** //
 
-    error NotAuthorized(address caller); // msg.send is neither the owner nor whitelisted by Cluster
+    error NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error TargetNotWhitelisted(address target); // Target contract is not whitelisted for an external call
     error UnknownReason(); // Revert reason not recognized
     error ModuleNotFound(Module module); // Module not found
@@ -100,9 +100,15 @@ contract MagnetarV2Storage is IERC721Receiver {
         }
     }
 
+    /**
+     * @dev Check if the sender is authorized to call the contract.
+     * sender is authorized if:
+     *      - is the owner
+     *      - is whitelisted by the cluster
+     */
     function _checkSender(address _from) internal view {
         if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender)) {
-            revert NotAuthorized(msg.sender);
+            revert NotAuthorized(msg.sender, _from);
         }
     }
 
