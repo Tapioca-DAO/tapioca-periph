@@ -32,21 +32,6 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
     // ************** //
     error tOLPTokenMismatch();
 
-    /// @dev Parse a burst call
-    fallback() external payable {
-        bytes4 funcSig = bytes4(BytesLib.slice(msg.data, 0, 4));
-        bytes memory callWithoutSelector = BytesLib.slice(msg.data, 4, msg.data.length - 4);
-
-        if (funcSig == this.depositAddCollateralAndBorrowFromMarket.selector) {
-            depositAddCollateralAndBorrowFromMarket(
-                abi.decode(callWithoutSelector, (DepositAddCollateralAndBorrowFromMarketData))
-            );
-        }
-        if (funcSig == this.mintFromBBAndLendOnSGL.selector) {
-            mintFromBBAndLendOnSGL(abi.decode(callWithoutSelector, (MintFromBBAndLendOnSGLData)));
-        }
-    }
-
     // *********************** //
     // *** PUBLIC METHODS ***  //
     // *********************** //
