@@ -89,12 +89,12 @@ contract MagnetarV2Storage is IERC721Receiver {
     // *** INTERNAL METHODS *** //
     // ************************ //
 
-    function _executeModule(Module _module, Call memory _data) internal returns (bytes memory returnData) {
+    function _executeModule(Module _module, bytes memory _data) internal returns (bytes memory returnData) {
         bool success = true;
         address module = modules[_module];
         if (module == address(0)) revert ModuleNotFound(_module);
 
-        (success, returnData) = module.delegatecall(abi.encode(_data));
+        (success, returnData) = module.delegatecall(_data);
         if (!success) {
             _getRevertMsg(returnData);
         }

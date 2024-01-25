@@ -34,9 +34,8 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
 
     /// @dev Parse a burst call
     fallback() external payable {
-        Call memory call = abi.decode(msg.data, (Call));
-        bytes4 funcSig = bytes4(BytesLib.slice(call.call, 0, 4));
-        bytes memory callWithoutSelector = BytesLib.slice(call.call, 4, call.call.length - 4);
+        bytes4 funcSig = bytes4(BytesLib.slice(msg.data, 0, 4));
+        bytes memory callWithoutSelector = BytesLib.slice(msg.data, 4, msg.data.length - 4);
 
         if (funcSig == this.depositAddCollateralAndBorrowFromMarket.selector) {
             depositAddCollateralAndBorrowFromMarket(

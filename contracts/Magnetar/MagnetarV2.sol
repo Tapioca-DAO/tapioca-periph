@@ -123,7 +123,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             /// @dev We use modules for complex operations in contrary to PERMIT/TOFT actions singular, direct operation to the target.
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.YieldboxModule) {
-                _executeModule(Module.Yieldbox, _action);
+                _executeModule(Module.Yieldbox, _action.call);
                 continue; // skip the rest of the loop
             }
 
@@ -131,7 +131,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             /// @dev Modules will not return result data.
             /// @dev Special use case for MarketModule, the module is split in two contracts, we need to check the funcSig to know which one to call.
             if (_action.id == MagnetarAction.MarketModule) {
-                _handleMarketModuleCall(_action);
+                _handleMarketModuleCall(_action.call);
                 continue; // skip the rest of the loop
             }
             // If no valid action was found, revert
@@ -318,8 +318,8 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
      * @dev Special handler for MarketModule call. The module was split into 2 contracts because of the total size of it.
      * @dev This function will check the funcSig and call the right contract.
      */
-    function _handleMarketModuleCall(Call calldata call) internal {
-        bytes4 funcSig = bytes4(call.call[:4]);
+    function _handleMarketModuleCall(bytes calldata call) internal {
+        bytes4 funcSig = bytes4(call[:4]);
         // Check `MagnetarMarketModule1` fallBack handler
         if (
             funcSig == MagnetarMarketModule1.depositAddCollateralAndBorrowFromMarket.selector
