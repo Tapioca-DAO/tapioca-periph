@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 //TAPIOCA
 import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
@@ -10,7 +11,8 @@ import {MagnetarYieldboxModule} from "./MagnetarYieldboxModule.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
-abstract contract MagnetarMarketModuleBase is MagnetarV2Storage {
+/// @dev We need Ownable to map MagnetarV2 storage layout
+abstract contract MagnetarMarketModuleBase is Ownable, MagnetarV2Storage {
     using SafeERC20 for IERC20;
 
     // ************** //

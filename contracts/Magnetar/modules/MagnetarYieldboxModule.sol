@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // LZ
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 
 // Tapioca
@@ -13,7 +14,8 @@ import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
 import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
 import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
 
-contract MagnetarYieldboxModule is MagnetarV2Storage {
+/// @dev We need Ownable to map MagnetarV2 storage layout
+contract MagnetarYieldboxModule is Ownable, MagnetarV2Storage {
     error GasMismatch(uint256 expected, uint256 received);
 
     /// @dev Parse a burst call
@@ -22,8 +24,8 @@ contract MagnetarYieldboxModule is MagnetarV2Storage {
         bytes4 funcSig = bytes4(BytesLib.slice(call.call, 0, 4));
         bytes memory callWithoutSelector = BytesLib.slice(call.call, 4, call.call.length - 4);
 
-        if (funcSig == IYieldBox.depositAsset.selector) {
-            depositAsset(call.target, abi.decode(callWithoutSelector, (YieldBoxDepositData)));
+        if (funcSig == this.depositAsset.selector) {
+            depositAsset(abi.decode(callWithoutSelector, (YieldBoxDepositData)));
         }
         if (funcSig == this.withdrawToChain.selector) {
             withdrawToChain(abi.decode(callWithoutSelector, (WithdrawToChainData)));
@@ -31,22 +33,10 @@ contract MagnetarYieldboxModule is MagnetarV2Storage {
     }
 
     /**
-     * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
-     */
-    function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue, bool _allowFailure)
-        internal
-    {
-        (bool success, bytes memory returnData) = _target.call{value: _actionValue}(_actionCalldata);
-
-        if (!success && !_allowFailure) {
-            _getRevertMsg(returnData);
-        }
-    }
-
-    /**
      * @dev `depositAsset` calldata
      */
     struct YieldBoxDepositData {
+        IYieldBox yieldbox;
         uint256 assetId;
         address from;
         address to;
@@ -56,16 +46,15 @@ contract MagnetarYieldboxModule is MagnetarV2Storage {
 
     /**
      * @dev Deposit asset to YieldBox..
-     * @param _target YieldBox address
      * @param _data The data without the func sig
      */
-    function depositAsset(address _target, YieldBoxDepositData memory _data) public {
+    function depositAsset(YieldBoxDepositData memory _data) public {
         _checkSender(_data.from);
-        if (!cluster.isWhitelisted(0, _target)) {
+        if (!cluster.isWhitelisted(0, address(_data.yieldbox))) {
             // 0 means current chain
-            revert TargetNotWhitelisted(_target);
+            revert TargetNotWhitelisted(address(_data.yieldbox));
         }
-        IYieldBox(_target).depositAsset(_data.assetId, _data.from, _data.to, _data.amount, _data.share);
+        _data.yieldbox.depositAsset(_data.assetId, _data.from, _data.to, _data.amount, _data.share);
     }
 
     /**
