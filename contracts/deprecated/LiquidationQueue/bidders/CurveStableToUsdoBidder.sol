@@ -9,7 +9,7 @@ pragma solidity 0.8.22;
 // import {ICurvePool} from "tapioca-periph/interfaces/external/curve/ICurvePool.sol";
 // import {ILiquidationQueue} from "../interfaces//ILiquidationQueue.sol";
 // import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-// import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+// import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 // import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 
 // /*

@@ -14,7 +14,7 @@ import {ITapiocaOFT, ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {MagnetarMarketModule1} from "./modules/MagnetarMarketModule1.sol";
 import {MagnetarMarketModule2} from "./modules/MagnetarMarketModule2.sol";

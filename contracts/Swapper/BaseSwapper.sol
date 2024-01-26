@@ -7,7 +7,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 

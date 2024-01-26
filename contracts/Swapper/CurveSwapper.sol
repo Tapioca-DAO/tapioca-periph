@@ -7,7 +7,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 
 // Tapioca
 import {ICurvePool} from "tapioca-periph/interfaces/external/curve/ICurvePool.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {BaseSwapper} from "./BaseSwapper.sol";
 

@@ -17,7 +17,7 @@ import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapioca
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {MagnetarYieldboxModule} from "./MagnetarYieldboxModule.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";

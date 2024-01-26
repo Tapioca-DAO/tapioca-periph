@@ -10,7 +10,7 @@ pragma solidity 0.8.22;
 // import "tapioca-sdk/dist/contracts/YieldBox/contracts/interfaces/IStrategy.sol";
 // import "tapioca-sdk/dist/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
 
-// import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+// import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 
 // /// @title LiquidationQueue
 // /// @author @0xRektora, TapiocaDAO

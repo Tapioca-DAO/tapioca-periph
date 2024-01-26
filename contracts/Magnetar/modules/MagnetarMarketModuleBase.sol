@@ -10,7 +10,7 @@ import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldBox/IYieldBox.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
 import {MagnetarYieldboxModule} from "./MagnetarYieldboxModule.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
