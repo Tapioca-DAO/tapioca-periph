@@ -1146,7 +1146,7 @@ export async function register(staging?: boolean) {
         'MagnetarMarketModule1';
     const magnetarMarketModule2 = await (
         await (
-            await ethers.getContractFactory('MagnetarMarketModule1')
+            await ethers.getContractFactory('MagnetarMarketModule2')
         ).deploy()
     ).deployed();
     hre.tracer.nameTags[magnetarMarketModule2.address] =

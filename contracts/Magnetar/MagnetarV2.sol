@@ -25,8 +25,6 @@ import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {MagnetarV2Storage} from "./MagnetarV2Storage.sol";
 
-// Interfaces
-
 /*
 
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
