@@ -92,7 +92,7 @@ interface IMagnetar {
 
     function MAGNETAR_ACTION_YIELDBOX_MODULE() external view returns (uint8);
 
-    function burst(MagnetarV2Storage.Call[] memory calls) external payable;
+    function burst(Call[] memory calls) external payable;
 
     function cluster() external view returns (address);
 
