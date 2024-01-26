@@ -9,7 +9,7 @@ import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
-interface Magnetar {
+interface IMagnetar {
     struct Call {
         uint8 id;
         address target;
