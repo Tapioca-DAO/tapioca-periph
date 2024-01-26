@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@tapioca-sdk/*": ["lib/tapioca-sdk/src/*"],
+      "@tapioca-sdk/*": ["gitmodule/tapioca-sdk/src/*"],
       "@typechain/*": ["gen/typechain/*"],
     }
   },
