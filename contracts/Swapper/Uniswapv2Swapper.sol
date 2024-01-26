@@ -88,8 +88,12 @@ contract UniswapV2Swapper is BaseSwapper {
         amountIn = amounts[0];
     }
 
-    /// *** PUBLIC METHODS ***
-    /// ***  ***
+    struct _SwapMemoryData {
+        address tokenIn;
+        address tokenOut;
+        address[] path;
+        uint256 amountIn;
+    }
 
     /// @notice swaps amount in
     /// @param swapData operation data
@@ -103,20 +107,21 @@ contract UniswapV2Swapper is BaseSwapper {
         nonReentrant
         returns (uint256 amountOut, uint256 shareOut)
     {
+        _SwapMemoryData memory _swapMemoryData;
         // Get tokens' addresses
-        (address tokenIn, address tokenOut) = _getTokens(swapData.tokensData, yieldBox);
+        (_swapMemoryData.tokenIn, _swapMemoryData.tokenOut) = _getTokens(swapData.tokensData, yieldBox);
 
         // Get tokens' amounts
-        (uint256 amountIn,) =
+        (_swapMemoryData.amountIn,) =
             _getAmounts(swapData.amountData, swapData.tokensData.tokenInId, swapData.tokensData.tokenOutId, yieldBox);
 
         // Retrieve tokens from sender or from YieldBox
-        amountIn = _extractTokens(
+        _swapMemoryData.amountIn = _extractTokens(
             swapData.yieldBoxData,
             yieldBox,
-            tokenIn,
+            _swapMemoryData.tokenIn,
             swapData.tokensData.tokenInId,
-            amountIn,
+            _swapMemoryData.amountIn,
             swapData.amountData.shareIn
         );
 
@@ -124,18 +129,26 @@ contract UniswapV2Swapper is BaseSwapper {
         if (data.length == 0) {
             data = getDefaultDexOptions();
         }
-        uint256 deadline = abi.decode(data, (uint256));
-        // Create swap path for UniswapV2Router02 operations
-        address[] memory path = _createPath(tokenIn, tokenOut);
-        uint256[] memory amounts = _swap(
-            amountIn, amountOutMin, tokenIn, tokenOut, swapData.yieldBoxData.depositToYb ? address(this) : to, deadline
-        );
+        {
+            uint256 deadline = abi.decode(data, (uint256));
+            // Create swap path for UniswapV2Router02 operations
+            _swapMemoryData.path = _createPath(_swapMemoryData.tokenIn, _swapMemoryData.tokenOut);
+            uint256[] memory amounts = _swap(
+                _swapMemoryData.amountIn,
+                amountOutMin,
+                _swapMemoryData.tokenIn,
+                _swapMemoryData.tokenOut,
+                swapData.yieldBoxData.depositToYb ? address(this) : to,
+                deadline
+            );
 
-        // Compute outputs
-        amountOut = amounts[1];
+            // Compute outputs
+            amountOut = amounts[1];
+        }
+
         if (swapData.yieldBoxData.depositToYb) {
-            if (path[path.length - 1] != address(0)) {
-                path[path.length - 1].safeApprove(address(yieldBox), amountOut);
+            if (_swapMemoryData.path[_swapMemoryData.path.length - 1] != address(0)) {
+                _swapMemoryData.path[_swapMemoryData.path.length - 1].safeApprove(address(yieldBox), amountOut);
                 (, shareOut) = yieldBox.depositAsset(swapData.tokensData.tokenOutId, address(this), to, amountOut, 0);
             } else {
                 (, shareOut) = yieldBox.depositETHAsset{value: amountOut}(swapData.tokensData.tokenOutId, to, amountOut);
