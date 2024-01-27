@@ -49,7 +49,7 @@ const MAX_DEADLINE = 9999999999999;
 const symbol = 'MTKN';
 const version = '1';
 
-describe.only('MagnetarV2', () => {
+describe('MagnetarV2', () => {
     describe('view', () => {
         it('should test sgl info', async () => {
             const {
@@ -2366,7 +2366,7 @@ describe.only('MagnetarV2', () => {
     });
 
     describe('remove asset', () => {
-        it.only('should remove asset, repay BingBang, remove collateral and withdraw', async () => {
+        it('should remove asset, repay BingBang, remove collateral and withdraw', async () => {
             const {
                 weth,
                 createWethUsd0Singularity,
