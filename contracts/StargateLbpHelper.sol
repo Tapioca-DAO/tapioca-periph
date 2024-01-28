@@ -71,11 +71,13 @@ contract StargateLbpHelper is Ownable, ReentrancyGuard {
     error TokensMismatch();
     error UnsupportedFunctionType();
 
-    constructor(address _router, address _lbpPool, address _vault) {
+    constructor(address _router, address _lbpPool, address _vault, address _owner) {
         if (_router == address(0)) revert RouterNotValid();
         router = IStargateRouter(_router);
         lbpPool = ILiquidityBootstrappingPool(_lbpPool); // address(0) for non-host chains
         lbpVault = IBalancerVault(_vault); // address(0) for non-host chains
+
+        transferOwnership(_owner);
     }
 
     // ********************** //
