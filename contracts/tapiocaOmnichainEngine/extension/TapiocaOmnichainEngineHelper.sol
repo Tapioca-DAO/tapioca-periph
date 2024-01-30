@@ -334,4 +334,27 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
 
         revert InvalidMsgIndex(_msgIndex, expectedMsgIndex_);
     }
+
+    /// =======================
+    /// View helpers
+    /// =======================
+    /**
+     * @dev Convert an amount from shared decimals into local decimals.
+     * @param _amountSD The amount in shared decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountLD The amount in local decimals.
+     */
+    function toLD(uint64 _amountSD, uint256 _decimalConversionRate) external pure returns (uint256 amountLD) {
+        return _amountSD * _decimalConversionRate;
+    }
+
+    /**
+     * @dev Convert an amount from local decimals into shared decimals.
+     * @param _amountLD The amount in local decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountSD The amount in shared decimals.
+     */
+    function toSD(uint256 _amountLD, uint256 _decimalConversionRate) external pure returns (uint64 amountSD) {
+        return uint64(_amountLD / _decimalConversionRate);
+    }
 }
