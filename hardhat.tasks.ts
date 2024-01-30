@@ -8,6 +8,7 @@ import { redeemLocalOnLbpHelper__task } from './tasks/exec/05-lbp-redeemLocal';
 import { redeemRemoteOnLbpHelper__task } from './tasks/exec/06-lbp-redeemRemote';
 import { deployOracle__task } from './tasks/deploy/deployOracle';
 import { deploySwappers__task } from './tasks/deploy/deploySwapper';
+import { deployStargateLbpHelper__task } from './tasks/deploy/deployStargateLbpHelper';
 import { pauseAll__task } from './tasks/exec/07-pause-all';
 
 task('pauseAll', 'Pause all contracts', pauseAll__task).addFlag(
@@ -62,3 +63,12 @@ task(
     'Deploys a swapper contract with a deterministic address, with MulticallV3.',
     deploySwappers__task,
 );
+
+task(
+    'deployStargateLbpHelper',
+    'Deploys StargateLbpHelper contract.',
+    deployStargateLbpHelper__task,
+)
+    .addParam('router', 'Stargate Router address')
+    .addParam('lbp', 'LBP address')
+    .addParam('vault', 'LBP vault address');

@@ -1,0 +1,44 @@
+{
+    "default": {
+        "421614": {
+            "name": "arbitrum_sepolia",
+            "lastBlockHeight": 10250337,
+            "contracts": [
+                {
+                    "name": "StargateLbpHelper",
+                    "address": "0x284C743ca88ba6EFF2F4915516C31305F513911C",
+                    "meta": {
+                        "args": [
+                            "0x2a4C2F5ffB0E0F2dcB3f9EBBd442B8F77ECDB9Cc",
+                            "0x9576b33FacEe2981e4e9C4601cAED63Be84c55AD",
+                            "0x471D13162Fd856C04410842628afe6B006d5AcB8",
+                            "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
+                        ],
+                        "salt": "0xe2ec2e7f35c3036b10d860fbb21f178e3acac851ae89eeb3c696177d1cf29333",
+                        "create2": true
+                    }
+                }
+            ]
+        },
+        "11155111": {
+            "name": "sepolia",
+            "lastBlockHeight": 5172927,
+            "contracts": [
+                {
+                    "name": "StargateLbpHelper",
+                    "address": "0x0d6F0A5A972196ef23Ac63d547038E8F033ADFd7",
+                    "meta": {
+                        "args": [
+                            "0x2836045A50744FB50D3d04a9C8D18aD7B5012102",
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000",
+                            "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
+                        ],
+                        "salt": "0x0d42efc4bf3b5033368e4f7be215b2ff597f217c36a5353e4ebac260c5238d6a",
+                        "create2": true
+                    }
+                }
+            ]
+        }
+    }
+}

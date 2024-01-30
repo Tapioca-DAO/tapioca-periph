@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
+import {ICommonOFT} from "../../gitsub_tapioca-sdk/src/contracts/token/oft/v2/ICommonOFT.sol";
 import "./ICommonData.sol";
 
 interface ISendFrom {

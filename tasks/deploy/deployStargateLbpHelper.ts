@@ -4,10 +4,9 @@ import inquirer from 'inquirer';
 import { buildStargateLbpHelper } from './builds/buildStargateLbpHelper';
 
 export const deployStargateLbpHelper__task = async (
-    taskArgs: { router: string, lbp: string, vault: string },
+    taskArgs: { router: string; lbp: string; vault: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
-
     const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
     const signer = (await hre.ethers.getSigners())[0];
     const chainInfo = hre.SDK.utils.getChainBy(
@@ -24,8 +23,15 @@ export const deployStargateLbpHelper__task = async (
     );
 
     const VM = await loadVM(hre, tag);
-    
-    VM.add(await buildStargateLbpHelper(hre, taskArgs.router, taskArgs.lbp, taskArgs.vault));
+
+    VM.add(
+        await buildStargateLbpHelper(
+            hre,
+            taskArgs.router,
+            taskArgs.lbp,
+            taskArgs.vault,
+        ),
+    );
 
     // Add and execute
     await VM.execute(3);
@@ -33,5 +39,4 @@ export const deployStargateLbpHelper__task = async (
     await VM.verify();
 
     console.log('[+] Stack deployed! 🎉');
-
-}
+};

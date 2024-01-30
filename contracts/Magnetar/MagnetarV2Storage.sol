@@ -15,7 +15,7 @@ import "../interfaces/ITapiocaOptionLiquidityProvision.sol";
 import {IUSDOBase} from "../interfaces/IUSDO.sol";
 
 //YIELDBOX
-import "tapioca-sdk/dist/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
+import "../../gitsub_tapioca-sdk/src/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";

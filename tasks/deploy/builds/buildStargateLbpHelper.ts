@@ -2,12 +2,11 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { StargateLbpHelper__factory } from '../../../typechain';
 
-
 export const buildStargateLbpHelper = async (
     hre: HardhatRuntimeEnvironment,
     router: string,
     lbp: string,
-    vault: string
+    vault: string,
 ): Promise<IDeployerVMAdd<StargateLbpHelper__factory>> => {
     console.log('[+] Building StargateLbpHelper');
 
@@ -17,7 +16,7 @@ export const buildStargateLbpHelper = async (
         router,
         lbp,
         vault,
-        deployer.address, 
+        deployer.address,
     ];
 
     return {
