@@ -149,7 +149,7 @@ interface IYieldBox {
             uint256[] memory extensions
         );
 
-    function ids(IYieldBoxTokenType tokenType, address contractAddr, address strategy, uint256 assetId)
+    function ids(IYieldBoxTokenType tokenType, address contractAddr, address strategy, uint256 tokenId)
         external
         view
         returns (uint256);
