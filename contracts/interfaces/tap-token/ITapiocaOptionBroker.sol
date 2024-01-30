@@ -60,4 +60,6 @@ interface ITapiocaOptionBroker {
     function participate(uint256 tOLPTokenID) external returns (uint256 oTAPTokenID);
 
     function exitPosition(uint256 oTAPTokenID) external;
+    
+    function tapOFT() external view returns (address);
 }

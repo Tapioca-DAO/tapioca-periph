@@ -83,8 +83,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, BaseToeMsgType {
     ) external view virtual returns (MessagingFee memory msgFee) {
         // @dev mock the amount to credit, this is the same operation used in the send().
         // The quote is as similar as possible to the actual send() operation.
-        (, uint256 amountToCreditLD) =
-            _debitView(_sendParam.amountToSendLD, _sendParam.minAmountToCreditLD, _sendParam.dstEid);
+        (, uint256 amountToCreditLD) = _debitView(_sendParam.amountLD, _sendParam.minAmountLD, _sendParam.dstEid);
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) =

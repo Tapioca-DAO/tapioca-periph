@@ -187,7 +187,7 @@ library TapiocaOmnichainEngineCodec {
      */
     function decodeExtraOptions(bytes memory _options)
         internal
-        view
+        pure
         returns (
             uint16 workerId_,
             uint16 optionLength_,

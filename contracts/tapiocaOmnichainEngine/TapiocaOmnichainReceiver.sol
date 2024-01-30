@@ -104,7 +104,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             );
         }
 
-        emit OFTReceived(_guid, toAddress, amountToCreditLD, amountReceivedLD);
+        emit OFTReceived(_guid, _origin.srcEid, toAddress, amountReceivedLD);
     }
 
     // TODO - SANITIZE MSG TYPE
@@ -203,7 +203,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
         _internalTransferWithAllowance(
-            remoteTransferMsg_.owner, _srcChainSender, remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
+            remoteTransferMsg_.owner, _srcChainSender, remoteTransferMsg_.lzSendParam.sendParam.amountLD
         );
 
         // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
@@ -215,7 +215,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             remoteTransferMsg_.owner,
             remoteTransferMsg_.lzSendParam.sendParam.dstEid,
             OFTMsgCodec.bytes32ToAddress(remoteTransferMsg_.lzSendParam.sendParam.to),
-            remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
+            remoteTransferMsg_.lzSendParam.sendParam.amountLD
         );
     }
 
@@ -231,19 +231,21 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         bytes memory _composeMsg
     ) internal returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
         // Burn tokens from this contract
-        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) =
-            _debitThis(_lzSendParam.sendParam.minAmountToCreditLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitView(
+            _lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid
+        );
+        _burn(address(this), amountToCreditLD_);
 
-        _lzSendParam.sendParam.amountToSendLD = amountToCreditLD_;
-        _lzSendParam.sendParam.minAmountToCreditLD = amountToCreditLD_;
+        _lzSendParam.sendParam.amountLD = amountToCreditLD_;
+        _lzSendParam.sendParam.minAmountLD = amountToCreditLD_;
 
         // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
-        if (_lzSendParam.sendParam.amountToSendLD > amountDebitedLD_) {
+        if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) {
             // Overwrite the amount to credit with the amount debited
-            _lzSendParam.sendParam.amountToSendLD = amountDebitedLD_;
-            _lzSendParam.sendParam.minAmountToCreditLD = amountDebitedLD_;
+            _lzSendParam.sendParam.amountLD = amountDebitedLD_;
+            _lzSendParam.sendParam.minAmountLD = amountDebitedLD_;
             // Send the difference back to the user
-            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountToSendLD - amountDebitedLD_);
+            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
         }
 
         // Builds the options and OFT message to quote in the endpoint.
@@ -257,7 +259,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
 
-        emit OFTSent(msgReceipt.guid, _srcChainSender, amountDebitedLD_, amountToCreditLD_, _composeMsg);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_);
     }
 
     /**
