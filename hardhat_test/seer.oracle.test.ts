@@ -20,27 +20,30 @@ if (hre.network.config.chainId === 1) {
                 'DAI/USDC', // Name
                 'DAI/USDC', // Symbol
                 18, // Decimals
-                [
-                    '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
-                    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-                ],
-                [
-                    '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
-                ],
-                [1], // Multiply/divide Uni
-                600, // TWAP
-                10, // Observation length
-                0, // Uni final currency
-                [
-                    '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
-                    '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
-                ],
-                [1, 0], // Multiply/divide CL
-                8640000, // CL period before stale
-                [deployer.address], // Owner
-                hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
-                hre.ethers.constants.AddressZero,
-                deployer.address, // Owner
+                {
+                    addressInAndOutUni: [
+                        '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+                        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+                    ],
+                    _circuitUniswap: [
+                        '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', /// LP DAI/USDC
+                    ],
+                    _circuitUniIsMultiplied: [1], // Multiply/divide Uni
+                    _twapPeriod: 600, // TWAP
+                    observationLength: 10, // Observation length
+                    _uniFinalCurrency: 0, // Uni final currency
+                    _circuitChainlink: [
+                        '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9', // CL DAI/USD
+                        '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // CL USDC/USD
+                    ],
+                    _circuitChainIsMultiplied: [1, 0], // Multiply/divide CL
+                    _stalePeriod: 8640000, // CL period before stale
+                    guardians: [deployer.address], // Owner
+                    _description:
+                        hre.ethers.utils.formatBytes32String('DAI/USDC'), // Description,
+                    _sequencerUptimeFeed: hre.ethers.constants.AddressZero,
+                    _admin: deployer.address, // Owner
+                },
             );
 
             console.log(
