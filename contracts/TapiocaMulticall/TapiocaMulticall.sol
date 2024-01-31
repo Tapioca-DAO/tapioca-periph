@@ -17,7 +17,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract Multicall3 is Ownable {
+contract TapiocaMulticall is Ownable {
     struct Call {
         address target;
         bool allowFailure;
@@ -36,7 +36,7 @@ contract Multicall3 is Ownable {
         bytes returnData;
     }
 
-    function multicall(Call[] calldata calls) public payable returns (Result[] memory returnData) {
+    function multicall(Call[] calldata calls) public payable onlyOwner returns (Result[] memory returnData) {
         uint256 length = calls.length;
         returnData = new Result[](length);
         Call memory calli;
@@ -55,7 +55,7 @@ contract Multicall3 is Ownable {
         }
     }
 
-    function multicallValue(CallValue[] calldata calls) public payable returns (Result[] memory returnData) {
+    function multicallValue(CallValue[] calldata calls) public payable onlyOwner returns (Result[] memory returnData) {
         uint256 valAccumulator;
         uint256 length = calls.length;
         returnData = new Result[](length);
