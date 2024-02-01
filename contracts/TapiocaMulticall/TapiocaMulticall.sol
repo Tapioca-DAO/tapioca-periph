@@ -47,7 +47,7 @@ contract TapiocaMulticall is Ownable {
             require(calli.target.code.length > 0, "Multicall: no contract");
             (result.success, result.returnData) = calli.target.call(calli.callData);
             if (!result.success) {
-                _getRevertMsg(result.returnData);
+                _getRevertMsg(calli.target, result.returnData);
             }
             unchecked {
                 ++i;
@@ -71,7 +71,7 @@ contract TapiocaMulticall is Ownable {
             }
             (result.success, result.returnData) = calli.target.call{value: val}(calli.callData);
             if (!result.success) {
-                _getRevertMsg(result.returnData);
+                _getRevertMsg(calli.target, result.returnData);
             }
             unchecked {
                 ++i;
@@ -81,15 +81,21 @@ contract TapiocaMulticall is Ownable {
         require(msg.value == valAccumulator, "Multicall3: value mismatch");
     }
 
-    function _getRevertMsg(bytes memory _returnData) private pure {
+    function _getRevertMsg(address _target, bytes memory _returnData) private pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert("Reason unknown");
+        // Comment this because of custom errors
+        // if (_returnData.length < 68) revert("Reason unknown");
 
+        bytes memory _withoutSelector;
         assembly {
             // Slice the sighash.
-            _returnData := add(_returnData, 0x04)
+            _withoutSelector := add(_returnData, 0x04)
         }
-        revert(abi.decode(_returnData, (string))); // All that remains is the revert string
+        revert(
+            abi.decode(
+                abi.encode(_target, abi.decode(_withoutSelector, (string)), " Return data: ", _returnData), (string)
+            )
+        ); // All that remains is the revert string
     }
 }
