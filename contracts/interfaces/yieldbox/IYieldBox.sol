@@ -149,7 +149,10 @@ interface IYieldBox {
             uint256[] memory extensions
         );
 
-    function ids(uint8, address, address, uint256) external view returns (uint256);
+    function ids(IYieldBoxTokenType tokenType, address contractAddr, address strategy, uint256 tokenId)
+        external
+        view
+        returns (uint256);
 
     function isApprovedForAll(address, address) external view returns (bool);
 

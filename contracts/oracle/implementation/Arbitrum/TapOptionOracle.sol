@@ -7,7 +7,7 @@ import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Po
 // Tapioca
 import {SeerUniSolo, OracleUniSoloConstructorData} from "../../SeerUniSolo.sol";
 
-contract TapOracle is SeerUniSolo {
+contract TapOptionOracle is SeerUniSolo {
     /// @notice Last prices of the oracle. get() will return the average.
     uint256[3] public lastPrices = [0, 0, 0];
 
