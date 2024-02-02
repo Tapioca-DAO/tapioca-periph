@@ -6,9 +6,7 @@ import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/
 
 // Tapioca
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-
 import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
@@ -25,38 +23,33 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-interface ITOFT is ITapiocaOmnichainEngine {
+interface IUsdo is ITapiocaOmnichainEngine {
     enum Module {
-        NonModule, //0
-        TOFTSender,
-        TOFTReceiver,
-        TOFTMarketReceiver,
-        TOFTOptionsReceiver,
-        TOFTGenericReceiver
+        NonModule,
+        UsdoSender,
+        UsdoReceiver,
+        UsdoMarketReceiver,
+        UsdoOptionReceiver,
+        UsdoGenericReceiver
     }
 }
 
 /// ============================
 /// ========= GENERIC ==========
 /// ============================
-
-struct TOFTInitStruct {
-    string name;
-    string symbol;
+struct UsdoInitStruct {
     address endpoint;
     address delegate;
     address yieldBox;
     address cluster;
-    address erc20;
-    uint256 hostEid;
 }
 
-struct TOFTModulesInitStruct {
+struct UsdoModulesInitStruct {
     //modules
-    address tOFTSenderModule;
-    address tOFTReceiverModule;
+    address usdoSenderModule;
+    address usdoReceiverModule;
     address marketReceiverModule;
-    address optionsReceiverModule;
+    address optionReceiverModule;
     address genericReceiverModule;
 }
 
@@ -64,12 +57,34 @@ struct TOFTModulesInitStruct {
 /// ========= COMPOSE ==========
 /// ============================
 /**
- * @notice Encodes the message for the PT_SEND_PARAMS operation.
+ * @notice Encodes the message for the PT_YB_SEND_SGL_LEND_OR_REPAY operation.
  */
-struct SendParamsMsg {
-    address receiver; //TODO: decide if we should use `srcChainSender_`
-    bool unwrap;
-    uint256 amount; //TODO: use the amount credited by lzReceive directly
+struct MarketLendOrRepayMsg {
+    address user;
+    IUSDOBase.ILendOrRepayParams lendParams;
+    ICommonData.IWithdrawParams withdrawParams;
+}
+
+/**
+ * @notice Encodes the message for the PT_MARKET_REMOVE_ASSET operation.
+ */
+struct MarketRemoveAssetMsg {
+    address user;
+    ICommonData.ICommonExternalContracts externalData;
+    IUSDOBase.IRemoveAndRepay removeAndRepayData;
+}
+
+/**
+ * @notice Encodes the message for the PT_LEVERAGE_MARKET_UP operation.
+ */
+struct MarketLeverageUpMsg {
+    address user;
+    uint256 amount;
+    IUSDOBase.ILeverageSwapData swapData;
+    IUSDOBase.ILeverageExternalContractsData externalData;
+    //@dev send back to source message params
+    LZSendParam lzSendParams;
+    bytes composeMsg;
 }
 
 /**
@@ -81,37 +96,6 @@ struct ExerciseOptionsMsg {
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
-}
-
-/**
- * @notice Encodes the message for the PT_LEVERAGE_MARKET_DOWN operation.
- */
-struct MarketLeverageDownMsg {
-    address user;
-    uint256 amount;
-    IUSDOBase.ILeverageSwapData swapData;
-    IUSDOBase.ILeverageExternalContractsData externalData;
-    //@dev send back to source message params
-    LZSendParam lzSendParams;
-    bytes composeMsg;
-}
-
-/**
- * @notice Encodes the message for the PT_MARKET_REMOVE_COLLATERAL operation.
- */
-struct MarketRemoveCollateralMsg {
-    address user;
-    ITapiocaOFT.IRemoveParams removeParams;
-    ICommonData.IWithdrawParams withdrawParams;
-}
-
-/**
- * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
- */
-struct MarketBorrowMsg {
-    address user;
-    ITapiocaOFT.IBorrowParams borrowParams;
-    ICommonData.IWithdrawParams withdrawParams;
 }
 
 /**
