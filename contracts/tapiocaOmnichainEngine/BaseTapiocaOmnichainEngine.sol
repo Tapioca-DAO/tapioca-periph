@@ -41,8 +41,8 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, BaseToeMsgType {
     /// @dev Used to execute certain extern calls from the TapToken contract, such as ERC20Permit approvals.
     TapiocaOmnichainExtExec public toeExtExec;
 
-    constructor(string memory _name, string memory _symbol, address _endpoint, address _owner)
-        OFT(_name, _symbol, _endpoint, _owner)
+    constructor(string memory _name, string memory _symbol, address _endpoint, address _delegate)
+        OFT(_name, _symbol, _endpoint, _delegate)
     {
         toeExtExec = new TapiocaOmnichainExtExec();
     }
