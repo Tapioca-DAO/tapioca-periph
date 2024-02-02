@@ -21,10 +21,10 @@ import {
 } from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {IUSDOBase, IMintData} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 import {MagnetarMarketModuleBase} from "./MagnetarMarketModuleBase.sol";
 
@@ -154,7 +154,7 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
     struct MintFromBBAndLendOnSGLData {
         address user;
         uint256 lendAmount;
-        IUSDOBase.IMintData mintData;
+        IMintData mintData;
         IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionBroker.IOptionsParticipateData participateData;

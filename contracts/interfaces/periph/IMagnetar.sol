@@ -11,8 +11,8 @@ import {
     ICommonExternalContracts
 } from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IUSDOBase, IMintData, IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 interface IMagnetar {
     struct Call {
@@ -37,7 +37,7 @@ interface IMagnetar {
     struct ExitPositionAndRemoveCollateralData {
         address user;
         ICommonExternalContracts externalData;
-        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+        IRemoveAndRepay removeAndRepayData;
         uint256 valueAmount;
     }
 
@@ -55,7 +55,7 @@ interface IMagnetar {
     struct MintFromBBAndLendOnSGLData {
         address user;
         uint256 lendAmount;
-        IUSDOBase.IMintData mintData;
+        IMintData mintData;
         IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionBroker.IOptionsParticipateData participateData;

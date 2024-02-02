@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {IUSDOBase, ILeverageLZData, ILeverageExternalContractsData, ILeverageSwapData} from "./IUSDO.sol";
 import {IMarket} from "./IMarket.sol";
-import {IUSDOBase} from "./IUSDO.sol";
 
 interface ISingularity is IMarket {
     struct AccrueInfo {
@@ -56,17 +56,17 @@ interface ISingularity is IMarket {
         uint256 collateralAmount,
         uint256 borrowAmount,
         bool useAirdroppedFunds,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData
+        ILeverageSwapData calldata swapData,
+        ILeverageLZData calldata lzData,
+        ILeverageExternalContractsData calldata externalData
     ) external payable;
 
     function multiHopSellCollateral(
         address from,
         uint256 share,
         bool useAirdroppedFunds,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData
+        ILeverageSwapData calldata swapData,
+        ILeverageLZData calldata lzData,
+        ILeverageExternalContractsData calldata externalData
     ) external payable;
 }

@@ -13,10 +13,10 @@ import {
     RemoteTransferMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 
+import {IUSDOBase, ILeverageSwapData, ILeverageExternalContractsData} from "tapioca-periph/interfaces/bar/IUSDO.sol";
+import {ITapiocaOFT, IRemoveParams, IBorrowParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -95,8 +95,8 @@ struct ExerciseOptionsMsg {
 struct MarketLeverageDownMsg {
     address user;
     uint256 amount;
-    IUSDOBase.ILeverageSwapData swapData;
-    IUSDOBase.ILeverageExternalContractsData externalData;
+    ILeverageSwapData swapData;
+    ILeverageExternalContractsData externalData;
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
@@ -107,7 +107,7 @@ struct MarketLeverageDownMsg {
  */
 struct MarketRemoveCollateralMsg {
     address user;
-    ITapiocaOFT.IRemoveParams removeParams;
+    IRemoveParams removeParams;
     IWithdrawParams withdrawParams;
 }
 
@@ -116,7 +116,7 @@ struct MarketRemoveCollateralMsg {
  */
 struct MarketBorrowMsg {
     address user;
-    ITapiocaOFT.IBorrowParams borrowParams;
+    IBorrowParams borrowParams;
     IWithdrawParams withdrawParams;
 }
 

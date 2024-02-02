@@ -13,8 +13,8 @@ import {
 import {
     ICommonData, IWithdrawParams, ICommonExternalContracts
 } from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {IUSDOBase, ILeverageSwapData, ILeverageExternalContractsData, IRemoveAndRepay, ILendOrRepayParams} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -67,7 +67,7 @@ struct UsdoModulesInitStruct {
  */
 struct MarketLendOrRepayMsg {
     address user;
-    IUSDOBase.ILendOrRepayParams lendParams;
+    ILendOrRepayParams lendParams;
     IWithdrawParams withdrawParams;
 }
 
@@ -77,7 +77,7 @@ struct MarketLendOrRepayMsg {
 struct MarketRemoveAssetMsg {
     address user;
     ICommonExternalContracts externalData;
-    IUSDOBase.IRemoveAndRepay removeAndRepayData;
+    IRemoveAndRepay removeAndRepayData;
 }
 
 /**
@@ -86,8 +86,8 @@ struct MarketRemoveAssetMsg {
 struct MarketLeverageUpMsg {
     address user;
     uint256 amount;
-    IUSDOBase.ILeverageSwapData swapData;
-    IUSDOBase.ILeverageExternalContractsData externalData;
+    ILeverageSwapData swapData;
+    ILeverageExternalContractsData externalData;
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;

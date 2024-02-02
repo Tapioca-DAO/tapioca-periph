@@ -7,6 +7,20 @@ import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
+struct IRemoveParams {
+    uint256 amount;
+    address marketHelper;
+    address market;
+}
+
+struct IBorrowParams {
+    uint256 amount;
+    uint256 borrowAmount;
+    address marketHelper;
+    address market;
+    bool deposit;
+}
+//TODO: refactor in 1 interface; we have 3 oft/ITOFT and these 2
 interface ITapiocaOFTBase {
     function hostChainID() external view returns (uint256);
 
@@ -23,20 +37,6 @@ interface ITapiocaOFTBase {
 
 /// @dev used for generic TOFTs
 interface ITapiocaOFT is ISendFrom, ITapiocaOFTBase {
-    struct IRemoveParams {
-        uint256 amount;
-        address marketHelper;
-        address market;
-    }
-
-    struct IBorrowParams {
-        uint256 amount;
-        uint256 borrowAmount;
-        address marketHelper;
-        address market;
-        bool deposit;
-    }
-
     function totalFees() external view returns (uint256);
 
     function erc20() external view returns (address);

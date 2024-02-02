@@ -18,11 +18,11 @@ import {
 } from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {IUSDOBase, IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {MagnetarYieldboxModule} from "./MagnetarYieldboxModule.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 import {MagnetarMarketModuleBase} from "./MagnetarMarketModuleBase.sol";
 
@@ -138,7 +138,7 @@ contract MagnetarMarketModule2 is MagnetarMarketModuleBase {
     struct ExitPositionAndRemoveCollateralData {
         address user;
         ICommonExternalContracts externalData;
-        IUSDOBase.IRemoveAndRepay removeAndRepayData;
+        IRemoveAndRepay removeAndRepayData;
         uint256 valueAmount;
     }
 
