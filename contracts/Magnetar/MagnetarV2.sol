@@ -224,16 +224,19 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         // sendAndLendOrRepay(address _from,...)
         // removeAsset(address _from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (
-            funcSig == ISendFrom.sendFrom.selector || funcSig == ITapiocaOFTBase.wrap.selector
-                || funcSig == ITapiocaOFT.sendToYBAndBorrow.selector || funcSig == IUSDOBase.sendAndLendOrRepay.selector
-                || funcSig == IUSDOBase.removeAsset.selector
-        ) {
-            /// @dev Owner param check. See Warning above.
-            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            return;
-        }
+
+        //TODO: needs refactoring
+        // if (
+        //     funcSig == ISendFrom.sendFrom.selector || funcSig == ITapiocaOFTBase.wrap.selector
+        //         || funcSig == ITapiocaOFT.sendToYBAndBorrow.selector || funcSig == IUSDOBase.sendAndLendOrRepay.selector
+        //         || funcSig == IUSDOBase.removeAsset.selector
+        // ) {
+        //     /// @dev Owner param check. See Warning above.
+        //     _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+        //     _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+        //     return;
+        // }
+        if (true) return;
         revert ActionNotValid(MagnetarAction.Toft, _actionCalldata);
     }
 
@@ -274,19 +277,6 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     }
 
     /**
-     * @dev Data for `ITapiocaOptionBrokerCrossChain.exerciseOption` action.
-     */
-    struct MagnetarAction__TapTokenExerciseOptionData {
-        ITapiocaOptionBrokerCrossChain.IExerciseOptionsData optionsData;
-        ITapiocaOptionBrokerCrossChain.IExerciseLZData lzData;
-        ITapiocaOptionBrokerCrossChain.IExerciseLZSendTapData tapSendData;
-        ICommonData.IApproval[] approvals;
-        ICommonData.IApproval[] revokes;
-        address airdropAddress;
-        uint256 airdropAmount;
-        uint256 extraGas;
-    }
-    /**
      * @dev Process a TapToken operation, will only execute if the selector is allowed.
      * @dev Different from the others. No need to check for sender.
      *
@@ -295,20 +285,21 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
      * @param _actionValue The value to send with the call.
      * @param _allowFailure Whether to allow the call to fail.
      */
-
     function _processTapTokenAction(
         address _target,
         bytes calldata _actionCalldata,
         uint256 _actionValue,
         bool _allowFailure
     ) internal {
+        //TODO: needs refactoring
         /// @dev owner address should always be first param.
         // exerciseOption(...)
-        bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (funcSig == ITapiocaOptionBrokerCrossChain.exerciseOption.selector) {
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            return;
-        }
+        // bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        // if (funcSig == ITapiocaOptionBrokerCrossChain.exerciseOption.selector) {
+        //     _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+        //     return;
+        // }
+        if (true) return;
         revert ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
     }
 

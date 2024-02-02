@@ -10,8 +10,10 @@ import {
     LZSendParam,
     ERC20PermitStruct
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {
+    ICommonData, IWithdrawParams, ICommonExternalContracts
+} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /*
@@ -66,7 +68,7 @@ struct UsdoModulesInitStruct {
 struct MarketLendOrRepayMsg {
     address user;
     IUSDOBase.ILendOrRepayParams lendParams;
-    ICommonData.IWithdrawParams withdrawParams;
+    IWithdrawParams withdrawParams;
 }
 
 /**
@@ -74,7 +76,7 @@ struct MarketLendOrRepayMsg {
  */
 struct MarketRemoveAssetMsg {
     address user;
-    ICommonData.ICommonExternalContracts externalData;
+    ICommonExternalContracts externalData;
     IUSDOBase.IRemoveAndRepay removeAndRepayData;
 }
 

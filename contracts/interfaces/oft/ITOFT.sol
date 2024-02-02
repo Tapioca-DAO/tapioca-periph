@@ -15,7 +15,7 @@ import {
 
 import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /*
@@ -108,7 +108,7 @@ struct MarketLeverageDownMsg {
 struct MarketRemoveCollateralMsg {
     address user;
     ITapiocaOFT.IRemoveParams removeParams;
-    ICommonData.IWithdrawParams withdrawParams;
+    IWithdrawParams withdrawParams;
 }
 
 /**
@@ -117,7 +117,7 @@ struct MarketRemoveCollateralMsg {
 struct MarketBorrowMsg {
     address user;
     ITapiocaOFT.IBorrowParams borrowParams;
-    ICommonData.IWithdrawParams withdrawParams;
+    IWithdrawParams withdrawParams;
 }
 
 /**

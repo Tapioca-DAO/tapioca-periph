@@ -13,9 +13,14 @@ import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 //TAPIOCA
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {
+    ICommonData,
+    IWithdrawParams,
+    IDepositData,
+    ICommonExternalContracts
+} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
@@ -46,7 +51,7 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
         uint256 borrowAmount;
         bool extractFromSender;
         bool deposit;
-        ICommonData.IWithdrawParams withdrawParams;
+        IWithdrawParams withdrawParams;
         uint256 valueAmount;
     }
 
@@ -150,10 +155,10 @@ contract MagnetarMarketModule1 is MagnetarMarketModuleBase {
         address user;
         uint256 lendAmount;
         IUSDOBase.IMintData mintData;
-        ICommonData.IDepositData depositData;
+        IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionBroker.IOptionsParticipateData participateData;
-        ICommonData.ICommonExternalContracts externalContracts;
+        ICommonExternalContracts externalContracts;
     }
 
     /**

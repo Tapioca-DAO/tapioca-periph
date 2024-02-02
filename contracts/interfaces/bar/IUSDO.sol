@@ -7,8 +7,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ICommonData, IWithdrawParams, IDepositData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {ISingularity} from "./ISingularity.sol";
 import {IMarket} from "./IMarket.sol";
@@ -31,8 +31,8 @@ interface IUSDOBase {
         uint256 collateralAmount; // from BB
         ITapiocaOptionBroker.IOptionsExitData exitData;
         ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
-        ICommonData.IWithdrawParams assetWithdrawData;
-        ICommonData.IWithdrawParams collateralWithdrawData;
+        IWithdrawParams assetWithdrawData;
+        IWithdrawParams collateralWithdrawData;
     }
 
     // lend or repay
@@ -68,7 +68,7 @@ interface IUSDOBase {
     struct IMintData {
         bool mint;
         uint256 mintAmount;
-        ICommonData.IDepositData collateralDepositData;
+        IDepositData collateralDepositData;
     }
 
     function mint(address _to, uint256 _amount) external;
@@ -80,52 +80,6 @@ interface IUSDOBase {
     function addFlashloanFee(uint256 _fee) external; //onlyOwner
 
     function paused() external view returns (bool);
-
-    function sendAndLendOrRepay(
-        address _from,
-        address _to,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        ILendOrRepayParams calldata lendParams,
-        ICommonData.IApproval[] calldata approvals,
-        ICommonData.IApproval[] calldata revokes,
-        ICommonData.IWithdrawParams calldata withdrawParams, //collateral remove data
-        bytes calldata adapterParams
-    ) external payable;
-
-    function sendForLeverage(
-        uint256 amount,
-        address leverageFor,
-        ILeverageLZData calldata lzData,
-        ILeverageSwapData calldata swapData,
-        ILeverageExternalContractsData calldata externalData
-    ) external payable;
-
-    function removeAsset(
-        address from,
-        address to,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        bytes calldata adapterParams,
-        ICommonData.ICommonExternalContracts calldata externalData,
-        IUSDOBase.IRemoveAndRepay calldata removeAndRepayData,
-        ICommonData.IApproval[] calldata approvals,
-        ICommonData.IApproval[] calldata revokes
-    ) external payable;
-
-    function triggerSendFrom(
-        address from,
-        uint16 dstChainId,
-        bytes32 to,
-        uint256 amount,
-        ICommonOFT.LzCallParams calldata callParams
-    ) external payable;
-
-    function triggerApproveOrRevoke(
-        uint16 lzDstChainId,
-        ICommonOFT.LzCallParams calldata lzCallParams,
-        ICommonData.IApproval[] calldata approvals
-    ) external payable;
 }
 
 interface IUSDO is IUSDOBase, IERC20Metadata {}

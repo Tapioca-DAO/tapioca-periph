@@ -4,9 +4,14 @@ pragma solidity 0.8.22;
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {
+    ICommonData,
+    IWithdrawParams,
+    IDepositData,
+    ICommonExternalContracts
+} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 interface IMagnetar {
@@ -25,13 +30,13 @@ interface IMagnetar {
         uint256 repayAmount;
         uint256 collateralAmount;
         bool extractFromSender;
-        ICommonData.IWithdrawParams withdrawCollateralParams;
+        IWithdrawParams withdrawCollateralParams;
         uint256 valueAmount;
     }
 
     struct ExitPositionAndRemoveCollateralData {
         address user;
-        ICommonData.ICommonExternalContracts externalData;
+        ICommonExternalContracts externalData;
         IUSDOBase.IRemoveAndRepay removeAndRepayData;
         uint256 valueAmount;
     }
@@ -43,7 +48,7 @@ interface IMagnetar {
         uint256 borrowAmount;
         bool extractFromSender;
         bool deposit;
-        ICommonData.IWithdrawParams withdrawParams;
+        IWithdrawParams withdrawParams;
         uint256 valueAmount;
     }
 
@@ -51,10 +56,10 @@ interface IMagnetar {
         address user;
         uint256 lendAmount;
         IUSDOBase.IMintData mintData;
-        ICommonData.IDepositData depositData;
+        IDepositData depositData;
         ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
         ITapiocaOptionBroker.IOptionsParticipateData participateData;
-        ICommonData.ICommonExternalContracts externalContracts;
+        ICommonExternalContracts externalContracts;
     }
 
     struct YieldBoxDepositData {
