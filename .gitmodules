@@ -10,3 +10,6 @@
 [submodule "gitmodule/tapioca-sdk"]
 	path = gitmodule/tapioca-sdk
 	url = https://github.com/Tapioca-DAO/tapioca-sdk
+[submodule "gitmodule/permitc"]
+	path = gitmodule/permitc
+	url = https://github.com/limitbreakinc/PermitC.git
