@@ -1,56 +1,46 @@
-import * as dotenv from 'dotenv';
-import fs from 'fs';
-
-// hardhat
-import '@nomicfoundation/hardhat-toolbox';
+// Plugins
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
+import '@nomicfoundation/hardhat-toolbox';
 import '@primitivefi/hardhat-dodoc';
+import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
-import 'hardhat-deploy';
 import 'hardhat-tracer';
-import { HardhatUserConfig, subtask } from 'hardhat/config';
-import { HttpNetworkConfig, NetworksUserConfig } from 'hardhat/types';
-import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
+import { HardhatUserConfig } from 'hardhat/config';
+import { HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types';
+import fs from 'fs';
 
-// Tapioca
+// Utils
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
-import { SDK, deleteDefaultTasks, loadEnv } from 'tapioca-sdk';
-
-dotenv.config();
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace NodeJS {
         interface ProcessEnv {
             ALCHEMY_API_KEY: string;
-            NETWORK: string;
-            FROM_BLOCK: string;
-            BINANCE_WALLET_ADDRESS: string;
+            ENV: string;
         }
     }
 }
 
+// Load the env vars from the .env/<network>.env file. the <network> file name is the same as the network in hh `--network arbitrum_sepolia`
 loadEnv();
-deleteDefaultTasks();
+// Check if the folder /gen/typechain exists, if not, create it. This is needed if the repo was freshly cloned.
+if (!fs.existsSync('./gen/typechain')) {
+    fs.mkdirSync('./gen/typechain');
+    fs.writeFileSync('./gen/typechain/index.ts', '');
+}
 
-// Solves the hardhat error [Error HH415: Two different source names]
-subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
-    // Get the list of source paths that would normally be passed to the Solidity compiler
-    const remappings = await runSuper();
-    fs.cpSync('contracts/', 'gen/contracts/', { recursive: true });
-    remappings['tapioca-periph/'] = 'gen/contracts/';
-    return remappings;
-});
-
+// TODO refactor all of that in the SDK?
 type TNetwork = ReturnType<
     typeof SDK.API.utils.getSupportedChains
 >[number]['name'];
 const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     (sdkChains, chain) => ({
         ...sdkChains,
-        [chain.name]: <HttpNetworkConfig>{
+        [chain.name]: <HttpNetworkUserConfig>{
             accounts:
                 process.env.PRIVATE_KEY !== undefined
                     ? [process.env.PRIVATE_KEY]
@@ -65,21 +55,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-const forkNetwork = process.env.NETWORK as TNetwork;
-const forkChainInfo = supportedChains[forkNetwork];
-const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
-    ? {
-          chainId: forkChainInfo.chainId,
-          forking: {
-              url: forkChainInfo.url,
-              ...(process.env.FROM_BLOCK
-                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
-                  : {}),
-          },
-      }
-    : {};
-
-const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
+const config: HardhatUserConfig & { dodoc: any } = {
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
     solidity: {
         compilers: [
@@ -99,14 +75,6 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         artifacts: './gen/artifacts',
         cache: './gen/cache',
         tests: './hardhat_test',
-    },
-    watcher: {
-        test: {
-            tasks: ['test'],
-            files: ['./contracts', './hardhat_test'],
-            verbose: true,
-            clearOnStart: true,
-        },
     },
     dodoc: {
         runOnCompile: false,
