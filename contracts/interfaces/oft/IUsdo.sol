@@ -56,7 +56,6 @@ struct UsdoModulesInitStruct {
     address usdoReceiverModule;
     address marketReceiverModule;
     address optionReceiverModule;
-    address genericReceiverModule;
 }
 
 /// ============================
