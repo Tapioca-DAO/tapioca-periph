@@ -6,10 +6,13 @@ import {IPearlmit} from "./IPearlmit.sol";
 
 library PearlmitHash {
     string public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
-        "SignatureApproval(uint8 tokenType,address token,uint256 id,uint200 amount,address operator,uint48 approvalExpiration)";
+        "SignatureApproval(uint8 tokenType,address token,uint256 id,uint200 amount,address operator)";
     string public constant _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH =
-        "PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce)SignatureApproval(address token,uint256 id,uint200 amount,address operator,uint48 approvalExpiration)";
+        "PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce)SignatureApproval(address token,uint256 id,uint200 amount,address operator)";
 
+    /**
+     * @dev Hashes the permit batch transfer from.
+     */
     function hashBatchTransferFrom(
         IPearlmit.SignatureApproval[] memory approvals,
         uint256 nonce,
@@ -33,6 +36,9 @@ library PearlmitHash {
         );
     }
 
+    /**
+     * @dev Hashes the permit signature approval.
+     */
     function _hashPermitSignatureApproval(IPearlmit.SignatureApproval memory approval)
         internal
         pure
@@ -45,8 +51,7 @@ library PearlmitHash {
                 approval.tokenType,
                 approval.id,
                 approval.amount,
-                approval.operator,
-                approval.approvalExpiration
+                approval.operator
             )
         );
     }
