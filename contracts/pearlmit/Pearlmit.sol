@@ -2,7 +2,9 @@
 pragma solidity 0.8.22;
 
 // External
-import {PermitC, PermitC__SignatureTransferExceededPermitExpired} from "permitc/PermitC.sol";
+import {
+    PermitC, PermitC__SignatureTransferExceededPermitExpired, PackedApproval, ZERO_BYTES32
+} from "permitc/PermitC.sol";
 
 // Tapioca
 import {PearlmitHash} from "./PearlmitHash.sol";
@@ -63,6 +65,39 @@ contract Pearlmit is PermitC {
                 _transferFromERC1155(approval.token, batch.owner, approval.operator, approval.id, approval.amount);
             }
         }
+    }
+
+    /**
+     * @notice Permit batch approve of multiple token types.
+     */
+    function permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch) external {
+        _checkPermitBatchApproval(batch);
+
+        uint256 numPermits = batch.approvals.length;
+        for (uint256 i = 0; i < numPermits; ++i) {
+            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
+            __storeApproval(
+                approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
+            );
+        }
+    }
+
+    /**
+     * @dev Identical of PermitC._storeApproval.
+     */
+    function __storeApproval(
+        address token,
+        uint256 id,
+        uint200 amount,
+        uint48 expiration,
+        address owner,
+        address operator
+    ) internal {
+        PackedApproval storage allowed = _getPackedApprovalPtr(owner, token, id, ZERO_BYTES32, operator);
+        allowed.expiration = expiration;
+        allowed.amount = amount;
+
+        emit Approval({owner: owner, token: token, operator: operator, id: id, amount: amount, expiration: expiration});
     }
 
     /**
