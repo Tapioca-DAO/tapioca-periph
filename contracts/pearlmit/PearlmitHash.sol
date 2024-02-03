@@ -47,8 +47,8 @@ library PearlmitHash {
         return keccak256(
             abi.encode(
                 _PERMIT_SIGNATURE_APPROVAL_TYPEHASH,
-                approval.token,
                 approval.tokenType,
+                approval.token,
                 approval.id,
                 approval.amount,
                 approval.operator
