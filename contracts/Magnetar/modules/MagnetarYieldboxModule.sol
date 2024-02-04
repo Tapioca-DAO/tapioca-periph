@@ -124,21 +124,22 @@ contract MagnetarYieldboxModule is Ownable, MagnetarV2Storage {
             adapterParams: ISendFrom(address(asset)).useCustomAdapterParams() ? adapterParams : adapterParams
         });
 
-        // sends the asset to another layer
-        if (_data.unwrap) {
-            ICommonData.IApproval[] memory approvals = new ICommonData.IApproval[](0);
-            try ITapiocaOFT(address(asset)).sendFromWithParams{value: _data.gas}(
-                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams, true, approvals, approvals
-            ) {} catch {
-                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            }
-        } else {
-            try ISendFrom(address(asset)).sendFrom{value: _data.gas}(
-                address(this), _data.dstChainId, _data.receiver, _data.amount, callParams
-            ) {} catch {
-                _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            }
-        }
+        //TODO: refactor
+        // // sends the asset to another layer
+        // if (_data.unwrap) {
+        //     ICommonData.IApproval[] memory approvals = new ICommonData.IApproval[](0);
+        //     try ITapiocaOFT(address(asset)).sendFromWithParams{value: _data.gas}(
+        //         address(this), _data.dstChainId, _data.receiver, _data.amount, callParams, true, approvals, approvals
+        //     ) {} catch {
+        //         _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
+        //     }
+        // } else {
+        //     try ISendFrom(address(asset)).sendFrom{value: _data.gas}(
+        //         address(this), _data.dstChainId, _data.receiver, _data.amount, callParams
+        //     ) {} catch {
+        //         _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
+        //     }
+        // }
     }
 
     /**

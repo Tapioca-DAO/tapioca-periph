@@ -27,15 +27,6 @@ interface ITapiocaOptionBrokerCrossChain {
         address zroPaymentAddress;
         uint256 extraGas;
     }
-
-    function exerciseOption(
-        IExerciseOptionsData calldata optionsData,
-        IExerciseLZData calldata lzData,
-        IExerciseLZSendTapData calldata tapSendData,
-        ICommonData.IApproval[] calldata approvals,
-        ICommonData.IApproval[] calldata revokes,
-        bytes calldata adapterParams
-    ) external payable;
 }
 
 interface ITapiocaOptionBroker {
