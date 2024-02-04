@@ -146,11 +146,11 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(oftComposeMsg_);
 
-        if (msgType_ == PT_APPROVALS) {
+        if (msgType_ == MSG_APPROVALS) {
             _erc20PermitApprovalReceiver(tapComposeMsg_);
-        } else if (msgType_ == PT_NFT_APPROVALS) {
+        } else if (msgType_ == MSG_NFT_APPROVALS) {
             _erc721PermitApprovalReceiver(tapComposeMsg_);
-        } else if (msgType_ == PT_REMOTE_TRANSFER) {
+        } else if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
         } else {
             if (!_toeComposeReceiver(msgType_, srcChainSender_, tapComposeMsg_)) {
