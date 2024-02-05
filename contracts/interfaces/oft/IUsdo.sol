@@ -91,7 +91,7 @@ struct MarketLeverageUpMsg {
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
-    uint256 composeGas;
+    uint128 composeGas;
 }
 
 /**
