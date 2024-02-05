@@ -48,6 +48,7 @@ struct UsdoInitStruct {
     address delegate;
     address yieldBox;
     address cluster;
+    address extExec;
 }
 
 struct UsdoModulesInitStruct {
