@@ -8,6 +8,7 @@ import {
     ERC721PermitApprovalMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {ERC721Permit} from "tapioca-periph/utils/ERC721Permit.sol"; // TODO audit
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -68,5 +69,9 @@ contract TapiocaOmnichainExtExec {
                 ++i;
             }
         }
+    }
+
+    function pearlmitApproval(address pearlmit, IPearlmit.PermitBatchTransferFrom calldata _data) public {
+        IPearlmit(pearlmit).permitBatchApprove(_data);
     }
 }

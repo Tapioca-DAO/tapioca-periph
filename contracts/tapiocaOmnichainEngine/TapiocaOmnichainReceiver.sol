@@ -23,6 +23,7 @@ import {
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainEngineCodec} from "./TapiocaOmnichainEngineCodec.sol";
 import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {TapiocaOmnichainSender} from "./TapiocaOmnichainSender.sol";
 
 /*
@@ -150,6 +151,8 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             _erc20PermitApprovalReceiver(tapComposeMsg_);
         } else if (msgType_ == MSG_NFT_APPROVALS) {
             _erc721PermitApprovalReceiver(tapComposeMsg_);
+        } else if (msgType_ == MSG_PEARLMIT_APPROVAL) {
+            _pearlmitApprovalReceiver(tapComposeMsg_);
         } else if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
         } else {
@@ -291,8 +294,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      *      - s::bytes32: s value of the signature.
      */
     function _erc20PermitApprovalReceiver(bytes memory _data) internal virtual {
-        ERC20PermitApprovalMsg[] memory approvals =
-            TapiocaOmnichainEngineCodec.decodeArrayOfERC20PermitApprovalMsg(_data);
+        ERC20PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC20PermitApprovalMsg(_data);
 
         toeExtExec.erc20PermitApproval(approvals);
     }
@@ -310,10 +312,15 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      */
     function _erc721PermitApprovalReceiver(bytes memory _data) internal virtual {
         // TODO: encode and decode packed data to save gas
-        ERC721PermitApprovalMsg[] memory approvals =
-            TapiocaOmnichainEngineCodec.decodeArrayOfERC721PermitApprovalMsg(_data);
+        ERC721PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC721PermitApprovalMsg(_data);
 
         toeExtExec.erc721PermitApproval(approvals);
+    }
+
+    function _pearlmitApprovalReceiver(bytes memory _data) internal virtual {
+        (address pearlmit, IPearlmit.PermitBatchTransferFrom memory data) =
+            TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
+        toeExtExec.pearlmitApproval(pearlmit, data);
     }
 
     /**

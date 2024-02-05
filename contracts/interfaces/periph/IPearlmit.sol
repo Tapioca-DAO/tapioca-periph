@@ -24,4 +24,6 @@ interface IPearlmit {
         uint48 sigDeadline; // Deadline for the signature.
         bytes signedPermit; // Signature of the permit.
     }
+
+    function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
 }

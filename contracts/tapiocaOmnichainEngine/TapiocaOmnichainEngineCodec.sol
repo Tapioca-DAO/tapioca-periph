@@ -15,6 +15,7 @@ import {
     LZSendParam,
     RemoteTransferMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -332,46 +333,37 @@ library TapiocaOmnichainEngineCodec {
     /**
      * @notice Encodes the message for the `TapTokenReceiver._erc20PermitApprovalReceiver()` operation.
      */
-    function buildERC20PermitApprovalMsg(ERC20PermitApprovalMsg memory _erc20PermitApprovalMsg)
+    function encodeERC20PermitApprovalMsg(ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg)
         internal
         pure
         returns (bytes memory)
     {
-        return abi.encodePacked(
-            _erc20PermitApprovalMsg.token,
-            _erc20PermitApprovalMsg.owner,
-            _erc20PermitApprovalMsg.spender,
-            _erc20PermitApprovalMsg.value,
-            _erc20PermitApprovalMsg.deadline,
-            _erc20PermitApprovalMsg.v,
-            _erc20PermitApprovalMsg.r,
-            _erc20PermitApprovalMsg.s
-        );
+        return abi.encode(_erc20PermitApprovalMsg);
+    }
+
+    function decodeERC20PermitApprovalMsg(bytes memory _msg)
+        internal
+        pure
+        returns (ERC20PermitApprovalMsg[] memory erc20PermitApprovalMsg_)
+    {
+        return abi.decode(_msg, (ERC20PermitApprovalMsg[]));
     }
 
     /**
      * @notice Encodes the message for the `TapTokenReceiver._erc721PermitApprovalReceiver()` operation.
      */
-    function buildERC721PermitApprovalMsg(ERC721PermitApprovalMsg memory _erc721PermitApprovalMsg)
+    function encodeERC721PermitApprovalMsg(ERC721PermitApprovalMsg[] memory _erc721PermitApprovalMsg)
         internal
         pure
         returns (bytes memory)
     {
-        return abi.encodePacked(
-            _erc721PermitApprovalMsg.token,
-            _erc721PermitApprovalMsg.spender,
-            _erc721PermitApprovalMsg.tokenId,
-            _erc721PermitApprovalMsg.deadline,
-            _erc721PermitApprovalMsg.v,
-            _erc721PermitApprovalMsg.r,
-            _erc721PermitApprovalMsg.s
-        );
+        return abi.encode(_erc721PermitApprovalMsg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TapTokenReceiver.erc721PermitApprovalReceiver()` operation.
      */
-    function decodeArrayOfERC721PermitApprovalMsg(bytes memory _msg)
+    function decodeERC721PermitApprovalMsg(bytes memory _msg)
         internal
         pure
         returns (ERC721PermitApprovalMsg[] memory)
@@ -379,106 +371,18 @@ library TapiocaOmnichainEngineCodec {
         return abi.decode(_msg, (ERC721PermitApprovalMsg[]));
     }
 
-    /**
-     * @notice Decodes an encoded message for the `TapTokenReceiver.erc20PermitApprovalReceiver()` operation.
-     *
-     *                    *   message packet   *
-     * ------------------------------------------------------------- *
-     * Name          | type      | start | end                       *
-     * ------------------------------------------------------------- *
-     * token         | address   | 0     | 20                        *
-     * ------------------------------------------------------------- *
-     * owner         | address   | 20    | 40                        *
-     * ------------------------------------------------------------- *
-     * spender       | address   | 40    | 60                        *
-     * ------------------------------------------------------------- *
-     * value         | uint256   | 60    | 92                        *
-     * ------------------------------------------------------------- *
-     * deadline      | uint256   | 92    | 124                       *
-     * ------------------------------------------------------------- *
-     * v             | uint8     | 124   | 125                       *
-     * ------------------------------------------------------------- *
-     * r             | bytes32   | 125   | 157                       *
-     * ------------------------------------------------------------- *
-     * s             | bytes32   | 157   | 189                       *
-     * ------------------------------------------------------------- *
-     *
-     * @param _msg The encoded message. see `TapTokenCodec.buildERC20PermitApprovalMsg()`
-     */
-    struct __offsets {
-        uint8 tokenOffset;
-        uint8 ownerOffset;
-        uint8 spenderOffset;
-        uint8 valueOffset;
-        uint8 deadlineOffset;
-        uint8 vOffset;
-        uint8 rOffset;
-        uint8 sOffset;
+    function encodePearlmitApprovalMsg(
+        address pearlmit,
+        IPearlmit.PermitBatchTransferFrom memory _permitBatchTransferFrom
+    ) internal pure returns (bytes memory) {
+        return abi.encode(pearlmit, _permitBatchTransferFrom);
     }
 
-    function decodeERC20PermitApprovalMsg(bytes memory _msg)
+    function decodePearlmitBatchApprovalMsg(bytes memory _msg)
         internal
         pure
-        returns (ERC20PermitApprovalMsg memory erc20PermitApprovalMsg_)
+        returns (address pearlmit, IPearlmit.PermitBatchTransferFrom memory _permitBatchTransferFrom)
     {
-        // TODO bitwise operators ?
-        __offsets memory offsets_ = __offsets({
-            tokenOffset: 20,
-            ownerOffset: 40,
-            spenderOffset: 60,
-            valueOffset: 92,
-            deadlineOffset: 124,
-            vOffset: 125,
-            rOffset: 157,
-            sOffset: 189
-        });
-
-        // Decoded data
-        address token = BytesLib.toAddress(BytesLib.slice(_msg, 0, offsets_.tokenOffset), 0);
-
-        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.tokenOffset, 20), 0);
-
-        address spender = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.ownerOffset, 20), 0);
-
-        uint256 value = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.spenderOffset, 32), 0);
-
-        uint256 deadline = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.valueOffset, 32), 0);
-
-        uint8 v = uint8(BytesLib.toUint8(BytesLib.slice(_msg, offsets_.deadlineOffset, 1), 0));
-
-        bytes32 r = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.vOffset, 32), 0);
-
-        bytes32 s = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.rOffset, 32), 0);
-
-        // Return structured data
-        erc20PermitApprovalMsg_ = ERC20PermitApprovalMsg(token, owner, spender, value, deadline, v, r, s);
-    }
-
-    /**
-     * @dev Decode an array of encoded messages for the `TapTokenReceiver.erc20PermitApprovalReceiver()` operation.
-     * @dev The message length must be a multiple of 189.
-     *
-     * @param _msg The encoded message. see `TapTokenCodec.buildERC20PermitApprovalMsg()`
-     */
-    function decodeArrayOfERC20PermitApprovalMsg(bytes memory _msg)
-        internal
-        pure
-        returns (ERC20PermitApprovalMsg[] memory)
-    {
-        /// @dev see `this.decodeERC20PermitApprovalMsg()`, token + owner + spender + value + deadline + v + r + s length = 189.
-        uint256 msgCount_ = _msg.length / 189;
-
-        ERC20PermitApprovalMsg[] memory erc20PermitApprovalMsgs_ = new ERC20PermitApprovalMsg[](msgCount_);
-
-        uint256 msgIndex_;
-        for (uint256 i; i < msgCount_;) {
-            erc20PermitApprovalMsgs_[i] = decodeERC20PermitApprovalMsg(BytesLib.slice(_msg, msgIndex_, 189));
-            unchecked {
-                msgIndex_ += 189;
-                ++i;
-            }
-        }
-
-        return erc20PermitApprovalMsgs_;
+        return abi.decode(_msg, (address, IPearlmit.PermitBatchTransferFrom));
     }
 }

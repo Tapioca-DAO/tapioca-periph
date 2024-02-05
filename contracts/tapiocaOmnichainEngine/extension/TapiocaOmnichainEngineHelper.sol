@@ -28,6 +28,7 @@ import {
     RemoteTransferMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainEngineCodec} from "../TapiocaOmnichainEngineCodec.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {BaseToeMsgType} from "../BaseToeMsgType.sol";
 
 /*
@@ -208,32 +209,32 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
      * @notice Encode the message for the _erc20PermitApprovalReceiver() operation.
      * @param _erc20PermitApprovalMsg The ERC20 permit approval messages.
      */
-    function buildPermitApprovalMsg(ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg)
+    function encodeERC20PermitApprovalMsg(ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg)
         public
         pure
         returns (bytes memory msg_)
     {
-        uint256 approvalsLength = _erc20PermitApprovalMsg.length;
-        for (uint256 i; i < approvalsLength;) {
-            msg_ = abi.encodePacked(
-                msg_, TapiocaOmnichainEngineCodec.buildERC20PermitApprovalMsg(_erc20PermitApprovalMsg[i])
-            );
-            unchecked {
-                ++i;
-            }
-        }
+        return TapiocaOmnichainEngineCodec.encodeERC20PermitApprovalMsg(_erc20PermitApprovalMsg);
     }
 
     /**
      * @notice Encode the message for the _erc721PermitApprovalReceiver() operation.
      * @param _erc721PermitApprovalMsg The ERC721 permit approval messages.
      */
-    function buildNftPermitApprovalMsg(ERC721PermitApprovalMsg[] memory _erc721PermitApprovalMsg)
+    function encodeERC721PermitApprovalMsg(ERC721PermitApprovalMsg[] memory _erc721PermitApprovalMsg)
         public
         pure
         returns (bytes memory msg_)
     {
-        return abi.encode(_erc721PermitApprovalMsg);
+        return TapiocaOmnichainEngineCodec.encodeERC721PermitApprovalMsg(_erc721PermitApprovalMsg);
+    }
+
+    function encodePearlmitApprovalMsg(address _pearlmit, IPearlmit.PermitBatchTransferFrom calldata _data)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        return TapiocaOmnichainEngineCodec.encodePearlmitApprovalMsg(_pearlmit, _data);
     }
 
     /**
@@ -292,7 +293,8 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
             // LZ
             _msgType == MSG_SEND
             // Tapioca msg types
-            || _msgType == MSG_APPROVALS || _msgType == MSG_NFT_APPROVALS || _msgType == MSG_REMOTE_TRANSFER
+            || _msgType == MSG_APPROVALS || _msgType == MSG_NFT_APPROVALS || _msgType == MSG_PEARLMIT_APPROVAL
+                || _msgType == MSG_REMOTE_TRANSFER
         ) {
             return;
         } else if (!_sanitizeMsgTypeExtended(_msgType)) {
