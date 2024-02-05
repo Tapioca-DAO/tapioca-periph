@@ -8,7 +8,7 @@ import {
 
 // Tapioca
 import {PearlmitHash} from "./PearlmitHash.sol";
-import {IPearlmit} from "./IPearlmit.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

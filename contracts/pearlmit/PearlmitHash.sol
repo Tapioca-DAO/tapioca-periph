@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {IPearlmit} from "./IPearlmit.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 library PearlmitHash {
     string public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
