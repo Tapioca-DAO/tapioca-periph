@@ -36,7 +36,8 @@ interface IUsdo is ITapiocaOmnichainEngine {
         UsdoReceiver,
         UsdoMarketReceiver,
         UsdoOptionReceiver,
-        UsdoGenericReceiver
+        UsdoGenericReceiver,
+        UsdoLeverageReceiver
     }
 }
 
