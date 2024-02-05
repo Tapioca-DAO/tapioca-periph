@@ -36,7 +36,8 @@ interface IUsdo is ITapiocaOmnichainEngine {
         UsdoReceiver,
         UsdoMarketReceiver,
         UsdoOptionReceiver,
-        UsdoGenericReceiver
+        UsdoGenericReceiver,
+        UsdoLeverageReceiver
     }
 }
 
@@ -48,6 +49,7 @@ struct UsdoInitStruct {
     address delegate;
     address yieldBox;
     address cluster;
+    address extExec;
 }
 
 struct UsdoModulesInitStruct {
@@ -56,6 +58,7 @@ struct UsdoModulesInitStruct {
     address usdoReceiverModule;
     address marketReceiverModule;
     address optionReceiverModule;
+    address leverageReceiverModule;
 }
 
 /// ============================
@@ -90,6 +93,7 @@ struct MarketLeverageUpMsg {
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
+    uint128 composeGas;
 }
 
 /**
