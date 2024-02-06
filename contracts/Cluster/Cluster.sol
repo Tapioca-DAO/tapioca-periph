@@ -5,7 +5,6 @@ pragma solidity 0.8.22;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {ILayerZeroEndpoint} from "tapioca-periph/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 contract Cluster is Ownable, ICluster {
@@ -15,12 +14,13 @@ contract Cluster is Ownable, ICluster {
 
     /// @notice returns the current LayerZero chain id
     uint32 public lzChainId;
-    /// @notice returns true if an address is marked as an Editor
-    /// @dev editors can update contracts' whitelist status
-    mapping(address editor => bool status) public isEditor;
+
     /// @notice returns the whitelist status for an address
     /// @dev LZ chain id => contract => status
     mapping(uint32 lzChainId => mapping(address _contract => bool status)) private _whitelisted;
+
+    /// @notice Centralized role assignment for Tapioca contract. Other contracts can use this mapping to check if an address has a role on them
+    mapping(address _contract => mapping(bytes32 role => mapping(address target => bool hasRole))) public hasRole;
 
     /// @notice event emitted when LZ chain id is updated
     event LzChainUpdate(uint256 indexed _oldChain, uint256 indexed _newChain);
@@ -30,6 +30,8 @@ contract Cluster is Ownable, ICluster {
     event ContractUpdated(
         address indexed _contract, uint32 indexed _lzChainId, bool indexed _oldStatus, bool _newStatus
     );
+    /// @notice event emitted when a role is set
+    event RoleSet(address indexed _contract, bytes32 indexed _role, address indexed _target, bool _hasRole);
 
     // ************** //
     // *** ERRORS *** //
@@ -39,6 +41,13 @@ contract Cluster is Ownable, ICluster {
     constructor(uint32 _lzChainId, address _owner) {
         lzChainId = _lzChainId;
         transferOwnership(_owner);
+    }
+
+    modifier isAuthorized() {
+        if (msg.sender != owner()) {
+            revert NotAuthorized();
+        }
+        _;
     }
 
     // ******************** //
@@ -63,11 +72,11 @@ contract Cluster is Ownable, ICluster {
     /// @param _lzChainId LayerZero chain id
     /// @param _addresses the contracts addresses
     /// @param _status the new whitelist status
-    function batchUpdateContracts(uint32 _lzChainId, address[] memory _addresses, bool _status) external override {
-        if (!isEditor[msg.sender] && msg.sender != owner()) {
-            revert NotAuthorized();
-        }
-
+    function batchUpdateContracts(uint32 _lzChainId, address[] memory _addresses, bool _status)
+        external
+        override
+        isAuthorized
+    {
         if (_lzChainId == 0) {
             //set lz chain as the current one
             _lzChainId = lzChainId;
@@ -84,11 +93,7 @@ contract Cluster is Ownable, ICluster {
     /// @param _lzChainId LayerZero chain id
     /// @param _addr the contract's address
     /// @param _status the new whitelist status
-    function updateContract(uint32 _lzChainId, address _addr, bool _status) external override {
-        if (!isEditor[msg.sender] && msg.sender != owner()) {
-            revert NotAuthorized();
-        }
-
+    function updateContract(uint32 _lzChainId, address _addr, bool _status) external override isAuthorized {
         if (_lzChainId == 0) {
             //set lz chain as the current one
             _lzChainId = lzChainId;
@@ -98,21 +103,29 @@ contract Cluster is Ownable, ICluster {
         _whitelisted[_lzChainId][_addr] = _status;
     }
 
+    /**
+     * @notice sets a role for a contract.
+     * @param _contract the contract's address.
+     * @param _role the role's name for the contract, in bytes32 format.
+     * @param _target the address to set the role for.
+     * @param _hasRole the new role status.
+     */
+    function setRoleForContract(address _contract, bytes32 _role, address _target, bool _hasRole)
+        external
+        isAuthorized
+    {
+        hasRole[_contract][_role][_target] = _hasRole;
+        emit RoleSet(_contract, _role, _target, _hasRole);
+    }
+
     // ********************* //
     // *** OWNER METHODS *** //
     // ********************* //
+
     /// @notice updates LayerZero chain id
     /// @param _lzChainId the new LayerZero chain id
     function updateLzChain(uint32 _lzChainId) external onlyOwner {
         emit LzChainUpdate(lzChainId, _lzChainId);
         lzChainId = _lzChainId;
-    }
-
-    /// @notice updates the editor status
-    /// @param _editor the editor's address
-    /// @param _status the new editor's status
-    function updateEditor(address _editor, bool _status) external onlyOwner {
-        emit EditorUpdated(_editor, isEditor[_editor], _status);
-        isEditor[_editor] = _status;
     }
 }
