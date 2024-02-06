@@ -9,4 +9,6 @@ interface ICluster {
     function batchUpdateContracts(uint32 _lzChainId, address[] memory _addresses, bool _status) external;
 
     function lzChainId() external view returns (uint32);
+
+    function hasRole(address _contract, bytes32 _role, address _target) external view returns (bool);
 }
