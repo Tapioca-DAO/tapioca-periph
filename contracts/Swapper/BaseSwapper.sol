@@ -15,6 +15,8 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
 
+    IYieldBox public immutable yieldBox;
+
     /// *** ERRORS ***
     /// ***  ***
     error AddressNotValid();
@@ -22,6 +24,11 @@ abstract contract BaseSwapper is Ownable, ReentrancyGuard, ISwapper {
     error NotValid();
     error AmountZero();
     error NoContract();
+
+    constructor(IYieldBox _yieldBox, address _owner) validAddress(address(_yieldBox)) {
+        yieldBox = _yieldBox;
+        transferOwnership(_owner);
+    }
 
     modifier validAddress(address _addr) {
         if (_addr == address(0)) revert AddressNotValid();

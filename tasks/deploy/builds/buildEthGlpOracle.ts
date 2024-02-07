@@ -10,7 +10,7 @@ export const __buildEthGlpOracleArgs = async (
     wethUsdOracle: string,
     glpUsdOracle: string,
 ): Promise<Parameters<EthGlpOracle__factory['deploy']>> => {
-    const chainID = await hre.getChainId();
+    const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
         throw '[-] EthGlp Oracle only available on Arbitrum';
     }

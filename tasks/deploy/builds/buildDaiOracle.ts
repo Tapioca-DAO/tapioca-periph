@@ -10,7 +10,7 @@ export const buildDaiOracle = async (
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
     console.log('[+] buildDaiOracle');
 
-    const chainID = await hre.getChainId();
+    const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.MAINNET) {
         throw '[-] DAI Oracle only available on Ethereum';
     }

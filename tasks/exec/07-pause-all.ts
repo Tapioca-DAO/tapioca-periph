@@ -26,10 +26,7 @@ export const pauseAll__task = async (
     //pausable contracts with  `updatePauseAll(bool val, bool resetAccrueTimestmap)`: Singularity
     //pausable contracts with  `updatePauseAll(PauseType _type, bool val)`: BigBang, Origins
 
-    const chainInfo = hre.SDK.utils.getChainBy(
-        'chainId',
-        await hre.getChainId(),
-    );
+    const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId);
     if (!chainInfo) throw new Error('Chain not found');
 
     const startsWith = ['BigBang', 'Tapioca Singularity'];
@@ -46,12 +43,7 @@ export const pauseAll__task = async (
             if (a.name.startsWith(startsWith[i])) return true;
         }
     };
-    const allContracts = loadAllContracts(
-        hre,
-        tag,
-        await hre.getChainId(),
-        filter,
-    );
+    const allContracts = loadAllContracts(hre, tag, hre.SDK.eChainId, filter);
 
     const bigBangMarkets = allContracts
         .filter((a) => a.name.startsWith('BigBang'))

@@ -15,10 +15,7 @@ export const deployOracle__task = async (
     // Settings
     const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
     const signer = (await hre.ethers.getSigners())[0];
-    const chainInfo = hre.SDK.utils.getChainBy(
-        'chainId',
-        await hre.getChainId(),
-    );
+    const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId);
     console.log(
         '[+] Deploying on',
         chainInfo?.name,

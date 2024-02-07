@@ -11,8 +11,8 @@ import {IQuoterV2} from "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.so
 // Tapioca
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {OracleLibrary} from "./libraries/OracleLibrary.sol";
-import {BaseSwapper} from "./BaseSwapper.sol";
+import {OracleLibrary} from "../libraries/OracleLibrary.sol";
+import {BaseSwapper} from "../BaseSwapper.sol";
 
 /*
 
@@ -45,7 +45,6 @@ contract UniswapV3Swapper is BaseSwapper {
     // ************ //
     // *** VARS *** //
     // ************ //
-    IYieldBox private immutable yieldBox;
     ISwapRouter public immutable swapRouter;
     IUniswapV3Factory public immutable factory;
 
@@ -63,14 +62,12 @@ contract UniswapV3Swapper is BaseSwapper {
     error UnwrapFailed();
 
     constructor(IYieldBox _yieldBox, ISwapRouter _swapRouter, IUniswapV3Factory _factory, address _owner)
-        validAddress(address(_yieldBox))
         validAddress(address(_swapRouter))
         validAddress(address(_factory))
+        BaseSwapper(_yieldBox, _owner)
     {
-        yieldBox = _yieldBox;
         swapRouter = _swapRouter;
         factory = _factory;
-        transferOwnership(_owner);
     }
 
     /// *** OWNER METHODS ***

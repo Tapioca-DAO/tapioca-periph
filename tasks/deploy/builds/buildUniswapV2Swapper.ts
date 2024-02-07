@@ -10,7 +10,7 @@ export const buildUniswapV2Swapper = async (
 ): Promise<IDeployerVMAdd<UniswapV2Swapper__factory>> => {
     const chainInfo = hre.SDK.utils.getChainBy(
         'chainId',
-        await hre.getChainId(),
+        hre.SDK.eChainId,
     );
     if (!chainInfo) {
         throw new Error('[-] Chain not found');

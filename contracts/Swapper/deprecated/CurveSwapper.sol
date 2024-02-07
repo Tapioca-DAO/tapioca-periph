@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {ICurvePool} from "tapioca-periph/interfaces/external/curve/ICurvePool.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {BaseSwapper} from "./BaseSwapper.sol";
+import {BaseSwapper} from "../BaseSwapper.sol";
 
 /*
 
@@ -34,14 +34,12 @@ contract CurveSwapper is BaseSwapper {
     /// *** VARS ***
     /// ***  ***
     ICurvePool public curvePool;
-    IYieldBox public immutable yieldBox;
 
-    constructor(ICurvePool _curvePool, IYieldBox _yieldBox)
+    constructor(ICurvePool _curvePool, IYieldBox _yieldBox, address _owner)
         validAddress(address(_curvePool))
-        validAddress(address(_yieldBox))
+        BaseSwapper(_yieldBox, _owner)
     {
         curvePool = _curvePool;
-        yieldBox = _yieldBox;
     }
 
     /// *** VIEW METHODS ***

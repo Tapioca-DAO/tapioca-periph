@@ -9,7 +9,7 @@ import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {IUniswapV2Factory} from "tapioca-periph/interfaces/external/uniswap/IUniswapV2Factory.sol";
 import {IUniswapV2Router02} from "tapioca-periph/interfaces/external/uniswap/IUniswapV2Router02.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {BaseSwapper} from "./BaseSwapper.sol";
+import {BaseSwapper} from "../BaseSwapper.sol";
 
 /*
 
@@ -32,7 +32,6 @@ contract UniswapV2Swapper is BaseSwapper {
     /// ***  ***
     IUniswapV2Router02 public immutable swapRouter;
     IUniswapV2Factory public immutable factory;
-    IYieldBox public immutable yieldBox;
 
     /// *** ERRORS ***
     error InvalidSwap();
@@ -40,12 +39,10 @@ contract UniswapV2Swapper is BaseSwapper {
     constructor(address _router, address _factory, IYieldBox _yieldBox, address _owner)
         validAddress(_router)
         validAddress(_factory)
-        validAddress(address(_yieldBox))
+        BaseSwapper(_yieldBox, _owner)
     {
         swapRouter = IUniswapV2Router02(_router);
         factory = IUniswapV2Factory(_factory);
-        yieldBox = _yieldBox;
-        transferOwnership(_owner);
     }
 
     /// *** VIEW METHODS ***

@@ -1007,12 +1007,10 @@ export async function register(staging?: boolean) {
 
     // ------------------- 2.1 Create Cluster -------------------
     const LZEndpointMock = new LZEndpointMock__factory(deployer);
-    const clusterLzEndpoint = await LZEndpointMock.deploy(
-        await hre.getChainId(),
-    );
+    const clusterLzEndpoint = await LZEndpointMock.deploy(hre.SDK.eChainId);
     const cluster = await (
         await ethers.getContractFactory('Cluster')
-    ).deploy(await hre.getChainId(), deployer.address);
+    ).deploy(hre.SDK.eChainId, deployer.address);
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
@@ -1089,7 +1087,7 @@ export async function register(staging?: boolean) {
 
     // ------------------- 10 Deploy USDO -------------------
     log('Registering USDO', staging);
-    const chainId = await hre.getChainId();
+    const chainId = hre.SDK.eChainId;
     const { usd0, lzEndpointContract } = await registerUsd0Contract(
         chainId,
         yieldBox.address,
