@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// Exterma;
+// External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+// Tapioca
+import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
 
 /*
 
@@ -18,23 +21,10 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-/// @notice swaps a token for another, using 0x as a swap aggregator
-/// @dev All of the parameters below are provided by the API response.
-/// @param sellToken the token to sell
-/// @param buyToken the token to buy
-/// @param swapTarget the 0x swap proxy
-/// @param swapCallData the swap call data
-/// @return amountOut the amount of buyToken bought
-struct SZeroXSwapData {
-    IERC20 sellToken;
-    IERC20 buyToken;
-    address payable swapTarget;
-    bytes swapCallData;
-}
-
 /// @title ZeroX swapper
-contract ZeroXSwapper {
+contract ZeroXSwapper is IZeroXSwapper {
     using SafeERC20 for IERC20;
+
     /// ************
     /// *** VARS ***
     /// ************
@@ -46,9 +36,9 @@ contract ZeroXSwapper {
     /// **************
 
     error ZeroAddress();
-    error InvalidProxy();
+    error InvalidProxy(address actual, address expected);
     error SwapFailed();
-    error MinSwapFailed();
+    error MinSwapFailed(uint256 amountOut);
 
     constructor(address _zeroXProxy) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
@@ -60,6 +50,7 @@ contract ZeroXSwapper {
     /// **********************
 
     /// @notice swaps a token for another, using 0x as a swap aggregator
+    /// @dev All of the parameters below are provided by the API response.
     /// @param swapData the swap data
     /// @param amountIn the amount of sellToken to sell
     /// @param minAmountOut the minimum amount of buyToken bought
@@ -69,7 +60,7 @@ contract ZeroXSwapper {
         payable
         returns (uint256 amountOut)
     {
-        if (swapData.swapTarget != zeroXProxy) revert InvalidProxy();
+        if (swapData.swapTarget != zeroXProxy) revert InvalidProxy(swapData.swapTarget, zeroXProxy);
 
         // Transfer tokens to this contract
         swapData.sellToken.safeTransferFrom(msg.sender, address(this), amountIn);
@@ -81,9 +72,15 @@ contract ZeroXSwapper {
 
         // Check that the amountOut is at least as much as minAmountOut
         amountOut = swapData.buyToken.balanceOf(address(this));
-        if (amountOut < minAmountOut) revert MinSwapFailed();
+        if (amountOut < minAmountOut) revert MinSwapFailed(amountOut);
 
         // Transfer the bought tokens to the sender
         swapData.buyToken.safeTransfer(msg.sender, amountOut);
     }
+
+    /**
+     * @notice Payable fallback to allow this contract to receive protocol fee refunds.
+     * https://0x.org/docs/0x-swap-api/guides/use-0x-api-liquidity-in-your-smart-contracts#payable-fallback
+     */
+    receive() external payable {}
 }
