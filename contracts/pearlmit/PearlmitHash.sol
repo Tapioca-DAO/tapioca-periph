@@ -5,10 +5,14 @@ pragma solidity 0.8.22;
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 library PearlmitHash {
-    string public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
-        "SignatureApproval(uint8 tokenType,address token,uint256 id,uint200 amount,address operator)";
-    string public constant _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH =
-        "PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce)SignatureApproval(address token,uint256 id,uint200 amount,address operator)";
+    // Batch transfer
+    // keccak256("SignatureApproval(uint8 tokenType,address token,uint256 id,uint200 amount,address operator)")
+    bytes32 public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
+        0x9907ae0a8b239bb7feef50f64ab23ff79fe790ab79bf66ed21a188dbd846e268;
+
+    // keccak256("PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce)SignatureApproval(address token,uint256 id,uint200 amount,address operator)")
+    bytes32 public constant _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH =
+        0xb59bf51f2ad95e38709b3bd22127b478138fe26ed8a454e461fd11e1423b53a6;
 
     /**
      * @dev Hashes the permit batch transfer from.
