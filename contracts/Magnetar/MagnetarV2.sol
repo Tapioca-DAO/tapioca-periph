@@ -2,7 +2,6 @@
 pragma solidity 0.8.22;
 
 // External
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
@@ -13,7 +12,6 @@ import {
 import {ITapiocaOFT, ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {MagnetarMarketModule1} from "./modules/MagnetarMarketModule1.sol";
