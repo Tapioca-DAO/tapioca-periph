@@ -10,7 +10,7 @@ export const __buildGMXOracleArgs = async (
     deployerAddr: string,
     logArgs = true,
 ): Promise<Parameters<SeerCLSolo__factory['deploy']>> => {
-    const chainID = await hre.getChainId();
+    const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
         throw '[-] GMX Oracle only available on Arbitrum';
     }
