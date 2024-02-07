@@ -25,5 +25,11 @@ interface IPearlmit {
         bytes signedPermit; // Signature of the permit.
     }
 
+    function allowance(address owner, address operator, address token, uint256 id)
+        external
+        view
+        returns (uint256 allowedAmount, uint256 expiration);
+
+    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch) external;
     function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
 }
