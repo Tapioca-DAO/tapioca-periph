@@ -2,22 +2,46 @@
 pragma solidity 0.8.22;
 
 // LZ
+import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
+
+// External
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {LzLib} from "tapioca-periph/tmp/LzLib.sol";
 
 // Tapioca
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
+import {
+    PrepareLzCallData,
+    PrepareLzCallReturn,
+    ComposeMsgData
+} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {TapiocaOmnichainEngineHelper} from
+    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {YieldBoxDepositData, MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
-import {MagnetarV2Storage} from "../MagnetarV2Storage.sol";
+import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
+import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
+/*
 
-/// @dev We need Ownable to map MagnetarV2 storage layout
-contract MagnetarYieldboxModule is Ownable, MagnetarV2Storage {
-    error GasMismatch(uint256 expected, uint256 received);
+__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
+ _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
+  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
+   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
+    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
+     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
+      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
+       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
+        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
+*/
+
+/**
+ * @title MagnetarYieldBoxModule
+ * @author TapiocaDAO
+ * @notice Magnetar YieldBox related operations
+ */
+contract MagnetarYieldBoxModule is MagnetarBaseModule {
     /// @dev Parse a burst call
     fallback() external payable {
         bytes4 funcSig = bytes4(BytesLib.slice(msg.data, 0, 4));
@@ -27,132 +51,43 @@ contract MagnetarYieldboxModule is Ownable, MagnetarV2Storage {
             depositAsset(abi.decode(callWithoutSelector, (YieldBoxDepositData)));
         }
         if (funcSig == this.withdrawToChain.selector) {
-            withdrawToChain(abi.decode(callWithoutSelector, (WithdrawToChainData)));
+            withdrawToChain(abi.decode(callWithoutSelector, (MagnetarWithdrawData)));
         }
     }
 
+    /// =====================
+    /// Public
+    /// =====================
     /**
-     * @dev `depositAsset` calldata
+     * @notice Deposit asset to YieldBox.
+     * @param data The data without the func sig
      */
-    struct YieldBoxDepositData {
-        IYieldBox yieldbox;
-        uint256 assetId;
-        address from;
-        address to;
-        uint256 amount;
-        uint256 share;
-    }
-
-    /**
-     * @dev Deposit asset to YieldBox..
-     * @param _data The data without the func sig
-     */
-    function depositAsset(YieldBoxDepositData memory _data) public {
-        _checkSender(_data.from);
-        if (!cluster.isWhitelisted(0, address(_data.yieldbox))) {
+    function depositAsset(YieldBoxDepositData memory data) public {
+        _checkSender(data.from);
+        if (!cluster.isWhitelisted(0, data.yieldbox)) {
             // 0 means current chain
-            revert TargetNotWhitelisted(address(_data.yieldbox));
+            revert Magnetar_TargetNotWhitelisted(data.yieldbox);
         }
-        _data.yieldbox.depositAsset(_data.assetId, _data.from, _data.to, _data.amount, _data.share);
-    }
-
-    /**
-     * @dev `withdrawToChain` calldata
-     */
-    struct WithdrawToChainData {
-        IYieldBox yieldBox;
-        address from;
-        uint256 assetId;
-        uint16 dstChainId;
-        bytes32 receiver;
-        uint256 amount;
-        bytes adapterParams;
-        address payable refundAddress;
-        uint256 gas;
-        bool unwrap;
-        address zroPaymentAddress;
+        IYieldBox(data.yieldbox).depositAsset(data.assetId, data.from, data.to, data.amount, data.share);
     }
 
     /**
      * @notice performs a withdraw operation
      * @dev it can withdraw on the current chain or it can send it to another one
      *     - if `dstChainId` is 0 performs a same-chain withdrawal
-     *          - all parameters except `yieldBox`, `from`, `assetId` and `amount` or `share` are ignored
-     *     - if `dstChainId` is NOT 0, the method requires gas for the `sendFrom` operation
+     *          - all parameters except `yieldBox`, `assetId` and `amount` or `share` are ignored
+     *     - if `dstChainId` is NOT 0, the method requires gas for the `send` operation
      *
-     * @param _data.yieldBox the YieldBox address
-     * @param _data.from user to withdraw from
-     * @param _data.assetId the YieldBox asset id to withdraw
-     * @param _data.dstChainId LZ chain id to withdraw to
-     * @param _data.receiver the receiver on the destination chain
-     * @param _data.amount the amount to withdraw
-     * @param _data.adapterParams LZ adapter params
-     * @param _data.refundAddress the LZ refund address which receives the gas not used in the process
-     * @param _data.gas the amount of gas to use for sending the asset to another layer
-     * @param _data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-     * @param _data.zroPaymentAddress ZRO payment address
+     * @param data.yieldBox the YieldBox address
+     * @param data.assetId the YieldBox asset id to withdraw
+     * @param data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
+     * @param data.receiver the receiver on the destination chain
+     * @param data.receiver the receiver on the destination chain
+     * @param data.lzSendParams LZv2 send params
+     * @param data.composeGas compose message gas amount
+     * @param data.composeMsg LZv2 compose message
      */
-    function withdrawToChain(WithdrawToChainData memory _data) public payable {
-        _checkSender(_data.from);
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.yieldBox))) {
-            revert TargetNotWhitelisted(address(_data.yieldBox));
-        }
-
-        // perform a same chain withdrawal
-        if (_data.dstChainId == 0) {
-            _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-            return;
-        }
-
-        if (msg.value > 0) {
-            if (msg.value != _data.gas) revert GasMismatch(_data.gas, msg.value);
-        }
-        // perform a cross chain withdrawal
-        (, address asset,,) = _data.yieldBox.assets(_data.assetId);
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(asset))) {
-            revert TargetNotWhitelisted(address(asset));
-        }
-
-        // withdraw from YieldBox
-        _data.yieldBox.withdraw(_data.assetId, _data.from, address(this), _data.amount, 0);
-
-        // build LZ params
-        bytes memory adapterParams;
-        ICommonOFT.LzCallParams memory callParams = ICommonOFT.LzCallParams({
-            refundAddress: _data.refundAddress,
-            zroPaymentAddress: _data.zroPaymentAddress,
-            adapterParams: ISendFrom(address(asset)).useCustomAdapterParams() ? adapterParams : adapterParams
-        });
-
-        //TODO: refactor
-        // // sends the asset to another layer
-        // if (_data.unwrap) {
-        //     ICommonData.IApproval[] memory approvals = new ICommonData.IApproval[](0);
-        //     try ITapiocaOFT(address(asset)).sendFromWithParams{value: _data.gas}(
-        //         address(this), _data.dstChainId, _data.receiver, _data.amount, callParams, true, approvals, approvals
-        //     ) {} catch {
-        //         _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-        //     }
-        // } else {
-        //     try ISendFrom(address(asset)).sendFrom{value: _data.gas}(
-        //         address(this), _data.dstChainId, _data.receiver, _data.amount, callParams
-        //     ) {} catch {
-        //         _withdrawOnThisChain(_data.yieldBox, _data.assetId, _data.from, _data.receiver, _data.amount);
-        //     }
-        // }
-    }
-
-    /**
-     * @notice withdraws an asset from a YieldBox on the current chain
-     * @param yieldBox YieldBox address
-     * @param assetId YieldBox asset id
-     * @param from user to withdraw from
-     * @param receiver the receiver on the destination chain
-     * @param amount the amount to withdraw
-     */
-    function _withdrawOnThisChain(IYieldBox yieldBox, uint256 assetId, address from, bytes32 receiver, uint256 amount)
-        internal
-    {
-        yieldBox.withdraw(assetId, from, LzLib.bytes32ToAddress(receiver), amount, 0);
+    function withdrawToChain(MagnetarWithdrawData memory data) public payable {
+        _withdrawToChain(data);
     }
 }

@@ -126,7 +126,7 @@ describe('MagnetarV2', () => {
         });
     });
     describe('withdrawTo()', () => {
-        it('should test withdrawTo', async () => {
+        it.only('should test withdrawTo', async () => {
             const {
                 deployer,
                 yieldBox,

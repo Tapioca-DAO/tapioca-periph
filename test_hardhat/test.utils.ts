@@ -1130,6 +1130,34 @@ export async function register(staging?: boolean) {
 
     // ------------------- 15 Create Magnetar -------------------
     log('Deploying MagnetarV2', staging);
+    const magnetarAssetModule = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarAssetModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarAssetModule.address] =
+        'magnetarAssetModule';
+    const magnetarCollateralModule = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarCollateralModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarCollateralModule.address] =
+        'magnetarCollateralModule';
+    const magnetarMintModule = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarMintModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarMintModule.address] =
+        'magnetarMintModule';
+    const magnetarOptionModule = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarOptionModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarOptionModule.address] =
+        'magnetarOptionModule';
     const magnetarYieldboxModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarYieldboxModule')
@@ -1137,33 +1165,22 @@ export async function register(staging?: boolean) {
     ).deployed();
     hre.tracer.nameTags[magnetarYieldboxModule.address] =
         'magnetarYieldboxModule';
-    const magnetarMarketModule1 = await (
-        await (
-            await ethers.getContractFactory('MagnetarMarketModule1')
-        ).deploy()
-    ).deployed();
-    hre.tracer.nameTags[magnetarMarketModule1.address] =
-        'MagnetarMarketModule1';
-    const magnetarMarketModule2 = await (
-        await (
-            await ethers.getContractFactory('MagnetarMarketModule2')
-        ).deploy()
-    ).deployed();
-    hre.tracer.nameTags[magnetarMarketModule2.address] =
-        'MagnetarMarketModule2';
+    
 
     const magnetar = await (
-        await ethers.getContractFactory('MagnetarV2')
+        await ethers.getContractFactory('Magnetar')
     ).deploy(
         cluster.address,
         deployer.address,
-        magnetarMarketModule1.address,
-        magnetarMarketModule2.address,
-        magnetarYieldboxModule.address,
+        magnetarAssetModule.address,
+        magnetarCollateralModule.address,
+        magnetarMintModule.address,
+        magnetarOptionModule.address,
+        magnetarYieldboxModule.address
     );
     await magnetar.deployed();
     log(
-        `Deployed MagnetarV2 ${magnetar.address} with args [${deployer.address}]`,
+        `Deployed Magnetar ${magnetar.address} with args [${deployer.address}]`,
         staging,
     );
     await cluster.updateContract(0, magnetar.address, true);

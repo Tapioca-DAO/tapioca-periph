@@ -9,6 +9,7 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ICommonData, IWithdrawParams, IDepositData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ICommonOFT} from "tapioca-periph/interfaces/common/ICommonOFT.sol";
 import {ISingularity} from "./ISingularity.sol";
 import {IMarket} from "./IMarket.sol";
@@ -30,8 +31,8 @@ struct IRemoveAndRepay {
     uint256 collateralAmount; // from BB
     ITapiocaOptionBroker.IOptionsExitData exitData;
     ITapiocaOptionLiquidityProvision.IOptionsUnlockData unlockData;
-    IWithdrawParams assetWithdrawData;
-    IWithdrawParams collateralWithdrawData;
+    MagnetarWithdrawData assetWithdrawData;
+    MagnetarWithdrawData collateralWithdrawData;
 }
 
 // lend or repay
@@ -70,6 +71,7 @@ struct IMintData {
     IDepositData collateralDepositData;
 }
 //TODO: refactor in 1 interface; we have 3 oft/IUsdo and these 2
+
 interface IUSDOBase {
     function mint(address _to, uint256 _amount) external;
 
