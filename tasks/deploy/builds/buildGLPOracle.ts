@@ -8,7 +8,7 @@ export const __buildGLPOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
     deployerAddr: string,
 ): Promise<Parameters<GLPOracle__factory['deploy']>> => {
-    const chainID = await hre.getChainId();
+    const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
         throw '[-] GLP Oracle only available on Arbitrum';
     }

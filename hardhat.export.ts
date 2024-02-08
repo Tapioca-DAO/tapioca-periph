@@ -6,12 +6,18 @@ import '@primitivefi/hardhat-dodoc';
 import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
-import { HardhatUserConfig } from 'hardhat/config';
-import { HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types';
+import { HardhatUserConfig, subtask } from 'hardhat/config';
+import {
+    HardhatNetworkUserConfig,
+    HttpNetworkConfig,
+    HttpNetworkUserConfig,
+    NetworksUserConfig,
+} from 'hardhat/types';
+import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 import fs from 'fs';
 
 // Utils
-import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
 
@@ -21,6 +27,7 @@ declare global {
         interface ProcessEnv {
             ALCHEMY_API_KEY: string;
             ENV: string;
+            NETWORK: string; // For forking
         }
     }
 }
@@ -34,6 +41,15 @@ if (!fs.existsSync('./gen/typechain/index.ts')) {
     } catch (e) {}
     fs.writeFileSync('./gen/typechain/index.ts', '');
 }
+
+// Solves the hardhat error [Error HH415: Two different source names]
+subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
+    // Get the list of source paths that would normally be passed to the Solidity compiler
+    const remappings = await runSuper();
+    fs.cpSync('contracts/', 'gen/contracts/', { recursive: true });
+    remappings['tapioca-periph/'] = 'gen/contracts/';
+    return remappings;
+});
 
 // TODO refactor all of that in the SDK?
 type TNetwork = ReturnType<
@@ -57,7 +73,22 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-const config: HardhatUserConfig & { dodoc: any } = {
+const forkNetwork = process.env.NETWORK as TNetwork;
+const forkChainInfo = supportedChains[forkNetwork];
+const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
+    ? {
+          chainId: forkChainInfo.chainId,
+          forking: {
+              url: forkChainInfo.url,
+              ...(process.env.FROM_BLOCK
+                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
+                  : {}),
+          },
+      }
+    : {};
+
+const config: HardhatUserConfig &
+    HardhatNetworkUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
     solidity: {
         compilers: [
@@ -90,10 +121,17 @@ const config: HardhatUserConfig & { dodoc: any } = {
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
+            mining: { auto: true },
+            hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
-                count: 5,
+                mnemonic:
+                    'test test test test test test test test test test test junk',
+                count: 10,
+                accountsBalance: '1000000000000000000000',
             },
+            tags: ['local'],
+            ...forkInfo,
         },
         ...supportedChains,
     },

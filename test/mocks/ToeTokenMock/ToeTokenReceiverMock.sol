@@ -48,8 +48,9 @@ contract ToeTokenReceiverMock is BaseTapiocaOmnichainEngine, TapiocaOmnichainRec
     /**
      * @inheritdoc TapiocaOmnichainReceiver
      */
-    function _toeComposeReceiver(uint16 _msgType, address _srcChainSender, bytes memory _toeComposeMsg)
+    function _toeComposeReceiver(uint16, address, bytes memory)
         internal
+        pure
         override
         returns (bool success)
     {

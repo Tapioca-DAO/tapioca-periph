@@ -35,6 +35,7 @@ import {
     USDOOptionsDestinationModule__factory,
     USDOGenericModule__factory,
     BigBang,
+    SimpleLeverageExecutor__factory,
 } from '@tapioca-sdk/typechain/Tapioca-bar';
 
 import {
@@ -187,7 +188,7 @@ async function registerPenrose(
 ) {
     const Penrose = new Penrose__factory(deployer);
 
-    const bar = await Penrose.deploy(
+    const penrose = await Penrose.deploy(
         yieldBox,
         cluster,
         tapAddress,
@@ -196,25 +197,25 @@ async function registerPenrose(
         deployer.address,
     );
     log(
-        `Deployed Penrose ${bar.address} with args [${yieldBox}, ${tapAddress}, ${wethAddress}]`,
+        `Deployed Penrose ${penrose.address} with args [${yieldBox}, ${tapAddress}, ${wethAddress}]`,
         staging,
     );
     await verifyEtherscan(
-        bar.address,
+        penrose.address,
         [yieldBox, tapAddress, wethAddress],
         staging,
     );
 
-    return { bar };
+    return { penrose };
 }
 
 async function setPenroseAssets(
     deployer: any,
     yieldBox: YieldBox,
-    bar: Penrose,
+    penrose: Penrose,
     usdcAddress: string,
 ) {
-    const wethAssetId = await bar.mainAssetId();
+    const wethAssetId = await penrose.mainAssetId();
 
     const usdcStrategy = await createTokenEmptyStrategy(
         deployer,
@@ -345,7 +346,7 @@ async function registerUniswapV2(deployer: any, staging?: boolean) {
 
 async function deployMediumRiskMC(
     deployer: any,
-    bar: Penrose,
+    penrose: Penrose,
     staging?: boolean,
 ) {
     const Singularity = new Singularity__factory(deployer);
@@ -357,7 +358,7 @@ async function deployMediumRiskMC(
     );
 
     await (
-        await bar.registerSingularityMasterContract(mediumRiskMC.address, 1)
+        await penrose.registerSingularityMasterContract(mediumRiskMC.address, 1)
     ).wait();
     log('MediumRiskMC was set on Penrose', staging);
 
@@ -368,7 +369,7 @@ async function deployMediumRiskMC(
 
 async function deployMediumRiskBigBangMC(
     deployer: any,
-    bar: Penrose,
+    penrose: Penrose,
     staging?: boolean,
 ) {
     const BigBang = new BigBang__factory(deployer);
@@ -379,7 +380,7 @@ async function deployMediumRiskBigBangMC(
     );
 
     await (
-        await bar.registerBigBangMasterContract(mediumRiskBigBangMC.address, 1)
+        await penrose.registerBigBangMasterContract(mediumRiskBigBangMC.address, 1)
     ).wait();
     log('MediumRiskMC was set on Penrose', staging);
 
@@ -392,7 +393,7 @@ async function registerSingularity(
     deployer: any,
     mediumRiskMC: string,
     yieldBox: YieldBox,
-    bar: Penrose,
+    penrose: Penrose,
     weth: ERC20Mock,
     wethAssetId: BigNumberish,
     usdc: ERC20Mock,
@@ -417,21 +418,14 @@ async function registerSingularity(
     const SGLLeverage = new SGLLeverage__factory(deployer);
     const _sglLeverageModule = await SGLLeverage.deploy();
 
-    const data = new ethers.utils.AbiCoder().encode(
+    const LeverageExecutor = new SimpleLeverageExecutor__factory(deployer);
+    const leverageExecutor = await LeverageExecutor.deploy(yieldBox.address, ethers.constants.AddressZero, ethers.constants.AddressZero);
+
+    const modulesData = new ethers.utils.AbiCoder().encode(
         [
             'address',
             'address',
             'address',
-            'address',
-            'address',
-            'address',
-            'uint256',
-            'address',
-            'uint256',
-            'address',
-            'uint256',
-            'uint256',
-            'uint256',
             'address',
         ],
         [
@@ -439,25 +433,52 @@ async function registerSingularity(
             _sglBorrowModule.address,
             _sglCollateralModule.address,
             _sglLeverageModule.address,
-            bar.address,
+        ]
+    );
+    
+    const tokensData = new ethers.utils.AbiCoder().encode(
+        [
+            'address',
+            'uint256',
+            'address',
+            'uint256',
+        ],
+        [
             weth.address,
             wethAssetId,
             usdc.address,
             usdcAssetId,
+        ]
+    );
+    const data = new ethers.utils.AbiCoder().encode(
+        [
+            'address',
+            'address',
+            'uint256',
+            'uint256',
+            'uint256',
+            'address',
+        ],
+        [
+            penrose.address,
             wethUsdcOracle.address,
             exchangeRatePrecision ?? 0,
             0,
             0,
-            ethers.constants.AddressZero,
+            leverageExecutor.address,
         ],
     );
-    await (await bar.registerSingularity(mediumRiskMC, data, true)).wait();
+
+    console.log('-----------------------1');
+    const sglData = new ethers.utils.AbiCoder().encode(['bytes','bytes','bytes'],[modulesData, tokensData, data]);
+    await (await penrose.registerSingularity(mediumRiskMC, sglData, true)).wait();
+    console.log('-----------------------2');
     log('WethUsdcSingularity registered on Penrose', staging);
 
     const singularityMarket = new ethers.Contract(
-        await bar.clonesOf(
+        await penrose.clonesOf(
             mediumRiskMC,
-            (await bar.clonesOfCount(mediumRiskMC)).sub(1),
+            (await penrose.clonesOfCount(mediumRiskMC)).sub(1),
         ),
         SingularityArtifact.abi,
         ethers.provider,
@@ -476,7 +497,7 @@ async function registerSingularity(
 
 async function registerLiquidationQueue(
     deployer: any,
-    bar: Penrose,
+    penrose: Penrose,
     singularity: Singularity,
     feeCollector: string,
     staging?: boolean,
@@ -512,7 +533,7 @@ async function registerLiquidationQueue(
     );
 
     await (
-        await bar.executeMarketFn([singularity.address], [payload], true)
+        await penrose.executeMarketFn([singularity.address], [payload], true)
     ).wait();
     log('WethUsdcLiquidationQueue was set for WethUsdcSingularity', staging);
 
@@ -663,7 +684,7 @@ async function addUniV2Liquidity(
 
 async function deployCurveStableToUsdoBidder(
     deployer: any,
-    bar: Penrose,
+    penrose: Penrose,
     usdc: ERC20Mock,
     usdo: USDO,
     staging?: boolean,
@@ -683,10 +704,10 @@ async function deployCurveStableToUsdoBidder(
     const CurveSwapper = new CurveSwapper__factory(deployer);
     const curveSwapper = await CurveSwapper.deploy(
         curvePoolMock.address,
-        bar.address,
+        penrose.address,
     );
     log(
-        `Deployed CurveSwapper ${curveSwapper.address} with args [${curvePoolMock.address},${bar.address}]`,
+        `Deployed CurveSwapper ${curveSwapper.address} with args [${curvePoolMock.address},${penrose.address}]`,
         staging,
     );
 
@@ -697,7 +718,7 @@ async function deployCurveStableToUsdoBidder(
     );
     await verifyEtherscan(
         curveSwapper.address,
-        [curvePoolMock.address, bar.address],
+        [curvePoolMock.address, penrose.address],
         staging,
     );
 
@@ -708,7 +729,7 @@ async function createWethUsd0Singularity(
     deployer: any,
     usd0: USDO,
     weth: ERC20Mock,
-    bar: Penrose,
+    penrose: Penrose,
     usdoAssetId: any,
     wethAssetId: any,
     mediumRiskMC: Singularity,
@@ -771,7 +792,7 @@ async function createWethUsd0Singularity(
             _sglBorrowModule.address,
             _sglCollateralModule.address,
             _sglLeverageModule.address,
-            bar.address,
+            penrose.address,
             usd0.address,
             usdoAssetId,
             weth.address,
@@ -783,15 +804,15 @@ async function createWethUsd0Singularity(
             ethers.constants.AddressZero,
         ],
     );
-    await bar.registerSingularity(mediumRiskMC.address, data, false);
+    await penrose.registerSingularity(mediumRiskMC.address, data, false);
 
-    const clonesCount = await bar.clonesOfCount(mediumRiskMC.address);
+    const clonesCount = await penrose.clonesOfCount(mediumRiskMC.address);
     log(`Clones count of MediumRiskMC ${clonesCount}`, staging);
 
     const wethUsdoSingularity = new ethers.Contract(
-        await bar.clonesOf(
+        await penrose.clonesOf(
             mediumRiskMC.address,
-            (await bar.clonesOfCount(mediumRiskMC.address)).sub(1),
+            (await penrose.clonesOfCount(mediumRiskMC.address)).sub(1),
         ),
         SingularityArtifact.abi,
         ethers.provider,
@@ -816,7 +837,7 @@ async function registerBigBangMarket(
     deployer: any,
     mediumRiskBigBangMC: string,
     yieldBox: YieldBox,
-    bar: Penrose,
+    penrose: Penrose,
     collateral: ERC20Mock,
     collateralId: BigNumberish,
     oracle: OracleMock,
@@ -852,23 +873,11 @@ async function registerBigBangMarket(
         staging,
     );
 
-    const data = new ethers.utils.AbiCoder().encode(
+    const modulesData = new ethers.utils.AbiCoder().encode(
         [
             'address',
             'address',
             'address',
-            'address',
-            'address',
-            'address',
-            'uint256',
-            'address',
-            'uint256',
-            'uint256',
-            'uint256',
-            'uint256',
-            'uint256',
-            'uint256',
-            'uint256',
             'address',
         ],
         [
@@ -876,28 +885,53 @@ async function registerBigBangMarket(
             _bbBorrow.address,
             _bbCollateral.address,
             _bbLeverage.address,
-            bar.address,
+        ]
+    );
+
+    const debtData = new ethers.utils.AbiCoder().encode(
+        [
+            'uint256',
+            'uint256',
+            'uint256',
+        ],
+        [
+            debtRateAgainstEth,
+            debtRateMin,
+            debtRateMax,
+        ]
+    );
+
+    const data = new ethers.utils.AbiCoder().encode(
+        [
+            'address',
+            'address',
+            'uint256',
+            'address',
+            'uint256',
+            'uint256',
+            'uint256',
+            'address',
+        ],
+        [
+            penrose.address,
             collateral.address,
             collateralId,
             oracle.address,
             exchangeRatePrecision,
-            debtRateAgainstEth,
-            debtRateMin,
-            debtRateMax,
-            debtStartPoint,
             0,
             0,
             ethers.constants.AddressZero,
         ],
     );
 
-    await (await bar.registerBigBang(mediumRiskBigBangMC, data, true)).wait();
+    const bbData = new ethers.utils.AbiCoder().encode(['bytes','bytes','bytes'],[modulesData, debtData, data]);
+    await (await penrose.registerBigBang(mediumRiskBigBangMC, bbData, true)).wait();
     log('BigBang market registered on Penrose', staging);
 
     const bigBangMarket = new ethers.Contract(
-        await bar.clonesOf(
+        await penrose.clonesOf(
             mediumRiskBigBangMC,
-            (await bar.clonesOfCount(mediumRiskBigBangMC)).sub(1),
+            (await penrose.clonesOfCount(mediumRiskBigBangMC)).sub(1),
         ),
         BigBangArtifact.abi,
         ethers.provider,
@@ -929,7 +963,7 @@ async function registerBigBangMarket(
             0,
         ],
     );
-    await bar.executeMarketFn(
+    await penrose.executeMarketFn(
         [bigBangMarket.address],
         [setAssetOracleFn],
         true,
@@ -1007,12 +1041,9 @@ export async function register(staging?: boolean) {
 
     // ------------------- 2.1 Create Cluster -------------------
     const LZEndpointMock = new LZEndpointMock__factory(deployer);
-    const clusterLzEndpoint = await LZEndpointMock.deploy(
-        await hre.getChainId(),
-    );
     const cluster = await (
         await ethers.getContractFactory('Cluster')
-    ).deploy(await hre.getChainId(), deployer.address);
+    ).deploy(hre.SDK.eChainId, deployer.address);
     await cluster.deployed();
     log(`Deployed Cluster ${cluster.address} with args [1]`, staging);
 
@@ -1021,7 +1052,7 @@ export async function register(staging?: boolean) {
     // ------------------- 2.2 Deploy Penrose -------------------
     log('Deploying Penrose', staging);
 
-    const { bar } = await registerPenrose(
+    const { penrose } = await registerPenrose(
         deployer,
         yieldBox.address,
         cluster.address,
@@ -1029,14 +1060,14 @@ export async function register(staging?: boolean) {
         weth.address,
         staging,
     );
-    log(`Deployed Penrose ${bar.address}`, staging);
+    log(`Deployed Penrose ${penrose.address}`, staging);
 
     // -------------------  3 Add asset types to Penrose -------------------
     log('Setting Penrose assets', staging);
     const { usdcAssetId, wethAssetId, usdcStrategy } = await setPenroseAssets(
         deployer,
         yieldBox,
-        bar,
+        penrose,
         usdc.address,
     );
     log(
@@ -1046,14 +1077,14 @@ export async function register(staging?: boolean) {
 
     // ------------------- 6 Deploy MediumRisk master contract -------------------
     log('Deploying MediumRiskMC', staging);
-    const { mediumRiskMC } = await deployMediumRiskMC(deployer, bar, staging);
+    const { mediumRiskMC } = await deployMediumRiskMC(deployer, penrose, staging);
     log(`Deployed MediumRiskMC ${mediumRiskMC.address}`, staging);
 
     // ------------------- 6.1 Deploy MediumRiskBigBang master contract -------------------
     log('Deploying MediumRiskBigBangMC', staging);
     const { mediumRiskBigBangMC } = await deployMediumRiskBigBangMC(
         deployer,
-        bar,
+        penrose,
         staging,
     );
     log(`Deployed MediumRiskBigBangMC ${mediumRiskBigBangMC.address}`, staging);
@@ -1064,7 +1095,7 @@ export async function register(staging?: boolean) {
         deployer,
         mediumRiskMC.address,
         yieldBox,
-        bar,
+        penrose,
         weth,
         wethAssetId,
         usdc,
@@ -1089,7 +1120,7 @@ export async function register(staging?: boolean) {
 
     // ------------------- 10 Deploy USDO -------------------
     log('Registering USDO', staging);
-    const chainId = await hre.getChainId();
+    const chainId = hre.SDK.eChainId;
     const { usd0, lzEndpointContract } = await registerUsd0Contract(
         chainId,
         yieldBox.address,
@@ -1100,7 +1131,7 @@ export async function register(staging?: boolean) {
     log(`USDO registered ${usd0.address}`, staging);
 
     // ------------------- 11 Set USDO on Penrose -------------------
-    await bar.setUsdoToken(usd0.address);
+    await penrose.setUsdoToken(usd0.address);
     log('USDO was set on Penrose', staging);
 
     // ------------------- 12 Register WETH BigBang -------------------
@@ -1109,7 +1140,7 @@ export async function register(staging?: boolean) {
         deployer,
         mediumRiskBigBangMC.address,
         yieldBox,
-        bar,
+        penrose,
         weth,
         wethAssetId,
         usd0WethOracle,
@@ -1121,7 +1152,7 @@ export async function register(staging?: boolean) {
         staging,
     );
     const wethBigBangMarket = bigBangRegData.bigBangMarket;
-    await bar.setBigBangEthMarket(wethBigBangMarket.address);
+    await penrose.setBigBangEthMarket(wethBigBangMarket.address);
     log(`WethMinterSingularity deployed ${wethBigBangMarket.address}`, staging);
 
     // ------------------- 13 Set Minter and Burner for USDO -------------------
@@ -1160,7 +1191,7 @@ export async function register(staging?: boolean) {
         'magnetarOptionModule';
     const magnetarYieldboxModule = await (
         await (
-            await hre.ethers.getContractFactory('MagnetarYieldboxModule')
+            await hre.ethers.getContractFactory('MagnetarYieldBoxModule')
         ).deploy()
     ).deployed();
     hre.tracer.nameTags[magnetarYieldboxModule.address] =
@@ -1196,7 +1227,7 @@ export async function register(staging?: boolean) {
         log('Deploying CurveStableToUsdoBidder', staging);
         const { stableToUsdoBidder } = await deployCurveStableToUsdoBidder(
             deployer,
-            bar,
+            penrose,
             usdc,
             usd0,
             staging,
@@ -1217,7 +1248,7 @@ export async function register(staging?: boolean) {
             deployer,
             usd0,
             weth,
-            bar,
+            penrose,
             usd0AssetId,
             wethAssetId,
             mediumRiskMC,
@@ -1256,7 +1287,7 @@ export async function register(staging?: boolean) {
         wethUsdcOracle,
         usd0WethOracle,
         yieldBox,
-        bar,
+        penrose,
         wethUsdcSingularity,
         wethBigBangMarket,
         _sglLiquidationModule,

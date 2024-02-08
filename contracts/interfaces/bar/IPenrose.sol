@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 
 interface IPenrose {
     /// @notice swap extra data
@@ -54,6 +54,8 @@ interface IPenrose {
     function hostLzChainId() external view returns (uint16);
 
     function cluster() external view returns (ICluster);
+
+    function pearlmit() external view returns (IPearlmit);
 
     function reAccrueBigBangMarkets() external;
 }
