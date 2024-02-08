@@ -6,6 +6,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 
 // Tapioca
 import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
+import {ICluster} from "tapioca-periph/interfaces/ICluster.sol";
 
 /*
 
@@ -30,6 +31,7 @@ contract ZeroXSwapper is IZeroXSwapper {
     /// ************
 
     address public zeroXProxy;
+    ICluster public cluster;
 
     /// **************
     /// *** ERRORS ***
@@ -39,10 +41,12 @@ contract ZeroXSwapper is IZeroXSwapper {
     error InvalidProxy(address actual, address expected);
     error SwapFailed();
     error MinSwapFailed(uint256 amountOut);
+    error SenderNotValid(address sender);
 
-    constructor(address _zeroXProxy) {
+    constructor(address _zeroXProxy, ICluster _cluster) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
         zeroXProxy = _zeroXProxy;
+        cluster = _cluster;
     }
 
     /// **********************
@@ -60,15 +64,18 @@ contract ZeroXSwapper is IZeroXSwapper {
         payable
         returns (uint256 amountOut)
     {
+        if (!cluster.isWhitelisted(0, msg.sender)) revert SenderNotValid(msg.sender);
+
         if (swapData.swapTarget != zeroXProxy) revert InvalidProxy(swapData.swapTarget, zeroXProxy);
 
         // Transfer tokens to this contract
         swapData.sellToken.safeTransferFrom(msg.sender, address(this), amountIn);
 
-        // Approve the 0x proxy to spend the sell token
+        // Approve the 0x proxy to spend the sell token, and call the swap function
         swapData.sellToken.safeApprove(swapData.swapTarget, amountIn);
         (bool success,) = swapData.swapTarget.call(swapData.swapCallData);
         if (!success) revert SwapFailed();
+        swapData.sellToken.safeApprove(swapData.swapTarget, 0);
 
         // Check that the amountOut is at least as much as minAmountOut
         amountOut = swapData.buyToken.balanceOf(address(this));
