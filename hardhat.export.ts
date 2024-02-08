@@ -27,6 +27,7 @@ declare global {
         interface ProcessEnv {
             ALCHEMY_API_KEY: string;
             ENV: string;
+            NETWORK: string; // For forking
         }
     }
 }
