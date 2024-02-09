@@ -15,7 +15,7 @@ remappings = [
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/src/",
 	"tapioca-bar/=gitmodule/Tapioca-bar/contracts/",
-	"tap-yieldbox/=gitmodule/tap-yieldbox/contracts/",
+	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
 	"permitc/=gitmodule/permitc/src/",
 ]
 
