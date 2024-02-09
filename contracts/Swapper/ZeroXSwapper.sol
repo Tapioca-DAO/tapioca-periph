@@ -6,7 +6,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 
 // Tapioca
 import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
-import {ICluster} from "tapioca-periph/interfaces/ICluster.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 /*
 
