@@ -30,26 +30,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 contract MagnetarV2Storage is IERC721Receiver {
-    // --- ACTIONS DATA ----
-    struct Call {
-        MagnetarAction id;
-        address target;
-        uint256 value;
-        bool allowFailure;
-        bytes call;
-    }
-
-    // --- ACTIONS IDS ----
-    enum MagnetarAction {
-        Permit, // Permit singular operations.
-        Toft, //  TOFT Singular operations.
-        Market, // Market Singular related operations.
-        TapToken, // TapToken Singular related operations.
-        MarketModule, // Market Module related operations.
-        YieldboxModule // YieldBox module related operations.
-
-    }
-
     // Helpers for external usage. Not used in the contract.
     uint8 public constant MAGNETAR_ACTION_PERMIT = 0;
     uint8 public constant MAGNETAR_ACTION_TOFT = 1;
