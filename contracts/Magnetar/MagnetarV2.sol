@@ -10,6 +10,7 @@ import {
     ITapiocaOptionBroker
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFT, ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {IMagnetarModuleExtender, IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -40,9 +41,11 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     // *** VARS *** //
     // ************ //
 
+    IMagnetarModuleExtender public magnetarModuleExtender; // For future implementations
     IMagnetarHelper public helper;
 
-    event HelperUpdate(address indexed old, address indexed newHelper);
+    event HelperUpdate(address old, address newHelper);
+    event MagnetarModuleExtenderSet(address old, address newMagnetarModuleExtender);
 
     // ************** //
     // *** ERRORS *** //
@@ -50,7 +53,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     error FuncSigNotValid(bytes4 funcSig);
     error EmptyAddress();
     error ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
-    error ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
+    error ActionNotValid(IMagnetar.MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
     error FailRescueEth();
 
     constructor(
@@ -74,13 +77,13 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
 
     /// @notice Batch multiple calls together
     /// @param calls The list of actions to perform
-    function burst(Call[] calldata calls) external payable {
+    function burst(IMagnetar.Call[] calldata calls) external payable {
         uint256 valAccumulator;
 
         uint256 length = calls.length;
 
         for (uint256 i; i < length; i++) {
-            Call calldata _action = calls[i];
+            IMagnetar.Call calldata _action = calls[i];
             if (!_action.allowFailure) {
                 require(
                     _action.call.length > 0,
@@ -91,32 +94,32 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
-            if (_action.id == MagnetarAction.Permit) {
+            if (_action.id == IMagnetar.MagnetarAction.Permit) {
                 _processPermitOperation(_action.target, _action.call, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Wrap/SendFrom operations on TOFT
-            if (_action.id == MagnetarAction.Toft) {
+            if (_action.id == IMagnetar.MagnetarAction.Toft) {
                 _processToftAction(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
             /// @dev addCollateral/borrow/addAsset/repay
-            if (_action.id == MagnetarAction.Market) {
+            if (_action.id == IMagnetar.MagnetarAction.Market) {
                 _processMarketAction(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
             /// @dev exerciseOption
-            if (_action.id == MagnetarAction.Market) {
+            if (_action.id == IMagnetar.MagnetarAction.Market) {
                 _processTapTokenAction(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
             /// @dev We use modules for complex operations in contrary to PERMIT/TOFT actions singular, direct operation to the target.
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.YieldboxModule) {
+            if (_action.id == IMagnetar.MagnetarAction.YieldboxModule) {
                 _executeModule(Module.Yieldbox, _action.call);
                 continue; // skip the rest of the loop
             }
@@ -124,12 +127,18 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             /// @dev We use modules for complex operations in contrary to PERMIT/TOFT actions singular, direct operation to the target.
             /// @dev Modules will not return result data.
             /// @dev Special use case for MarketModule, the module is split in two contracts, we need to check the funcSig to know which one to call.
-            if (_action.id == MagnetarAction.MarketModule) {
+            if (_action.id == IMagnetar.MagnetarAction.MarketModule) {
                 _handleMarketModuleCall(_action.call);
                 continue; // skip the rest of the loop
             }
-            // If no valid action was found, revert
-            revert ActionNotValid(_action.id, _action.call);
+
+            // If no valid action was found, use the Magnetar module extender
+            if (address(magnetarModuleExtender) != address(0)) {
+                IMagnetarModuleExtender(magnetarModuleExtender).handleAction(_action);
+            } else {
+                // If no valid action was found, revert
+                revert ActionNotValid(_action.id, _action.call);
+            }
         }
 
         if (msg.value != valAccumulator) revert ValueMismatch(msg.value, valAccumulator);
@@ -159,6 +168,14 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
     function rescueEth(uint256 amount, address to) external onlyOwner {
         (bool success,) = to.call{value: amount}("");
         if (!success) revert FailRescueEth();
+    }
+
+    /**
+     * @notice updates the `magnetarModuleExtender` state variable
+     */
+    function setMagnetarModuleExtender(IMagnetarModuleExtender _magnetarModuleExtender) external onlyOwner {
+        emit MagnetarModuleExtenderSet(address(magnetarModuleExtender), address(_magnetarModuleExtender));
+        magnetarModuleExtender = _magnetarModuleExtender;
     }
 
     // ************************ //
@@ -195,7 +212,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             _executeCall(_target, _actionCalldata, 0, _allowFailure);
             return;
         }
-        revert ActionNotValid(MagnetarAction.Permit, _actionCalldata);
+        revert ActionNotValid(IMagnetar.MagnetarAction.Permit, _actionCalldata);
     }
 
     /**
@@ -233,7 +250,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         //     return;
         // }
         if (true) return;
-        revert ActionNotValid(MagnetarAction.Toft, _actionCalldata);
+        revert ActionNotValid(IMagnetar.MagnetarAction.Toft, _actionCalldata);
     }
 
     /**
@@ -269,7 +286,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
             return;
         }
-        revert ActionNotValid(MagnetarAction.Market, _actionCalldata);
+        revert ActionNotValid(IMagnetar.MagnetarAction.Market, _actionCalldata);
     }
 
     /**
@@ -296,7 +313,7 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
         //     return;
         // }
         if (true) return;
-        revert ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
+        revert ActionNotValid(IMagnetar.MagnetarAction.TapToken, _actionCalldata);
     }
 
     /**

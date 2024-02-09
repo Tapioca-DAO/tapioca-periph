@@ -11,16 +11,31 @@ import {
     ICommonExternalContracts
 } from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {IUSDOBase, IMintData, IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
+import {IMintData, IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
+
+interface IMagnetarModuleExtender {
+    function handleAction(IMagnetar.Call calldata call) external payable;
+}
 
 interface IMagnetar {
+    // --- ACTIONS DATA ----
     struct Call {
-        uint8 id;
+        MagnetarAction id;
         address target;
         uint256 value;
         bool allowFailure;
         bytes call;
+    }
+
+    // --- ACTIONS IDS ----
+    enum MagnetarAction {
+        Permit, // Permit singular operations.
+        Toft, //  TOFT Singular operations.
+        Market, // Market Singular related operations.
+        TapToken, // TapToken Singular related operations.
+        MarketModule, // Market Module related operations.
+        YieldboxModule // YieldBox module related operations.
+
     }
 
     struct DepositRepayAndRemoveCollateralFromMarketData {
