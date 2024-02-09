@@ -104,6 +104,7 @@ contract MagnetarV2Storage is IERC721Receiver {
         }
     }
 
+    // TODO - This doesn't handle custom errors
     function _getRevertMsg(bytes memory _returnData) internal pure {
         // If the _res length is less than 68, then
         // the transaction failed with custom error or silently (without a revert message)

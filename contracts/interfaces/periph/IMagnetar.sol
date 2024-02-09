@@ -14,6 +14,7 @@ import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapioca
 import {IMintData, IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 interface IMagnetarModuleExtender {
+    function isValidActionId(uint8 actionId) external view returns (bool);
     function handleAction(IMagnetar.Call calldata call) external payable;
 }
 

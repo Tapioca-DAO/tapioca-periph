@@ -132,9 +132,16 @@ contract MagnetarV2 is Ownable, MagnetarV2Storage {
                 continue; // skip the rest of the loop
             }
 
-            // If no valid action was found, use the Magnetar module extender
-            if (address(magnetarModuleExtender) != address(0)) {
-                IMagnetarModuleExtender(magnetarModuleExtender).handleAction(_action);
+            // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
+            if (
+                address(magnetarModuleExtender) != address(0)
+                    && magnetarModuleExtender.isValidActionId(uint8(_action.id))
+            ) {
+                bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
+                (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
+                if (!success) {
+                    _getRevertMsg(returnData);
+                }
             } else {
                 // If no valid action was found, revert
                 revert ActionNotValid(_action.id, _action.call);
