@@ -34,13 +34,6 @@ declare global {
 
 // Load the env vars from the .env/<network>.env file. the <network> file name is the same as the network in hh `--network arbitrum_sepolia`
 loadEnv();
-// Check if the folder /gen/typechain exists, if not, create it. This is needed if the repo was freshly cloned.
-if (!fs.existsSync('./gen/typechain/index.ts')) {
-    try {
-        fs.mkdirSync('./gen/typechain', { recursive: true });
-    } catch (e) {}
-    fs.writeFileSync('./gen/typechain/index.ts', '');
-}
 
 // Solves the hardhat error [Error HH415: Two different source names]
 subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
