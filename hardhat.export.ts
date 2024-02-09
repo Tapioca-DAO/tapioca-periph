@@ -6,15 +6,13 @@ import '@primitivefi/hardhat-dodoc';
 import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
-import { HardhatUserConfig, subtask } from 'hardhat/config';
+import { HardhatUserConfig } from 'hardhat/config';
 import {
     HardhatNetworkUserConfig,
     HttpNetworkConfig,
     HttpNetworkUserConfig,
     NetworksUserConfig,
 } from 'hardhat/types';
-import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
-import fs from 'fs';
 
 // Utils
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
@@ -34,15 +32,6 @@ declare global {
 
 // Load the env vars from the .env/<network>.env file. the <network> file name is the same as the network in hh `--network arbitrum_sepolia`
 loadEnv();
-
-// Solves the hardhat error [Error HH415: Two different source names]
-subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
-    // Get the list of source paths that would normally be passed to the Solidity compiler
-    const remappings = await runSuper();
-    fs.cpSync('contracts/', 'gen/contracts/', { recursive: true });
-    remappings['tapioca-periph/'] = 'gen/contracts/';
-    return remappings;
-});
 
 // TODO refactor all of that in the SDK?
 type TNetwork = ReturnType<
@@ -82,7 +71,7 @@ const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
 
 const config: HardhatUserConfig &
     HardhatNetworkUserConfig & { dodoc?: any; typechain?: any } = {
-    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriphery },
+    SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriph },
     solidity: {
         compilers: [
             {
