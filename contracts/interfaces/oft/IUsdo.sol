@@ -6,7 +6,7 @@ import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/
 
 // Tapioca
 import {ITapiocaOmnichainEngine, LZSendParam, ERC20PermitStruct} from "../periph/ITapiocaOmnichainEngine.sol";
-import {ICommonData, IWithdrawParams, ICommonExternalContracts} from "../common/ICommonData.sol";
+import {ICommonData, ICommonExternalContracts} from "../common/ICommonData.sol";
 import {
     ITapiocaOptionBroker,
     IExerciseOptionsData,
@@ -81,7 +81,7 @@ struct UsdoModulesInitStruct {
 struct MarketLendOrRepayMsg {
     address user;
     ILendOrRepayParams lendParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**

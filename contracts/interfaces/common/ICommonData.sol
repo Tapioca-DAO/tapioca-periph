@@ -15,17 +15,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-struct IWithdrawParams {
-    bool withdraw;
-    uint256 withdrawLzFeeAmount;
-    bool withdrawOnOtherChain;
-    uint16 withdrawLzChainId;
-    bytes withdrawAdapterParams;
-    bool unwrap; // valid only for TOFTs
-    address payable refundAddress;
-    address zroPaymentAddress;
-}
-
 struct ICommonExternalContracts {
     address magnetar;
     address singularity;

@@ -13,8 +13,9 @@ import {
     RemoteTransferMsg
 } from "../periph/ITapiocaOmnichainEngine.sol";
 import {ITapiocaOptionBroker, IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData, IWithdrawParams} from "../common/ICommonData.sol";
 import {ILeverageSwapData, ILeverageExternalContractsData} from "./IUsdo.sol";
+import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
+import {ICommonData} from "../common/ICommonData.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -124,7 +125,7 @@ struct MarketLeverageDownMsg {
 struct MarketRemoveCollateralMsg {
     address user;
     IRemoveParams removeParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**
@@ -133,7 +134,7 @@ struct MarketRemoveCollateralMsg {
 struct MarketBorrowMsg {
     address user;
     IBorrowParams borrowParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**
