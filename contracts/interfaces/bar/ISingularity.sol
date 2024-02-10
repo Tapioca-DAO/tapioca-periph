@@ -1,8 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {IUSDOBase, ILeverageLZData, ILeverageExternalContractsData, ILeverageSwapData} from "./IUSDO.sol";
+import {ILeverageLZData, ILeverageExternalContractsData, ILeverageSwapData} from "../oft/IUsdo.sol";
 import {IMarket} from "./IMarket.sol";
+
+/*
+
+__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
+ _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
+  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
+   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
+    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
+     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
+      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
+       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
+        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
+
+*/
 
 interface ISingularity is IMarket {
     struct AccrueInfo {
@@ -50,23 +64,4 @@ interface ISingularity is IMarket {
     function interestElasticity() external view returns (uint256);
 
     function startingInterestPerSecond() external view returns (uint256);
-
-    function multiHopBuyCollateral(
-        address from,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool useAirdroppedFunds,
-        ILeverageSwapData calldata swapData,
-        ILeverageLZData calldata lzData,
-        ILeverageExternalContractsData calldata externalData
-    ) external payable;
-
-    function multiHopSellCollateral(
-        address from,
-        uint256 share,
-        bool useAirdroppedFunds,
-        ILeverageSwapData calldata swapData,
-        ILeverageLZData calldata lzData,
-        ILeverageExternalContractsData calldata externalData
-    ) external payable;
 }

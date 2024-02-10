@@ -8,7 +8,10 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {MagnetarWithdrawData, DepositRepayAndRemoveCollateralFromMarketData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {
+    MagnetarWithdrawData,
+    DepositRepayAndRemoveCollateralFromMarketData
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";

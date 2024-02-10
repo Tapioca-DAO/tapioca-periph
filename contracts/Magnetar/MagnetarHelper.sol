@@ -11,7 +11,6 @@ import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.so
 import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 import {IBigBang} from "tapioca-periph/interfaces/bar/IBigBang.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /**
  * @title MagnetarHelper

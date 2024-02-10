@@ -5,6 +5,7 @@ pragma solidity 0.8.22;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
+import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {MagnetarStorage} from "./MagnetarStorage.sol";
@@ -29,12 +30,14 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  */
 contract BaseMagnetar is Ownable, MagnetarStorage {
     IMagnetarHelper public helper;
+    IMagnetarModuleExtender public magnetarModuleExtender; // For future implementations
 
     error Magnetar_FailRescueEth();
     error Magnetar_EmptyAddress();
 
     event HelperUpdate(address indexed old, address indexed newHelper);
     event ClusterUpdated(ICluster indexed oldCluster, ICluster indexed newCluster);
+    event MagnetarModuleExtenderSet(address old, address newMagnetarModuleExtender);
 
     constructor(ICluster _cluster, address _owner) {
         cluster = _cluster;
@@ -63,6 +66,14 @@ contract BaseMagnetar is Ownable, MagnetarStorage {
     function setHelper(address _helper) external onlyOwner {
         emit HelperUpdate(address(helper), _helper);
         helper = IMagnetarHelper(_helper);
+    }
+
+    /**
+     * @notice updates the `magnetarModuleExtender` state variable
+     */
+    function setMagnetarModuleExtender(IMagnetarModuleExtender _magnetarModuleExtender) external onlyOwner {
+        emit MagnetarModuleExtenderSet(address(magnetarModuleExtender), address(_magnetarModuleExtender));
+        magnetarModuleExtender = _magnetarModuleExtender;
     }
 
     /**

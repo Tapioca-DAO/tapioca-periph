@@ -12,12 +12,9 @@ import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapioca
 import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -48,7 +45,6 @@ contract MagnetarStorage is IERC721Receiver {
 
     ICluster public cluster;
     mapping(MagnetarModule moduleId => address moduleAddress) public modules;
-
 
     // Helpers for external usage. Not used in the contract.
     uint8 public constant MAGNETAR_ACTION_PERMIT = 0;

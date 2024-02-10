@@ -11,12 +11,10 @@ import {
     ERC20PermitStruct,
     ERC20PermitApprovalMsg,
     RemoteTransferMsg
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-
-import {IUSDOBase, ILeverageSwapData, ILeverageExternalContractsData} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-import {ITapiocaOFT, IRemoveParams, IBorrowParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
+} from "../periph/ITapiocaOmnichainEngine.sol";
+import {ITapiocaOptionBroker, IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {ICommonData, IWithdrawParams} from "../common/ICommonData.sol";
+import {ILeverageSwapData, ILeverageExternalContractsData} from "./IUsdo.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -50,6 +48,12 @@ interface ITOFT is ITapiocaOmnichainEngine {
     function erc20() external view returns (address);
 
     function vault() external view returns (address);
+
+    function balanceOf(address _holder) external view returns (uint256);
+
+    function approve(address _spender, uint256 _amount) external returns (bool);
+
+    function extractUnderlying(uint256 _amount) external; //mTOFT
 }
 
 /// ============================
@@ -94,7 +98,7 @@ struct SendParamsMsg {
  * @notice Encodes the message for the PT_TAP_EXERCISE operation.
  */
 struct ExerciseOptionsMsg {
-    ITapiocaOptionBrokerCrossChain.IExerciseOptionsData optionsData;
+    IExerciseOptionsData optionsData;
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;
@@ -175,4 +179,18 @@ struct MarketPermitActionMsg {
     bytes32 r;
     bytes32 s;
     bool permitAsset;
+}
+
+struct IRemoveParams {
+    uint256 amount;
+    address marketHelper;
+    address market;
+}
+
+struct IBorrowParams {
+    uint256 amount;
+    uint256 borrowAmount;
+    address marketHelper;
+    address market;
+    bool deposit;
 }

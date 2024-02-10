@@ -2,6 +2,7 @@
 pragma solidity 0.8.22;
 
 /*
+
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
  _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
   _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
@@ -14,22 +15,15 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-interface IToken {
-    function approve(address spender, uint256 amount) external returns (bool);
-}
+/// @dev interface for TAP token
+interface ITap {
+    function extractTAP(address to, uint256 value) external;
 
-library SafeApprove {
-    function safeApprove(address token, address to, uint256 value) internal {
-        require(token.code.length > 0, "SafeApprove: no contract");
+    function approve(address to, uint256 value) external;
 
-        bool success;
-        bytes memory data;
-        (success, data) = token.call(abi.encodeCall(IToken.approve, (to, 0)));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "SafeApprove: approve failed");
+    function balanceOf(address user) external view returns (uint256);
 
-        if (value > 0) {
-            (success, data) = token.call(abi.encodeCall(IToken.approve, (to, value)));
-            require(success && (data.length == 0 || abi.decode(data, (bool))), "SafeApprove: approve failed");
-        }
-    }
+    function emissionsStartTime() external view returns (uint256);
+
+    function mintedInWeek(int256 week) external view returns (uint256);
 }

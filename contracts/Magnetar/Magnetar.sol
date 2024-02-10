@@ -5,25 +5,19 @@ pragma solidity 0.8.22;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {
-    ITapiocaOptionBrokerCrossChain,
-    ITapiocaOptionBroker
-} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOFT, ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
-import {ISendFrom} from "tapioca-periph/interfaces/common/ISendFrom.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseMagnetar} from "./BaseMagnetar.sol";
-
 /*
 
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -144,8 +138,20 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
-            // If no valid action was found, revert
-            revert Magnetar_ActionNotValid(_action.id, _action.call);
+            // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
+            if (
+                address(magnetarModuleExtender) != address(0)
+                    && magnetarModuleExtender.isValidActionId(uint8(_action.id))
+            ) {
+                bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
+                (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
+                if (!success) {
+                    _getRevertMsg(returnData);
+                }
+            } else {
+                // If no valid action was found, revert
+                revert Magnetar_ActionNotValid(_action.id, _action.call);
+            }
         }
 
         if (msg.value != valAccumulator) revert Magnetar_ValueMismatch(msg.value, valAccumulator);

@@ -2,13 +2,25 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from
-    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ICommonExternalContracts, IDepositData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {IRemoveAndRepay} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-import {IMintData} from "tapioca-periph/interfaces/bar/IUSDO.sol";
+import {ITapiocaOptionLiquidityProvision, IOptionsLockData} from "../tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionBroker, IOptionsParticipateData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {ICommonExternalContracts, IDepositData} from "../common/ICommonData.sol";
+import {LZSendParam} from "../periph/ITapiocaOmnichainEngine.sol";
+import {IRemoveAndRepay, IMintData} from "../oft/IUsdo.sol";
+
+/*
+
+__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
+ _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
+  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
+   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
+    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
+     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
+      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
+       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
+        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
+
+*/
 
 struct MagnetarWithdrawData {
     address yieldBox;
@@ -79,8 +91,8 @@ struct MintFromBBAndLendOnSGLData {
     uint256 lendAmount;
     IMintData mintData;
     IDepositData depositData;
-    ITapiocaOptionLiquidityProvision.IOptionsLockData lockData;
-    ITapiocaOptionBroker.IOptionsParticipateData participateData;
+    IOptionsLockData lockData;
+    IOptionsParticipateData participateData;
     ICommonExternalContracts externalContracts;
 }
 
@@ -103,6 +115,7 @@ enum MagnetarAction {
     MintModule, //7 BigBang Singular related operations.
     OptionModule, //8 Market Module related operations.
     YieldBoxModule //9 YieldBox module related operations.
+
 }
 
 enum MagnetarModule {
@@ -140,4 +153,9 @@ interface IMagnetar {
     function cluster() external view returns (address);
 
     function helper() external view returns (address);
+}
+
+interface IMagnetarModuleExtender {
+    function isValidActionId(uint8 actionId) external view returns (bool);
+    function handleAction(MagnetarCall calldata call) external payable;
 }

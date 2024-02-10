@@ -9,7 +9,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ExitPositionAndRemoveCollateralData, MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {
+    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
