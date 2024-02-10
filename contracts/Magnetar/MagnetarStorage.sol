@@ -35,14 +35,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @notice Storage contract for Magnetar & modules
  */
 contract MagnetarStorage is IERC721Receiver {
-    struct Call {
-        bytes call;
-        uint256 value;
-        address target;
-        MagnetarAction id;
-        bool allowFailure;
-    }
-
     ICluster public cluster;
     mapping(MagnetarModule moduleId => address moduleAddress) public modules;
 

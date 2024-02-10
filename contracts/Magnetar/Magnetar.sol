@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -64,13 +64,13 @@ contract Magnetar is BaseMagnetar {
      * @notice Batch multiple calls together
      * @param calls The list of actions to perform
      */
-    function burst(Call[] calldata calls) external payable {
+    function burst(MagnetarCall[] calldata calls) external payable {
         uint256 valAccumulator;
 
         uint256 length = calls.length;
 
         for (uint256 i; i < length; i++) {
-            Call calldata _action = calls[i];
+            MagnetarCall calldata _action = calls[i];
             if (!_action.allowFailure) {
                 require(
                     _action.call.length > 0,
