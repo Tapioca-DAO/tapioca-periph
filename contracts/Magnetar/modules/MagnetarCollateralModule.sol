@@ -73,7 +73,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         // deposit to YieldBox
         if (data.deposit) {
             // transfers tokens from sender or from the user to this contract
-            data.collateralAmount = _extractTokens(msg.sender, collateralAddress, data.collateralAmount);
+            data.collateralAmount = _extractTokens(data.user, collateralAddress, data.collateralAmount);
             _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
 
             // deposit to YieldBox

@@ -70,7 +70,6 @@ struct TOFTInitStruct {
     address cluster;
     address erc20;
     uint256 hostEid;
-    address toftVault;
     address extExec;
 }
 
