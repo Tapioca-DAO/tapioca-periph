@@ -13,7 +13,6 @@ import {
     RemoteTransferMsg
 } from "../periph/ITapiocaOmnichainEngine.sol";
 import {ITapiocaOptionBroker, IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
-import {ILeverageSwapData, ILeverageExternalContractsData} from "./IUsdo.sol";
 import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
 import {ICommonData} from "../common/ICommonData.sol";
 
@@ -100,19 +99,6 @@ struct SendParamsMsg {
 struct ExerciseOptionsMsg {
     IExerciseOptionsData optionsData;
     bool withdrawOnOtherChain;
-    //@dev send back to source message params
-    LZSendParam lzSendParams;
-    bytes composeMsg;
-}
-
-/**
- * @notice Encodes the message for the PT_LEVERAGE_MARKET_DOWN operation.
- */
-struct MarketLeverageDownMsg {
-    address user;
-    uint256 amount;
-    ILeverageSwapData swapData;
-    ILeverageExternalContractsData externalData;
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;

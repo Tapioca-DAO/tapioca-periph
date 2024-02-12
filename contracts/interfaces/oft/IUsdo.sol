@@ -94,20 +94,6 @@ struct MarketRemoveAssetMsg {
 }
 
 /**
- * @notice Encodes the message for the PT_LEVERAGE_MARKET_UP operation.
- */
-struct MarketLeverageUpMsg {
-    address user;
-    uint256 amount;
-    ILeverageSwapData swapData;
-    ILeverageExternalContractsData externalData;
-    //@dev send back to source message params
-    LZSendParam lzSendParams;
-    bytes composeMsg;
-    uint128 composeGas;
-}
-
-/**
  * @notice Encodes the message for the PT_TAP_EXERCISE operation.
  */
 struct ExerciseOptionsMsg {
@@ -162,14 +148,6 @@ struct MarketPermitActionMsg {
     bool permitAsset;
 }
 
-// remove and repay
-struct ILeverageExternalContractsData {
-    address swapper;
-    address magnetar;
-    address tOft;
-    address srcMarket;
-}
-
 struct IRemoveAndRepay {
     bool removeAssetFromSGL;
     uint256 removeAmount; //slightly greater than repayAmount to cover the interest
@@ -196,22 +174,6 @@ struct ILendOrRepayParams {
     IOptionsParticipateData participateData;
 }
 
-//leverage data
-struct ILeverageLZData {
-    uint256 srcExtraGasLimit;
-    uint16 lzSrcChainId;
-    uint16 lzDstChainId;
-    address zroPaymentAddress;
-    bytes dstAirdropAdapterParam;
-    bytes srcAirdropAdapterParam;
-    address refundAddress;
-}
-
-struct ILeverageSwapData {
-    address tokenOut;
-    uint256 amountOutMin;
-    bytes data;
-}
 
 struct IMintData {
     bool mint;
