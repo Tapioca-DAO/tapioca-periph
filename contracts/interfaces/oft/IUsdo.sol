@@ -152,7 +152,6 @@ struct YieldBoxApproveAssetMsg {
  */
 struct MarketPermitActionMsg {
     address target;
-    uint16 actionType;
     address owner;
     address spender;
     uint256 value;
