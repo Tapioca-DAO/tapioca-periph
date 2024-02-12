@@ -12,6 +12,17 @@ import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 import {IBigBang} from "tapioca-periph/interfaces/bar/IBigBang.sol";
 
+/*
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
+*/
+
 /**
  * @title MagnetarHelper
  * @author TapiocaDAO

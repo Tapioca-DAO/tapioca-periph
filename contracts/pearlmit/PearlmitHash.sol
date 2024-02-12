@@ -4,6 +4,17 @@ pragma solidity 0.8.22;
 // Tapioca
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
+/*
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
+*/
+
 library PearlmitHash {
     // Batch transfer
     // keccak256("SignatureApproval(uint8 tokenType,address token,uint256 id,uint200 amount,address operator)")
