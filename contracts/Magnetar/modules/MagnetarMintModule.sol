@@ -106,7 +106,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
             // deposit collateral to YB
             if (data.mintData.collateralDepositData.deposit) {
                 data.mintData.collateralDepositData.amount =
-                    _extractTokens(msg.sender, bbCollateralAddress, data.mintData.collateralDepositData.amount);
+                    _extractTokens(data.user, bbCollateralAddress, data.mintData.collateralDepositData.amount);
                 bbCollateralShare = yieldBox_.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
 
                 bbCollateralAddress.safeApprove(address(yieldBox_), data.mintData.collateralDepositData.amount);
@@ -136,7 +136,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         uint256 sglAssetId = singularity_.assetId();
         (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
         if (data.depositData.deposit) {
-            data.depositData.amount = _extractTokens(msg.sender, sglAssetAddress, data.depositData.amount);
+            data.depositData.amount = _extractTokens(data.user, sglAssetAddress, data.depositData.amount);
 
             sglAssetAddress.safeApprove(address(yieldBox_), data.depositData.amount);
             yieldBox_.depositAsset(sglAssetId, address(this), data.user, data.depositData.amount, 0);
