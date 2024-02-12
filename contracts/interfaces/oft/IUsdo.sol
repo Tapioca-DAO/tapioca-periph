@@ -37,8 +37,7 @@ interface IUsdo is ITapiocaOmnichainEngine {
         UsdoReceiver,
         UsdoMarketReceiver,
         UsdoOptionReceiver,
-        UsdoGenericReceiver,
-        UsdoLeverageReceiver
+        UsdoGenericReceiver
     }
 
     function mint(address _to, uint256 _amount) external;
@@ -69,7 +68,6 @@ struct UsdoModulesInitStruct {
     address usdoReceiverModule;
     address marketReceiverModule;
     address optionReceiverModule;
-    address leverageReceiverModule;
 }
 
 /// ============================
