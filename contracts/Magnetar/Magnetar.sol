@@ -10,7 +10,6 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
@@ -177,7 +176,7 @@ contract Magnetar is BaseMagnetar {
         // setApprovalForAsset(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
-            funcSig == IPermitAction.permitAction.selector || funcSig == IPermitAll.permitAll.selector
+            funcSig == IPermitAll.permitAll.selector
                 || funcSig == IPermitAll.revokeAll.selector || funcSig == IPermit.permit.selector
                 || funcSig == IPermit.revoke.selector || funcSig == IYieldBox.setApprovalForAll.selector
                 || funcSig == IYieldBox.setApprovalForAsset.selector
