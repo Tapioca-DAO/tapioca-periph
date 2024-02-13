@@ -9,7 +9,7 @@ export const buildTapOracle = async (
 ): Promise<IDeployerVMAdd<Seer__factory>> => {
     console.log('[+] buildTAPOracle');
 
-    const chainID = await hre.getChainId();
+    const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
         throw '[-] TAP Oracle only available on Arbitrum';
     }

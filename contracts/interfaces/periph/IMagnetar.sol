@@ -2,11 +2,16 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision, IOptionsLockData} from "../tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionBroker, IOptionsParticipateData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {IOptionsLockData} from "../tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ICommonExternalContracts, IDepositData} from "../common/ICommonData.sol";
+import {IOptionsParticipateData} from "../tap-token/ITapiocaOptionBroker.sol";
 import {LZSendParam} from "../periph/ITapiocaOmnichainEngine.sol";
 import {IRemoveAndRepay, IMintData} from "../oft/IUsdo.sol";
+
+interface IMagnetarModuleExtender {
+    function isValidActionId(uint8 actionId) external view returns (bool);
+    function handleAction(IMagnetar.Call calldata call) external payable;
+}
 
 /*
 

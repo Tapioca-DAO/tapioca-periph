@@ -12,16 +12,10 @@ pragma solidity 0.8.22;
    
 */
 
-// TODO move to a common file
 /**
  * @title ModuleManager
  * @author TapiocaDAO
  * @notice Help to modularize a contract.
- *
- * @dev !!!!!!!! IMPORTANT !!!!!!!!
- * `_executeModule()` will sometimes return random/garbage data on the `(success, returnData) = module.delegatecall(_data)` call.
- *  Occurrence happens when calling a non view function on the main contract, that target a view function on the module.
- *  The module function is a view function that deals with `byte memory` slicing. Problem might be related to how Solidity handles memory bytes in 32 bytes chunks.
  */
 abstract contract ModuleManager {
     /// @notice returns whitelisted modules

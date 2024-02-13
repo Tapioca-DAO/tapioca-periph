@@ -12,6 +12,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
+import {ITapiocaOmnichainReceiveExtender} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
 import {BaseToeMsgType} from "./BaseToeMsgType.sol";
 
@@ -34,11 +35,20 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, BaseToeMsgType {
 
     /// @dev Used to execute certain extern calls from the TapToken contract, such as ERC20Permit approvals.
     TapiocaOmnichainExtExec public toeExtExec;
+    /// @dev For future use, to extend the receive() operation.
+    ITapiocaOmnichainReceiveExtender public tapiocaOmnichainReceiveExtender;
 
     constructor(string memory _name, string memory _symbol, address _endpoint, address _delegate, address _extExec)
         OFT(_name, _symbol, _endpoint, _delegate)
     {
         toeExtExec = TapiocaOmnichainExtExec(_extExec);
+    }
+
+    /**
+     * @dev Sets the `tapiocaOmnichainReceiveExtender` contract.
+     */
+    function setTapiocaOmnichainReceiveExtender(address _tapiocaOmnichainReceiveExtender) external onlyOwner {
+        tapiocaOmnichainReceiveExtender = ITapiocaOmnichainReceiveExtender(_tapiocaOmnichainReceiveExtender);
     }
 
     /**

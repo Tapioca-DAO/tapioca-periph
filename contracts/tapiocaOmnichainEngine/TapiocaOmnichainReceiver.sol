@@ -11,11 +11,9 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
-// External
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 // Tapioca
 import {
+    ITapiocaOmnichainReceiveExtender,
     ERC721PermitApprovalMsg,
     ERC20PermitApprovalMsg,
     RemoteTransferMsg,
@@ -24,7 +22,6 @@ import {
 import {TapiocaOmnichainEngineCodec} from "./TapiocaOmnichainEngineCodec.sol";
 import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {TapiocaOmnichainSender} from "./TapiocaOmnichainSender.sol";
 
 /*
 
@@ -153,8 +150,27 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         } else if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
         } else {
-            if (!_toeComposeReceiver(msgType_, srcChainSender_, tapComposeMsg_)) {
-                revert InvalidMsgType(msgType_);
+            // If no msg type matched, try to call the TOE extender, if it exists.
+            if (
+                address(tapiocaOmnichainReceiveExtender) != address(0)
+                    && tapiocaOmnichainReceiveExtender.isMsgTypeValid(msgType_)
+            ) {
+                bytes memory callData = abi.encodeWithSelector(
+                    ITapiocaOmnichainReceiveExtender.toeComposeReceiver.selector,
+                    msgType_,
+                    srcChainSender_,
+                    tapComposeMsg_
+                );
+                (bool success, bytes memory returnData) =
+                    address(tapiocaOmnichainReceiveExtender).delegatecall(callData);
+                if (!success) {
+                    revert(_getTOEExtenderRevertMsg(returnData));
+                }
+            } else {
+                // If no TOE extender is set or msg type doesn't match extender, try to call the internal receiver.
+                if (!_toeComposeReceiver(msgType_, srcChainSender_, tapComposeMsg_)) {
+                    revert InvalidMsgType(msgType_);
+                }
             }
         }
 
@@ -320,6 +336,10 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         toeExtExec.pearlmitApproval(pearlmit, data);
     }
 
+    // ***************** //
+    // ***** UTILS ***** //
+    // ***************** //
+
     /**
      * @dev For details about this function, check `BaseTapiocaOmnichainEngine._buildOFTMsgAndOptions()`.
      * @dev !!!! IMPORTANT !!!! The differences are:
@@ -346,5 +366,22 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
+    }
+
+    /**
+     * @notice Return the revert message from an external call.
+     * @param _returnData The return data from the external call.
+     */
+    function _getTOEExtenderRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+        if (_returnData.length > 1000) return "Module: reason too long";
+
+        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
+        if (_returnData.length < 68) return "Module: data";
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Slice the sighash.
+            _returnData := add(_returnData, 0x04)
+        }
+        return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
 }
