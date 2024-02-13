@@ -8,11 +8,6 @@ import {IOptionsParticipateData} from "../tap-token/ITapiocaOptionBroker.sol";
 import {LZSendParam} from "../periph/ITapiocaOmnichainEngine.sol";
 import {IRemoveAndRepay, IMintData} from "../oft/IUsdo.sol";
 
-interface IMagnetarModuleExtender {
-    function isValidActionId(uint8 actionId) external view returns (bool);
-    function handleAction(IMagnetar.Call calldata call) external payable;
-}
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
