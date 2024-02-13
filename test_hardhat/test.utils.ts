@@ -339,8 +339,10 @@ async function registerPenrose(
         [yieldBox, tapAddress, wethAddress],
         staging,
     );
-    
-    const pearlmit = await (await ethers.getContractFactory('Pearlmit')).deploy('A','1');
+
+    const pearlmit = await (
+        await ethers.getContractFactory('Pearlmit')
+    ).deploy('A', '1');
     await pearlmit.deployed();
 
     await penrose.setPearlmit(pearlmit.address);
@@ -664,8 +666,7 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
             await hre.ethers.getContractFactory('MagnetarAssetModule')
         ).deploy()
     ).deployed();
-    hre.tracer.nameTags[magnetarAssetModule.address] =
-        'magnetarAssetModule';
+    hre.tracer.nameTags[magnetarAssetModule.address] = 'magnetarAssetModule';
     const magnetarCollateralModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarCollateralModule')
@@ -678,15 +679,13 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
             await hre.ethers.getContractFactory('MagnetarMintModule')
         ).deploy()
     ).deployed();
-    hre.tracer.nameTags[magnetarMintModule.address] =
-        'magnetarMintModule';
+    hre.tracer.nameTags[magnetarMintModule.address] = 'magnetarMintModule';
     const magnetarOptionModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarOptionModule')
         ).deploy()
     ).deployed();
-    hre.tracer.nameTags[magnetarOptionModule.address] =
-        'magnetarOptionModule';
+    hre.tracer.nameTags[magnetarOptionModule.address] = 'magnetarOptionModule';
     const magnetarYieldboxModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarYieldBoxModule')
@@ -694,7 +693,6 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
     ).deployed();
     hre.tracer.nameTags[magnetarYieldboxModule.address] =
         'magnetarYieldboxModule';
-    
 
     const magnetar = await (
         await ethers.getContractFactory('Magnetar')
@@ -705,11 +703,11 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
         magnetarCollateralModule.address,
         magnetarMintModule.address,
         magnetarOptionModule.address,
-        magnetarYieldboxModule.address
+        magnetarYieldboxModule.address,
     );
     await magnetar.deployed();
 
-    return {magnetar};
+    return { magnetar };
 }
 async function registerMagnetarHelper(deployer: any) {
     const magnetarHelper = await (
@@ -766,9 +764,13 @@ async function deployMediumRiskMC(penrose: Penrose, staging?: boolean) {
     );
 
     await (
-        await penrose.registerSingularityMasterContract(mediumRiskMC.address, 1, {
-            gasPrice: gasPrice,
-        })
+        await penrose.registerSingularityMasterContract(
+            mediumRiskMC.address,
+            1,
+            {
+                gasPrice: gasPrice,
+            },
+        )
     ).wait();
     log('MediumRiskMC was set on Penrose', staging);
 
@@ -859,34 +861,35 @@ async function registerSingularity(
         staging,
     );
     const modulesData = {
-            _liquidationModule: _sglLiquidationModule.address,
-            _borrowModule: _sglBorrow.address,
-            _collateralModule: _sglCollateral.address,
-            _leverageModule: _sglLeverage.address,
-        };
-    
+        _liquidationModule: _sglLiquidationModule.address,
+        _borrowModule: _sglBorrow.address,
+        _collateralModule: _sglCollateral.address,
+        _leverageModule: _sglLeverage.address,
+    };
+
     const tokensData = {
-            _asset: weth.address,
-            _assetId: wethAssetId,
-            _collateral: usdc.address,
-            _collateralId: usdcAssetId,
+        _asset: weth.address,
+        _assetId: wethAssetId,
+        _collateral: usdc.address,
+        _collateralId: usdcAssetId,
     };
     const data = {
-            penrose_: penrose.address,
-            _oracle: wethUsdcOracle.address,
-            _exchangeRatePrecision: exchangeRatePrecision ?? 0,
-            _collateralizationRate: 0,
-            _liquidationCollateralizationRate: 0,
-            _leverageExecutor: leverageExecutor.address,
-    }
+        penrose_: penrose.address,
+        _oracle: wethUsdcOracle.address,
+        _exchangeRatePrecision: exchangeRatePrecision ?? 0,
+        _collateralizationRate: 0,
+        _liquidationCollateralizationRate: 0,
+        _leverageExecutor: leverageExecutor.address,
+    };
 
     const sglData = new ethers.utils.AbiCoder().encode(
         [
             'tuple(address _liquidationModule, address _borrowModule, address _collateralModule, address _leverageModule)',
             'tuple(address _asset, uint256 _assetId, address _collateral, uint256 _collateralId)',
-            'tuple(address penrose_, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)'
+            'tuple(address penrose_, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)',
         ],
-        [modulesData, tokensData, data]);
+        [modulesData, tokensData, data],
+    );
     await (
         await penrose.registerSingularity(mediumRiskMC, sglData, true, {
             gasPrice: gasPrice,
@@ -999,34 +1002,35 @@ async function createWethUsd0Singularity(
     );
 
     const modulesData = {
-            _liquidationModule: _sglLiquidationModule.address,
-            _borrowModule: _sglBorrow.address,
-            _collateralModule: _sglCollateral.address,
-            _leverageModule: _sglLeverage.address,
-        };
-    
+        _liquidationModule: _sglLiquidationModule.address,
+        _borrowModule: _sglBorrow.address,
+        _collateralModule: _sglCollateral.address,
+        _leverageModule: _sglLeverage.address,
+    };
+
     const tokensData = {
-            _asset: usd0.address,
-            _assetId: usdoAssetId,
-            _collateral: weth.address,
-            _collateralId: wethAssetId,
+        _asset: usd0.address,
+        _assetId: usdoAssetId,
+        _collateral: weth.address,
+        _collateralId: wethAssetId,
     };
     const data = {
-            penrose_: penrose.address,
-            _oracle: wethUsd0Oracle.address,
-            _exchangeRatePrecision: exchangePrecision,
-            _collateralizationRate: 0,
-            _liquidationCollateralizationRate: 0,
-            _leverageExecutor: leverageExecutor.address,
-    }
+        penrose_: penrose.address,
+        _oracle: wethUsd0Oracle.address,
+        _exchangeRatePrecision: exchangePrecision,
+        _collateralizationRate: 0,
+        _liquidationCollateralizationRate: 0,
+        _leverageExecutor: leverageExecutor.address,
+    };
 
     const sglData = new ethers.utils.AbiCoder().encode(
         [
             'tuple(address _liquidationModule, address _borrowModule, address _collateralModule, address _leverageModule)',
             'tuple(address _asset, uint256 _assetId, address _collateral, uint256 _collateralId)',
-            'tuple(address penrose_, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)'
+            'tuple(address penrose_, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)',
         ],
-        [modulesData, tokensData, data]);
+        [modulesData, tokensData, data],
+    );
     await penrose.registerSingularity(mediumRiskMC.address, sglData, false, {
         gasPrice: gasPrice,
     });
@@ -1158,35 +1162,36 @@ async function registerBigBangMarket(
     );
 
     const modulesData = {
-            _liquidationModule: _bbLiquidationModule.address,
-            _borrowModule: _bbBorrow.address,
-            _collateralModule: _bbCollateral.address,
-            _leverageModule: _bbLeverage.address,
-        };
-    
+        _liquidationModule: _bbLiquidationModule.address,
+        _borrowModule: _bbBorrow.address,
+        _collateralModule: _bbCollateral.address,
+        _leverageModule: _bbLeverage.address,
+    };
+
     const debtData = {
-            _debtRateAgainstEth: debtRateAgainstEth,
-            _debtRateMin: debtRateMin,
-            _debtRateMax: debtRateMax
+        _debtRateAgainstEth: debtRateAgainstEth,
+        _debtRateMin: debtRateMin,
+        _debtRateMax: debtRateMax,
     };
     const data = {
-            _penrose: penrose.address,
-            _collateral: collateral.address,
-            _collateralId: collateralId,
-            _oracle: oracle.address,
-            _exchangeRatePrecision: exchangeRatePrecision,
-            _collateralizationRate: 0,
-            _liquidationCollateralizationRate: 0,
-            _leverageExecutor: ethers.constants.AddressZero,
-    }
+        _penrose: penrose.address,
+        _collateral: collateral.address,
+        _collateralId: collateralId,
+        _oracle: oracle.address,
+        _exchangeRatePrecision: exchangeRatePrecision,
+        _collateralizationRate: 0,
+        _liquidationCollateralizationRate: 0,
+        _leverageExecutor: ethers.constants.AddressZero,
+    };
 
     const bbData = new ethers.utils.AbiCoder().encode(
         [
             'tuple(address _liquidationModule, address _borrowModule, address _collateralModule, address _leverageModule)',
             'tuple(uint256 _debtRateAgainstEth, uint256 _debtRateMin, uint256 _debtRateMax)',
-            'tuple(address _penrose, address _collateral, uint256 _collateralId, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)'
+            'tuple(address _penrose, address _collateral, uint256 _collateralId, address _oracle, uint256 _exchangeRatePrecision, uint256 _collateralizationRate, uint256 _liquidationCollateralizationRate, address _leverageExecutor)',
         ],
-        [modulesData, debtData, data]);
+        [modulesData, debtData, data],
+    );
 
     await (
         await penrose.registerBigBang(mediumRiskBigBangMC, bbData, true, {
@@ -1394,7 +1399,6 @@ export async function register(staging?: boolean) {
         // await resetVM();
     }
 
-
     /**
      * INITIAL SETUP
      */
@@ -1483,23 +1487,14 @@ export async function register(staging?: boolean) {
     log(`Deployed YieldBox ${yieldBox.address}`, staging);
 
     // -------------------  2.1 Deploy Yieldbox -------------------
-    const chainInfo = hre.SDK.utils.getChainBy(
-        'chainId',
-        hre.SDK.eChainId,
-    );
+    const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId);
     const LZEndpointMock = new LZEndpointMock__factory(deployer);
-    const clusterLzEndpoint = await LZEndpointMock.deploy(
-        hre.SDK.eChainId,
-    );
+    const clusterLzEndpoint = await LZEndpointMock.deploy(hre.SDK.eChainId);
 
     const Cluster = new Cluster__factory(deployer);
-    const cluster = await Cluster.deploy(
-        hre.SDK.eChainId,
-        deployer.address,
-        {
-            gasPrice: gasPrice,
-        },
-    );
+    const cluster = await Cluster.deploy(hre.SDK.eChainId, deployer.address, {
+        gasPrice: gasPrice,
+    });
     log(
         `Deployed Cluster ${cluster.address} with args [${chainInfo?.lzChainId}]`,
         staging,
@@ -1645,7 +1640,7 @@ export async function register(staging?: boolean) {
     log('Deploying Magnetar', staging);
     const { magnetar } = await registerMagnetar(cluster.address, deployer);
     log(`Deployed Magnetar ${magnetar.address}`, staging);
-   await cluster.updateContract(0, magnetar.address, true);
+    await cluster.updateContract(0, magnetar.address, true);
 
     log('Deploying MagnetarHelper', staging);
     const { magnetarHelper } = await registerMagnetarHelper(deployer);
@@ -1659,19 +1654,18 @@ export async function register(staging?: boolean) {
     const feeCollector = new ethers.Wallet(
         ethers.Wallet.createRandom().privateKey,
         ethers.provider,
-        );
+    );
 
     // ------------------- 10 Deploy USDO -------------------
     log('Registering USDO', staging);
     const chainId = hre.SDK.eChainId;
-    const { usd0, lzEndpointContract } =
-        await registerUsd0Contract(
-            chainId,
-            yieldBox.address,
-            cluster.address,
-            deployer,
-            staging,
-        );
+    const { usd0, lzEndpointContract } = await registerUsd0Contract(
+        chainId,
+        yieldBox.address,
+        cluster.address,
+        deployer,
+        staging,
+    );
     log(`USDO registered ${usd0.address}`, staging);
 
     // ------------------- 11 Set USDO on Penrose -------------------
@@ -1741,7 +1735,6 @@ export async function register(staging?: boolean) {
         staging,
     );
 
-    
     // ------------------- 14 Create weth-usd0 pair -------------------
     log('Creating WethUSDO and TapUSDO pairs', staging);
     const { __wethUsdoMockPair, __tapUsdoMockPair } =
@@ -1827,7 +1820,6 @@ export async function register(staging?: boolean) {
     await cluster.updateContract(0, wethUsdcSingularity.address, true);
     await cluster.updateContract(0, weth.address, true);
     await cluster.updateContract(0, usdc.address, true);
-
 
     // Helper
     const initialSetup = {
