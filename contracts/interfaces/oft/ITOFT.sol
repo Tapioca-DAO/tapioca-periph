@@ -11,24 +11,20 @@ import {
     ERC20PermitStruct,
     ERC20PermitApprovalMsg,
     RemoteTransferMsg
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-
-import {IUSDOBase, ILeverageSwapData, ILeverageExternalContractsData} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-import {ITapiocaOFT, IRemoveParams, IBorrowParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
+} from "../periph/ITapiocaOmnichainEngine.sol";
+import {ITapiocaOptionBroker, IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
+import {ICommonData} from "../common/ICommonData.sol";
 
 /*
-__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
- _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
-  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
-   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
-    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
-     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
-      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
-       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
-        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
 */
 
 interface ITOFT is ITapiocaOmnichainEngine {
@@ -40,6 +36,22 @@ interface ITOFT is ITapiocaOmnichainEngine {
         TOFTOptionsReceiver,
         TOFTGenericReceiver
     }
+
+    function hostEid() external view returns (uint256);
+
+    function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
+
+    function unwrap(address _toAddress, uint256 _amount) external;
+
+    function erc20() external view returns (address);
+
+    function vault() external view returns (address);
+
+    function balanceOf(address _holder) external view returns (uint256);
+
+    function approve(address _spender, uint256 _amount) external returns (bool);
+
+    function extractUnderlying(uint256 _amount) external; //mTOFT
 }
 
 /// ============================
@@ -55,7 +67,6 @@ struct TOFTInitStruct {
     address cluster;
     address erc20;
     uint256 hostEid;
-    address toftVault;
     address extExec;
 }
 
@@ -84,21 +95,8 @@ struct SendParamsMsg {
  * @notice Encodes the message for the PT_TAP_EXERCISE operation.
  */
 struct ExerciseOptionsMsg {
-    ITapiocaOptionBrokerCrossChain.IExerciseOptionsData optionsData;
+    IExerciseOptionsData optionsData;
     bool withdrawOnOtherChain;
-    //@dev send back to source message params
-    LZSendParam lzSendParams;
-    bytes composeMsg;
-}
-
-/**
- * @notice Encodes the message for the PT_LEVERAGE_MARKET_DOWN operation.
- */
-struct MarketLeverageDownMsg {
-    address user;
-    uint256 amount;
-    ILeverageSwapData swapData;
-    ILeverageExternalContractsData externalData;
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
@@ -110,7 +108,7 @@ struct MarketLeverageDownMsg {
 struct MarketRemoveCollateralMsg {
     address user;
     IRemoveParams removeParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**
@@ -119,7 +117,7 @@ struct MarketRemoveCollateralMsg {
 struct MarketBorrowMsg {
     address user;
     IBorrowParams borrowParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**
@@ -156,7 +154,6 @@ struct YieldBoxApproveAssetMsg {
  */
 struct MarketPermitActionMsg {
     address target;
-    uint16 actionType;
     address owner;
     address spender;
     uint256 value;
@@ -165,4 +162,18 @@ struct MarketPermitActionMsg {
     bytes32 r;
     bytes32 s;
     bool permitAsset;
+}
+
+struct IRemoveParams {
+    uint256 amount;
+    address marketHelper;
+    address market;
+}
+
+struct IBorrowParams {
+    uint256 amount;
+    uint256 borrowAmount;
+    address marketHelper;
+    address market;
+    bool deposit;
 }

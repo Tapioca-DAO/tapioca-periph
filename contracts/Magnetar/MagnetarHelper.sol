@@ -11,20 +11,23 @@ import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.so
 import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 import {IBigBang} from "tapioca-periph/interfaces/bar/IBigBang.sol";
-import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 /*
-__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
- _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
-  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
-   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
-    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
-     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
-      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
-       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
-        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
 */
 
+/**
+ * @title MagnetarHelper
+ * @author TapiocaDAO
+ * @notice View helper methods
+ */
 contract MagnetarHelper {
     using SafeERC20 for IERC20;
     using RebaseLibrary for Rebase;
@@ -84,12 +87,14 @@ contract MagnetarHelper {
         uint256 currentDebtRate;
     }
 
-    // ******************** //
-    // *** VIEW METHODS *** //
-    // ******************** //
-    /// @notice returns Singularity markets' information
-    /// @param who user to return for
-    /// @param markets the list of Singularity markets to query for
+    /// =====================
+    /// View
+    /// =====================
+    /**
+     * @notice returns Singularity markets' information.
+     * @param who user to return for.
+     * @param markets the list of Singularity markets to query for.
+     */
     function singularityMarketInfo(address who, ISingularity[] calldata markets)
         external
         view
@@ -98,27 +103,33 @@ contract MagnetarHelper {
         return _singularityMarketInfo(who, markets);
     }
 
-    /// @notice returns BigBang markets' information
-    /// @param who user to return for
-    /// @param markets the list of BigBang markets to query for
+    /**
+     * @notice returns BigBang markets' information.
+     * @param who user to return for.
+     * @param markets the list of BigBang markets to query for.
+     */
     function bigBangMarketInfo(address who, IBigBang[] calldata markets) external view returns (BigBangInfo[] memory) {
         return _bigBangMarketInfo(who, markets);
     }
 
-    /// @notice Calculate the collateral amount off the shares.
-    /// @param market the Singularity or BigBang address
-    /// @param share The shares.
-    /// @return amount The amount.
+    /**
+     * @notice Calculate the collateral amount off the shares.
+     * @param market the Singularity or BigBang address.
+     * @param share The shares.
+     * @return amount The amount.
+     */
     function getCollateralAmountForShare(IMarket market, uint256 share) external view returns (uint256 amount) {
         IYieldBox yieldBox = IYieldBox(market.yieldBox());
         return yieldBox.toAmount(market.collateralId(), share, false);
     }
 
-    /// @notice Calculate the collateral shares that are needed for `borrowPart`,
-    /// taking the current exchange rate into account.
-    /// @param market the Singularity or BigBang address
-    /// @param borrowPart The borrow part.
-    /// @return collateralShares The collateral shares.
+    /**
+     * @notice Calculate the collateral shares that are needed for `borrowPart,
+     *       taking the current exchange rate into account.
+     * @param market the Singularity or BigBang address
+     * @param borrowPart The borrow part.
+     * @return collateralShares The collateral shares.
+     */
     function getCollateralSharesForBorrowPart(
         IMarket market,
         uint256 borrowPart,
@@ -137,10 +148,12 @@ contract MagnetarHelper {
         return yieldBox.toShare(market.collateralId(), val, false);
     }
 
-    /// @notice Return the equivalent of borrow part in asset amount.
-    /// @param market the Singularity or BigBang address
-    /// @param borrowPart The amount of borrow part to convert.
-    /// @return amount The equivalent of borrow part in asset amount.
+    /**
+     * @notice Return the equivalent of borrow part in asset amount.
+     * @param market the Singularity or BigBang address.
+     * @param borrowPart The amount of borrow part to convert.
+     * @return amount The equivalent of borrow part in asset amount.
+     */
     function getAmountForBorrowPart(IMarket market, uint256 borrowPart) external view returns (uint256 amount) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
@@ -149,10 +162,12 @@ contract MagnetarHelper {
         return _totalBorrowed.toElastic(borrowPart, false);
     }
 
-    /// @notice Return the equivalent of amount in borrow part.
-    /// @param market the Singularity or BigBang address
-    /// @param amount The amount to convert.
-    /// @return part The equivalent of amount in borrow part.
+    /**
+     * @notice Return the equivalent of amount in borrow part.
+     * @param market the Singularity or BigBang address.
+     * @param amount The amount to convert.
+     * @return part The equivalent of amount in borrow part.
+     */
     function getBorrowPartForAmount(IMarket market, uint256 amount) external view returns (uint256 part) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
@@ -161,11 +176,13 @@ contract MagnetarHelper {
         return _totalBorrowed.toBase(amount, false);
     }
 
-    /// @notice Compute the amount of `singularity.assetId` from `fraction`
-    /// `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
-    /// @param singularity the singularity address
-    /// @param fraction The fraction.
-    /// @return amount The amount.
+    /**
+     * @notice Compute the amount of `singularity.assetId` from `fraction`
+     *       `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`.
+     * @param singularity the singularity address.
+     * @param fraction The fraction.
+     * @return amount The amount.
+     */
     function getAmountForAssetFraction(ISingularity singularity, uint256 fraction)
         external
         view
@@ -181,11 +198,13 @@ contract MagnetarHelper {
         return yieldBox.toAmount(singularity.assetId(), (fraction * allShare) / totalAssetBase, false);
     }
 
-    /// @notice Compute the fraction of `singularity.assetId` from `amount`
-    /// `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`
-    /// @param singularity the singularity address
-    /// @param amount The amount.
-    /// @return fraction The fraction.
+    /**
+     * @notice Compute the fraction of `singularity.assetId` from `amount`
+     *       `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`.
+     * @param singularity the singularity address.
+     * @param amount The amount.
+     * @return fraction The fraction.
+     */
     function getFractionForAmount(ISingularity singularity, uint256 amount) external view returns (uint256 fraction) {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity.totalAsset();
         (uint128 totalBorrowElastic,) = singularity.totalBorrow();
@@ -198,6 +217,10 @@ contract MagnetarHelper {
 
         fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
     }
+
+    /// =====================
+    /// Private
+    /// =====================
 
     function _singularityMarketInfo(address who, ISingularity[] memory markets)
         private

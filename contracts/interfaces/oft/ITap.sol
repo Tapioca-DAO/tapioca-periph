@@ -12,16 +12,15 @@ pragma solidity 0.8.22;
    
 */
 
-struct ICommonExternalContracts {
-    address magnetar;
-    address singularity;
-    address bigBang;
-}
+/// @dev interface for TAP token
+interface ITap {
+    function extractTAP(address to, uint256 value) external;
 
-struct IDepositData {
-    bool deposit;
-    uint256 amount;
-    bool extractFromSender;
-}
+    function approve(address to, uint256 value) external;
 
-interface ICommonData {}
+    function balanceOf(address user) external view returns (uint256);
+
+    function emissionsStartTime() external view returns (uint256);
+
+    function mintedInWeek(int256 week) external view returns (uint256);
+}

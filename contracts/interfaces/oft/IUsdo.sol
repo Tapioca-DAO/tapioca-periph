@@ -5,28 +5,27 @@ pragma solidity 0.8.22;
 import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
+import {ITapiocaOmnichainEngine, LZSendParam, ERC20PermitStruct} from "../periph/ITapiocaOmnichainEngine.sol";
+import {ICommonData, ICommonExternalContracts} from "../common/ICommonData.sol";
 import {
-    ITapiocaOmnichainEngine,
-    LZSendParam,
-    ERC20PermitStruct
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {
-    ICommonData, IWithdrawParams, ICommonExternalContracts
-} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {IUSDOBase, ILeverageSwapData, ILeverageExternalContractsData, IRemoveAndRepay, ILendOrRepayParams} from "tapioca-periph/interfaces/bar/IUSDO.sol";
-import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+    ITapiocaOptionBroker,
+    IExerciseOptionsData,
+    IOptionsParticipateData,
+    IOptionsExitData
+} from "../tap-token/ITapiocaOptionBroker.sol";
+import {IOptionsUnlockData, IOptionsLockData} from "../tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
+import {IDepositData} from "../common/ICommonData.sol";
 
 /*
-__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
- _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
-  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
-   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
-    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
-     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
-      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
-       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
-        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
 */
 
 interface IUsdo is ITapiocaOmnichainEngine {
@@ -36,9 +35,18 @@ interface IUsdo is ITapiocaOmnichainEngine {
         UsdoReceiver,
         UsdoMarketReceiver,
         UsdoOptionReceiver,
-        UsdoGenericReceiver,
-        UsdoLeverageReceiver
+        UsdoGenericReceiver
     }
+
+    function mint(address _to, uint256 _amount) external;
+
+    function burn(address _from, uint256 _amount) external;
+
+    function setFlashloanHelper(address _helper) external;
+
+    function addFlashloanFee(uint256 _fee) external; //onlyOwner
+
+    function paused() external view returns (bool);
 }
 
 /// ============================
@@ -58,7 +66,6 @@ struct UsdoModulesInitStruct {
     address usdoReceiverModule;
     address marketReceiverModule;
     address optionReceiverModule;
-    address leverageReceiverModule;
 }
 
 /// ============================
@@ -70,7 +77,7 @@ struct UsdoModulesInitStruct {
 struct MarketLendOrRepayMsg {
     address user;
     ILendOrRepayParams lendParams;
-    IWithdrawParams withdrawParams;
+    MagnetarWithdrawData withdrawParams;
 }
 
 /**
@@ -83,24 +90,10 @@ struct MarketRemoveAssetMsg {
 }
 
 /**
- * @notice Encodes the message for the PT_LEVERAGE_MARKET_UP operation.
- */
-struct MarketLeverageUpMsg {
-    address user;
-    uint256 amount;
-    ILeverageSwapData swapData;
-    ILeverageExternalContractsData externalData;
-    //@dev send back to source message params
-    LZSendParam lzSendParams;
-    bytes composeMsg;
-    uint128 composeGas;
-}
-
-/**
  * @notice Encodes the message for the PT_TAP_EXERCISE operation.
  */
 struct ExerciseOptionsMsg {
-    ITapiocaOptionBrokerCrossChain.IExerciseOptionsData optionsData;
+    IExerciseOptionsData optionsData;
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;
@@ -141,7 +134,6 @@ struct YieldBoxApproveAssetMsg {
  */
 struct MarketPermitActionMsg {
     address target;
-    uint16 actionType;
     address owner;
     address spender;
     uint256 value;
@@ -150,4 +142,37 @@ struct MarketPermitActionMsg {
     bytes32 r;
     bytes32 s;
     bool permitAsset;
+}
+
+struct IRemoveAndRepay {
+    bool removeAssetFromSGL;
+    uint256 removeAmount; //slightly greater than repayAmount to cover the interest
+    bool repayAssetOnBB;
+    uint256 repayAmount; // on BB
+    bool removeCollateralFromBB;
+    uint256 collateralAmount; // from BB
+    IOptionsExitData exitData;
+    IOptionsUnlockData unlockData;
+    MagnetarWithdrawData assetWithdrawData;
+    MagnetarWithdrawData collateralWithdrawData;
+}
+
+// lend or repay
+struct ILendOrRepayParams {
+    bool repay;
+    uint256 depositAmount;
+    uint256 repayAmount;
+    address marketHelper;
+    address market;
+    bool removeCollateral;
+    uint256 removeCollateralAmount;
+    IOptionsLockData lockData;
+    IOptionsParticipateData participateData;
+}
+
+
+struct IMintData {
+    bool mint;
+    uint256 mintAmount;
+    IDepositData collateralDepositData;
 }

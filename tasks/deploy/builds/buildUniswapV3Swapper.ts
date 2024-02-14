@@ -7,10 +7,7 @@ export const buildUniswapV3Swapper = async (
     hre: HardhatRuntimeEnvironment,
     tag: string,
 ): Promise<IDeployerVMAdd<UniswapV3Swapper__factory>> => {
-    const chainInfo = hre.SDK.utils.getChainBy(
-        'chainId',
-        hre.SDK.eChainId,
-    );
+    const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId);
     if (!chainInfo) {
         throw new Error('[-] Chain not found');
     }

@@ -1,8 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {ILayerZeroEndpoint} from "../../../layerzero/v1/interfaces/ILayerZeroEndpoint.sol";
+
+/*
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
+*/
+
 // Tapioca
-import {ILayerZeroEndpoint} from "tapioca-periph/interfaces/external/layerzero/ILayerZeroEndpoint.sol";
 
 interface IStargateBridge {
     function quoteLayerZeroFee(

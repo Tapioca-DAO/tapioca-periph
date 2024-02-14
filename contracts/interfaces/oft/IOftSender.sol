@@ -5,7 +5,18 @@ pragma solidity 0.8.22;
 import {MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {LZSendParam} from "../periph/ITapiocaOmnichainEngine.sol";
+
+/*
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
+*/
 
 interface IOftSender {
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)

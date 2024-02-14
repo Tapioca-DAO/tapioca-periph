@@ -1,8 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {IUSDOBase, ILeverageLZData, ILeverageExternalContractsData, ILeverageSwapData} from "./IUSDO.sol";
 import {IMarket} from "./IMarket.sol";
+
+/*
+
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
+*/
 
 interface ISingularity is IMarket {
     struct AccrueInfo {
@@ -50,23 +60,4 @@ interface ISingularity is IMarket {
     function interestElasticity() external view returns (uint256);
 
     function startingInterestPerSecond() external view returns (uint256);
-
-    function multiHopBuyCollateral(
-        address from,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool useAirdroppedFunds,
-        ILeverageSwapData calldata swapData,
-        ILeverageLZData calldata lzData,
-        ILeverageExternalContractsData calldata externalData
-    ) external payable;
-
-    function multiHopSellCollateral(
-        address from,
-        uint256 share,
-        bool useAirdroppedFunds,
-        ILeverageSwapData calldata swapData,
-        ILeverageLZData calldata lzData,
-        ILeverageExternalContractsData calldata externalData
-    ) external payable;
 }
