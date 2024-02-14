@@ -854,7 +854,7 @@ async function registerSingularity(
 
     const leverageExecutor = await (
         await ethers.getContractFactory('SimpleLeverageExecutor')
-    ).deploy(yieldBox.address, swapper, cluster, { gasPrice: gasPrice });
+    ).deploy(swapper, cluster, { gasPrice: gasPrice });
     await leverageExecutor.deployed();
     log(
         `Deployed SimpleLeverageExecutor ${leverageExecutor.address} with args`,
@@ -994,7 +994,7 @@ async function createWethUsd0Singularity(
 
     const leverageExecutor = await (
         await ethers.getContractFactory('SimpleLeverageExecutor')
-    ).deploy(yieldBox.address, swapper, cluster, { gasPrice: gasPrice });
+    ).deploy(swapper, cluster, { gasPrice: gasPrice });
     await leverageExecutor.deployed();
     log(
         `Deployed SimpleLeverageExecutor ${leverageExecutor.address} with args`,
@@ -1154,7 +1154,7 @@ async function registerBigBangMarket(
 
     const leverageExecutor = await (
         await ethers.getContractFactory('SimpleLeverageExecutor')
-    ).deploy(yieldBox.address, swapper, cluster, { gasPrice: gasPrice });
+    ).deploy(swapper, cluster, { gasPrice: gasPrice });
     await leverageExecutor.deployed();
     log(
         `Deployed SimpleLeverageExecutor ${leverageExecutor.address} with args`,

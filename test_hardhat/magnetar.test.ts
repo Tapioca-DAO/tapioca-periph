@@ -97,7 +97,7 @@ describe('MagnetarV2', () => {
 
             const leverageExecutor = await (
                 await ethers.getContractFactory('SimpleLeverageExecutor')
-            ).deploy(yieldBox.address, multiSwapper.address, cluster.address);
+            ).deploy(multiSwapper.address, cluster.address);
             await leverageExecutor.deployed();
 
             const newPrice = __wethUsdcPrice.div(1000000);
@@ -189,7 +189,7 @@ describe('MagnetarV2', () => {
             await _sglLeverage.deployed();
             const leverageExecutor = await (
                 await ethers.getContractFactory('SimpleLeverageExecutor')
-            ).deploy(yieldBox.address, multiSwapper.address, cluster.address);
+            ).deploy(multiSwapper.address, cluster.address);
             await leverageExecutor.deployed();
 
             const newPrice = __wethUsdcPrice.div(1000000);
