@@ -104,12 +104,6 @@ struct ExerciseOptionsMsg {
     bytes composeMsg;
 }
 
-/**
- * @notice Encodes the message for the PT_LOCK_AND_PARTICIPATE operation.
- */
-struct LockAndParticipateMsg {
-    
-}
 
 /**
  * @notice Encodes the message for the PT_MARKET_REMOVE_COLLATERAL operation.
