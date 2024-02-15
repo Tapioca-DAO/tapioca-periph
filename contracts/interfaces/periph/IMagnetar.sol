@@ -115,6 +115,7 @@ struct CrossChainMintFromBBAndLendOnSGLData {
 struct DepositAndSendForLockingData {
     address user;
     address singularity;
+    address magnetar;
     uint256 assetId; // Singularity receipt token id
     uint256 lendAmount;
     IDepositData depositData;
@@ -130,6 +131,7 @@ struct DepositAndSendForLockingData {
 struct LockAndParticipateData {
     address user;
     address singularity;
+    address magnetar;
     uint256 fraction;
     IOptionsLockData lockData;
     IOptionsParticipateData participateData;

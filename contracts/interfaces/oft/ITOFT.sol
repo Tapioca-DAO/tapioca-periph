@@ -82,6 +82,8 @@ struct TOFTModulesInitStruct {
 /// ============================
 /// ========= COMPOSE ==========
 /// ============================
+
+
 /**
  * @notice Encodes the message for the PT_SEND_PARAMS operation.
  */
@@ -100,6 +102,13 @@ struct ExerciseOptionsMsg {
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
+}
+
+/**
+ * @notice Encodes the message for the PT_LOCK_AND_PARTICIPATE operation.
+ */
+struct LockAndParticipateMsg {
+    
 }
 
 /**
