@@ -58,10 +58,6 @@ contract MagnetarBaseModule is Ownable, MagnetarStorage {
             return;
         }
 
-        if (msg.value > 0) {
-            if (msg.value != data.composeGas) revert Magnetar_GasMismatch(data.composeGas, msg.value);
-        }
-
         // perform a cross chain withdrawal
         (, address asset,,) = _yieldBox.assets(data.assetId);
         if (!cluster.isWhitelisted(0, asset)) {

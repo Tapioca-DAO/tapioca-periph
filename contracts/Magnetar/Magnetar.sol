@@ -176,10 +176,9 @@ contract Magnetar is BaseMagnetar {
         // setApprovalForAsset(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
-            funcSig == IPermitAll.permitAll.selector
-                || funcSig == IPermitAll.revokeAll.selector || funcSig == IPermit.permit.selector
-                || funcSig == IPermit.revoke.selector || funcSig == IYieldBox.setApprovalForAll.selector
-                || funcSig == IYieldBox.setApprovalForAsset.selector
+            funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
+                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
+                || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
         ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));

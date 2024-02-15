@@ -170,7 +170,6 @@ struct ILendOrRepayParams {
     IOptionsParticipateData participateData;
 }
 
-
 struct IMintData {
     bool mint;
     uint256 mintAmount;
