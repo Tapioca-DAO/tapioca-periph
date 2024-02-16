@@ -1,21 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-
 // Tapioca
-import {
-    ITapiocaOmnichainEngine,
-    LZSendParam,
-    ERC20PermitStruct,
-    ERC20PermitApprovalMsg,
-    RemoteTransferMsg
-} from "../periph/ITapiocaOmnichainEngine.sol";
-import {ITapiocaOptionBroker, IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
-import {ICommonData} from "../common/ICommonData.sol";
 
+import "../periph/ITapiocaOmnichainEngine.sol";
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -38,20 +28,37 @@ interface ITOFT is ITapiocaOmnichainEngine {
     }
 
     function hostEid() external view returns (uint256);
-
     function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
-
     function unwrap(address _toAddress, uint256 _amount) external;
-
     function erc20() external view returns (address);
-
     function vault() external view returns (address);
-
     function balanceOf(address _holder) external view returns (uint256);
-
     function approve(address _spender, uint256 _amount) external returns (bool);
-
     function extractUnderlying(uint256 _amount) external; //mTOFT
+}
+
+interface IToftVault {
+    error AmountNotRight();
+    error Failed();
+    error FeesAmountNotRight();
+    error NotValid();
+    error OwnerSet();
+    error ZeroAmount();
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    function _token() external view returns (address);
+    function claimOwnership() external;
+    function depositNative() external payable;
+    function owner() external view returns (address);
+    function registerFees(uint256 amount) external payable;
+    function renounceOwnership() external;
+    function transferFees(address to, uint256 amount) external;
+    function transferOwnership(address newOwner) external;
+    function viewFees() external view returns (uint256);
+    function viewSupply() external view returns (uint256);
+    function viewTotalSupply() external view returns (uint256);
+    function withdraw(address to, uint256 amount) external;
 }
 
 /// ============================
@@ -66,6 +73,7 @@ struct TOFTInitStruct {
     address yieldBox;
     address cluster;
     address erc20;
+    address vault;
     uint256 hostEid;
     address extExec;
 }
@@ -118,50 +126,6 @@ struct MarketBorrowMsg {
     address user;
     IBorrowParams borrowParams;
     MagnetarWithdrawData withdrawParams;
-}
-
-/**
- * @notice Encodes the message for the ybPermitAll() operation.
- */
-struct YieldBoxApproveAllMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permit;
-}
-
-/**
- * @notice Encodes the message for the ybPermitAll() operation.
- */
-struct YieldBoxApproveAssetMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 assetId;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permit;
-}
-
-/**
- * @notice Encodes the message for the market.permitAction() or market.permitBorrow() operations.
- */
-struct MarketPermitActionMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 value;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permitAsset;
 }
 
 struct IRemoveParams {
