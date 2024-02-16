@@ -9,16 +9,14 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {
-    YieldBoxApproveAllMsg,
-    MarketPermitActionMsg,
-    YieldBoxApproveAssetMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {
     ITapiocaOmnichainEngine,
     ERC20PermitApprovalMsg,
     ERC721PermitApprovalMsg,
     LZSendParam,
-    RemoteTransferMsg
+    RemoteTransferMsg,
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    YieldBoxApproveAssetMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 

@@ -7,13 +7,11 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
 import {
+    ERC20PermitApprovalMsg,
+    ERC721PermitApprovalMsg,
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     YieldBoxApproveAssetMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {
-    ERC20PermitApprovalMsg,
-    ERC721PermitApprovalMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {IPermitBorrow} from "tapioca-periph/interfaces/common/IPermitBorrow.sol";
 import {TapiocaOmnichainEngineCodec} from "../TapiocaOmnichainEngineCodec.sol";

@@ -13,6 +13,11 @@ import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/
 
 // Tapioca
 import {
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    YieldBoxApproveAssetMsg
+} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {
     ITapiocaOmnichainEngine,
     ERC20PermitApprovalMsg,
     ERC721PermitApprovalMsg,
@@ -239,6 +244,49 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
         return TapiocaOmnichainEngineCodec.buildRemoteTransferMsg(_remoteTransferMsg);
     }
 
+    /**
+     * @notice Encode the message for the _marketPermitBorrowReceiver() & _marketPermitLendReceiver operations.
+     * @param _marketPermitActionMsg The Market permit lend/borrow approval message.
+     */
+    function buildMarketPermitApprovalMsg(MarketPermitActionMsg memory _marketPermitActionMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        msg_ = TapiocaOmnichainEngineCodec.buildMarketPermitApprovalMsg(_marketPermitActionMsg);
+    }
+
+    /**
+     * @notice Encode the message for the _yieldBoxPermitAllReceiver() & _yieldBoxRevokeAllReceiver operations.
+     * @param _yieldBoxApprovalAllMsg The YieldBox permit/revoke approval message.
+     */
+    function buildYieldBoxApproveAllMsg(YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        msg_ = TapiocaOmnichainEngineCodec.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg);
+    }
+
+    /**
+     * @notice Encode the message for the `PT_YB_APPROVE_ASSET` operation,
+     *   _yieldBoxRevokeAssetReceiver() & _yieldBoxApproveAssetReceiver operations.
+     * @param _approvalMsg The YieldBoxApproveAssetMsg messages.
+     */
+    function buildYieldBoxApproveAssetMsg(YieldBoxApproveAssetMsg[] memory _approvalMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        uint256 approvalsLength = _approvalMsg.length;
+        for (uint256 i; i < approvalsLength;) {
+            msg_ = abi.encodePacked(msg_, TapiocaOmnichainEngineCodec.buildYieldBoxPermitAssetMsg(_approvalMsg[i]));
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /// =======================
     /// Compose builder functions
     /// =======================
@@ -288,7 +336,8 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
             _msgType == MSG_SEND
             // Tapioca msg types
             || _msgType == MSG_APPROVALS || _msgType == MSG_NFT_APPROVALS || _msgType == MSG_PEARLMIT_APPROVAL
-                || _msgType == MSG_REMOTE_TRANSFER
+                || _msgType == MSG_REMOTE_TRANSFER || _msgType == MSG_YB_APPROVE_ASSET || _msgType == MSG_YB_APPROVE_ALL
+                || _msgType == MSG_MARKET_PERMIT
         ) {
             return;
         } else if (!_sanitizeMsgTypeExtended(_msgType)) {
