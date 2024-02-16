@@ -81,7 +81,7 @@ struct DepositAddCollateralAndBorrowFromMarketData {
 }
 
 /**
- * @dev `mintFromBBAndLendOnSGL` calldata
+ * @dev `mintBBLendSGLLockTOLP` calldata
  */
 struct MintFromBBAndLendOnSGLData {
     address user;
@@ -95,7 +95,7 @@ struct MintFromBBAndLendOnSGLData {
 
 /**
  * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 1
- *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
+ *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
  *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
  *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
  */
@@ -108,7 +108,7 @@ struct CrossChainMintFromBBAndLendOnSGLData {
 
 /**
  * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 2
- *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
+ *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
  *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
  *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
  */
@@ -124,7 +124,7 @@ struct DepositAndSendForLockingData {
 
 /**
  * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 3
- *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
+ *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
  *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
  *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
  */

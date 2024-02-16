@@ -73,7 +73,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      * @param data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
      * @param data.externalContracts the contracts' addresses used in all the operations performed by the helper
      */
-    function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData memory data) public payable {
+    function mintBBLendSGLLockTOLP(MintFromBBAndLendOnSGLData memory data) public payable {
         // Check sender
         _checkSender(data.user);
 
@@ -84,14 +84,14 @@ contract MagnetarMintModule is MagnetarBaseModule {
         //  - performs bigBang_.addCollateral
         //  - performs bigBang_.borrow
         if (data.mintData.mint) {
-            _depositAddCollateralAndMintFromBB(data.mintData, data.externalContracts.bigBang, yieldBox_, data.user);
+            _depositYBBorrowBB(data.mintData, data.externalContracts.bigBang, yieldBox_, data.user);
         }
 
         // if `depositData.deposit`:
         //      - deposit SGL asset to YB for `data.user`
         // if `lendAmount` > 0:
         //      - add asset to SGL
-        uint256 fraction = _depositAndLendOnSGL(
+        uint256 fraction = _depositYBLendSGL(
             data.depositData, data.externalContracts.singularity, yieldBox_, data.user, data.lendAmount
         );
 
@@ -120,8 +120,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
     /**
      * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
      * @dev Cross chain flow:
-     *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
-     *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
      *  Mints from BB and sends borrowed Usdo to another layer for lending
      *  ! Handles `step 1` described above !
@@ -131,7 +131,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      * @param data.mintData the data needed to mint on BB
      * @param data.lendSendParams LZ send params for lending on another layer
      */
-    function mintFromBBAndSendForLending(CrossChainMintFromBBAndLendOnSGLData memory data) public payable {
+    function mintBBLendXChainSGL(CrossChainMintFromBBAndLendOnSGLData memory data) public payable {
         // Check sender
         _checkSender(data.user);
 
@@ -142,7 +142,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         //  - performs bigBang_.addCollateral
         //  - performs bigBang_.borrow
         if (data.mintData.mint) {
-            _depositAddCollateralAndMintFromBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user);
+            _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user);
         }
 
         // send on another layer for lending
@@ -166,8 +166,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
     /**
      * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
      * @dev Cross chain flow:
-     *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
-     *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
      *  Lends on SGL and sends receipt token on another layer
      *  ! Handles `step 2` described above !
@@ -178,7 +178,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      * @param data.depositData the data needed to deposit on YieldBox
      * @param data.lockAndParticipateSendParams LZ send params for the lock or/and the participate operations
      */
-    function depositLendAndSendForLocking(DepositAndSendForLockingData memory data) public payable {
+    function depositYBLendSGLLockXchainTOLP(DepositAndSendForLockingData memory data) public payable {
         // Check sender
         _checkSender(data.user);
 
@@ -189,7 +189,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         // if `lendAmount` > 0:
         //      - add asset to SGL
         uint256 fraction =
-            _depositAndLendOnSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
+            _depositYBLendSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
 
         data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = fraction;
 
@@ -216,8 +216,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
     /**
      * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
      * @dev Cross chain flow:
-     *  step 1: magnetar.mintFromBBAndSendForLending (chain A) -->
-     *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
      *  Lock on tOB and/or participate on tOLP
      *  ! Handles `step 3` described above !
@@ -318,7 +318,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _depositAndLendOnSGL(
+    function _depositYBLendSGL(
         IDepositData memory depositData,
         address singularityAddress,
         IYieldBox yieldBox_,
@@ -362,7 +362,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _depositAddCollateralAndMintFromBB(
+    function _depositYBBorrowBB(
         IMintData memory mintData,
         address bigBangAddress,
         IYieldBox yieldBox_,

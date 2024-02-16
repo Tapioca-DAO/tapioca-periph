@@ -971,7 +971,7 @@ describe('MagnetarV2', () => {
                     target: magnetar.address,
                     value: 0,
                     call: MagnetarMintModule__factory.createInterface().encodeFunctionData(
-                        'mintFromBBAndLendOnSGL',
+                        'mintBBLendSGLLockTOLP',
                         [
                             {
                                 user: deployer.address,
@@ -1039,7 +1039,7 @@ describe('MagnetarV2', () => {
             await cluster.updateContract(0, wethUsdcSingularity.address, true);
             const lendFn =
                 MagnetarMintModule__factory.createInterface().encodeFunctionData(
-                    'mintFromBBAndLendOnSGL',
+                    'mintBBLendSGLLockTOLP',
                     [
                         {
                             user: deployer.address,
@@ -2014,7 +2014,7 @@ describe('MagnetarV2', () => {
                     value: 0,
                     allowFailure: false,
                     call: MagnetarMintModule__factory.createInterface().encodeFunctionData(
-                        'mintFromBBAndLendOnSGL',
+                        'mintBBLendSGLLockTOLP',
                         [
                             {
                                 user: deployer.address,
@@ -2204,7 +2204,7 @@ describe('MagnetarV2', () => {
                     value: 0,
                     allowFailure: false,
                     call: MagnetarMintModule__factory.createInterface().encodeFunctionData(
-                        'mintFromBBAndLendOnSGL',
+                        'mintBBLendSGLLockTOLP',
                         [
                             {
                                 user: deployer.address,
@@ -2524,7 +2524,7 @@ describe('MagnetarV2', () => {
                     value: 0,
                     allowFailure: false,
                     call: MagnetarMintModule__factory.createInterface().encodeFunctionData(
-                        'mintFromBBAndLendOnSGL',
+                        'mintBBLendSGLLockTOLP',
                         [
                             {
                                 user: deployer.address,
