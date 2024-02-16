@@ -102,6 +102,7 @@ struct MintFromBBAndLendOnSGLData {
 struct CrossChainMintFromBBAndLendOnSGLData {
     address user;
     address bigBang;
+    address magnetar;
     IMintData mintData;
     LendOrLockSendParams lendSendParams;
 }
