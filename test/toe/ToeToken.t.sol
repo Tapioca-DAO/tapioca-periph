@@ -43,7 +43,9 @@ import {BaseToeMsgType} from "tapioca-periph/tapiocaOmnichainEngine/BaseToeMsgTy
 import {ToeTestHelper} from "./ToeTestHelper.sol";
 import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ToeTokenMock} from "../mocks/ToeTokenMock/ToeTokenMock.sol";
+import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {ERC721Mock} from "../mocks/ERC721Mock.sol";
 
 import "forge-std/Test.sol";
@@ -60,6 +62,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
     ToeTokenMock aToeOFT;
     ToeTokenMock bToeOFT;
 
+    ICluster cluster;
     ToeTestHelper toeTestHelper;
 
     uint256 internal userAPKey = 0x1;
@@ -91,7 +94,9 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        __extExec = address(new TapiocaOmnichainExtExec());
+        cluster = ICluster(address(new Cluster(1, address(__owner))));
+
+        __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
         aToeOFT = ToeTokenMock(
             payable(
                 _deployOApp(

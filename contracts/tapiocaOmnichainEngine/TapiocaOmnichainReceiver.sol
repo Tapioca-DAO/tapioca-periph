@@ -21,7 +21,6 @@ import {
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainEngineCodec} from "./TapiocaOmnichainEngineCodec.sol";
 import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 
 /*
 
@@ -141,16 +140,12 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(oftComposeMsg_);
 
-        if (msgType_ == MSG_APPROVALS) {
-            _erc20PermitApprovalReceiver(tapComposeMsg_);
-        } else if (msgType_ == MSG_NFT_APPROVALS) {
-            _erc721PermitApprovalReceiver(tapComposeMsg_);
-        } else if (msgType_ == MSG_PEARLMIT_APPROVAL) {
-            _pearlmitApprovalReceiver(tapComposeMsg_);
-        } else if (msgType_ == MSG_REMOTE_TRANSFER) {
+        // Call Permits/approvals if the msg type is a permit/approval.
+        // If the msg type is not a permit/approval, it will call the other receivers.
+        if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
-        } else {
-            // If no msg type matched, try to call the TOE extender, if it exists.
+        } else if (!_extExec(msgType_, tapComposeMsg_)) {
+            // Check if the TOE extender is set and the msg type is valid. If so, call the TOE extender to handle msg.
             if (
                 address(tapiocaOmnichainReceiveExtender) != address(0)
                     && tapiocaOmnichainReceiveExtender.isMsgTypeValid(msgType_)
@@ -295,45 +290,28 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     }
 
     /**
-     * @notice Approves tokens via permit.
-     * @param _data The call data containing info about the approvals.
-     *      - token::address: Address of the token to approve.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - value::uint256: Amount of tokens to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
+     * @notice Sends a permit/approval call to the `tapiocaOmnichainReceiveExtender` contract.
+     * @param _msgType The type of the message.
+     * @param _data The call data containing info about the message.
+     * @return success is the success of the composed message handler. If no handler is found, it should return false to trigger `InvalidMsgType()`.
      */
-    function _erc20PermitApprovalReceiver(bytes memory _data) internal virtual {
-        ERC20PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC20PermitApprovalMsg(_data);
-
-        toeExtExec.erc20PermitApproval(approvals);
-    }
-
-    /**
-     * @notice Approves NFT tokens via permit.
-     * @param _data The call data containing info about the approvals.
-     *      - token::address: Address of the token to approve.
-     *      - spender::address: Address of the spender.
-     *      - tokenId::uint256: TokenId of the token to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _erc721PermitApprovalReceiver(bytes memory _data) internal virtual {
-        // TODO: encode and decode packed data to save gas
-        ERC721PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC721PermitApprovalMsg(_data);
-
-        toeExtExec.erc721PermitApproval(approvals);
-    }
-
-    function _pearlmitApprovalReceiver(bytes memory _data) internal virtual {
-        (address pearlmit, IPearlmit.PermitBatchTransferFrom memory data) =
-            TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
-        toeExtExec.pearlmitApproval(pearlmit, data);
+    function _extExec(uint16 _msgType, bytes memory _data) internal returns (bool) {
+        if (_msgType == MSG_APPROVALS) {
+            toeExtExec.erc20PermitApproval(_data);
+        } else if (_msgType == MSG_NFT_APPROVALS) {
+            toeExtExec.erc721PermitApproval(_data);
+        } else if (_msgType == MSG_PEARLMIT_APPROVAL) {
+            toeExtExec.pearlmitApproval(_data);
+        } else if (_msgType == MSG_YB_APPROVE_ALL) {
+            toeExtExec.yieldBoxPermitAll(_data);
+        } else if (_msgType == MSG_YB_APPROVE_ASSET) {
+            toeExtExec.yieldBoxPermitAsset(_data);
+        } else if (_msgType == MSG_MARKET_PERMIT) {
+            toeExtExec.marketPermit(_data);
+        } else {
+            return false;
+        }
+        return true;
     }
 
     // ***************** //
