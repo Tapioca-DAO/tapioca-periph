@@ -308,6 +308,9 @@ describe('MagnetarV2', () => {
                 },
             ];
 
+            await cluster.updateContract(0, yieldBox.address, true);
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
+
             await magnetar.connect(deployer).burst(calls);
 
             const ybBalance = await yieldBox.balanceOf(
@@ -378,6 +381,9 @@ describe('MagnetarV2', () => {
                 deployer.address,
             );
             expect(borrowPart.eq(0)).to.be.true;
+
+            await cluster.updateContract(0, magnetar.address, true);
+
             await magnetar.connect(deployer).burst(
                 [
                     {
@@ -466,7 +472,7 @@ describe('MagnetarV2', () => {
 
     describe('permits', () => {
         it('should test an array of permits', async () => {
-            const { deployer, eoa1, magnetar } = await loadFixture(register);
+            const { deployer, eoa1, magnetar, cluster } = await loadFixture(register);
 
             const name = 'Token One';
 
@@ -509,6 +515,7 @@ describe('MagnetarV2', () => {
                 'permit',
                 [deployer.address, eoa1.address, value, MAX_DEADLINE, v, r, s],
             );
+            await cluster.updateContract(0, tokenOne.address, true);
 
             await magnetar.connect(deployer).burst([
                 {
@@ -542,7 +549,7 @@ describe('MagnetarV2', () => {
 
     describe('ybDeposit()', () => {
         it('should execute YB deposit asset', async () => {
-            const { deployer, yieldBox, magnetar, createTokenEmptyStrategy } =
+            const { deployer, yieldBox, magnetar, createTokenEmptyStrategy, cluster } =
                 await loadFixture(register);
 
             const name = 'Token One';
@@ -681,6 +688,8 @@ describe('MagnetarV2', () => {
                 },
             ];
 
+            await cluster.updateContract(0, tokenOne.address, true);
+            await cluster.updateContract(0, yieldBox.address, true);
             await magnetar.connect(deployer).burst(calls);
 
             const ybBalance = await yieldBox.balanceOf(
@@ -704,6 +713,7 @@ describe('MagnetarV2', () => {
                 wethAssetId,
                 mediumRiskMC,
                 magnetar,
+                cluster,
             } = await loadFixture(register);
 
             const usdoStratregy = await penrose.emptyStrategies(usd0.address);
@@ -927,6 +937,9 @@ describe('MagnetarV2', () => {
                 },
             ];
 
+            await cluster.updateContract(0, wethUsdoSingularity.address, true);
+            await cluster.updateContract(0, yieldBox.address, true);
+            await cluster.updateContract(0, usd0.address, true);
             await magnetar.connect(deployer).burst(calls);
 
             const ybBalance = await yieldBox.balanceOf(

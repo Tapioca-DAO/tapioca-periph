@@ -166,6 +166,8 @@ contract Magnetar is BaseMagnetar {
      * @param _allowFailure Whether to allow the call to fail.
      */
     function _processPermitOperation(address _target, bytes calldata _actionCalldata, bool _allowFailure) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+
         /// @dev owner address should always be first param.
         // permitAction(bytes,uint16)
         // permit(address owner...)
@@ -205,6 +207,8 @@ contract Magnetar is BaseMagnetar {
         uint256 _actionValue,
         bool _allowFailure
     ) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+
         /// @dev owner address should always be first param.
         // wrap(address from,...)
         // unwrap(address from,...)
@@ -234,6 +238,8 @@ contract Magnetar is BaseMagnetar {
         uint256 _actionValue,
         bool _allowFailure
     ) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+
         /// @dev owner address should always be first param.
         // addCollateral(address from,...)
         // borrow(address from,...)
@@ -270,6 +276,8 @@ contract Magnetar is BaseMagnetar {
         uint256 _actionValue,
         bool _allowFailure
     ) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
             funcSig == ITapiocaOptionBroker.exerciseOption.selector
@@ -299,6 +307,7 @@ contract Magnetar is BaseMagnetar {
         uint256 _actionValue,
         bool _allowFailure
     ) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
         _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
     }
 
