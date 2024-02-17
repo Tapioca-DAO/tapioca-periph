@@ -21,7 +21,6 @@ struct ICommonExternalContracts {
 struct IDepositData {
     bool deposit;
     uint256 amount;
-    bool extractFromSender;
 }
 
 interface ICommonData {}

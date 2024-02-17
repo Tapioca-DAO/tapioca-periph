@@ -6,14 +6,25 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // Tapioca
+import {
+    MintFromBBAndLendOnSGLData,
+    CrossChainMintFromBBAndLendOnSGLData,
+    IMintData,
+    IDepositData,
+    IOptionsLockData,
+    IOptionsParticipateData,
+    DepositAndSendForLockingData,
+    LockAndParticipateData,
+    MagnetarWithdrawData
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {MintFromBBAndLendOnSGLData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -39,8 +50,13 @@ contract MagnetarMintModule is MagnetarBaseModule {
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
 
+    event Magnetar_ZeroAddress();
+
+    /// =====================
+    /// Public
+    /// =====================
     /**
-     * @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @notice helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB on the current chain
      * @dev all steps are optional:
      *         - if `mintData.mint` is false, the mint operation on BB is skipped
      *             - add BB collateral to YB, add collateral on BB and borrow from BB are part of the mint operation
@@ -58,160 +74,358 @@ contract MagnetarMintModule is MagnetarBaseModule {
      * @param data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
      * @param data.externalContracts the contracts' addresses used in all the operations performed by the helper
      */
-    function mintFromBBAndLendOnSGL(MintFromBBAndLendOnSGLData memory data) public payable {
+    function mintBBLendSGLLockTOLP(MintFromBBAndLendOnSGLData memory data) public payable {
         // Check sender
         _checkSender(data.user);
 
-        // Check targets
-        if (data.externalContracts.bigBang != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalContracts.bigBang)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalContracts.bigBang);
-            }
-        }
-        if (data.externalContracts.singularity != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalContracts.singularity)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalContracts.singularity);
-            }
-        }
-
-        IMarket bigBang_ = IMarket(data.externalContracts.bigBang);
-        ISingularity singularity_ = ISingularity(data.externalContracts.singularity);
-        IYieldBox yieldBox_ = IYieldBox(singularity_.yieldBox());
-
-        {
-            if (data.externalContracts.singularity != address(0)) {
-                _setApprovalForYieldBox(data.externalContracts.singularity, yieldBox_);
-            }
-            if (data.externalContracts.bigBang != address(0)) {
-                _setApprovalForYieldBox(data.externalContracts.bigBang, yieldBox_);
-            }
-        }
+        IYieldBox yieldBox_ = IYieldBox(IMarket(data.externalContracts.singularity).yieldBox());
 
         // if `mint` was requested the following actions are performed:
         //  - extracts & deposits collateral to YB
         //  - performs bigBang_.addCollateral
         //  - performs bigBang_.borrow
         if (data.mintData.mint) {
-            // retrieve collateral id & address
-            uint256 bbCollateralId = bigBang_.collateralId();
-            (, address bbCollateralAddress,,) = yieldBox_.assets(bbCollateralId);
-
-            // compute collateral share
-            uint256 bbCollateralShare =
-                yieldBox_.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
-
-            // deposit collateral to YB
-            if (data.mintData.collateralDepositData.deposit) {
-                data.mintData.collateralDepositData.amount =
-                    _extractTokens(data.user, bbCollateralAddress, data.mintData.collateralDepositData.amount);
-                bbCollateralShare = yieldBox_.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
-
-                bbCollateralAddress.safeApprove(address(yieldBox_), data.mintData.collateralDepositData.amount);
-                yieldBox_.depositAsset(
-                    bbCollateralId, address(this), address(this), data.mintData.collateralDepositData.amount, 0
-                );
-            }
-
-            // add collateral to BB
-            if (data.mintData.collateralDepositData.amount > 0) {
-                _setApprovalForYieldBox(data.externalContracts.bigBang, yieldBox_);
-                bigBang_.addCollateral(
-                    data.mintData.collateralDepositData.deposit ? address(this) : data.user,
-                    data.user,
-                    false,
-                    data.mintData.collateralDepositData.amount,
-                    bbCollateralShare
-                );
-            }
-
-            // mints from BB
-            bigBang_.borrow(data.user, data.user, data.mintData.mintAmount);
+            _depositYBBorrowBB(data.mintData, data.externalContracts.bigBang, yieldBox_, data.user);
         }
 
         // if `depositData.deposit`:
         //      - deposit SGL asset to YB for `data.user`
-        uint256 sglAssetId = singularity_.assetId();
-        (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
-        if (data.depositData.deposit) {
-            data.depositData.amount = _extractTokens(data.user, sglAssetAddress, data.depositData.amount);
-
-            sglAssetAddress.safeApprove(address(yieldBox_), data.depositData.amount);
-            yieldBox_.depositAsset(sglAssetId, address(this), data.user, data.depositData.amount, 0);
-        }
-
         // if `lendAmount` > 0:
         //      - add asset to SGL
-        uint256 fraction = 0;
-        if (data.lendAmount == 0 && data.depositData.deposit) {
-            data.lendAmount = data.depositData.amount;
-        }
-        if (data.lendAmount > 0) {
-            uint256 lendShare = yieldBox_.toShare(sglAssetId, data.lendAmount, false);
-            fraction = singularity_.addAsset(data.user, data.user, false, lendShare);
-        }
+        uint256 fraction = _depositYBLendSGL(
+            data.depositData, data.externalContracts.singularity, yieldBox_, data.user, data.lendAmount
+        );
 
         // if `lockData.lock`:
         //      - transfer `fraction` from data.user to `address(this)
         //      - deposits `fraction` to YB for `address(this)`
         //      - performs tOLP.lock
-        uint256 tOLPTokenId = 0;
-        if (data.lockData.lock) {
-            if (!cluster.isWhitelisted(0, data.lockData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.lockData.target);
-            }
-            if (data.lockData.fraction > 0) fraction = data.lockData.fraction;
+        uint256 tOLPTokenId = _lockOnTOB(
+            data.lockData,
+            yieldBox_,
+            fraction,
+            data.participateData.participate,
+            data.user,
+            data.externalContracts.singularity
+        );
 
-            // retrieve and deposit SGLAssetId registered in tOLP
-            (uint256 tOLPSglAssetId,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
-                data.externalContracts.singularity
-            );
-            if (fraction == 0) revert Magnetar_ActionParamsMismatch();
-
-            //deposit to YieldBox
-            IERC20(data.externalContracts.singularity).safeTransferFrom(data.user, address(this), fraction);
-            data.externalContracts.singularity.safeApprove(address(yieldBox_), fraction);
-            yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
-
-            _setApprovalForYieldBox(data.lockData.target, yieldBox_);
-            address lockTo = data.participateData.participate ? address(this) : data.user;
-            tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-                lockTo, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
-            );
-            _revertYieldBoxApproval(data.lockData.target, yieldBox_);
-        }
-
-        // TODO improve this
         // if `participateData.participate`:
         //      - verify tOLPTokenId
         //      - performs tOB.participate
         //      - transfer `oTAPTokenId` to data.user
         if (data.participateData.participate) {
-            if (!cluster.isWhitelisted(0, data.participateData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.participateData.target);
-            }
+            _participateOnTOLP(data.participateData, data.user, data.lockData.target, tOLPTokenId);
+        }
+    }
 
-            // Check tOLPTokenId
-            if (data.participateData.tOLPTokenId != 0) {
-                if (data.participateData.tOLPTokenId != tOLPTokenId && tOLPTokenId != 0) {
-                    revert Magnetar_tOLPTokenMismatch();
-                }
+    /**
+     * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev Cross chain flow:
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
+     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     *  Mints from BB and sends borrowed Usdo to another layer for lending
+     *  ! Handles `step 1` described above !
+     *  !!! All uint variables should be in the LD format !!!
+     * @param data.user the user to perform the operation for
+     * @param data.bigBang the BB address
+     * @param data.mintData the data needed to mint on BB
+     * @param data.lendSendParams LZ send params for lending on another layer
+     */
+    function mintBBLendXChainSGL(CrossChainMintFromBBAndLendOnSGLData memory data) public payable {
+        // Check sender
+        _checkSender(data.user);
 
-                tOLPTokenId = data.participateData.tOLPTokenId;
-            }
-            if (tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+        address yieldBox = IMarket(data.bigBang).yieldBox();
 
-            IERC721(data.lockData.target).approve(data.participateData.target, tOLPTokenId);
-            uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
-
-            address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
-            IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "0x");
+        // if `mint` was requested the following actions are performed:
+        //  - extracts & deposits collateral to YB
+        //  - performs bigBang_.addCollateral
+        //  - performs bigBang_.borrow
+        if (data.mintData.mint) {
+            _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user);
         }
 
-        if (data.externalContracts.singularity != address(0)) {
-            _revertYieldBoxApproval(data.externalContracts.singularity, yieldBox_);
+        // send on another layer for lending
+        _withdrawToChain(
+            MagnetarWithdrawData({
+                yieldBox: yieldBox,
+                assetId: IMarket(data.bigBang).assetId(),
+                unwrap: false,
+                lzSendParams: data.lendSendParams.lzParams,
+                sendGas: data.lendSendParams.lzSendGas,
+                composeGas: data.lendSendParams.lzComposeGas,
+                sendVal: data.lendSendParams.lzSendVal,
+                composeVal: data.lendSendParams.lzComposeVal,
+                composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
+                composeMsgType: data.lendSendParams.lzComposeMsgType,
+                withdraw: true
+            })
+        );
+    }
+
+    /**
+     * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev Cross chain flow:
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
+     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     *  Lends on SGL and sends receipt token on another layer
+     *  ! Handles `step 2` described above !
+     *  !!! All uint variables should be in the LD format !!!
+     * @param data.user the user to perform the operation for
+     * @param data.singularity the SGL address
+     * @param data.lendAmount the amount to lend on SGL
+     * @param data.depositData the data needed to deposit on YieldBox
+     * @param data.lockAndParticipateSendParams LZ send params for the lock or/and the participate operations
+     */
+    function depositYBLendSGLLockXchainTOLP(DepositAndSendForLockingData memory data) public payable {
+        // Check sender
+        _checkSender(data.user);
+
+        address yieldBox = IMarket(data.singularity).yieldBox();
+
+        // if `depositData.deposit`:
+        //      - deposit SGL asset to YB for `data.user`
+        // if `lendAmount` > 0:
+        //      - add asset to SGL
+        uint256 fraction =
+            _depositYBLendSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
+
+        // wrap SGL receipt into tReceipt
+        // ! User should approve `address(this)` for `IERC20(data.singularity)` !
+        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
+
+        data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+
+        // send on another layer for lending
+        _withdrawToChain(
+            MagnetarWithdrawData({
+                yieldBox: yieldBox,
+                assetId: data.assetId,
+                unwrap: false,
+                lzSendParams: data.lockAndParticipateSendParams.lzParams,
+                sendGas: data.lockAndParticipateSendParams.lzSendGas,
+                composeGas: data.lockAndParticipateSendParams.lzComposeGas,
+                sendVal: data.lockAndParticipateSendParams.lzSendVal,
+                composeVal: data.lockAndParticipateSendParams.lzComposeVal,
+                composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
+                composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
+                withdraw: true
+            })
+        );
+    }
+
+    /**
+     * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev Cross chain flow:
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
+     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     *  Lock on tOB and/or participate on tOLP
+     *  ! Handles `step 3` described above !
+     *  !!! All uint variables should be in the LD format !!!
+     * @param data.user the user to perform the operation for
+     * @param data.singularity the SGL address
+     * @param data.fraction the amount to lock
+     * @param data.lockData the data needed to lock on tOB
+     * @param data.participateData the data needed to participate on tOLP
+     */
+    function lockAndParticipate(LockAndParticipateData memory data) public payable {
+        // Check sender
+        _checkSender(data.user);
+
+        // if `lockData.lock`:
+        //      - transfer `fraction` from data.user to `address(this)
+        //      - deposits `fraction` to YB for `address(this)`
+        //      - performs tOLP.lock
+        uint256 tOLPTokenId = _lockOnTOB(
+            data.lockData,
+            IYieldBox(IMarket(data.singularity).yieldBox()),
+            data.fraction,
+            data.participateData.participate,
+            data.user,
+            data.singularity
+        );
+
+        // if `participateData.participate`:
+        //      - verify tOLPTokenId
+        //      - performs tOB.participate
+        //      - transfer `oTAPTokenId` to data.user
+        if (data.participateData.participate) {
+            _participateOnTOLP(data.participateData, data.user, data.lockData.target, tOLPTokenId);
         }
-        if (data.externalContracts.bigBang != address(0)) {
-            _revertYieldBoxApproval(data.externalContracts.bigBang, yieldBox_);
+    }
+
+    /// =====================
+    /// Private
+    /// =====================
+    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
+        private
+        returns (uint256 toftAmount)
+    {
+        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
+
+        (, address tReceiptAddress,,) = yieldBox.assets(assetId);
+
+        IERC20(sgl).approve(tReceiptAddress, fraction);
+        toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
+        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
+    }
+
+    function _participateOnTOLP(
+        IOptionsParticipateData memory participateData,
+        address user,
+        address lockDataTarget,
+        uint256 tOLPTokenId
+    ) private {
+        if (!cluster.isWhitelisted(0, participateData.target)) {
+            revert Magnetar_TargetNotWhitelisted(participateData.target);
+        }
+
+        // Check tOLPTokenId
+        if (participateData.tOLPTokenId != 0) {
+            if (participateData.tOLPTokenId != tOLPTokenId && tOLPTokenId != 0) {
+                revert Magnetar_tOLPTokenMismatch();
+            }
+
+            tOLPTokenId = participateData.tOLPTokenId;
+        }
+        if (tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+
+        IERC721(lockDataTarget).approve(participateData.target, tOLPTokenId);
+        uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
+
+        address oTapAddress = ITapiocaOptionBroker(participateData.target).oTAP();
+        IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "0x");
+    }
+
+    function _lockOnTOB(
+        IOptionsLockData memory lockData,
+        IYieldBox yieldBox_,
+        uint256 fraction,
+        bool participate,
+        address user,
+        address singularityAddress
+    ) private returns (uint256 tOLPTokenId) {
+        tOLPTokenId = 0;
+        if (lockData.lock) {
+            if (!cluster.isWhitelisted(0, lockData.target)) {
+                revert Magnetar_TargetNotWhitelisted(lockData.target);
+            }
+            if (lockData.fraction > 0) fraction = lockData.fraction;
+
+            // retrieve and deposit SGLAssetId registered in tOLP
+            (uint256 tOLPSglAssetId,,) =
+                ITapiocaOptionLiquidityProvision(lockData.target).activeSingularities(singularityAddress);
+            if (fraction == 0) revert Magnetar_ActionParamsMismatch();
+
+            //deposit to YieldBox
+            IERC20(singularityAddress).safeTransferFrom(user, address(this), fraction);
+            singularityAddress.safeApprove(address(yieldBox_), fraction);
+            yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
+
+            _setApprovalForYieldBox(lockData.target, yieldBox_);
+            tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target).lock(
+                participate ? address(this) : user, singularityAddress, lockData.lockDuration, lockData.amount
+            );
+            _revertYieldBoxApproval(lockData.target, yieldBox_);
+        }
+    }
+
+    function _depositYBLendSGL(
+        IDepositData memory depositData,
+        address singularityAddress,
+        IYieldBox yieldBox_,
+        address user,
+        uint256 lendAmount
+    ) private returns (uint256 fraction) {
+        if (singularityAddress == address(0)) {
+            // @dev for dev trace
+            emit Magnetar_ZeroAddress();
+        } else {
+            if (!cluster.isWhitelisted(0, singularityAddress)) {
+                revert Magnetar_TargetNotWhitelisted(singularityAddress);
+            }
+            _setApprovalForYieldBox(singularityAddress, yieldBox_);
+
+            IMarket singularity_ = IMarket(singularityAddress);
+
+            // if `depositData.deposit`:
+            //      - deposit SGL asset to YB for `user`
+            uint256 sglAssetId = singularity_.assetId();
+            (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
+            if (depositData.deposit) {
+                depositData.amount = _extractTokens(user, sglAssetAddress, depositData.amount);
+
+                sglAssetAddress.safeApprove(address(yieldBox_), depositData.amount);
+                yieldBox_.depositAsset(sglAssetId, address(this), user, depositData.amount, 0);
+            }
+
+            // if `lendAmount` > 0:
+            //      - add asset to SGL
+            fraction = 0;
+            if (lendAmount == 0 && depositData.deposit) {
+                lendAmount = depositData.amount;
+            }
+            if (lendAmount > 0) {
+                uint256 lendShare = yieldBox_.toShare(sglAssetId, lendAmount, false);
+                fraction = singularity_.addAsset(user, user, false, lendShare);
+            }
+
+            _revertYieldBoxApproval(singularityAddress, yieldBox_);
+        }
+    }
+
+    function _depositYBBorrowBB(IMintData memory mintData, address bigBangAddress, IYieldBox yieldBox_, address user)
+        private
+    {
+        if (bigBangAddress == address(0)) {
+            // @dev for dev trace
+            emit Magnetar_ZeroAddress();
+        } else {
+            if (!cluster.isWhitelisted(0, bigBangAddress)) {
+                revert Magnetar_TargetNotWhitelisted(bigBangAddress);
+            }
+            _setApprovalForYieldBox(bigBangAddress, yieldBox_);
+
+            IMarket bigBang_ = IMarket(bigBangAddress);
+
+            // retrieve collateral id & address
+            uint256 bbCollateralId = bigBang_.collateralId();
+            (, address bbCollateralAddress,,) = yieldBox_.assets(bbCollateralId);
+
+            // compute collateral share
+            uint256 bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
+
+            // deposit collateral to YB
+            if (mintData.collateralDepositData.deposit) {
+                mintData.collateralDepositData.amount =
+                    _extractTokens(user, bbCollateralAddress, mintData.collateralDepositData.amount);
+                bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
+
+                bbCollateralAddress.safeApprove(address(yieldBox_), mintData.collateralDepositData.amount);
+                yieldBox_.depositAsset(
+                    bbCollateralId, address(this), address(this), mintData.collateralDepositData.amount, 0
+                );
+            }
+
+            // add collateral to BB
+            if (mintData.collateralDepositData.amount > 0) {
+                _setApprovalForYieldBox(address(bigBang_), yieldBox_);
+                bigBang_.addCollateral(
+                    mintData.collateralDepositData.deposit ? address(this) : user,
+                    user,
+                    false,
+                    mintData.collateralDepositData.amount,
+                    bbCollateralShare
+                );
+            }
+
+            // mints from BB
+            bigBang_.borrow(user, user, mintData.mintAmount);
+
+            _revertYieldBoxApproval(bigBangAddress, yieldBox_);
         }
     }
 }

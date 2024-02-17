@@ -90,6 +90,7 @@ struct TOFTModulesInitStruct {
 /// ============================
 /// ========= COMPOSE ==========
 /// ============================
+
 /**
  * @notice Encodes the message for the PT_SEND_PARAMS operation.
  */
