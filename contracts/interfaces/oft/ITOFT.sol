@@ -83,7 +83,6 @@ struct TOFTModulesInitStruct {
 /// ========= COMPOSE ==========
 /// ============================
 
-
 /**
  * @notice Encodes the message for the PT_SEND_PARAMS operation.
  */
@@ -103,7 +102,6 @@ struct ExerciseOptionsMsg {
     LZSendParam lzSendParams;
     bytes composeMsg;
 }
-
 
 /**
  * @notice Encodes the message for the PT_MARKET_REMOVE_COLLATERAL operation.

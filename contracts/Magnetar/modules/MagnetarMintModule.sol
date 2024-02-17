@@ -24,6 +24,7 @@ import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -191,9 +192,11 @@ contract MagnetarMintModule is MagnetarBaseModule {
         uint256 fraction =
             _depositYBLendSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
 
-        data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = fraction;
+        // wrap SGL receipt into tReceipt
+        // ! User should approve `address(this)` for `IERC20(data.singularity)` !
+        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
 
-        // TODO: wrap `fraction` and send wrapped version instead of the ERC20
+        data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
 
         // send on another layer for lending
         _withdrawToChain(
@@ -257,6 +260,18 @@ contract MagnetarMintModule is MagnetarBaseModule {
     /// =====================
     /// Private
     /// =====================
+    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
+        private
+        returns (uint256 toftAmount)
+    {
+        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
+
+        (, address tReceiptAddress,,) = yieldBox.assets(assetId);
+
+        IERC20(sgl).approve(tReceiptAddress, fraction);
+        toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
+        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
+    }
 
     function _participateOnTOLP(
         IOptionsParticipateData memory participateData,
@@ -325,7 +340,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         address user,
         uint256 lendAmount
     ) private returns (uint256 fraction) {
-        if (singularityAddress != address(0)) {
+        if (singularityAddress == address(0)) {
             // @dev for dev trace
             emit Magnetar_ZeroAddress();
         } else {
@@ -362,13 +377,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _depositYBBorrowBB(
-        IMintData memory mintData,
-        address bigBangAddress,
-        IYieldBox yieldBox_,
-        address user
-    ) private {
-        if (bigBangAddress != address(0)) {
+    function _depositYBBorrowBB(IMintData memory mintData, address bigBangAddress, IYieldBox yieldBox_, address user)
+        private
+    {
+        if (bigBangAddress == address(0)) {
             // @dev for dev trace
             emit Magnetar_ZeroAddress();
         } else {
