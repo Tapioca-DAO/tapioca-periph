@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// External
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
 // Tapioca
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOptionLiquidityProvision} from

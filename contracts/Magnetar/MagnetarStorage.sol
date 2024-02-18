@@ -57,6 +57,10 @@ contract MagnetarStorage is IERC721Receiver {
     /// =====================
     /// Public
     /// =====================
+
+    /**
+     * @dev Receiver for `MagnetarMintModule._participateOnTOLP()`
+     */
     function onERC721Received(address, address, uint256, bytes memory) public virtual override returns (bytes4) {
         return this.onERC721Received.selector;
     }
