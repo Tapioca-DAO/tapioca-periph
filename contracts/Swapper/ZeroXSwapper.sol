@@ -44,9 +44,10 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     error MinSwapFailed(uint256 amountOut);
     error SenderNotValid(address sender);
 
-    constructor(address _zeroXProxy, ICluster _cluster, address _owner) {
+    constructor(address _zeroXProxy, address _oneInchProxy, ICluster _cluster, address _owner) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
         zeroXProxy = _zeroXProxy;
+        oneInchProxy = _oneInchProxy;
         cluster = _cluster;
         transferOwnership(_owner);
     }
@@ -73,7 +74,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
 
         if (!isOneInchEnabled && swapData.swapTarget != zeroXProxy) {
             revert InvalidProxy(swapData.swapTarget, zeroXProxy);
-        } else if (swapData.swapTarget != oneInchProxy) {
+        } else if (isOneInchEnabled && swapData.swapTarget != oneInchProxy) {
             revert InvalidProxy(swapData.swapTarget, oneInchProxy);
         }
 
