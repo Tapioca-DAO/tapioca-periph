@@ -181,26 +181,6 @@ enum MagnetarModule {
 interface IMagnetar {
     function burst(MagnetarCall[] calldata calls) external payable;
 
-    function MAGNETAR_ACTION_PERMIT() external view returns (uint8);
-
-    function MAGNETAR_ACTION_WRAP() external view returns (uint8);
-
-    function MAGNETAR_ACTION_MARKET() external view returns (uint8);
-
-    function MAGNETAR_ACTION_TAP_TOKEN() external view returns (uint8);
-
-    function MAGNETAR_ACTION_OFT() external view returns (uint8);
-
-    function MAGNETAR_ACTION_ASSET_MODULE() external view returns (uint8);
-
-    function MAGNETAR_ACTION_COLLATERAL_MODULE() external view returns (uint8);
-
-    function MAGNETAR_ACTION_MINT_MODULE() external view returns (uint8);
-
-    function MAGNETAR_ACTION_OPTION_MODULE() external view returns (uint8);
-
-    function MAGNETAR_ACTION_YIELDBOX_MODULE() external view returns (uint8);
-
     function cluster() external view returns (address);
 
     function helper() external view returns (address);

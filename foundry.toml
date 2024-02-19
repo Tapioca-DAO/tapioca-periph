@@ -8,7 +8,7 @@ broadcast = 'gen/broadcast'
 solc_version='0.8.22'
 evm_version='paris'
 optimizer = true
-optimizer_runs = 9999
+optimizer_runs = 1000
 
 remappings = [
     "tapioca-periph/=contracts/",

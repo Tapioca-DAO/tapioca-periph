@@ -178,3 +178,11 @@ struct IBorrowParams {
     address market;
     bool deposit;
 }
+
+struct LeverageUpActionMsg {
+    address user;
+    address market;
+    uint256 borrowAmount;
+    uint256 supplyAmount;
+    bytes executorData;
+}

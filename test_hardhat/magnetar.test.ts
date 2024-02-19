@@ -472,7 +472,9 @@ describe('MagnetarV2', () => {
 
     describe('permits', () => {
         it('should test an array of permits', async () => {
-            const { deployer, eoa1, magnetar, cluster } = await loadFixture(register);
+            const { deployer, eoa1, magnetar, cluster } = await loadFixture(
+                register,
+            );
 
             const name = 'Token One';
 
@@ -549,8 +551,13 @@ describe('MagnetarV2', () => {
 
     describe('ybDeposit()', () => {
         it('should execute YB deposit asset', async () => {
-            const { deployer, yieldBox, magnetar, createTokenEmptyStrategy, cluster } =
-                await loadFixture(register);
+            const {
+                deployer,
+                yieldBox,
+                magnetar,
+                createTokenEmptyStrategy,
+                cluster,
+            } = await loadFixture(register);
 
             const name = 'Token One';
 
