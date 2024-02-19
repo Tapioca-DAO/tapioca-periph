@@ -33,8 +33,8 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
  * @notice Storage contract for Magnetar & modules
  */
 contract MagnetarStorage is IERC721Receiver {
-    ICluster public cluster;
-    mapping(MagnetarModule moduleId => address moduleAddress) public modules;
+    ICluster internal cluster;
+    mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
 
     // Helpers for external usage. Not used in the contract.
     uint8 public constant MAGNETAR_ACTION_PERMIT = 0;

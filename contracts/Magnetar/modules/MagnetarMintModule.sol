@@ -19,7 +19,9 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {MagnetarMintExternalHelper} from "./MagnetarMintExternalHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
@@ -51,6 +53,12 @@ contract MagnetarMintModule is MagnetarBaseModule {
     error Magnetar_tOLPTokenMismatch();
 
     event Magnetar_ZeroAddress();
+
+    MagnetarMintExternalHelper private _externalHelper;
+
+    constructor() {
+        _externalHelper = new MagnetarMintExternalHelper();
+    }
 
     /// =====================
     /// Public
@@ -127,6 +135,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      *  Mints from BB and sends borrowed Usdo to another layer for lending
      *  ! Handles `step 1` described above !
      *  !!! All uint variables should be in the LD format !!!
+     *  !!! Sets `lendAmount` parameter of the next call (step 2) !!!
      * @param data.user the user to perform the operation for
      * @param data.bigBang the BB address
      * @param data.mintData the data needed to mint on BB
@@ -145,6 +154,9 @@ contract MagnetarMintModule is MagnetarBaseModule {
         if (data.mintData.mint) {
             _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user);
         }
+
+        // decode `composeMsg` and re-encode it with updated params
+        data.lendSendParams.lzParams.sendParam.composeMsg = _externalHelper.mintBBLendXChainSGLEncoder(data.lendSendParams.lzParams.sendParam.composeMsg, data.mintData.mintAmount);
 
         // send on another layer for lending
         _withdrawToChain(
@@ -173,6 +185,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      *  Lends on SGL and sends receipt token on another layer
      *  ! Handles `step 2` described above !
      *  !!! All uint variables should be in the LD format !!!
+     *  !!! Sets `fraction` parameter of the next call (step 2) !!!
      * @param data.user the user to perform the operation for
      * @param data.singularity the SGL address
      * @param data.lendAmount the amount to lend on SGL
@@ -197,6 +210,9 @@ contract MagnetarMintModule is MagnetarBaseModule {
         uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
 
         data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+
+        // decode `composeMsg` and re-encode it with updated params
+        data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg = _externalHelper.depositYBLendSGLLockXchainTOLPEncoder(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg, toftAmount);
 
         // send on another layer for lending
         _withdrawToChain(

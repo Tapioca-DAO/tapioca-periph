@@ -35,7 +35,7 @@ import {MagnetarStorage} from "../MagnetarStorage.sol";
    
 */
 
-contract MagnetarBaseModule is Ownable, MagnetarStorage {
+abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
