@@ -21,7 +21,7 @@ interface IZeroXSwapper {
     /// @param sellToken the token to sell
     /// @param buyToken the token to buy
     /// @param swapTarget the 0x swap proxy
-    /// @param swapCallData the swap call data
+    /// @param swapCallData the swap call data. Either 0x or 1inch
     /// @return amountOut the amount of buyToken bought
     struct SZeroXSwapData {
         IERC20 sellToken;

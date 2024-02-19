@@ -9,14 +9,10 @@ import {
     MessagingReceipt,
     OFTReceipt
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
-import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
 // External
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -36,14 +32,15 @@ import {
     LZSendParam
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
-import {TapiocaOmnichainEngineCodec} from "contracts/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {BaseToeMsgType} from "tapioca-periph/tapiocaOmnichainEngine/BaseToeMsgType.sol";
 
 // Tapioca Tests
 import {ToeTestHelper} from "./ToeTestHelper.sol";
 import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ToeTokenMock} from "../mocks/ToeTokenMock/ToeTokenMock.sol";
+import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {ERC721Mock} from "../mocks/ERC721Mock.sol";
 
 import "forge-std/Test.sol";
@@ -60,6 +57,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
     ToeTokenMock aToeOFT;
     ToeTokenMock bToeOFT;
 
+    ICluster cluster;
     ToeTestHelper toeTestHelper;
 
     uint256 internal userAPKey = 0x1;
@@ -91,7 +89,9 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        __extExec = address(new TapiocaOmnichainExtExec());
+        cluster = ICluster(address(new Cluster(1, address(__owner))));
+
+        __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
         aToeOFT = ToeTokenMock(
             payable(
                 _deployOApp(

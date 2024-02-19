@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-
 // Tapioca
-import {ITapiocaOmnichainEngine, LZSendParam, ERC20PermitStruct} from "../periph/ITapiocaOmnichainEngine.sol";
-import {ICommonData, ICommonExternalContracts} from "../common/ICommonData.sol";
 import {
+    ITapiocaOmnichainEngine,
+    YieldBoxApproveAssetMsg,
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    ERC20PermitStruct,
+    LZSendParam
+} from "../periph/ITapiocaOmnichainEngine.sol";
+import {
+    IOptionsParticipateData,
     ITapiocaOptionBroker,
     IExerciseOptionsData,
-    IOptionsParticipateData,
     IOptionsExitData
 } from "../tap-token/ITapiocaOptionBroker.sol";
 import {IOptionsUnlockData, IOptionsLockData} from "../tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ICommonData, ICommonExternalContracts} from "../common/ICommonData.sol";
 import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
 import {IDepositData} from "../common/ICommonData.sol";
 
@@ -98,50 +102,6 @@ struct ExerciseOptionsMsg {
     //@dev send back to source message params
     LZSendParam lzSendParams;
     bytes composeMsg;
-}
-
-/**
- * @notice Encodes the message for the ybPermitAll() operation.
- */
-struct YieldBoxApproveAllMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permit;
-}
-
-/**
- * @notice Encodes the message for the ybPermitAll() operation.
- */
-struct YieldBoxApproveAssetMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 assetId;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permit;
-}
-
-/**
- * @notice Encodes the message for the market.permitAction() or market.permitBorrow() operations.
- */
-struct MarketPermitActionMsg {
-    address target;
-    address owner;
-    address spender;
-    uint256 value;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bool permitAsset;
 }
 
 struct IRemoveAndRepay {
