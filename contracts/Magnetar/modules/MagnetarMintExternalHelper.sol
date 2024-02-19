@@ -11,7 +11,7 @@ import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine
 
 contract MagnetarMintExternalHelper {
 
-    function mintBBLendXChainSGLEncoder(bytes memory composeMsg, uint256 amountToSet) public returns (bytes memory) {
+    function mintBBLendXChainSGLEncoder(bytes memory composeMsg, uint256 amountToSet) public pure returns (bytes memory) {
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
                 TapiocaOmnichainEngineCodec.decodeToeComposeMsg(composeMsg);
 
@@ -22,7 +22,7 @@ contract MagnetarMintExternalHelper {
             TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
     }
 
-    function depositYBLendSGLLockXchainTOLPEncoder(bytes memory composeMsg, uint256 amountToSet) public returns (bytes memory) {
+    function depositYBLendSGLLockXchainTOLPEncoder(bytes memory composeMsg, uint256 amountToSet) public pure returns (bytes memory) {
          // decode `composeMsg` and re-encode it with updated params
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
