@@ -86,6 +86,7 @@ describe.only('ZeroXSwapper-fork test on mainnet', () => {
             await ethers.getContractFactory('ZeroXSwapper')
         ).deploy(
             '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+            ethers.constants.AddressZero, // 0x for 1inch for now
             cluster.address,
             owner.address,
         );
