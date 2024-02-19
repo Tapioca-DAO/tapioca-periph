@@ -36,6 +36,8 @@ interface IPearlmit {
         bytes signedPermit; // Signature of the permit.
     }
 
+    function approve(address token, uint256 id, address operator, uint200 amount, uint48 expiration) external;
+
     function allowance(address owner, address operator, address token, uint256 id)
         external
         view
