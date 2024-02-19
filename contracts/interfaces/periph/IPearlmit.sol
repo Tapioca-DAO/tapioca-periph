@@ -42,5 +42,16 @@ interface IPearlmit {
         returns (uint256 allowedAmount, uint256 expiration);
 
     function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch) external;
+
     function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
+
+    function transferFromERC1155(address owner, address to, address token, uint256 id, uint256 amount)
+        external
+        returns (bool isError);
+
+    function transferFromERC20(address owner, address to, address token, uint256 amount)
+        external
+        returns (bool isError);
+
+    function transferFromERC721(address owner, address to, address token, uint256 id) external returns (bool isError);
 }
