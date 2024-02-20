@@ -122,7 +122,8 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(0),
                                 IPearlmit(address(pearlmit))
                             )
-                        )
+                        ),
+                        address(pearlmit)
                     )
                 )
             )
@@ -155,7 +156,8 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(0),
                                 IPearlmit(address(pearlmit))
                             )
-                        )
+                        ),
+                        address(pearlmit)
                     )
                 )
             )
