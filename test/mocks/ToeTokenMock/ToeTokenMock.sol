@@ -2,11 +2,12 @@
 pragma solidity 0.8.22;
 
 // External
-import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ModuleManager} from "tapioca-periph/utils/ModuleManager.sol";
 
 /*
@@ -28,12 +29,24 @@ contract ToeTokenMock is BaseTapiocaOmnichainEngine, ModuleManager, ERC20Permit 
         ToeTokenReceiver
     }
 
-    constructor(address _endpoint, address _owner, address _extExec, address _senderModule, address _receiverModule)
-        BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec)
-        ERC20Permit("TOEM")
-    {
+    constructor(
+        address _endpoint,
+        address _owner,
+        address _extExec,
+        address _senderModule,
+        address _receiverModule,
+        IPearlmit _pearlmit
+    ) BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec, _pearlmit) ERC20Permit("TOEM") {
         _setModule(uint8(Module.ToeTokenSender), _senderModule);
         _setModule(uint8(Module.ToeTokenReceiver), _receiverModule);
+    }
+
+    function transferFrom(address from, address to, uint256 value)
+        public
+        override(BaseTapiocaOmnichainEngine, ERC20)
+        returns (bool)
+    {
+        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
     }
 
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {

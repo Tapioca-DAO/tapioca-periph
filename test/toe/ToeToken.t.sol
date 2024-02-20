@@ -38,6 +38,7 @@ import {BaseToeMsgType} from "tapioca-periph/tapiocaOmnichainEngine/BaseToeMsgTy
 import {ToeTestHelper} from "./ToeTestHelper.sol";
 import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
+import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ToeTokenMock} from "../mocks/ToeTokenMock/ToeTokenMock.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
@@ -57,6 +58,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
     ToeTokenMock aToeOFT;
     ToeTokenMock bToeOFT;
 
+    Pearlmit pearlmit;
     ICluster cluster;
     ToeTestHelper toeTestHelper;
 
@@ -89,6 +91,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
+        pearlmit = new Pearlmit("Pearlmit", "1");
         cluster = ICluster(address(new Cluster(1, address(__owner))));
 
         __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
@@ -100,8 +103,26 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                         address(endpoints[aEid]),
                         __owner,
                         __extExec,
-                        address(new ToeTokenSenderMock("", "", address(endpoints[aEid]), address(this), address(0))),
-                        address(new ToeTokenReceiverMock("", "", address(endpoints[aEid]), address(this), address(0)))
+                        address(
+                            new ToeTokenSenderMock(
+                                "",
+                                "",
+                                address(endpoints[aEid]),
+                                address(this),
+                                address(0),
+                                IPearlmit(address(pearlmit))
+                            )
+                        ),
+                        address(
+                            new ToeTokenReceiverMock(
+                                "",
+                                "",
+                                address(endpoints[aEid]),
+                                address(this),
+                                address(0),
+                                IPearlmit(address(pearlmit))
+                            )
+                        )
                     )
                 )
             )
@@ -115,8 +136,26 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                         address(endpoints[bEid]),
                         __owner,
                         address(__extExec),
-                        address(new ToeTokenSenderMock("", "", address(endpoints[bEid]), address(this), address(0))),
-                        address(new ToeTokenReceiverMock("", "", address(endpoints[bEid]), address(this), address(0)))
+                        address(
+                            new ToeTokenSenderMock(
+                                "",
+                                "",
+                                address(endpoints[bEid]),
+                                address(this),
+                                address(0),
+                                IPearlmit(address(pearlmit))
+                            )
+                        ),
+                        address(
+                            new ToeTokenReceiverMock(
+                                "",
+                                "",
+                                address(endpoints[bEid]),
+                                address(this),
+                                address(0),
+                                IPearlmit(address(pearlmit))
+                            )
+                        )
                     )
                 )
             )
