@@ -28,7 +28,6 @@ import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
    
 */
 
-
 /**
  * @title MagnetarMintXChainModule
  * @author TapiocaDAO
@@ -76,7 +75,8 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         DepositAndSendForLockingData memory lendData = abi.decode(tapComposeMsg_, (DepositAndSendForLockingData));
         lendData.lendAmount = data.mintData.mintAmount;
 
-        data.lendSendParams.lzParams.sendParam.composeMsg = TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
+        data.lendSendParams.lzParams.sendParam.composeMsg =
+            TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
 
         // send on another layer for lending
         _withdrawToChain(
@@ -96,7 +96,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         );
     }
 
-    
     /**
      * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
      * @dev Cross chain flow:
