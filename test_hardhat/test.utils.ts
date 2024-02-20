@@ -680,6 +680,12 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
         ).deploy()
     ).deployed();
     hre.tracer.nameTags[magnetarMintModule.address] = 'magnetarMintModule';
+    const magnetarMintXChainModule = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarMintXChainModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarMintXChainModule.address] = 'magnetarMintXChainModule';
     const magnetarOptionModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarOptionModule')
@@ -702,6 +708,7 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
         magnetarAssetModule.address,
         magnetarCollateralModule.address,
         magnetarMintModule.address,
+        magnetarMintXChainModule.address,
         magnetarOptionModule.address,
         magnetarYieldboxModule.address,
     );

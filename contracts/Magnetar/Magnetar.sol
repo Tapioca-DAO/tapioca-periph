@@ -43,6 +43,7 @@ contract Magnetar is BaseMagnetar {
         address payable _assetModule,
         address payable _collateralModule,
         address payable _mintModule,
+        address payable _mintXChainModule,
         address payable _optionModule,
         address payable _yieldBoxModule,
         IPearlmit _pearlmit
@@ -50,6 +51,7 @@ contract Magnetar is BaseMagnetar {
         modules[MagnetarModule.AssetModule] = _assetModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;
+        modules[MagnetarModule.MintXChainModule] = _mintXChainModule;
         modules[MagnetarModule.OptionModule] = _optionModule;
         modules[MagnetarModule.YieldBoxModule] = _yieldBoxModule;
     }
@@ -115,6 +117,12 @@ contract Magnetar is BaseMagnetar {
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.MintModule) {
                 _executeModule(MagnetarModule.MintModule, _action.call);
+                continue; // skip the rest of the loop
+            }
+
+             /// @dev Modules will not return result data.
+            if (_action.id == MagnetarAction.MintXChainModule) {
+                _executeModule(MagnetarModule.MintXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 

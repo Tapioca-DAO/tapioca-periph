@@ -10,14 +10,20 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
     MagnetarWithdrawData,
-    DepositRepayAndRemoveCollateralFromMarketData
+    DepositRepayAndRemoveCollateralFromMarketData,
+    DepositAndSendForLockingData,
+    IDepositData,
+    LockAndParticipateData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -38,6 +44,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  */
 contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
+    using SafeApprove for address;
 
     error Magnetar_WithdrawParamsMismatch();
     error Magnetar_ActionParamsMismatch();
@@ -130,4 +137,124 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             }
         }
     }
+
+
+    /**
+     * @notice cross-chain helper to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev Cross chain flow:
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
+     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     *  Lends on SGL and sends receipt token on another layer
+     *  ! Handles `step 2` described above !
+     *  !!! All uint variables should be in the LD format !!!
+     *  !!! Sets `fraction` parameter of the next call (step 2) !!!
+     * @param data.user the user to perform the operation for
+     * @param data.singularity the SGL address
+     * @param data.lendAmount the amount to lend on SGL
+     * @param data.depositData the data needed to deposit on YieldBox
+     * @param data.lockAndParticipateSendParams LZ send params for the lock or/and the participate operations
+     */
+    function depositYBLendSGLLockXchainTOLP(DepositAndSendForLockingData memory data) public payable {
+        // Check sender
+        _checkSender(data.user);
+
+        address yieldBox = IMarket(data.singularity).yieldBox();
+
+        // if `depositData.deposit`:
+        //      - deposit SGL asset to YB for `data.user`
+        // if `lendAmount` > 0:
+        //      - add asset to SGL
+        uint256 fraction =
+            _depositYBLendSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
+
+        // wrap SGL receipt into tReceipt
+        // ! User should approve `address(this)` for `IERC20(data.singularity)` !
+        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
+
+        data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+
+
+         // decode `composeMsg` and re-encode it with updated params
+        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg);
+
+        LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
+        lockData.fraction = toftAmount;
+
+        data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg = TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lockData), msgType_, msgIndex_, nextMsg_);
+
+        // send on another layer for lending
+        _withdrawToChain(
+            MagnetarWithdrawData({
+                yieldBox: yieldBox,
+                assetId: data.assetId,
+                unwrap: false,
+                lzSendParams: data.lockAndParticipateSendParams.lzParams,
+                sendGas: data.lockAndParticipateSendParams.lzSendGas,
+                composeGas: data.lockAndParticipateSendParams.lzComposeGas,
+                sendVal: data.lockAndParticipateSendParams.lzSendVal,
+                composeVal: data.lockAndParticipateSendParams.lzComposeVal,
+                composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
+                composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
+                withdraw: true
+            })
+        );
+    }
+
+
+    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
+        private
+        returns (uint256 toftAmount)
+    {
+        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
+
+        (, address tReceiptAddress,,) = yieldBox.assets(assetId);
+
+        IERC20(sgl).approve(tReceiptAddress, fraction);
+        toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
+        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
+    }
+    function _depositYBLendSGL(
+        IDepositData memory depositData,
+        address singularityAddress,
+        IYieldBox yieldBox_,
+        address user,
+        uint256 lendAmount
+    ) private returns (uint256 fraction) {
+        if (singularityAddress != address(0)) {
+            if (!cluster.isWhitelisted(0, singularityAddress)) {
+                revert Magnetar_TargetNotWhitelisted(singularityAddress);
+            }
+            _setApprovalForYieldBox(singularityAddress, yieldBox_);
+
+            IMarket singularity_ = IMarket(singularityAddress);
+
+            // if `depositData.deposit`:
+            //      - deposit SGL asset to YB for `user`
+            uint256 sglAssetId = singularity_.assetId();
+            (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
+            if (depositData.deposit) {
+                depositData.amount = _extractTokens(user, sglAssetAddress, depositData.amount);
+
+                sglAssetAddress.safeApprove(address(yieldBox_), depositData.amount);
+                yieldBox_.depositAsset(sglAssetId, address(this), user, depositData.amount, 0);
+            }
+
+            // if `lendAmount` > 0:
+            //      - add asset to SGL
+            fraction = 0;
+            if (lendAmount == 0 && depositData.deposit) {
+                lendAmount = depositData.amount;
+            }
+            if (lendAmount > 0) {
+                uint256 lendShare = yieldBox_.toShare(sglAssetId, lendAmount, false);
+                fraction = ISingularity(singularityAddress).addAsset(user, user, false, lendShare);
+            }
+
+            _revertYieldBoxApproval(singularityAddress, yieldBox_);
+        }
+    }
+
+
 }
