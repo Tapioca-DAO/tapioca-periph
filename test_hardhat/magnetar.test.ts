@@ -32,6 +32,8 @@ import {
     MagnetarCollateralModule__factory,
     MagnetarMintModule,
     MagnetarMintModule__factory,
+    MagnetarMintXChainModule,
+    MagnetarMintXChainModule__factory,
     MagnetarOptionModule,
     MagnetarOptionModule__factory,
     MagnetarYieldBoxModule,
@@ -2327,49 +2329,6 @@ describe('MagnetarV2', () => {
                 totalBingBangCollateral,
                 false,
             );
-
-            // await expect(
-            //     magnetar.exitPositionAndRemoveCollateral(
-            //         deployer.address,
-            //         {
-            //             magnetar: magnetar.address,
-            //             singularity: wethUsdoSingularity.address,
-            //             bigBang: wethBigBangMarket.address,
-            //         },
-            //         {
-            //             removeAssetFromSGL: true,
-            //             removeAmount: fractionAmount,
-            //             repayAssetOnBB: true,
-            //             repayAmount: fractionAmount,
-            //             removeCollateralFromBB: true,
-            //             collateralAmount: totalBingBangCollateralAmount,
-            //             exitData: {
-            //                 exit: false,
-            //                 oTAPTokenID: 0,
-            //                 target: ethers.constants.AddressZero,
-            //             },
-            //             unlockData: {
-            //                 unlock: false,
-            //                 target: ethers.constants.AddressZero,
-            //                 tokenId: 0,
-            //             },
-            //             assetWithdrawData: {
-            //                 withdraw: false,
-            //                 withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
-            //                 withdrawLzChainId: 0,
-            //                 withdrawLzFeeAmount: 0,
-            //                 withdrawOnOtherChain: false,
-            //             },
-            //             collateralWithdrawData: {
-            //                 withdraw: false,
-            //                 withdrawAdapterParams: ethers.utils.toUtf8Bytes(''),
-            //                 withdrawLzChainId: 0,
-            //                 withdrawLzFeeAmount: 0,
-            //                 withdrawOnOtherChain: false,
-            //             },
-            //         },
-            //     ),
-            // ).to.be.revertedWith('SGL: min limit');
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);

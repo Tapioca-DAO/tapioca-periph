@@ -167,8 +167,9 @@ enum MagnetarAction {
     AssetModule, //5  Usdo Singular operations.
     CollateralModule, //6 Collateral Singular related operations.
     MintModule, //7 BigBang Singular related operations.
-    OptionModule, //8 Market Module related operations.
-    YieldBoxModule //9 YieldBox module related operations.
+    MintXChainModule, //8 BigBang Singular related operations.
+    OptionModule, //9 Market Module related operations.
+    YieldBoxModule //10 YieldBox module related operations.
 
 }
 
@@ -176,6 +177,7 @@ enum MagnetarModule {
     AssetModule,
     CollateralModule,
     MintModule,
+    MintXChainModule,
     OptionModule,
     YieldBoxModule
 }
