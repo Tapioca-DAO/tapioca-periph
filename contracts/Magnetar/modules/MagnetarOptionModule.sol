@@ -98,8 +98,11 @@ contract MagnetarOptionModule is MagnetarBaseModule {
                 revert Magnetar_ActionParamsMismatch();
             }
             if (ownerOfTapTokenId == data.user) {
-                IERC721(oTapAddress).safeTransferFrom(
-                    data.user, address(this), data.removeAndRepayData.exitData.oTAPTokenID, "0x"
+                // IERC721(oTapAddress).safeTransferFrom(
+                //     data.user, address(this), data.removeAndRepayData.exitData.oTAPTokenID, "0x"
+                // );
+                pearlmit.transferFromERC721(
+                    data.user, address(this), oTapAddress, data.removeAndRepayData.exitData.oTAPTokenID
                 );
             }
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
