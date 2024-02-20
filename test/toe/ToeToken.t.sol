@@ -45,6 +45,7 @@ import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {ERC721Mock} from "../mocks/ERC721Mock.sol";
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 
 // TODO Clean refactor
 contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
@@ -123,7 +124,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 IPearlmit(address(pearlmit))
                             )
                         ),
-                        address(pearlmit)
+                        IPearlmit(address(pearlmit))
                     )
                 )
             )
@@ -157,7 +158,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 IPearlmit(address(pearlmit))
                             )
                         ),
-                        address(pearlmit)
+                        IPearlmit(address(pearlmit))
                     )
                 )
             )
