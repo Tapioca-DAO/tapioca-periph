@@ -28,6 +28,8 @@ interface ISingularity is IMarket {
 
     function totalAsset() external view returns (uint128 elastic, uint128 base);
 
+    function addAsset(address from, address to, bool skim, uint256 share) external returns (uint256 fraction);
+
     function removeAsset(address from, address to, uint256 fraction) external returns (uint256 share);
 
     function name() external view returns (string memory);

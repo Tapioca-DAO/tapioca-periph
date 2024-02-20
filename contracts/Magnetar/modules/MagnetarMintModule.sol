@@ -21,11 +21,12 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {MagnetarMintExternalHelper} from "./MagnetarMintExternalHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
@@ -93,7 +94,9 @@ contract MagnetarMintModule is MagnetarBaseModule {
         //  - performs bigBang_.addCollateral
         //  - performs bigBang_.borrow
         if (data.mintData.mint) {
-            _depositYBBorrowBB(data.mintData, data.externalContracts.bigBang, yieldBox_, data.user);
+            _depositYBBorrowBB(
+                data.mintData, data.externalContracts.bigBang, yieldBox_, data.user, data.externalContracts.marketHelper
+            );
         }
 
         // if `depositData.deposit`:
@@ -152,11 +155,13 @@ contract MagnetarMintModule is MagnetarBaseModule {
         //  - performs bigBang_.addCollateral
         //  - performs bigBang_.borrow
         if (data.mintData.mint) {
-            _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user);
+            _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user, data.marketHelper);
         }
 
         // decode `composeMsg` and re-encode it with updated params
-        data.lendSendParams.lzParams.sendParam.composeMsg = _externalHelper.mintBBLendXChainSGLEncoder(data.lendSendParams.lzParams.sendParam.composeMsg, data.mintData.mintAmount);
+        data.lendSendParams.lzParams.sendParam.composeMsg = _externalHelper.mintBBLendXChainSGLEncoder(
+            data.lendSendParams.lzParams.sendParam.composeMsg, data.mintData.mintAmount
+        );
 
         // send on another layer for lending
         _withdrawToChain(
@@ -212,7 +217,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
 
         // decode `composeMsg` and re-encode it with updated params
-        data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg = _externalHelper.depositYBLendSGLLockXchainTOLPEncoder(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg, toftAmount);
+        data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg = _externalHelper
+            .depositYBLendSGLLockXchainTOLPEncoder(
+            data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg, toftAmount
+        );
 
         // send on another layer for lending
         _withdrawToChain(
@@ -386,16 +394,20 @@ contract MagnetarMintModule is MagnetarBaseModule {
             }
             if (lendAmount > 0) {
                 uint256 lendShare = yieldBox_.toShare(sglAssetId, lendAmount, false);
-                fraction = singularity_.addAsset(user, user, false, lendShare);
+                fraction = ISingularity(singularityAddress).addAsset(user, user, false, lendShare);
             }
 
             _revertYieldBoxApproval(singularityAddress, yieldBox_);
         }
     }
 
-    function _depositYBBorrowBB(IMintData memory mintData, address bigBangAddress, IYieldBox yieldBox_, address user)
-        private
-    {
+    function _depositYBBorrowBB(
+        IMintData memory mintData,
+        address bigBangAddress,
+        IYieldBox yieldBox_,
+        address user,
+        address marketHelper
+    ) private {
         if (bigBangAddress == address(0)) {
             // @dev for dev trace
             emit Magnetar_ZeroAddress();
@@ -403,6 +415,11 @@ contract MagnetarMintModule is MagnetarBaseModule {
             if (!cluster.isWhitelisted(0, bigBangAddress)) {
                 revert Magnetar_TargetNotWhitelisted(bigBangAddress);
             }
+
+            if (!cluster.isWhitelisted(0, marketHelper)) {
+                revert Magnetar_TargetNotWhitelisted(marketHelper);
+            }
+
             _setApprovalForYieldBox(bigBangAddress, yieldBox_);
 
             IMarket bigBang_ = IMarket(bigBangAddress);
@@ -429,17 +446,23 @@ contract MagnetarMintModule is MagnetarBaseModule {
             // add collateral to BB
             if (mintData.collateralDepositData.amount > 0) {
                 _setApprovalForYieldBox(address(bigBang_), yieldBox_);
-                bigBang_.addCollateral(
+
+                (Module[] memory modules, bytes[] memory calls) = IMarketHelper(marketHelper).addCollateral(
                     mintData.collateralDepositData.deposit ? address(this) : user,
                     user,
                     false,
                     mintData.collateralDepositData.amount,
                     bbCollateralShare
                 );
+                bigBang_.execute(modules, calls, true);
             }
 
             // mints from BB
-            bigBang_.borrow(user, user, mintData.mintAmount);
+            {
+                (Module[] memory modules, bytes[] memory calls) =
+                    IMarketHelper(marketHelper).borrow(user, user, mintData.mintAmount);
+                bigBang_.execute(modules, calls, true);
+            }
 
             _revertYieldBoxApproval(bigBangAddress, yieldBox_);
         }

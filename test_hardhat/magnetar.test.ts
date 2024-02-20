@@ -43,6 +43,7 @@ import { MintFromBBAndLendOnSGLDataStruct } from '@typechain/contracts/Magnetar/
 import { DepositRepayAndRemoveCollateralFromMarketDataStruct } from '@typechain/contracts/Magnetar/modules/MagnetarAssetModule';
 import { ExitPositionAndRemoveCollateralDataStruct } from '@typechain/contracts/Magnetar/modules/MagnetarOptionModule';
 import { BigNumber } from 'ethers';
+import { ContractFunctionVisibility } from 'hardhat/internal/hardhat-network/stack-traces/model';
 
 const MAX_DEADLINE = 9999999999999;
 
@@ -157,6 +158,7 @@ describe('MagnetarV2', () => {
                 timeTravel,
                 cluster,
                 multiSwapper,
+                marketHelper,
             } = await loadFixture(register);
 
             const usdoStratregy = await penrose.emptyStrategies(usd0.address);
@@ -231,14 +233,13 @@ describe('MagnetarV2', () => {
                 sglData,
                 true,
             );
-            const wethUsdoSingularity = new ethers.Contract(
+            const wethUsdoSingularity  = await ethers.getContractAt(
+                'Singularity',
                 await penrose.clonesOf(
                     mediumRiskMC.address,
                     (await penrose.clonesOfCount(mediumRiskMC.address)).sub(1),
-                ),
-                SingularityArtifact.abi,
-                ethers.provider,
-            ).connect(deployer);
+                )
+            );
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
 
             //Deploy & set LiquidationQueue
@@ -337,6 +338,7 @@ describe('MagnetarV2', () => {
             const depositAddCollateralAndBorrowFromMarketData: DepositAddCollateralAndBorrowFromMarketDataStruct =
                 {
                     market: wethUsdoSingularity.address,
+                    marketHelper: marketHelper.address,
                     user: deployer.address,
                     collateralAmount: wethMintVal,
                     borrowAmount: borrowAmount,
@@ -407,10 +409,11 @@ describe('MagnetarV2', () => {
                 false,
             );
             expect(collateralAmpunt.eq(wethMintVal)).to.be.true;
+            
+            const borrowCallData = await marketHelper.borrow(deployer.address, deployer.address, borrowAmount);
 
-            await wethUsdoSingularity
-                .connect(deployer)
-                .borrow(deployer.address, deployer.address, borrowAmount);
+            await wethUsdoSingularity.execute(borrowCallData[0], borrowCallData[1], true);
+
 
             await yieldBox.transfer(
                 deployer.address,
@@ -971,6 +974,7 @@ describe('MagnetarV2', () => {
                 initContracts,
                 magnetar,
                 cluster,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1026,6 +1030,7 @@ describe('MagnetarV2', () => {
                                     singularity: wethUsdcSingularity.address,
                                     magnetar: magnetar.address,
                                     bigBang: ethers.constants.AddressZero,
+                                    marketHelper: marketHelper.address,
                                 },
                             } as MintFromBBAndLendOnSGLDataStruct,
                         ],
@@ -1044,6 +1049,7 @@ describe('MagnetarV2', () => {
                 magnetar,
                 wethAssetId,
                 cluster,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1094,6 +1100,7 @@ describe('MagnetarV2', () => {
                                 singularity: wethUsdcSingularity.address,
                                 magnetar: magnetar.address,
                                 bigBang: ethers.constants.AddressZero,
+                                marketHelper: marketHelper.address,
                             },
                         } as MintFromBBAndLendOnSGLDataStruct,
                     ],
@@ -1146,6 +1153,7 @@ describe('MagnetarV2', () => {
                 deployer,
                 yieldBox,
                 cluster,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1204,6 +1212,7 @@ describe('MagnetarV2', () => {
                     [
                         {
                             market: wethUsdcSingularity.address,
+                            marketHelper: marketHelper.address,
                             user: eoa1.address,
                             collateralAmount: usdcMintVal,
                             borrowAmount: borrowAmount,
@@ -1248,6 +1257,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1304,6 +1314,7 @@ describe('MagnetarV2', () => {
 
             const depositAddCollateralAndBorrowFromMarketData = {
                 market: wethUsdcSingularity.address,
+                marketHelper: marketHelper.address,
                 user: eoa1.address,
                 collateralAmount: usdcMintVal,
                 borrowAmount: borrowAmount,
@@ -1341,6 +1352,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1403,6 +1415,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 collateralAmount: usdcMintVal,
                                 borrowAmount: borrowAmount,
@@ -1429,6 +1442,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1492,6 +1506,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 collateralAmount: usdcMintVal,
                                 borrowAmount: borrowAmount,
@@ -1519,6 +1534,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1596,6 +1612,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 collateralAmount: usdcMintVal,
                                 borrowAmount: borrowAmount,
@@ -1624,6 +1641,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 yieldBox,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             const assetId = await wethUsdcSingularity.assetId();
@@ -1687,6 +1705,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 collateralAmount: usdcMintVal,
                                 borrowAmount: borrowAmount,
@@ -1755,6 +1774,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 depositAmount: userBorrowPart.mul(2),
                                 repayAmount: userBorrowPart,
@@ -1781,6 +1801,7 @@ describe('MagnetarV2', () => {
                 approveTokensAndSetBarApproval,
                 wethDepositAndAddAsset,
                 deployer,
+                marketHelper,
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1845,6 +1866,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 collateralAmount: usdcMintVal,
                                 borrowAmount: borrowAmount,
@@ -1923,6 +1945,7 @@ describe('MagnetarV2', () => {
                         [
                             {
                                 market: wethUsdcSingularity.address,
+                                marketHelper: marketHelper.address,
                                 user: eoa1.address,
                                 depositAmount: userBorrowPart.mul(2),
                                 repayAmount: userBorrowPart,
@@ -1953,6 +1976,7 @@ describe('MagnetarV2', () => {
                 deployer,
                 cluster,
                 multiSwapper,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2071,6 +2095,7 @@ describe('MagnetarV2', () => {
                                     singularity: wethUsdoSingularity.address,
                                     magnetar: magnetar.address,
                                     bigBang: wethBigBangMarket.address,
+                                    marketHelper: marketHelper.address,
                                 },
                             } as MintFromBBAndLendOnSGLDataStruct,
                         ],
@@ -2121,6 +2146,7 @@ describe('MagnetarV2', () => {
                 cluster,
                 deployer,
                 multiSwapper,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2261,6 +2287,7 @@ describe('MagnetarV2', () => {
                                     singularity: wethUsdoSingularity.address,
                                     magnetar: magnetar.address,
                                     bigBang: wethBigBangMarket.address,
+                                    marketHelper: marketHelper.address,
                                 },
                             } as MintFromBBAndLendOnSGLDataStruct,
                         ],
@@ -2339,7 +2366,9 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);
-
+        
+            await wethBigBangMarket.approve(magnetar.address, ethers.constants.MaxUint256);
+            await wethBigBangMarket.approveBorrow(magnetar.address, ethers.constants.MaxUint256);
             const receiverSplit = deployer.address.split('0x');
             const assetWithdrawToChainData = {
                 withdraw: false,
@@ -2408,6 +2437,7 @@ describe('MagnetarV2', () => {
                                     magnetar: magnetar.address,
                                     singularity: wethUsdoSingularity.address,
                                     bigBang: wethBigBangMarket.address,
+                                    marketHelper: marketHelper.address,
                                 },
                                 removeAndRepayData: {
                                     removeAssetFromSGL: true,
@@ -2463,6 +2493,7 @@ describe('MagnetarV2', () => {
                 deployer,
                 cluster,
                 multiSwapper,
+                marketHelper,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2579,6 +2610,7 @@ describe('MagnetarV2', () => {
                                     singularity: wethUsdoSingularity.address,
                                     magnetar: magnetar.address,
                                     bigBang: wethBigBangMarket.address,
+                                    marketHelper: marketHelper.address,
                                 },
                             } as MintFromBBAndLendOnSGLDataStruct,
                         ],
@@ -2657,6 +2689,7 @@ describe('MagnetarV2', () => {
                                     magnetar: magnetar.address,
                                     singularity: wethUsdoSingularity.address,
                                     bigBang: wethBigBangMarket.address,
+                                    marketHelper: marketHelper.address,
                                 },
                                 removeAndRepayData: {
                                     removeAssetFromSGL: true,
