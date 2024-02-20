@@ -1885,7 +1885,7 @@ export async function register(staging?: boolean) {
         cluster,
         magnetarHelper,
         deployLiquidationReceiverMock,
-        marketHelper
+        marketHelper,
     };
 
     /**

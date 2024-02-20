@@ -233,12 +233,12 @@ describe('MagnetarV2', () => {
                 sglData,
                 true,
             );
-            const wethUsdoSingularity  = await ethers.getContractAt(
+            const wethUsdoSingularity = await ethers.getContractAt(
                 'Singularity',
                 await penrose.clonesOf(
                     mediumRiskMC.address,
                     (await penrose.clonesOfCount(mediumRiskMC.address)).sub(1),
-                )
+                ),
             );
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
 
@@ -409,11 +409,18 @@ describe('MagnetarV2', () => {
                 false,
             );
             expect(collateralAmpunt.eq(wethMintVal)).to.be.true;
-            
-            const borrowCallData = await marketHelper.borrow(deployer.address, deployer.address, borrowAmount);
 
-            await wethUsdoSingularity.execute(borrowCallData[0], borrowCallData[1], true);
+            const borrowCallData = await marketHelper.borrow(
+                deployer.address,
+                deployer.address,
+                borrowAmount,
+            );
 
+            await wethUsdoSingularity.execute(
+                borrowCallData[0],
+                borrowCallData[1],
+                true,
+            );
 
             await yieldBox.transfer(
                 deployer.address,
@@ -2366,9 +2373,15 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(1, wethBigBangMarket.address, true);
             await cluster.updateContract(1, wethUsdoSingularity.address, true);
-        
-            await wethBigBangMarket.approve(magnetar.address, ethers.constants.MaxUint256);
-            await wethBigBangMarket.approveBorrow(magnetar.address, ethers.constants.MaxUint256);
+
+            await wethBigBangMarket.approve(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
+            await wethBigBangMarket.approveBorrow(
+                magnetar.address,
+                ethers.constants.MaxUint256,
+            );
             const receiverSplit = deployer.address.split('0x');
             const assetWithdrawToChainData = {
                 withdraw: false,

@@ -123,6 +123,7 @@ struct ILendOrRepayParams {
     uint256 depositAmount;
     uint256 repayAmount;
     address marketHelper;
+    address magnetar;
     address market;
     bool removeCollateral;
     uint256 removeCollateralAmount;
