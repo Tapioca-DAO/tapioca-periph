@@ -85,18 +85,15 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
      * @dev Setup the OApps by deploying them and setting up the endpoints.
      */
     function setUp() public override {
-        console.log("------------------A");
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
         vm.label(userA, "userA");
         vm.label(userB, "userB");
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
-        console.log("------------------B");
 
         pearlmit = new Pearlmit("Pearlmit", "1");
         cluster = ICluster(address(new Cluster(1, address(__owner))));
-        console.log("------------------C");
 
         __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
         aToeOFT = ToeTokenMock(
@@ -132,7 +129,6 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                 )
             )
         );
-        console.log("------------------D");
         vm.label(address(aToeOFT), "aToeOFT");
         bToeOFT = ToeTokenMock(
             payable(
@@ -167,18 +163,15 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                 )
             )
         );
-        console.log("------------------E");
         vm.label(address(bToeOFT), "bToeOFT");
 
         toeTestHelper = new ToeTestHelper();
-        console.log("------------------F");
 
         // config and wire the ofts
         address[] memory ofts = new address[](2);
         ofts[0] = address(aToeOFT);
         ofts[1] = address(bToeOFT);
         this.wireOApps(ofts);
-        console.log("------------------G");
     }
 
     /**

@@ -1659,7 +1659,11 @@ export async function register(staging?: boolean) {
     log('USDC, WETH, TAP and WBTC were set on twTap', staging);
 
     log('Deploying Magnetar', staging);
-    const { magnetar } = await registerMagnetar(cluster.address, pearlmit.address, deployer);
+    const { magnetar } = await registerMagnetar(
+        cluster.address,
+        pearlmit.address,
+        deployer,
+    );
     log(`Deployed Magnetar ${magnetar.address}`, staging);
     await cluster.updateContract(0, magnetar.address, true);
 

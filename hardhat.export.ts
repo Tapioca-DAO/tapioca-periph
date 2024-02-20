@@ -14,10 +14,14 @@ import {
     NetworksUserConfig,
 } from 'hardhat/types';
 
+import fs from 'fs';
+
 // Utils
 import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
+
+import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -32,6 +36,15 @@ declare global {
 
 // Load the env vars from the .env/<network>.env file. the <network> file name is the same as the network in hh `--network arbitrum_sepolia`
 loadEnv();
+
+// Solves the hardhat error [Error HH415: Two different source names]
+subtask(TASK_COMPILE_GET_REMAPPINGS).setAction(async (_, __, runSuper) => {
+    // Get the list of source paths that would normally be passed to the Solidity compiler
+    const remappings = await runSuper();
+    fs.cpSync('contracts/', 'gen/contracts/', { recursive: true });
+    remappings['tapioca-periph/'] = 'gen/contracts/';
+    return remappings;
+});
 
 // TODO refactor all of that in the SDK?
 type TNetwork = ReturnType<
