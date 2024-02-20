@@ -92,7 +92,17 @@ const config: HardhatUserConfig &
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 0,
+                        runs: 9999,
+                    },
+                },
+            },
+            'contracts/Magnetar/modules/MagnetarAssetXChainModule.sol': {
+                version: '0.8.22',
+                settings: {
+                    evmVersion: 'paris', // Latest before Shanghai
+                    optimizer: {
+                        enabled: true,
+                        runs: 5000,
                     },
                 },
             },

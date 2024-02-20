@@ -160,21 +160,23 @@ struct MagnetarCall {
 
 enum MagnetarAction {
     Permit, // 0 Permit singular operations.
-    Wrap, //1 Wrap/unwrap singular operations.
-    Market, //2 Market singular operations.
-    TapToken, //3 TapToken singular operations.
-    OFT, //4 LZ OFT singular operations.
-    AssetModule, //5  Usdo Singular operations.
-    CollateralModule, //6 Collateral Singular related operations.
-    MintModule, //7 BigBang Singular related operations.
-    MintXChainModule, //8 BigBang Singular related operations.
-    OptionModule, //9 Market Module related operations.
-    YieldBoxModule //10 YieldBox module related operations.
+    Wrap, // 1 Wrap/unwrap singular operations.
+    Market, // 2 Market singular operations.
+    TapToken, // 3 TapToken singular operations.
+    OFT, // 4 LZ OFT singular operations.
+    AssetModule, // 5  Usdo Singular operations.
+    AssetXChainModule, // 6  Usdo Singular operations.
+    CollateralModule, // 7 Collateral Singular related operations.
+    MintModule, // 8 BigBang Singular related operations.
+    MintXChainModule, // 9 BigBang Singular related operations.
+    OptionModule, // 10 Market Module related operations.
+    YieldBoxModule // 11 YieldBox module related operations.
 
 }
 
 enum MagnetarModule {
     AssetModule,
+    AssetXChainModule,
     CollateralModule,
     MintModule,
     MintXChainModule,

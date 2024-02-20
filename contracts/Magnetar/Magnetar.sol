@@ -41,6 +41,7 @@ contract Magnetar is BaseMagnetar {
         ICluster _cluster,
         address _owner,
         address payable _assetModule,
+        address payable _assetXChainModule,
         address payable _collateralModule,
         address payable _mintModule,
         address payable _mintXChainModule,
@@ -49,6 +50,7 @@ contract Magnetar is BaseMagnetar {
         IPearlmit _pearlmit
     ) BaseMagnetar(_cluster, _pearlmit, _owner) {
         modules[MagnetarModule.AssetModule] = _assetModule;
+        modules[MagnetarModule.AssetXChainModule] = _assetXChainModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;
         modules[MagnetarModule.MintXChainModule] = _mintXChainModule;
@@ -104,7 +106,13 @@ contract Magnetar is BaseMagnetar {
 
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.AssetModule) {
-                _executeModule(MagnetarModule.YieldBoxModule, _action.call);
+                _executeModule(MagnetarModule.AssetModule, _action.call);
+                continue; // skip the rest of the loop
+            }
+
+            /// @dev Modules will not return result data.
+            if (_action.id == MagnetarAction.AssetXChainModule) {
+                _executeModule(MagnetarModule.AssetXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
@@ -120,7 +128,7 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
-             /// @dev Modules will not return result data.
+            /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.MintXChainModule) {
                 _executeModule(MagnetarModule.MintXChainModule, _action.call);
                 continue; // skip the rest of the loop
