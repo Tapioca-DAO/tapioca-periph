@@ -37,7 +37,7 @@ declare global {
     }
 }
 
-describe.only('ZeroXSwapper-fork test on mainnet', () => {
+describe('ZeroXSwapper-fork test on mainnet', () => {
     before(function () {
         if (process.env.NETWORK != 'ethereum') {
             console.log(

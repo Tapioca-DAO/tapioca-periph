@@ -61,6 +61,7 @@ struct ExitPositionAndRemoveCollateralData {
  */
 struct DepositRepayAndRemoveCollateralFromMarketData {
     address market;
+    address marketHelper;
     address user;
     uint256 depositAmount;
     uint256 repayAmount;
@@ -73,6 +74,7 @@ struct DepositRepayAndRemoveCollateralFromMarketData {
  */
 struct DepositAddCollateralAndBorrowFromMarketData {
     address market;
+    address marketHelper;
     address user;
     uint256 collateralAmount;
     uint256 borrowAmount;
@@ -103,6 +105,7 @@ struct CrossChainMintFromBBAndLendOnSGLData {
     address user;
     address bigBang;
     address magnetar;
+    address marketHelper;
     IMintData mintData;
     LendOrLockSendParams lendSendParams;
 }

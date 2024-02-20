@@ -14,9 +14,10 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -40,6 +41,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
+    error Magnetar_MarketCallFailed(bytes call);
 
     /**
      * @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
@@ -163,7 +165,14 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         // performs a BigBang repay operation
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
             _setApprovalForYieldBox(address(bigBang_), yieldBox_);
-            uint256 repayed = bigBang_.repay(address(this), data.user, false, data.removeAndRepayData.repayAmount);
+
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
+                address(this), data.user, false, data.removeAndRepayData.repayAmount
+            );
+            (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
+
+            if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+            uint256 repayed = IMarketHelper(data.externalData.marketHelper).repayView(results[0]);
             // transfer excess amount to the data.user
             if (repayed < _removeAmount) {
                 uint256 bbAssetId = bigBang_.assetId();
@@ -180,7 +189,10 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             uint256 collateralShare = yieldBox_.toShare(_collateralId, data.removeAndRepayData.collateralAmount, false);
             address removeCollateralTo =
                 data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : data.user;
-            bigBang_.removeCollateral(data.user, removeCollateralTo, collateralShare);
+
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper)
+                .removeCollateral(data.user, removeCollateralTo, collateralShare);
+            bigBang_.execute(modules, calls, true);
 
             //withdraw
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {

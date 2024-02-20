@@ -6,10 +6,11 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 
 // Tapioca
 import {DepositAddCollateralAndBorrowFromMarketData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -59,6 +60,9 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         if (!cluster.isWhitelisted(0, data.market)) {
             revert Magnetar_TargetNotWhitelisted(data.market);
         }
+        if (!cluster.isWhitelisted(0, data.marketHelper)) {
+            revert Magnetar_TargetNotWhitelisted(data.marketHelper);
+        }
 
         IMarket market_ = IMarket(data.market);
         IYieldBox yieldBox_ = IYieldBox(market_.yieldBox());
@@ -82,16 +86,21 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         // performs .addCollateral on data.market
         if (data.collateralAmount > 0) {
             _setApprovalForYieldBox(data.market, yieldBox_);
-            market_.addCollateral(
+
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
                 data.deposit ? address(this) : data.user, data.user, false, data.collateralAmount, _share
             );
+            market_.execute(modules, calls, true);
         }
 
         // performs .borrow on data.market
         // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
         if (data.borrowAmount > 0) {
             address borrowReceiver = data.withdrawParams.withdraw ? address(this) : data.user;
-            market_.borrow(data.user, borrowReceiver, data.borrowAmount);
+
+            (Module[] memory modules, bytes[] memory calls) =
+                IMarketHelper(data.marketHelper).borrow(data.user, borrowReceiver, data.borrowAmount);
+            market_.execute(modules, calls, true);
 
             if (data.withdrawParams.withdraw) {
                 _withdrawToChain(data.withdrawParams);

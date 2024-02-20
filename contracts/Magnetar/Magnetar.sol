@@ -7,6 +7,7 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
@@ -246,9 +247,8 @@ contract Magnetar is BaseMagnetar {
         // sellCollateral(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
-            funcSig == IMarket.addCollateral.selector || funcSig == IMarket.borrow.selector
-                || funcSig == IMarket.addAsset.selector || funcSig == IMarket.repay.selector
-                || funcSig == IMarket.buyCollateral.selector || funcSig == IMarket.sellCollateral.selector
+            funcSig == IMarket.execute.selector || funcSig == ISingularity.addAsset.selector
+                || funcSig == ISingularity.removeAsset.selector
         ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));

@@ -14,9 +14,10 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -71,6 +72,9 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         if (!cluster.isWhitelisted(0, address(data.market))) {
             revert Magnetar_TargetNotWhitelisted(address(data.market));
         }
+        if (!cluster.isWhitelisted(0, address(data.marketHelper))) {
+            revert Magnetar_TargetNotWhitelisted(address(data.marketHelper));
+        }
 
         IMarket _market = IMarket(data.market);
         IYieldBox _yieldBox = IYieldBox(_market.yieldBox());
@@ -89,7 +93,10 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         // @dev performs a repay operation for the specified market
         if (data.repayAmount > 0) {
             _setApprovalForYieldBox(data.market, _yieldBox);
-            _market.repay(data.depositAmount > 0 ? address(this) : data.user, data.user, false, data.repayAmount);
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).repay(
+                data.depositAmount > 0 ? address(this) : data.user, data.user, false, data.repayAmount
+            );
+            _market.execute(modules, calls, true);
             _revertYieldBoxApproval(data.market, _yieldBox);
         }
 
@@ -100,7 +107,11 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         if (data.collateralAmount > 0) {
             address collateralWithdrawReceiver = data.withdrawCollateralParams.withdraw ? address(this) : data.user;
             uint256 collateralShare = _yieldBox.toShare(_market.collateralId(), data.collateralAmount, false);
-            _market.removeCollateral(data.user, collateralWithdrawReceiver, collateralShare);
+
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).removeCollateral(
+                data.user, collateralWithdrawReceiver, collateralShare
+            );
+            _market.execute(modules, calls, true);
 
             //withdraw
             if (data.withdrawCollateralParams.withdraw) {

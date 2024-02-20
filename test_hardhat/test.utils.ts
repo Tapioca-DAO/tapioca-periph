@@ -1751,6 +1751,13 @@ export async function register(staging?: boolean) {
         staging,
     );
 
+    // ------------------- 14 Create market helper -------------------
+    const marketHelperFactory = await ethers.getContractFactory('MarketHelper');
+    const marketHelper = await marketHelperFactory.deploy();
+    await marketHelper.deployed();
+
+    await cluster.updateContract(0, marketHelper.address, true);
+
     if (staging) {
         // ------------------- 18 Create WethUsd0Singularity -------------------
         log('Deploying WethUsd0Singularty', staging);
@@ -1878,6 +1885,7 @@ export async function register(staging?: boolean) {
         cluster,
         magnetarHelper,
         deployLiquidationReceiverMock,
+        marketHelper,
     };
 
     /**

@@ -12,6 +12,16 @@ pragma solidity 0.8.22;
    
 */
 
+/// @notice enum representing each type of module associated with a Singularity market
+/// @dev modules are contracts that holds a portion of the market's logic
+enum Module {
+    Base,
+    Borrow,
+    Collateral,
+    Liquidation,
+    Leverage
+}
+
 interface IMarket {
     function asset() external view returns (address);
 
@@ -41,20 +51,6 @@ interface IMarket {
 
     function liquidationMultiplier() external view returns (uint256);
 
-    function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share) external;
-
-    function removeCollateral(address from, address to, uint256 share) external;
-
-    function addAsset(address from, address to, bool skim, uint256 share) external returns (uint256 fraction);
-
-    function repay(address from, address to, bool skim, uint256 part) external returns (uint256 amount);
-
-    function borrow(address from, address to, uint256 amount) external returns (uint256 part, uint256 share);
-
-    function execute(bytes[] calldata calls, bool revertOnFail)
-        external
-        returns (bool[] memory successes, string[] memory results);
-
     function refreshPenroseFees() external returns (uint256 feeShares);
 
     function penrose() external view returns (address);
@@ -63,9 +59,10 @@ interface IMarket {
 
     function collateralizationRate() external view returns (uint256);
 
-    function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data)
+    function execute(Module[] calldata modules, bytes[] calldata calls, bool revertOnFail)
         external
-        returns (uint256 amountOut);
+        returns (bool[] memory successes, bytes[] memory results);
 
-    function sellCollateral(address from, uint256 share, bytes calldata data) external returns (uint256 amountOut);
+    function liquidationBonusAmount() external view returns (uint256);
+    function liquidationCollateralizationRate() external view returns (uint256);
 }

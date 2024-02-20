@@ -16,6 +16,7 @@ struct ICommonExternalContracts {
     address magnetar;
     address singularity;
     address bigBang;
+    address marketHelper;
 }
 
 struct IDepositData {
