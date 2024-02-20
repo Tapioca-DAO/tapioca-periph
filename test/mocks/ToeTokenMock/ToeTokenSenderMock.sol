@@ -6,7 +6,9 @@ import {
     MessagingReceipt, OFTReceipt, SendParam
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 // Tapioca
-import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {
+    BaseTapiocaOmnichainEngine, IPearlmit
+} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 
 /*
@@ -24,7 +26,12 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 contract ToeTokenSenderMock is BaseTapiocaOmnichainEngine, TapiocaOmnichainSender {
-    constructor(string memory _name, string memory _symbol, address _endpoint, address _delegate, address _extExec)
-        BaseTapiocaOmnichainEngine(_name, _symbol, _endpoint, _delegate, _extExec)
-    {}
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _endpoint,
+        address _delegate,
+        address _extExec,
+        IPearlmit _pearlmit
+    ) BaseTapiocaOmnichainEngine(_name, _symbol, _endpoint, _delegate, _extExec, _pearlmit) {}
 }

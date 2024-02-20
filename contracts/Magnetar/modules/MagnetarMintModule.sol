@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-
 // Tapioca
 import {MintFromBBAndLendOnSGLData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarMintCommonModule} from "./MagnetarMintCommonModule.sol";
+import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
 /*
 

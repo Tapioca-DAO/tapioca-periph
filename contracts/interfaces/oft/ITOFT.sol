@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // Tapioca
 import {IExerciseOptionsData} from "../tap-token/ITapiocaOptionBroker.sol";
+import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {MagnetarWithdrawData} from "../periph/IMagnetar.sol";
 
 import "../periph/ITapiocaOmnichainEngine.sol";
@@ -76,6 +77,7 @@ struct TOFTInitStruct {
     address vault;
     uint256 hostEid;
     address extExec;
+    IPearlmit pearlmit;
 }
 
 struct TOFTModulesInitStruct {

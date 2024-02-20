@@ -10,6 +10,7 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
@@ -32,7 +33,7 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
  * @author TapiocaDAO
  * @notice Storage contract for Magnetar & modules
  */
-contract MagnetarStorage is IERC721Receiver {
+contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     ICluster internal cluster;
     mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
 
@@ -52,6 +53,8 @@ contract MagnetarStorage is IERC721Receiver {
     error Magnetar_NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error Magnetar_ModuleNotFound(MagnetarModule module); // Module not found
     error Magnetar_UnknownReason(); // Revert reason not recognized
+
+    constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {}
 
     receive() external payable virtual {}
 

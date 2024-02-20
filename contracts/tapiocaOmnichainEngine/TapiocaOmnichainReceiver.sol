@@ -116,13 +116,15 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * @param _from The address initiating the composition, typically the OApp where the lzReceive was called.
      * @param _guid The unique identifier for the corresponding LayerZero src/dst tx.
      * @param _message The composed message payload in bytes. NOT necessarily the same payload passed via lzReceive.
+     * @param _executor The address of the executor for the composed message.
+     * @param _extraData Additional arbitrary data in bytes passed by the entity who executes the lzCompose.
      */
     function lzCompose(
         address _from,
         bytes32 _guid,
         bytes calldata _message,
-        address, // _executor The address of the executor for the composed message.
-        bytes calldata // _extraData Additional arbitrary data in bytes passed by the entity who executes the lzCompose.
+        address _executor,
+        bytes calldata _extraData
     ) external payable override {
         // Validate the from and the caller.
         if (_from != address(this)) {
@@ -135,7 +137,15 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // Decode LZ compose message.
         (address srcChainSender_, bytes memory oftComposeMsg_) =
             TapiocaOmnichainEngineCodec.decodeLzComposeMsg(_message);
+        // Execute the composed message.
+        _lzCompose(srcChainSender_, _guid, oftComposeMsg_);
+    }
 
+    /**
+     * @dev Modifier behavior of composed calls to be executed as a single Tx.
+     * Since composed msgs and approval
+     */
+    function _lzCompose(address srcChainSender_, bytes32 _guid, bytes memory oftComposeMsg_) internal {
         // Decode OFT compose message.
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(oftComposeMsg_);
@@ -169,15 +179,9 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             }
         }
 
-        emit ComposeReceived(msgType_, _guid, _message);
-
+        emit ComposeReceived(msgType_, _guid, tapComposeMsg_);
         if (nextMsg_.length > 0) {
-            endpoint.sendCompose(
-                address(this),
-                _guid,
-                msgIndex_ + 1, // Increment the index
-                abi.encodePacked(OFTMsgCodec.addressToBytes32(srcChainSender_), nextMsg_) // Re encode the compose msg with the composeSender
-            );
+            _lzCompose(address(this), _guid, nextMsg_);
         }
     }
 
