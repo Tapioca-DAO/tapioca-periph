@@ -660,13 +660,24 @@ async function registerTwTapMock(deployer: any) {
     const twTap = await TwTapMock.deploy();
     return { twTap };
 }
-async function registerMagnetar(clusterAddress: string, deployer: any) {
+async function registerMagnetar(
+    clusterAddress: string,
+    pearlmitAddress: string,
+    deployer: any,
+) {
     const magnetarAssetModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarAssetModule')
         ).deploy()
     ).deployed();
     hre.tracer.nameTags[magnetarAssetModule.address] = 'magnetarAssetModule';
+    const magnetarAssetXChain = await (
+        await (
+            await hre.ethers.getContractFactory('MagnetarAssetXChainModule')
+        ).deploy()
+    ).deployed();
+    hre.tracer.nameTags[magnetarAssetXChain.address] =
+        'MagnetarAssetXChainModule';
     const magnetarCollateralModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarCollateralModule')
@@ -685,7 +696,8 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
             await hre.ethers.getContractFactory('MagnetarMintXChainModule')
         ).deploy()
     ).deployed();
-    hre.tracer.nameTags[magnetarMintXChainModule.address] = 'magnetarMintXChainModule';
+    hre.tracer.nameTags[magnetarMintXChainModule.address] =
+        'magnetarMintXChainModule';
     const magnetarOptionModule = await (
         await (
             await hre.ethers.getContractFactory('MagnetarOptionModule')
@@ -706,11 +718,13 @@ async function registerMagnetar(clusterAddress: string, deployer: any) {
         clusterAddress,
         deployer.address,
         magnetarAssetModule.address,
+        magnetarAssetXChain.address,
         magnetarCollateralModule.address,
         magnetarMintModule.address,
         magnetarMintXChainModule.address,
         magnetarOptionModule.address,
         magnetarYieldboxModule.address,
+        pearlmitAddress,
     );
     await magnetar.deployed();
 
