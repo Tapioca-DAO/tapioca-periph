@@ -3,7 +3,6 @@ pragma solidity 0.8.22;
 
 // LZ
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -22,6 +21,7 @@ import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/pe
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -42,6 +42,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     error Magnetar_GasMismatch(uint256 expected, uint256 received);
     error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
+
+    constructor() MagnetarStorage(IPearlmit(address(0))) {}
 
     /// =====================
     /// Internal
@@ -97,7 +99,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
 
     function _extractTokens(address _from, address _token, uint256 _amount) internal returns (uint256) {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
-        IERC20(_token).safeTransferFrom(_from, address(this), _amount);
+        // IERC20(_token).safeTransferFrom(_from, address(this), _amount);
+        pearlmit.transferFromERC20(_from, address(this), address(_token), _amount);
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
         if (balanceAfter <= balanceBefore) revert Magnetar_ExtractTokenFail();
         return balanceAfter - balanceBefore;

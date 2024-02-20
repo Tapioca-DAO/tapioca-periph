@@ -11,6 +11,7 @@ import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -43,8 +44,9 @@ contract Magnetar is BaseMagnetar {
         address payable _collateralModule,
         address payable _mintModule,
         address payable _optionModule,
-        address payable _yieldBoxModule
-    ) BaseMagnetar(_cluster, _owner) {
+        address payable _yieldBoxModule,
+        IPearlmit _pearlmit
+    ) BaseMagnetar(_cluster, _pearlmit, _owner) {
         modules[MagnetarModule.AssetModule] = _assetModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;

@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {MagnetarStorage} from "./MagnetarStorage.sol";
+import {MagnetarStorage, IPearlmit} from "./MagnetarStorage.sol";
 
 /*
 
@@ -37,7 +37,7 @@ contract BaseMagnetar is Ownable, MagnetarStorage {
     event ClusterUpdated(ICluster indexed oldCluster, ICluster indexed newCluster);
     event MagnetarModuleExtenderSet(address old, address newMagnetarModuleExtender);
 
-    constructor(ICluster _cluster, address _owner) {
+    constructor(ICluster _cluster, IPearlmit _pearlmit, address _owner) MagnetarStorage(_pearlmit) {
         cluster = _cluster;
         transferOwnership(_owner);
     }

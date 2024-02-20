@@ -288,7 +288,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
         private
         returns (uint256 toftAmount)
     {
-        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
+        // IERC20(sgl).safeTransferFrom(user, address(this), fraction);
+        pearlmit.transferFromERC20(user, address(this), sgl, fraction);
 
         (, address tReceiptAddress,,) = yieldBox.assets(assetId);
 
@@ -345,7 +346,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
             if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
             //deposit to YieldBox
-            IERC20(singularityAddress).safeTransferFrom(user, address(this), fraction);
+            // IERC20(singularityAddress).safeTransferFrom(user, address(this), fraction);
+            pearlmit.transferFromERC20(user, address(this), singularityAddress, fraction);
             singularityAddress.safeApprove(address(yieldBox_), fraction);
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
