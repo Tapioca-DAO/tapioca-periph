@@ -346,7 +346,7 @@ async function registerPenrose(
     await pearlmit.deployed();
 
     await penrose.setPearlmit(pearlmit.address);
-    return { penrose };
+    return { penrose, pearlmit };
 }
 
 async function setPenroseAssets(
@@ -1524,7 +1524,7 @@ export async function register(staging?: boolean) {
 
     // ------------------- 2.2 Deploy Penrose -------------------
     log('Deploying Penrose', staging);
-    const { penrose } = await registerPenrose(
+    const { penrose, pearlmit } = await registerPenrose(
         yieldBox.address,
         cluster.address,
         tap.address,
@@ -1659,7 +1659,7 @@ export async function register(staging?: boolean) {
     log('USDC, WETH, TAP and WBTC were set on twTap', staging);
 
     log('Deploying Magnetar', staging);
-    const { magnetar } = await registerMagnetar(cluster.address, deployer);
+    const { magnetar } = await registerMagnetar(cluster.address, pearlmit.address, deployer);
     log(`Deployed Magnetar ${magnetar.address}`, staging);
     await cluster.updateContract(0, magnetar.address, true);
 
