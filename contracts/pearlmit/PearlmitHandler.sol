@@ -28,11 +28,13 @@ abstract contract PearlmitHandler is Ownable {
         pearlmit = _pearlmit;
     }
 
+    /// @notice Perform an allowance check for an ERC721 token on Pearlmit.
     function isERC721Approved(address owner, address spender, address token, uint256 id) internal view returns (bool) {
         (uint256 allowedAmount,) = pearlmit.allowance(owner, spender, token, id); // Returns 0 if not approved or expired
         return allowedAmount > 0;
     }
 
+    /// @notice Perform an allowance check for an ERC20 token on Pearlmit.
     function isERC20Approved(address owner, address spender, address token, uint256 amount)
         internal
         view
