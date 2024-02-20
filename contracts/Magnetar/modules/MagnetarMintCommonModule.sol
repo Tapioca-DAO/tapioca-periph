@@ -113,8 +113,7 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
             //deposit to YieldBox
-            IERC20(singularityAddress).safeTransferFrom(user, address(this), fraction);
-            singularityAddress.safeApprove(address(yieldBox_), fraction);
+            _extractTokens(user, singularityAddress, fraction);
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
             _setApprovalForYieldBox(lockData.target, yieldBox_);
