@@ -146,6 +146,7 @@ struct IBorrowParams {
 struct LeverageUpActionMsg {
     address user;
     address market;
+    address marketHelper;
     uint256 borrowAmount;
     uint256 supplyAmount;
     bytes executorData;
