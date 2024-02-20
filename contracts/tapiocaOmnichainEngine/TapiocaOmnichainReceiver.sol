@@ -116,15 +116,13 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * @param _from The address initiating the composition, typically the OApp where the lzReceive was called.
      * @param _guid The unique identifier for the corresponding LayerZero src/dst tx.
      * @param _message The composed message payload in bytes. NOT necessarily the same payload passed via lzReceive.
-     * @param _executor The address of the executor for the composed message.
-     * @param _extraData Additional arbitrary data in bytes passed by the entity who executes the lzCompose.
      */
     function lzCompose(
         address _from,
         bytes32 _guid,
         bytes calldata _message,
-        address _executor,
-        bytes calldata _extraData
+        address, //executor
+        bytes calldata //extra Data
     ) external payable override {
         // Validate the from and the caller.
         if (_from != address(this)) {
@@ -147,7 +145,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      */
     function _lzCompose(address srcChainSender_, bytes32 _guid, bytes memory oftComposeMsg_) internal {
         // Decode OFT compose message.
-        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+        (uint16 msgType_,,, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(oftComposeMsg_);
 
         // Call Permits/approvals if the msg type is a permit/approval.
