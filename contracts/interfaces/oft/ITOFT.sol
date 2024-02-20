@@ -131,6 +131,7 @@ struct MarketBorrowMsg {
 
 struct IRemoveParams {
     uint256 amount;
+    address magnetar;
     address marketHelper;
     address market;
 }
@@ -138,6 +139,7 @@ struct IRemoveParams {
 struct IBorrowParams {
     uint256 amount;
     uint256 borrowAmount;
+    address magnetar;
     address marketHelper;
     address market;
     bool deposit;
