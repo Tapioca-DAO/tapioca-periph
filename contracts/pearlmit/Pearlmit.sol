@@ -50,18 +50,18 @@ contract Pearlmit is PermitC {
      * batch.sigDeadline - deadline for the signature.
      * batch.signedPermit - signature of the permit.
      */
-    function permitBatchTransferFrom(IPearlmit.PermitBatchTransferFrom calldata batch) external {
+    function permitBatchTransferFrom(IPearlmit.PermitBatchTransferFrom calldata batch) external returns(bool[] memory errorStatus) {
         _checkPermitBatchApproval(batch);
-
         uint256 numPermits = batch.approvals.length;
+        errorStatus = new bool[](numPermits);
         for (uint256 i = 0; i < numPermits; ++i) {
             IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
             if (approval.tokenType == uint8(IPearlmit.TokenType.ERC20)) {
-                _transferFromERC20(approval.token, batch.owner, approval.operator, 0, approval.amount);
+                errorStatus[i] = _transferFromERC20(approval.token, batch.owner, approval.operator, 0, approval.amount);
             } else if (approval.tokenType == uint8(IPearlmit.TokenType.ERC721)) {
-                _transferFromERC721(batch.owner, approval.operator, approval.token, approval.id);
+                errorStatus[i] = _transferFromERC721(batch.owner, approval.operator, approval.token, approval.id);
             } else if (approval.tokenType == uint8(IPearlmit.TokenType.ERC1155)) {
-                _transferFromERC1155(approval.token, batch.owner, approval.operator, approval.id, approval.amount);
+                errorStatus[i] =  _transferFromERC1155(approval.token, batch.owner, approval.operator, approval.id, approval.amount);
             }
         }
     }
