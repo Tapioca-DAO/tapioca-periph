@@ -179,7 +179,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         emit ComposeReceived(msgType_, _guid, tapComposeMsg_);
         if (nextMsg_.length > 0) {
-            _lzCompose(address(this), _guid, nextMsg_);
+            _lzCompose(srcChainSender_, _guid, nextMsg_);
         }
     }
 
