@@ -40,6 +40,8 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     /// @dev For future use, to extend the receive() operation.
     ITapiocaOmnichainReceiveExtender public tapiocaOmnichainReceiveExtender;
 
+    error BaseTapiocaOmnichainEngine_NotValid();
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -60,7 +62,8 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         // If allowance on this contract is not met, try a transferFrom via Pearlmit.
         if (allowance(from, spender) < value) {
             // _transfer(from, to, value);
-            pearlmit.transferFromERC20(from, to, address(this), value);
+            bool isErr = pearlmit.transferFromERC20(from, to, address(this), value);
+            if (isErr) revert BaseTapiocaOmnichainEngine_NotValid();
         } else {
             // If allowance on this contract is met, perform a normal transferFrom.
             _spendAllowance(from, spender, value);

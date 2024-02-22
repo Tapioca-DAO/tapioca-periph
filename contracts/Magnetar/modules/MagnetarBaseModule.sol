@@ -100,7 +100,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     function _extractTokens(address _from, address _token, uint256 _amount) internal returns (uint256) {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         // IERC20(_token).safeTransferFrom(_from, address(this), _amount);
-        pearlmit.transferFromERC20(_from, address(this), address(_token), _amount);
+        bool isErr = pearlmit.transferFromERC20(_from, address(this), address(_token), _amount);
+        if (isErr) revert Magnetar_ExtractTokenFail();
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
         if (balanceAfter <= balanceBefore) revert Magnetar_ExtractTokenFail();
         return balanceAfter - balanceBefore;
