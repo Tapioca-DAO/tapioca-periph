@@ -101,9 +101,10 @@ contract MagnetarOptionModule is MagnetarBaseModule {
                 // IERC721(oTapAddress).safeTransferFrom(
                 //     data.user, address(this), data.removeAndRepayData.exitData.oTAPTokenID, "0x"
                 // );
-                pearlmit.transferFromERC721(
+                bool isErr = pearlmit.transferFromERC721(
                     data.user, address(this), oTapAddress, data.removeAndRepayData.exitData.oTAPTokenID
                 );
+                if (isErr) revert Magnetar_ExtractTokenFail();
             }
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
                 data.removeAndRepayData.exitData.oTAPTokenID
