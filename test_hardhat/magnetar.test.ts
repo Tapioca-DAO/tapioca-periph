@@ -145,7 +145,7 @@ describe('MagnetarV2', () => {
         });
     });
     describe('withdrawTo()', () => {
-        it.only('should test withdrawTo', async () => {
+        it('should test withdrawTo', async () => {
             const {
                 deployer,
                 yieldBox,
@@ -161,6 +161,7 @@ describe('MagnetarV2', () => {
                 cluster,
                 multiSwapper,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             const usdoStratregy = await penrose.emptyStrategies(usd0.address);
@@ -387,7 +388,8 @@ describe('MagnetarV2', () => {
             expect(borrowPart.eq(0)).to.be.true;
 
             await cluster.updateContract(0, magnetar.address, true);
-
+            await pearlmit.approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256);
             await magnetar.connect(deployer).burst(
                 [
                     {
@@ -984,6 +986,7 @@ describe('MagnetarV2', () => {
                 magnetar,
                 cluster,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -997,6 +1000,9 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
             await cluster.updateContract(0, wethUsdcSingularity.address, true);
+
+            await pearlmit.approve(weth.address, 0, magnetar.address, mintVal.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256); 
             await magnetar.burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_MINT_MODULE(),
@@ -1059,6 +1065,7 @@ describe('MagnetarV2', () => {
                 wethAssetId,
                 cluster,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1072,6 +1079,8 @@ describe('MagnetarV2', () => {
                 ethers.constants.MaxUint256,
             );
             await cluster.updateContract(0, wethUsdcSingularity.address, true);
+            await pearlmit.approve(weth.address, 0, magnetar.address, mintVal.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256); 
             const lendFn =
                 MagnetarMintModule__factory.createInterface().encodeFunctionData(
                     'mintBBLendSGLLockTOLP',
@@ -1161,8 +1170,8 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 deployer,
                 yieldBox,
-                cluster,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1234,7 +1243,13 @@ describe('MagnetarV2', () => {
             let borrowPart = await wethUsdcSingularity.userBorrowPart(
                 eoa1.address,
             );
+
             expect(borrowPart.eq(0)).to.be.true;
+
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
             await magnetar.connect(eoa1).burst(
                 [
                     {
@@ -1267,6 +1282,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 deployer,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1337,6 +1353,10 @@ describe('MagnetarV2', () => {
                     'depositAddCollateralAndBorrowFromMarket',
                     [depositAddCollateralAndBorrowFromMarketData],
                 );
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
             await magnetar.connect(eoa1).burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_COLLATERAL_MODULE(),
@@ -1362,6 +1382,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 deployer,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1413,6 +1434,10 @@ describe('MagnetarV2', () => {
                 composeMsg: '0x',
                 composeMsgType: 0,
             };
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);
             await magnetar.connect(eoa1).burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_COLLATERAL_MODULE(),
@@ -1452,6 +1477,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 deployer,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             await initContracts(); // To prevent `Singularity: below minimum`
@@ -1504,7 +1530,11 @@ describe('MagnetarV2', () => {
                 composeMsg: '0x',
                 composeMsgType: 0,
             };
-            await magnetar.connect(eoa1).burst([
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256); 
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256); 
+            await magnetar.connect(eoa1).connect(eoa1).burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_COLLATERAL_MODULE(),
                     target: magnetar.address,
@@ -1651,6 +1681,7 @@ describe('MagnetarV2', () => {
                 yieldBox,
                 deployer,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             const assetId = await wethUsdcSingularity.assetId();
@@ -1703,6 +1734,10 @@ describe('MagnetarV2', () => {
                 composeMsg: '0x',
                 composeMsgType: 0,
             };
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256); 
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256); 
             await magnetar.connect(eoa1).burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_COLLATERAL_MODULE(),
@@ -1811,6 +1846,7 @@ describe('MagnetarV2', () => {
                 wethDepositAndAddAsset,
                 deployer,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             const collateralId = await wethUsdcSingularity.collateralId();
@@ -1864,6 +1900,10 @@ describe('MagnetarV2', () => {
                 composeMsg: '0x',
                 composeMsgType: 0,
             };
+            await pearlmit.connect(eoa1).approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await pearlmit.connect(eoa1).approve(usdc.address, 0, magnetar.address, usdcMintVal.mul(100), '9000000000');
+            await weth.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);  
+            await usdc.connect(eoa1).approve(pearlmit.address, ethers.constants.MaxUint256);  
             await magnetar.connect(eoa1).burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_COLLATERAL_MODULE(),
@@ -1986,6 +2026,7 @@ describe('MagnetarV2', () => {
                 cluster,
                 multiSwapper,
                 marketHelper,
+                pearlmit
             } = await loadFixture(register);
 
             await initContracts();
@@ -2059,7 +2100,8 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await cluster.updateContract(0, wethBigBangMarket.address, true);
-
+            await pearlmit.approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256); 
             await magnetar.burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_MINT_MODULE(),
@@ -2156,6 +2198,7 @@ describe('MagnetarV2', () => {
                 deployer,
                 multiSwapper,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2251,7 +2294,8 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
             await cluster.updateContract(0, wethBigBangMarket.address, true);
-
+            await pearlmit.approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256); 
             await magnetar.burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_MINT_MODULE(),
@@ -2466,6 +2510,7 @@ describe('MagnetarV2', () => {
                 cluster,
                 multiSwapper,
                 marketHelper,
+                pearlmit,
             } = await loadFixture(register);
 
             await initContracts();
@@ -2539,7 +2584,8 @@ describe('MagnetarV2', () => {
 
             await cluster.updateContract(0, wethBigBangMarket.address, true);
             await cluster.updateContract(0, wethUsdoSingularity.address, true);
-
+            await pearlmit.approve(weth.address, 0, magnetar.address, borrowAmount.mul(100), '9000000000');
+            await weth.approve(pearlmit.address, ethers.constants.MaxUint256); 
             await magnetar.burst([
                 {
                     id: await magnetar.MAGNETAR_ACTION_MINT_MODULE(),
