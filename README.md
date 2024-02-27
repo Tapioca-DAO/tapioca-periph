@@ -1,3 +1,5 @@
+All rights are reserved and the Tapioca codebase is not Open Source or Free. You cannot modify or redistribute this code without explicit written permission from the copyright holder (Tapioca Foundation & BoringCrypto [where applicable]).
+
 # tapioca-periph 🍹 🤙
 
 The `tapioca-periph` is a repository containing external contracts that are not used as core functionalities of the protocol but are still needed in order for it to work, It includes;
