@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { loadVM } from '../utils';
+import { loadVM } from '../../../utils';
 import inquirer from 'inquirer';
-import { buildGLPOracle } from './builds/buildGLPOracle';
-import { buildTapOracle } from './builds/buildTapOracle';
-import { buildDaiOracle } from './builds/buildDaiOracle';
-import { buildGMXOracle } from './builds/buildGMXOracle';
+import { buildGLPOracle } from '../../../deployBuilds/oracle/buildGLPOracle';
+import { buildTapOracle } from '../../../deployBuilds/oracle/buildTapOracle';
+import { buildDaiOracle } from '../../../deployBuilds/oracle/buildDaiOracle';
+import { buildGMXOracle } from '../../../deployBuilds/oracle/buildGMXOracle';
 
 // hh deployOracles --network goerli
 export const deployOracle__task = async (

@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { GLPOracle__factory } from '../../../typechain';
 import { nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../CONF';
+import { ARGS_CONFIG } from '../../deploy/CONF';
 
 export const __buildGLPOracleArgs = async (
     hre: HardhatRuntimeEnvironment,

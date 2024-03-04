@@ -1,8 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadVM } from '../utils';
+import { loadVM } from '../../../utils';
 import inquirer from 'inquirer';
-import { buildUniswapV2Swapper } from './builds/buildUniswapV2Swapper';
-import { buildUniswapV3Swapper } from './builds/buildUniswapV3Swapper';
+import { buildUniswapV2Swapper } from '../../../deployBuilds/mock/buildUniswapV2Swapper';
+import { buildUniswapV3Swapper } from '../../../deployBuilds/mock/buildUniswapV3Swapper';
 
 // hh deploySwappers --network goerli
 export const deploySwappers__task = async (
