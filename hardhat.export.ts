@@ -182,7 +182,7 @@ const config: HardhatUserConfig &
                 network: 'optimismSepolia',
                 chainId: 11155420,
                 urls: {
-                    apiURL: 'https://api-sepolia-optimistic.etherscan.io/',
+                    apiURL: 'https://api-sepolia-optimistic.etherscan.io/api',
                     browserURL: 'https://sepolia-optimism.etherscan.io/',
                 },
             },
