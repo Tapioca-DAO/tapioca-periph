@@ -2,18 +2,12 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
 import { SeerCLSolo__factory, Seer__factory } from '../typechain';
 
-export const loadVM = async (
-    hre: HardhatRuntimeEnvironment,
-    tag: string,
-    debugMode = true,
-) => {
-    const isLocal = hre.network.config.tags.includes('local');
+export const loadVM = async (hre: HardhatRuntimeEnvironment, tag?: string) => {
     const VM = new hre.SDK.DeployerVM(hre, {
         // Change this if you get bytecode size error / gas required exceeds allowance (550000000)/ anything related to bytecode size
         // Could be different by network/RPC provider
         bytecodeSizeLimit: 100_000,
-        ...(isLocal ? { globalWait: 0 } : {}),
-        debugMode,
+        debugMode: true,
         tag,
     });
     return VM;
