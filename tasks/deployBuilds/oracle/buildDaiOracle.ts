@@ -1,9 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 
-import { displaySeerCLSoloArgs, nonNullValues } from '../../utils';
 import { SeerCLSolo__factory } from '@typechain/index';
-import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const buildDaiOracle = async (
     hre: HardhatRuntimeEnvironment,
@@ -22,7 +21,7 @@ export const buildDaiOracle = async (
         18, // Decimals
         {
             _poolChainlink:
-                DEPLOY_CONFIG.PRE_LBP[chainID]!.DAI_USD_CL_DATA_FEED_ADDRESS, // CL Pool
+                DEPLOY_CONFIG.POST_LBP[chainID]!.DAI_USD_CL_DATA_FEED_ADDRESS, // CL Pool
             _isChainlinkMultiplied: 1, // Multiply/divide Uni
             _inBase: (1e18).toString(), // In base
             stalePeriod: 86400, // CL stale period, 1 day
@@ -33,13 +32,9 @@ export const buildDaiOracle = async (
         },
     ];
 
-    // Check for null values
-    displaySeerCLSoloArgs(args);
-    nonNullValues(args);
-
     return {
         contract: await hre.ethers.getContractFactory('SeerCLSolo'),
-        deploymentName: 'DaiOracle',
+        deploymentName: DEPLOYMENT_NAMES.DAI_ORACLE,
         args,
     };
 };

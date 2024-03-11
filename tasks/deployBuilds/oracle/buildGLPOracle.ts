@@ -1,47 +1,28 @@
 import { GLPOracle__factory } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
-import { nonNullValues } from 'tasks/utils';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
-export const __buildGLPOracleArgs = async (
+export const buildGLPOracle = async (
     hre: HardhatRuntimeEnvironment,
-    deployerAddr: string,
-): Promise<Parameters<GLPOracle__factory['deploy']>> => {
+    owner: string,
+): Promise<IDeployerVMAdd<GLPOracle__factory>> => {
+    console.log('[+] buildGLPOracle');
+
     const chainID = hre.SDK.eChainId;
     if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
         throw '[-] GLP Oracle only available on Arbitrum';
     }
 
     const args: Parameters<GLPOracle__factory['deploy']> = [
-        DEPLOY_CONFIG.PRE_LBP[chainID]!.GLP_MANAGER,
+        DEPLOY_CONFIG.POST_LBP[chainID]!.GLP_MANAGER,
         DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER,
-        deployerAddr, // Owner
+        owner, // Owner
     ];
-    // Check for null values
-    nonNullValues(args);
-
-    return args;
-};
-
-export const buildGLPOracle = async (
-    hre: HardhatRuntimeEnvironment,
-): Promise<IDeployerVMAdd<GLPOracle__factory>> => {
-    console.log('[+] buildGLPOracle');
-    const deployer = (await hre.ethers.getSigners())[0];
-
-    const args = await __buildGLPOracleArgs(hre, deployer.address);
-
-    // Displaying args for sanity check
-    let i = 0;
-    console.log('[+] With args:');
-    console.log(`\t[${i}]GLP Manager:`, args[i++]);
-    console.log(`\t[${i}]CL Sequencer:`, args[i++]);
-    console.log(`\t[${i}]Owner:`, args[i++]);
 
     return {
         contract: await hre.ethers.getContractFactory('GLPOracle'),
-        deploymentName: 'GLPOracle',
+        deploymentName: DEPLOYMENT_NAMES.GLP_ORACLE,
         args,
     };
 };
