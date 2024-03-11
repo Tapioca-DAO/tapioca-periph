@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { buildMagnetar } from 'tasks/deployBuilds/magnetar/buildMagnetar';
 import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
 import { loadVM } from 'tasks/utils';
-import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildMagnetarAssetModule } from 'tasks/deployBuilds/magnetar/buildMagnetarAssetModule';
 import { buildMagnetarAssetXChainModule } from 'tasks/deployBuilds/magnetar/buildMagnetarAssetXChainModule';
 import { buildMagnetarCollateralModule } from 'tasks/deployBuilds/magnetar/buildMagnetarCollateralModule';
@@ -11,6 +11,7 @@ import { buildMagnetarMintXChainModule } from 'tasks/deployBuilds/magnetar/build
 import { buildMagnetarOptionModule } from 'tasks/deployBuilds/magnetar/buildMagnetarOptionModule';
 import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxModule';
 import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
+import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 
 export const deployPreLbpStack__task = async (
     taskArgs: { tag?: string; load?: boolean; verify: boolean },
@@ -100,7 +101,8 @@ export const deployPreLbpStack__task = async (
                     [],
                 ),
             )
-            .add(await getMagnetar(hre, tapiocaMulticall.address));
+            .add(await getMagnetar(hre, tapiocaMulticall.address))
+            .add(await buildZeroXSwapper(hre, tag, tapiocaMulticall.address));
 
         // Add and execute
         await VM.execute();
