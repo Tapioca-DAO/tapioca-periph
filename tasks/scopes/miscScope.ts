@@ -1,5 +1,5 @@
 import { scope } from 'hardhat/config';
-import { deploySwappers__task } from 'tasks/deploy/builds/misc/deploySwapper';
+import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
 import { pauseAll__task } from 'tasks/exec/misc/pause-all';
 
 const miscScope = scope('extra', ' Miscellaneous tasks');
