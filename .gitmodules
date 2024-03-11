@@ -16,3 +16,6 @@
 [submodule "gitmodule/tap-token"]
 	path = gitmodule/tap-token
 	url = https://github.com/Tapioca-DAO/tap-token
+[submodule "gitmodule/tapioca-mocks"]
+	path = gitmodule/tapioca-mocks
+	url = https://github.com/Tapioca-DAO/tapioca-mocks
