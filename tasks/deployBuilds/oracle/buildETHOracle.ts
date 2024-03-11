@@ -2,8 +2,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 
 import { displaySeerCLSoloArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../../deploy/CONF';
-import { SeerCLSolo__factory } from '../../../typechain';
+import { SeerCLSolo__factory } from '@typechain/index';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const __buildETHOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
@@ -18,13 +18,17 @@ export const __buildETHOracleArgs = async (
         'ETH/USD', // Name
         'ETH/USD', // Symbol
         18, // Decimals
-        ARGS_CONFIG[chainID].WETH_ORACLE.WETH_USD_CL_DATA_FEED_ADDRESS, // CL Pool
-        1, // Multiply/divide Uni
-        86400, // CL stale period, 1 day
-        [deployerAddr], // Guardians
-        hre.ethers.utils.formatBytes32String('ETH/USD'), // Description,
-        hre.ethers.constants.AddressZero, // CL Sequencer
-        deployerAddr, // Owner
+        {
+            _poolChainlink:
+                DEPLOY_CONFIG.PRE_LBP[chainID]!.WETH_USD_CL_DATA_FEED_ADDRESS, // CL Pool
+            _isChainlinkMultiplied: 1, // Multiply/divide Uni
+            _inBase: (1e18).toString(), // In base
+            stalePeriod: 86400, // CL stale period, 1 day
+            guardians: [deployerAddr], // Guardians
+            _description: hre.ethers.utils.formatBytes32String('ETH/USD'), // Description,
+            _sequencerUptimeFeed: hre.ethers.constants.AddressZero, // CL Sequencer
+            _admin: deployerAddr, // Owner
+        },
     ];
 
     // Check for null values

@@ -2,8 +2,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 
 import { displaySeerCLSoloArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../../deploy/CONF';
-import { SeerCLSolo__factory } from '../../../typechain';
+import { SeerCLSolo__factory } from '@typechain/index';
+import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const __buildGMXOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
@@ -19,13 +19,17 @@ export const __buildGMXOracleArgs = async (
         'GMX/USD', // Name
         'GMX/USD', // Symbol
         18, // Decimals
-        ARGS_CONFIG[chainID].GMX_ORACLE.GMX_USD_CL_DATA_FEED_ADDRESS, // CL Pool
-        1, // Multiply/divide CL
-        86400, // CL stale period, 1 day
-        [deployerAddr], // Guardians
-        hre.ethers.utils.formatBytes32String('GMX/USD'), // Description,
-        ARGS_CONFIG[chainID].MISC.CL_SEQUENCER, // CL Sequencer
-        deployerAddr, // Owner
+        {
+            _poolChainlink:
+                DEPLOY_CONFIG.PRE_LBP[chainID]!.GMX_USD_CL_DATA_FEED_ADDRESS, // CL Pool
+            _isChainlinkMultiplied: 1, // Multiply/divide CL
+            _inBase: (1e18).toString(), // In base
+            stalePeriod: 86400, // CL stale period, 1 day
+            guardians: [deployerAddr], // Guardians
+            _description: hre.ethers.utils.formatBytes32String('GMX/USD'), // Description,
+            _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
+            _admin: deployerAddr, // Owner
+        },
     ];
 
     // Check for null values

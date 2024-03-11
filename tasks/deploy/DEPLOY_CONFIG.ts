@@ -15,27 +15,27 @@ export const DEPLOYMENT_NAMES = {
     CLUSTER: 'CLUSTER',
 };
 
-type TPostLbp = {
-    [key in EChainID]?: {};
+type TPreLbp = {
+    [key in EChainID]?: {
+        GMX_USD_CL_DATA_FEED_ADDRESS: string;
+        GLP_MANAGER: string;
+        WETH_USD_CL_DATA_FEED_ADDRESS: string;
+        DAI_USD_CL_DATA_FEED_ADDRESS: string;
+    };
+};
+const PRE_LBP: TPreLbp = {
+    [EChainID.ARBITRUM]: {
+        GMX_USD_CL_DATA_FEED_ADDRESS:
+            '0xdb98056fecfff59d032ab628337a4887110df3db',
+        GLP_MANAGER: '0x3963FfC9dff443c2A94f21b129D429891E32ec18',
+        WETH_USD_CL_DATA_FEED_ADDRESS:
+            '0x639fe6ab55c921f74e7fac1ee960c0b6293ba612',
+        DAI_USD_CL_DATA_FEED_ADDRESS:
+            '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9',
+    },
 };
 
-const POST_LBP: TPostLbp = {
-    [EChainID.ARBITRUM]: {},
-};
-POST_LBP[EChainID.ARBITRUM_SEPOLIA] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
-POST_LBP[EChainID.SEPOLIA] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
-POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
-
-type TFinal = {
-    [key in EChainID]?: {};
-};
-
-const FINAL: TFinal = {
-    [EChainID.ARBITRUM]: {},
-};
-FINAL[EChainID.ARBITRUM_SEPOLIA] = FINAL[EChainID.ARBITRUM]; // Copy from Arbitrum
-FINAL[EChainID.SEPOLIA] = FINAL[EChainID.ARBITRUM]; // Copy from Arbitrum
-FINAL['31337' as EChainID] = FINAL[EChainID.ARBITRUM]; // Copy from Arbitrum
+PRE_LBP['31337' as EChainID] = PRE_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
 
 type TMisc = {
     [key in EChainID]?: {
@@ -51,11 +51,9 @@ const MISC: TMisc = {
         USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
     },
 };
-MISC[EChainID.ARBITRUM_SEPOLIA] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
-MISC[EChainID.SEPOLIA] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
+MISC['31337' as EChainID] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
 
 export const DEPLOY_CONFIG = {
-    POST_LBP,
-    FINAL,
+    PRE_LBP,
     MISC,
 };

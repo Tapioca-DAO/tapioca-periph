@@ -1,8 +1,8 @@
+import { GLPOracle__factory } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { GLPOracle__factory } from '../../../typechain';
-import { nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../../deploy/CONF';
+import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
+import { nonNullValues } from 'tasks/utils';
 
 export const __buildGLPOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
@@ -14,8 +14,8 @@ export const __buildGLPOracleArgs = async (
     }
 
     const args: Parameters<GLPOracle__factory['deploy']> = [
-        ARGS_CONFIG[chainID].GLP_ORACLE.GLP_MANAGER,
-        ARGS_CONFIG[chainID].MISC.CL_SEQUENCER,
+        DEPLOY_CONFIG.PRE_LBP[chainID]!.GLP_MANAGER,
+        DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER,
         deployerAddr, // Owner
     ];
     // Check for null values

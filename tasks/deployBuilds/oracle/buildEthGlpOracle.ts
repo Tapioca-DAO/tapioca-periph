@@ -1,8 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { EthGlpOracle__factory } from '../../../typechain';
 import { nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../../deploy/CONF';
+import { EthGlpOracle__factory } from '@typechain/index';
+import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const __buildEthGlpOracleArgs = async (
     hre: HardhatRuntimeEnvironment,
@@ -18,7 +18,7 @@ export const __buildEthGlpOracleArgs = async (
     const args: Parameters<EthGlpOracle__factory['deploy']> = [
         wethUsdOracle,
         glpUsdOracle,
-        ARGS_CONFIG[chainID].MISC.CL_SEQUENCER,
+        DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER,
         deployerAddr, // Owner
     ];
     // Check for null values

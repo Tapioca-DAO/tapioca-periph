@@ -1,11 +1,13 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { Seer__factory } from '../../../typechain';
 import { displaySeerArgs, nonNullValues } from '../../utils';
-import { ARGS_CONFIG } from '../../deploy/CONF';
+import { Seer__factory } from '@typechain/index';
+import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const buildTapOracle = async (
     hre: HardhatRuntimeEnvironment,
+    tapAddress: string,
+    ltapUsdcAddress: string,
 ): Promise<IDeployerVMAdd<Seer__factory>> => {
     console.log('[+] buildTAPOracle');
 
@@ -19,25 +21,24 @@ export const buildTapOracle = async (
         'TAP/USDC', // Name
         'TAP/USDC', // Symbol
         18, // Decimals
-        [
-            ARGS_CONFIG[chainID].TAP_ORACLE.TAP_ADDRESS, // TAP
-            ARGS_CONFIG[chainID].MISC.USDC_ADDRESS, // USDC
-        ],
-        [
-            ARGS_CONFIG[chainID].TAP_ORACLE.TAP_USDC_LP_ADDRESS, /// LP TAP/USDC
-        ],
-        [1], // Multiply/divide Uni
-        3600, // TWAP, 1hr
-        10, // Observation length that each Uni pool should have
-        0, // Whether we need to use the last Chainlink oracle to convert to another
-        // CL path
-        [],
-        [], // Multiply/divide CL
-        86400, // CL period before stale, 1 day
-        [deployer.address], // Owner
-        hre.ethers.utils.formatBytes32String('TAP/USDC'), // Description,
-        ARGS_CONFIG[chainID].MISC.CL_SEQUENCER, // CL Sequencer
-        deployer.address, // Owner
+        {
+            addressInAndOutUni: [
+                tapAddress, // TAP
+                DEPLOY_CONFIG.MISC[chainID]!.USDC, // USDC
+            ],
+            _circuitUniswap: [ltapUsdcAddress], // LP TAP/USDC
+            _circuitUniIsMultiplied: [1], // Multiply/divide Uni
+            _twapPeriod: 3600, // TWAP, 1hr
+            observationLength: 10, // Observation length that each Uni pool should have
+            _uniFinalCurrency: 0, // Whether we need to use the last Chainlink oracle to convert to another
+            _circuitChainlink: [], // CL path
+            _circuitChainIsMultiplied: [], // Multiply/divide CL
+            _stalePeriod: 86400, // CL period before stale, 1 day
+            guardians: [deployer.address], // Owner
+            _description: hre.ethers.utils.formatBytes32String('TAP/USDC'), // Description,
+            _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
+            _admin: deployer.address, // Owner
+        },
     ];
 
     // Check for null values
