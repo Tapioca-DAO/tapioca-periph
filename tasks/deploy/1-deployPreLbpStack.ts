@@ -14,115 +14,94 @@ import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
+import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 
 export const deployPreLbpStack__task = async (
-    taskArgs: { tag?: string; load?: boolean; verify?: boolean },
+    _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,
 ) => {
-    // Settings
-    const tag = taskArgs.tag ?? 'default';
-    const VM = await loadVM(hre, tag);
-    const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId)!;
-
-    const isTestnet = !!chainInfo.tags.find((tag) => tag === 'testnet');
-    const tapiocaMulticall = await VM.getMulticall();
-
-    // Build contracts
-    if (taskArgs.load) {
-        console.log(`[+] Loading contracts from ${tag} deployment... 📡`);
-        console.log(
-            `\t[+] ${hre.SDK.db
-                .loadLocalDeployment(tag, hre.SDK.eChainId)
-                ?.contracts.map((e) => e.name)
-                .reduce((a, b) => `${a}, ${b}`)}`,
-        );
-
-        VM.load(
-            hre.SDK.db.loadLocalDeployment(tag, hre.SDK.eChainId)?.contracts ??
-                [],
-        );
-    } else {
-        VM.add(
-            await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
-                'Pearlmit',
-                '1',
-            ]),
-        )
-            .add(
-                await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
-                    chainInfo.lzChainId,
-                    tapiocaMulticall.address,
+    return await hre.SDK.DeployerVM.tapiocaDeployTask(
+        _taskArgs,
+        hre,
+        async ({
+            VM,
+            tapiocaMulticallAddr,
+            chainInfo,
+            taskArgs,
+            isTestnet,
+        }) => {
+            VM.add(
+                await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
+                    'Pearlmit',
+                    '1',
                 ]),
             )
-            .add(
-                await buildMagnetarAssetModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_ASSET_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildMagnetarAssetXChainModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_ASSET_X_CHAIN_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildMagnetarCollateralModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildMagnetarMintModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_MINT_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildMagnetarMintXChainModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_MINT_X_CHAIN_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildMagnetarOptionModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_OPTION_MODULE,
-                    [],
-                ),
-            )
-            .add(
-                await buildYieldboxModule(
-                    hre,
-                    DEPLOYMENT_NAMES.MAGNETAR_YIELDBOX_MODULE,
-                    [],
-                ),
-            )
-            .add(await getMagnetar(hre, tapiocaMulticall.address))
-            .add(
-                (await getZeroXSwapper({
-                    hre,
-                    tag,
-                    isTestnet,
-                    owner: tapiocaMulticall.address,
-                })) as IDeployerVMAdd<any>,
-            );
-
-        // Add and execute
-        await VM.execute();
-        await VM.save();
-    }
-
-    if (taskArgs.verify) {
-        await VM.verify();
-    }
-
-    console.log('[+] Pre LBP Stack deployed! 🎉');
+                .add(
+                    await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
+                        chainInfo.lzChainId,
+                        tapiocaMulticallAddr,
+                    ]),
+                )
+                .add(
+                    await buildMagnetarAssetModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_ASSET_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarAssetXChainModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_ASSET_X_CHAIN_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarCollateralModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarMintModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_MINT_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarMintXChainModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_MINT_X_CHAIN_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarOptionModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_OPTION_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildYieldboxModule(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_YIELDBOX_MODULE,
+                        [],
+                    ),
+                )
+                .add(await getMagnetar(hre, tapiocaMulticallAddr))
+                .add(
+                    (await getZeroXSwapper({
+                        hre,
+                        tag: taskArgs.tag,
+                        isTestnet,
+                        owner: tapiocaMulticallAddr,
+                    })) as IDeployerVMAdd<any>,
+                );
+        },
+    );
 };
 
 async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
