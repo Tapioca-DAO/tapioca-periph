@@ -36,7 +36,7 @@ export const deployERC20Mock__task = async (
     } else {
         VM.add(
             await buildERC20Mock(hre, {
-                deploymentName: 'ERC20Mock',
+                deploymentName: taskArgs.name,
                 args: [
                     taskArgs.name,
                     taskArgs.name,
