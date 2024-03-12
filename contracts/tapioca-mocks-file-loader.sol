@@ -5,3 +5,4 @@ pragma solidity 0.8.22;
 /// Comment the imports for faster compilation
 
 import {ZeroXSwapperMock} from "tapioca-mocks/ZeroXSwapperMock.sol";
+import {ERC20Mock} from "tapioca-mocks/ERC20Mock.sol";
