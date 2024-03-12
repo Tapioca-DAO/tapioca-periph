@@ -5,6 +5,21 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "WETH9Mock",
+                    "address": "0x997FE31Adda5c969691768Ad1140273290952333",
+                    "meta": {
+                        "args": [
+                            "WETH9",
+                            "WETH9",
+                            "1000000000000000000",
+                            18,
+                            "0x3ffe12859A4206e84a83f34525045536c5afd486"
+                        ],
+                        "salt": "0xdb39d1270d271b2c74dea1545a653ebf4825db04861227a056e1bd1f89df3145",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "PEARLMIT",
                     "address": "0x89c0f2fcdb91BE80C964Cc775f6e9343f6dC5cc9",
                     "meta": {
