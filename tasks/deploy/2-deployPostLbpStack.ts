@@ -1,6 +1,6 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { TAPIOCA_PROJECTS_NAME } from 'tapioca-sdk/dist/api/config';
 import { buildDaiOracle } from 'tasks/deployBuilds/oracle/buildDaiOracle';
 import { buildETHOracle } from 'tasks/deployBuilds/oracle/buildETHOracle';
 import { buildEthGlpPOracle } from 'tasks/deployBuilds/oracle/buildEthGlpOracle';
@@ -94,9 +94,9 @@ async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
     if (!tapToken) {
         throw `[-] ${
             TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN
-        } from TAP_TOKEN repo not deployed on ${
+        } from TAP_TOKEN contract repo not deployed on ${
             hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId)!.name
-        }`;
+        } tag ${tag}`;
     }
 
     // TapWethLp

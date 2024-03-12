@@ -64,6 +64,13 @@ const MISC: TMisc = {
         USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         ZERO_X_PROXY: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     },
+    [EChainID.ARBITRUM_SEPOLIA]: {
+        CL_SEQUENCER: '0x',
+        WETH_USDC_UNIV3_LP: '0x',
+        WETH: '0x',
+        USDC: '0x',
+        ZERO_X_PROXY: '0x',
+    },
     [EChainID.MAINNET]: {
         CL_SEQUENCER: '0x', // Arbitrum mainnet ChainLink sequencer uptime feed
         WETH_USDC_UNIV3_LP: '0x', // WETH/USDC LP
