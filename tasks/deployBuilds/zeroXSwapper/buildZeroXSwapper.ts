@@ -8,25 +8,20 @@ export const buildZeroXSwapper = async (
     tag: string,
     owner: string,
 ): Promise<IDeployerVMAdd<ZeroXSwapper__factory>> => {
-    const clusterAddr = hre.SDK.db.findLocalDeployment(
-        hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.CLUSTER,
-        tag,
-    )?.address;
-
-    if (!clusterAddr) {
-        throw '[-] Cluster not deployed';
-    }
-
     const args: Parameters<ZeroXSwapper__factory['deploy']> = [
         DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.ZERO_X_PROXY,
-        clusterAddr,
+        hre.ethers.constants.AddressZero, // clusterAddr
         owner,
     ];
     return {
         contract: new ZeroXSwapper__factory(hre.ethers.provider.getSigner()),
         deploymentName: DEPLOYMENT_NAMES.ZERO_X_SWAPPER,
         args,
-        dependsOn: [],
+        dependsOn: [
+            {
+                deploymentName: DEPLOYMENT_NAMES.CLUSTER,
+                argPosition: 1,
+            },
+        ],
     };
 };

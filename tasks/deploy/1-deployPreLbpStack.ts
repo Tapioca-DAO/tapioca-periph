@@ -12,6 +12,8 @@ import { buildMagnetarOptionModule } from 'tasks/deployBuilds/magnetar/buildMagn
 import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxModule';
 import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
+import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
+import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 
 export const deployPreLbpStack__task = async (
     taskArgs: { tag?: string; load?: boolean; verify: boolean },
@@ -22,7 +24,7 @@ export const deployPreLbpStack__task = async (
     const VM = await loadVM(hre, tag);
     const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId)!;
 
-    const isTestnet = chainInfo.tags.find((tag) => tag === 'testnet');
+    const isTestnet = !!chainInfo.tags.find((tag) => tag === 'testnet');
     const tapiocaMulticall = await VM.getMulticall();
 
     // Build contracts
@@ -102,7 +104,14 @@ export const deployPreLbpStack__task = async (
                 ),
             )
             .add(await getMagnetar(hre, tapiocaMulticall.address))
-            .add(await buildZeroXSwapper(hre, tag, tapiocaMulticall.address));
+            .add(
+                (await getZeroXSwapper({
+                    hre,
+                    tag,
+                    isTestnet,
+                    owner: tapiocaMulticall.address,
+                })) as IDeployerVMAdd<any>,
+            );
 
         // Add and execute
         await VM.execute();
@@ -171,4 +180,19 @@ async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
             },
         ],
     );
+}
+
+async function getZeroXSwapper(data: {
+    hre: HardhatRuntimeEnvironment;
+    tag: string;
+    owner: string;
+    isTestnet: boolean;
+}) {
+    const { hre, tag, owner, isTestnet } = data;
+
+    if (isTestnet) {
+        return await buildZeroXSwapperMock(hre);
+    } else {
+        return await buildZeroXSwapper(hre, tag, owner);
+    }
 }
