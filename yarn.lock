@@ -5238,10 +5238,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.1.tgz#3e11cffed0eaa38a3e697c2c619dcd7748526e27"
-  integrity sha512-rBngE/6f52C8zrJiMqkekMfeLats3sViI70PAn59V2fkjNc531QwFQW+d3PUbIBdg8s4rt4xMtke4s7+krTByg==
+tapioca-sdk@^1.7.4:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.4.tgz#bccab7842b293da3d2d0a0580bd4198f52c2b669"
+  integrity sha512-wHqlKdTycSvQCgID8jgYHyJJPtmOsNwZ++6OArU9TupK76DgeFLvi0zFoXcx3fzCL2JLn8ZupeNg4APIoyq5kQ==
   dependencies:
     deepmerge "^4.3.1"
     dotenv "^16.3.2"
