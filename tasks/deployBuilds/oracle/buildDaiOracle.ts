@@ -6,6 +6,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const buildDaiOracle = async (
     hre: HardhatRuntimeEnvironment,
+    owner: string,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
     console.log('[+] buildDaiOracle');
 
@@ -13,7 +14,6 @@ export const buildDaiOracle = async (
     if (chainID !== hre.SDK.config.EChainID.MAINNET) {
         throw '[-] DAI Oracle only available on Ethereum';
     }
-    const deployer = (await hre.ethers.getSigners())[0];
 
     const args: Parameters<SeerCLSolo__factory['deploy']> = [
         'DAI/USD', // Name
@@ -25,10 +25,10 @@ export const buildDaiOracle = async (
             _isChainlinkMultiplied: 1, // Multiply/divide Uni
             _inBase: (1e18).toString(), // In base
             stalePeriod: 86400, // CL stale period, 1 day
-            guardians: [deployer.address], // Guardians
+            guardians: [owner], // Guardians
             _description: hre.ethers.utils.formatBytes32String('DAI/USD'), // Description,
             _sequencerUptimeFeed: hre.ethers.constants.AddressZero, // CL Sequencer
-            _admin: deployer.address, // Owner
+            _admin: owner, // Owner
         },
     ];
 

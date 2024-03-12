@@ -16,7 +16,7 @@ import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZero
 import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 
 export const deployPreLbpStack__task = async (
-    taskArgs: { tag?: string; load?: boolean; verify: boolean },
+    taskArgs: { tag?: string; load?: boolean; verify?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     // Settings

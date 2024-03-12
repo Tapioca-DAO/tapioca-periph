@@ -11,7 +11,7 @@ import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { loadVM } from 'tasks/utils';
 
 export const deployPostLbpStack__task = async (
-    taskArgs: { tag?: string; load?: boolean; verify: boolean },
+    taskArgs: { tag?: string; load?: boolean; verify?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     // Settings
@@ -68,7 +68,7 @@ export const deployPostLbpStack__task = async (
             chainInfo.name === 'ethereum' ||
             chainInfo.name === 'sepolia'
         ) {
-            VM.add(await buildDaiOracle(hre));
+            VM.add(await buildDaiOracle(hre, owner));
         }
 
         // Add and execute
