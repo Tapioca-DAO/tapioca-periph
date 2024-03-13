@@ -22,6 +22,7 @@ import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -45,6 +46,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
+    using SafeCast for uint256;
 
     error Magnetar_WithdrawParamsMismatch();
 
@@ -101,7 +103,15 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).repay(
                 data.depositAmount > 0 ? address(this) : data.user, data.user, false, data.repayAmount
             );
+            if (data.depositAmount > 0) {
+                uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
+                pearlmit.approve(
+                    address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
+                );
+            }
+            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
+            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
             _revertYieldBoxApproval(data.market, _yieldBox);
         }
 
@@ -116,7 +126,16 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).removeCollateral(
                 data.user, collateralWithdrawReceiver, collateralShare
             );
+            pearlmit.approve(
+                address(_yieldBox),
+                _market.collateralId(),
+                address(_market),
+                collateralShare.toUint200(),
+                (block.timestamp + 1).toUint48()
+            );
+            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
+            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
 
             //withdraw
             if (data.withdrawCollateralParams.withdraw) {

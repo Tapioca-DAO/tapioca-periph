@@ -35,8 +35,6 @@ contract Cluster is Ownable, ICluster {
 
     /// @notice event emitted when LZ chain id is updated
     event LzChainUpdate(uint256 indexed _oldChain, uint256 indexed _newChain);
-    /// @notice event emitted when an editor status is updated
-    event EditorUpdated(address indexed _editor, bool indexed _oldStatus, bool indexed _newStatus);
     /// @notice event emitted when a contract status is updated
     event ContractUpdated(
         address indexed _contract, uint32 indexed _lzChainId, bool indexed _oldStatus, bool _newStatus

@@ -43,7 +43,9 @@ interface IPearlmit {
         view
         returns (uint256 allowedAmount, uint256 expiration);
 
-    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch) external returns (bool[] memory errorStatus);
+    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch)
+        external
+        returns (bool[] memory errorStatus);
 
     function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
 

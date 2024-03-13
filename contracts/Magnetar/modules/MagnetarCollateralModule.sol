@@ -71,6 +71,9 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         (, address collateralAddress,,) = yieldBox_.assets(collateralId);
 
         uint256 _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
+
+        _setApprovalForYieldBox(address(pearlmit), yieldBox_);
+
         // deposit to YieldBox
         if (data.deposit) {
             // transfers tokens from sender or from the user to this contract
@@ -86,11 +89,22 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         // performs .addCollateral on data.market
         if (data.collateralAmount > 0) {
             _setApprovalForYieldBox(data.market, yieldBox_);
+            _setApprovalForYieldBox(address(pearlmit), yieldBox_);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
                 data.deposit ? address(this) : data.user, data.user, false, data.collateralAmount, _share
             );
+            if (data.deposit) {
+                pearlmit.approve(
+                    address(yieldBox_),
+                    collateralId,
+                    address(market_),
+                    _share.toUint200(),
+                    (block.timestamp + 1).toUint48()
+                );
+            }
             market_.execute(modules, calls, true);
+            _revertYieldBoxApproval(data.market, yieldBox_);
         }
 
         // performs .borrow on data.market
@@ -100,6 +114,15 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
 
             (Module[] memory modules, bytes[] memory calls) =
                 IMarketHelper(data.marketHelper).borrow(data.user, borrowReceiver, data.borrowAmount);
+
+            uint256 borrowShare = yieldBox_.toShare(market_.assetId(), data.borrowAmount, false);
+            pearlmit.approve(
+                address(yieldBox_),
+                market_.assetId(),
+                address(market_),
+                borrowShare.toUint200(),
+                (block.timestamp + 1).toUint48()
+            );
             market_.execute(modules, calls, true);
 
             if (data.withdrawParams.withdraw) {
@@ -107,6 +130,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             }
         }
 
+        _revertYieldBoxApproval(address(pearlmit), yieldBox_);
         _revertYieldBoxApproval(data.market, yieldBox_);
     }
 }
