@@ -54,9 +54,8 @@ type TMisc = {
         WETH: string;
         USDC: string;
         ZERO_X_PROXY: string;
-        // Testnet
-        nonfungibleTokenPositionManager?: string;
-        v3CoreFactory?: string;
+        nonfungibleTokenPositionManager: string;
+        v3CoreFactory: string;
     };
 };
 
@@ -67,6 +66,9 @@ const MISC: TMisc = {
         WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         ZERO_X_PROXY: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+        nonfungibleTokenPositionManager:
+            '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+        v3CoreFactory: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         CL_SEQUENCER: '0x',
@@ -74,7 +76,6 @@ const MISC: TMisc = {
         WETH: '0x997FE31Adda5c969691768Ad1140273290952333', // Locally deployed WETH9 Mock
         USDC: '0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705', // Locally deployed USDC Mock
         ZERO_X_PROXY: '0x',
-        // Testnet
         nonfungibleTokenPositionManager:
             '0xFd1a7CA61e49703da3618999B2EEdc0E79476759',
         v3CoreFactory: '0x76D8F1D83716bcd0f811449a76Fc2B3E3ef98454',
@@ -85,6 +86,9 @@ const MISC: TMisc = {
         WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         ZERO_X_PROXY: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+        nonfungibleTokenPositionManager:
+            '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+        v3CoreFactory: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
     },
 };
 MISC['31337' as EChainID] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
