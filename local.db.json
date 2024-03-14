@@ -5,6 +5,21 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "USDCMock",
+                    "address": "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                    "meta": {
+                        "args": [
+                            "USDCMock",
+                            "USDCMock",
+                            "1000000000000000000",
+                            18,
+                            "0x3ffe12859A4206e84a83f34525045536c5afd486"
+                        ],
+                        "salt": "0x3c2eb42f58ce6f8d912b25fc22806759eef8cb5dff17cfad0b5f140a559c9d95",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "WETH9Mock",
                     "address": "0x997FE31Adda5c969691768Ad1140273290952333",
                     "meta": {

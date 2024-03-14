@@ -1,4 +1,4 @@
-import { scope } from 'hardhat/config';
+import { scope, types } from 'hardhat/config';
 import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
@@ -22,7 +22,13 @@ TAP_TASK(
 TAP_TASK(
     deployScope
         .task('erc20mock', 'Deploy an ERC20 Mock', deployERC20Mock__task)
-        .addParam('name', 'The name of the ERC20 token to deploy.'),
+        .addParam('name', 'The name of the ERC20 token to deploy.')
+        .addOptionalParam(
+            'decimals',
+            'The number of decimals for the token.',
+            18,
+            types.int,
+        ),
 );
 TAP_TASK(
     deployScope.task(

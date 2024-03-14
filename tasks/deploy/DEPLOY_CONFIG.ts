@@ -71,8 +71,8 @@ const MISC: TMisc = {
     [EChainID.ARBITRUM_SEPOLIA]: {
         CL_SEQUENCER: '0x',
         WETH_USDC_UNIV3_LP: '0x',
-        WETH: '0x',
-        USDC: '0x',
+        WETH: '0x997FE31Adda5c969691768Ad1140273290952333', // Locally deployed WETH9 Mock
+        USDC: '0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705', // Locally deployed USDC Mock
         ZERO_X_PROXY: '0x',
         // Testnet
         nonfungibleTokenPositionManager:

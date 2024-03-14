@@ -5,6 +5,7 @@ import { buildERC20Mock } from 'tasks/deployBuilds/mock/buildERC20Mock';
 export const deployERC20Mock__task = async (
     taskArgs: TTapiocaDeployTaskArgs & {
         name: string;
+        decimals: number;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
