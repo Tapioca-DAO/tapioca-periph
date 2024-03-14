@@ -54,8 +54,12 @@ type TMisc = {
         WETH: string;
         USDC: string;
         ZERO_X_PROXY: string;
+        // Testnet
+        nonfungibleTokenPositionManager?: string;
+        v3CoreFactory?: string;
     };
 };
+
 const MISC: TMisc = {
     [EChainID.ARBITRUM]: {
         CL_SEQUENCER: '0xFdB631F5EE196F0ed6FAa767959853A9F217697D', // Arbitrum mainnet ChainLink sequencer uptime feed
@@ -70,6 +74,10 @@ const MISC: TMisc = {
         WETH: '0x',
         USDC: '0x',
         ZERO_X_PROXY: '0x',
+        // Testnet
+        nonfungibleTokenPositionManager:
+            '0xFd1a7CA61e49703da3618999B2EEdc0E79476759',
+        v3CoreFactory: '0x76D8F1D83716bcd0f811449a76Fc2B3E3ef98454',
     },
     [EChainID.MAINNET]: {
         CL_SEQUENCER: '0x', // Arbitrum mainnet ChainLink sequencer uptime feed
