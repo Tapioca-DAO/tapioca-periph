@@ -1,6 +1,7 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { loadGlobalContract } from 'tapioca-sdk';
 import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { buildDaiOracle } from 'tasks/deployBuilds/oracle/buildDaiOracle';
 import { buildETHOracle } from 'tasks/deployBuilds/oracle/buildETHOracle';
@@ -59,34 +60,22 @@ export const deployPostLbpStack__task = async (
 
 async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
     // TapToken
-    const tapToken = hre.SDK.db.findGlobalDeployment(
+    const tapToken = loadGlobalContract(
+        hre,
         TAPIOCA_PROJECTS_NAME.TapToken,
         hre.SDK.eChainId,
         TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
         tag,
     );
-    if (!tapToken) {
-        throw `[-] ${
-            TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN
-        } from TAP_TOKEN contract repo not deployed on ${
-            hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId)!.name
-        } tag ${tag}`;
-    }
 
     // TapWethLp
-    const tapWethLp = hre.SDK.db.findGlobalDeployment(
+    const tapWethLp = loadGlobalContract(
+        hre,
         TAPIOCA_PROJECTS_NAME.TapToken,
         hre.SDK.eChainId,
         TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
         tag,
     );
-    if (!tapWethLp) {
-        throw `[-] ${
-            TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL
-        } from TAP_TOKEN repo not deployed on ${
-            hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId)!.name
-        }`;
-    }
 
     return { tapToken, tapWethLp };
 }
