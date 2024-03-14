@@ -7,14 +7,16 @@ import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/Deployer
 import { DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { checkExists, loadGlobalContract } from 'tapioca-sdk';
 
-export const deployUniV3EnvMock__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs,
+export const deployUniV3pool__task = async (
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        feeTier: number;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     const { tag } = _taskArgs;
     const { tapToken, usdo, v3CoreFactory, positionManager } =
         await loadContract(hre, tag!);
-    const feeTier = 3000;
+    const feeTier = validateFeeTier(_taskArgs.feeTier);
 
     console.log('[+] Creating pool...');
     await (
@@ -37,6 +39,13 @@ export const deployUniV3EnvMock__task = async (
 
     console.log(`[+] Pool created at address: ${poolAddress}`);
 };
+
+function validateFeeTier(feeTier: number) {
+    if (![500, 3000, 10000].includes(feeTier)) {
+        throw new Error(`Invalid fee tier: ${feeTier}`);
+    }
+    return feeTier;
+}
 
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
     const tapToken = loadGlobalContract(

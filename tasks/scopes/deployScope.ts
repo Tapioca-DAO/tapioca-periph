@@ -3,7 +3,7 @@ import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
 import { TAP_TASK } from 'tapioca-sdk';
-import { deployUniV3EnvMock__task } from 'tasks/deploy/misc/deployUniV3MockEnv';
+import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 
 const deployScope = scope('deploys', 'Deployment tasks');
 
@@ -31,9 +31,12 @@ TAP_TASK(
         ),
 );
 TAP_TASK(
-    deployScope.task(
-        'uniV3EnvMock',
-        'Deploy a UniV3 mock infrastructure',
-        deployUniV3EnvMock__task,
-    ),
+    deployScope
+        .task('uniV3Pool', 'Deploy a UniV3 pool', deployUniV3pool__task)
+        .addOptionalParam(
+            'feeTier',
+            'The fee tier for the pool. Default is 3000.',
+            3000,
+            types.int,
+        ),
 );
