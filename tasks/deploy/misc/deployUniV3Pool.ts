@@ -1,43 +1,64 @@
-import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
-import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import NonfungiblePositionManagerArtifact from '@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json';
 import { encodeSqrtRatioX96 } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { checkExists } from 'tapioca-sdk';
 import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
-import { checkExists, loadGlobalContract } from 'tapioca-sdk';
+import { ERC20 } from '@typechain/@openzeppelin/contracts/token/ERC20';
 
 export const deployUniV3pool__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
         feeTier: number;
+        token0: string;
+        token1: string;
+        ratio0: number;
+        ratio1: number;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
     const { tag } = _taskArgs;
-    const { tapToken, usdo, v3CoreFactory, positionManager } =
-        await loadContract(hre, tag!);
+    const { v3CoreFactory, positionManager } = await loadContract(hre, tag!);
     const feeTier = validateFeeTier(_taskArgs.feeTier);
 
-    console.log('[+] Creating pool...');
+    const [token0, token1, ratio0, ratio1] = sortTokens(
+        _taskArgs.token0,
+        _taskArgs.token1,
+        _taskArgs.ratio0,
+        _taskArgs.ratio1,
+    );
+
+    {
+        const token0Contract = (await hre.ethers.getContractAt(
+            '@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20',
+            token0,
+        )) as ERC20;
+        const token1Contract = (await hre.ethers.getContractAt(
+            '@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20',
+            token1,
+        )) as ERC20;
+        const token0Name = await token0Contract.name();
+        const token1Name = await token1Contract.name();
+        console.log(
+            `[+] Creating ${token0Name}/${token1Name} with - fee ${feeTier} - ratio ${ratio0}/${ratio1} ...`,
+        );
+    }
+
     await (
         await positionManager.createAndInitializePoolIfNecessary(
-            usdo.address,
-            tapToken.address,
+            token0,
+            token1,
             feeTier,
-            encodeSqrtRatioX96(33, 1).toString(),
+            encodeSqrtRatioX96(ratio0, ratio1).toString(),
             {
                 gasLimit: 5_000_000,
             },
         )
     ).wait(3);
 
-    const poolAddress = await v3CoreFactory.getPool(
-        tapToken.address,
-        usdo.address,
-        feeTier,
-    );
-
+    const poolAddress = await v3CoreFactory.getPool(token0, token1, feeTier);
     console.log(`[+] Pool created at address: ${poolAddress}`);
+
+    return poolAddress;
 };
 
 function validateFeeTier(feeTier: number) {
@@ -47,23 +68,18 @@ function validateFeeTier(feeTier: number) {
     return feeTier;
 }
 
+function sortTokens(
+    token0: string,
+    token1: string,
+    ratio0: number,
+    ratio1: number,
+) {
+    return token0.toLowerCase() < token1.toLowerCase()
+        ? ([token0, token1, ratio0, ratio1] as const)
+        : ([token1, token0, ratio1, ratio0] as const);
+}
+
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
-    const tapToken = loadGlobalContract(
-        hre,
-        TAPIOCA_PROJECTS_NAME.TapToken,
-        hre.SDK.eChainId,
-        TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
-        tag,
-    );
-
-    const usdo = loadGlobalContract(
-        hre,
-        TAPIOCA_PROJECTS_NAME.TapiocaBar,
-        hre.SDK.eChainId,
-        'USDO', // TODO replace by BAR NAME CONFIG
-        tag,
-    );
-
     const positionManager = (
         await hre.ethers.getContractFactoryFromArtifact(
             NonfungiblePositionManagerArtifact,
@@ -71,8 +87,7 @@ async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
     ).attach(
         checkExists(
             hre,
-            DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!
-                .nonfungibleTokenPositionManager,
+            DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.NONFUNGIBLE_POSITION_MANAGER,
             'nonfungibleTokenPositionManager',
             'DEPLOY_CONFIG.MISC',
         ),
@@ -82,11 +97,11 @@ async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
         'IUniswapV3Factory',
         checkExists(
             hre,
-            DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.v3CoreFactory,
+            DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.V3_FACTORY,
             'v3CoreFactory',
             'DEPLOY_CONFIG.MISC',
         ),
     );
 
-    return { tapToken, usdo, v3CoreFactory, positionManager };
+    return { v3CoreFactory, positionManager };
 }
