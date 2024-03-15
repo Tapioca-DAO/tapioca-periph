@@ -11,7 +11,7 @@ export const deployERC20Mock__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask<{ name: string }>(
         taskArgs,
-        hre,
+        { hre },
         async ({ VM, tapiocaMulticallAddr }) => {
             VM.add(
                 await buildERC20Mock(hre, {
@@ -25,6 +25,12 @@ export const deployERC20Mock__task = async (
                     ],
                 }),
             );
+        },
+        async ({ VM }) => {
+            const addr = VM.list().find(
+                (e) => e.name === taskArgs.name,
+            )!.address;
+            console.log(`[+] ERC20Mock ${taskArgs.name} deployed at: ${addr}`);
         },
     );
 };
