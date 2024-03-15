@@ -10,8 +10,11 @@ export const buildGLPOracle = async (
     console.log('[+] buildGLPOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
-        throw '[-] GLP Oracle only available on Arbitrum';
+    if (
+        chainID !== hre.SDK.config.EChainID.ARBITRUM &&
+        chainID !== hre.SDK.config.EChainID.ARBITRUM_SEPOLIA
+    ) {
+        throw '[-] GLP Oracle only available on Arbitrum or Arbitrum Sepolia';
     }
 
     const args: Parameters<GLPOracle__factory['deploy']> = [

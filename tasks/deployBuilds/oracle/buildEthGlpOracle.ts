@@ -10,8 +10,11 @@ export const buildEthGlpPOracle = async (
     console.log('[+] buildEthGlpOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
-        throw '[-] EthGlp Oracle only available on Arbitrum';
+    if (
+        chainID !== hre.SDK.config.EChainID.ARBITRUM &&
+        chainID !== hre.SDK.config.EChainID.ARBITRUM_SEPOLIA
+    ) {
+        throw '[-] EthGlp Oracle only available on Arbitrum or Arbitrum Sepolia';
     }
 
     const args: Parameters<EthGlpOracle__factory['deploy']> = [

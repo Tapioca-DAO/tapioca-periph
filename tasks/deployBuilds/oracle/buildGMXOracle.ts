@@ -10,8 +10,11 @@ export const buildGMXOracle = async (
     console.log('[+] buildGMXOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
-        throw '[-] GMX Oracle only available on Arbitrum';
+    if (
+        chainID !== hre.SDK.config.EChainID.ARBITRUM &&
+        chainID !== hre.SDK.config.EChainID.ARBITRUM_SEPOLIA
+    ) {
+        throw '[-] GMX Oracle only available on Arbitrum or Arbitrum Sepolia';
     }
 
     const args: Parameters<SeerCLSolo__factory['deploy']> = [

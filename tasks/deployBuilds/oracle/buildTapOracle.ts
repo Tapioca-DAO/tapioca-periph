@@ -6,33 +6,37 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildTapOracle = async (
     hre: HardhatRuntimeEnvironment,
     tapAddress: string,
-    tapUsdcLpAddress: string,
+    tapWethLpPair: string,
     owner: string,
 ): Promise<IDeployerVMAdd<Seer__factory>> => {
     console.log('[+] buildTAPOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
-        throw '[-] TAP Oracle only available on Arbitrum';
+    if (
+        chainID !== hre.SDK.config.EChainID.ARBITRUM &&
+        chainID !== hre.SDK.config.EChainID.ARBITRUM_SEPOLIA
+    ) {
+        throw '[-] TAP Oracle only available on Arbitrum or Arbitrum Sepolia';
     }
 
     const args: Parameters<Seer__factory['deploy']> = [
-        'TAP/USDC', // Name
-        'TAP/USDC', // Symbol
+        'TAP/USD', // Name
+        'TAP/USD', // Symbol
         18, // Decimals
         {
-            // TODO check if this is correct. Do we need TAP/USDC or TAP/ETH?
             addressInAndOutUni: [
                 tapAddress, // TAP
-                DEPLOY_CONFIG.MISC[chainID]!.USDC, // USDC
+                DEPLOY_CONFIG.MISC[chainID]!.WETH,
             ],
-            _circuitUniswap: [tapUsdcLpAddress], // LP TAP/USDC
+            _circuitUniswap: [tapWethLpPair], // LP TAP/WETH
             _circuitUniIsMultiplied: [1], // Multiply/divide Uni
             _twapPeriod: 3600, // TWAP, 1hr
             observationLength: 10, // Observation length that each Uni pool should have
             _uniFinalCurrency: 0, // Whether we need to use the last Chainlink oracle to convert to another
-            _circuitChainlink: [], // CL path
-            _circuitChainIsMultiplied: [], // Multiply/divide CL
+            _circuitChainlink: [
+                DEPLOY_CONFIG.POST_LBP[chainID]!.WETH_USD_CL_DATA_FEED_ADDRESS,
+            ], // CL path
+            _circuitChainIsMultiplied: [1], // Multiply/divide CL
             _stalePeriod: 86400, // CL period before stale, 1 day
             guardians: [owner], // Owner
             _description: hre.ethers.utils.formatBytes32String('TAP/USDC'), // Description,

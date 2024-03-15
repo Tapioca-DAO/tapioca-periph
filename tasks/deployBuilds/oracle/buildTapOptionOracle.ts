@@ -12,8 +12,11 @@ export const buildTapOptionOracle = async (
     console.log('[+] buildTAPOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (chainID !== hre.SDK.config.EChainID.ARBITRUM) {
-        throw '[-] TAP Oracle only available on Arbitrum';
+    if (
+        chainID !== hre.SDK.config.EChainID.ARBITRUM &&
+        chainID !== hre.SDK.config.EChainID.ARBITRUM_SEPOLIA
+    ) {
+        throw '[-] TAP Oracle only available on Arbitrum or Arbitrum Sepolia';
     }
 
     const args: Parameters<TapOptionOracle__factory['deploy']> = [
@@ -30,7 +33,7 @@ export const buildTapOptionOracle = async (
                 tapWethLp,
                 DEPLOY_CONFIG.MISC[chainID]!.WETH_USDC_UNIV3_LP,
             ], // LP TAP/USDC
-            _circuitUniIsMultiplied: [1], // Multiply/divide Uni
+            _circuitUniIsMultiplied: [1, 1], // Multiply/divide Uni
             _twapPeriod: 3600, // TWAP, 1hr
             observationLength: 10, // Observation length that each Uni pool should have
             guardians: [owner], // Owner

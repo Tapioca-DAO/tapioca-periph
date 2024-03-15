@@ -1,7 +1,6 @@
+import { ERC20Mock__factory } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { ERC20Mock__factory } from '@typechain/index';
-import { DEPLOYMENT_NAMES } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const buildERC20Mock = async (
     hre: HardhatRuntimeEnvironment,
@@ -13,7 +12,9 @@ export const buildERC20Mock = async (
     console.log('[+] buildERC20Mock');
 
     return {
-        contract: await hre.ethers.getContractFactory('ERC20Mock'),
+        contract: new ERC20Mock__factory().connect(
+            hre.ethers.provider.getSigner(),
+        ),
         deploymentName: params.deploymentName,
         args: params.args,
     };
