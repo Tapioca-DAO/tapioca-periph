@@ -36,7 +36,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const owner = tapiocaMulticallAddr;
 
     if (isTestnet) {
-        await deployUniV3MockPool({
+        await deployTapWethUniV3Pool({
             hre,
             taskArgs,
             tag: taskArgs.tag,
@@ -116,7 +116,7 @@ async function loadContracts(
 }
 
 // TODO - remove this once we deploy the pool on TapToken
-async function deployUniV3MockPool(params: {
+async function deployTapWethUniV3Pool(params: {
     hre: HardhatRuntimeEnvironment;
     taskArgs: TTapiocaDeployTaskArgs;
     tag: string;
