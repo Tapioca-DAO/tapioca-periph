@@ -20,9 +20,9 @@ export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,
 ) => {
-    return await hre.SDK.DeployerVM.tapiocaDeployTask(
+    await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        hre,
+        { hre },
         async ({
             VM,
             tapiocaMulticallAddr,
