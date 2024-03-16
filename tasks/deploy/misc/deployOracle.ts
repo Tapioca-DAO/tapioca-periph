@@ -1,14 +1,18 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadVM } from '../utils';
-import inquirer from 'inquirer';
-import { buildUniswapV2Swapper } from './builds/buildUniswapV2Swapper';
-import { buildUniswapV3Swapper } from './builds/buildUniswapV3Swapper';
 
-// hh deploySwappers --network goerli
-export const deploySwappers__task = async (
+import { loadVM } from '../../utils';
+import inquirer from 'inquirer';
+import { buildGLPOracle } from '../../deployBuilds/oracle/buildGLPOracle';
+import { buildTapOracle } from '../../deployBuilds/oracle/buildTapOracle';
+import { buildDaiOracle } from '../../deployBuilds/oracle/buildDaiOracle';
+import { buildGMXOracle } from '../../deployBuilds/oracle/buildGMXOracle';
+
+// hh deployOracles --network goerli
+export const deployOracle__task = async (
     {},
     hre: HardhatRuntimeEnvironment,
 ) => {
+    // Settings
     const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
     const signer = (await hre.ethers.getSigners())[0];
     const chainInfo = hre.SDK.utils.getChainBy('chainId', hre.SDK.eChainId);
@@ -21,7 +25,15 @@ export const deploySwappers__task = async (
         signer.address,
     );
 
-    const deployType = ['UniswapV2Swapper', 'UniswapV3Swapper'] as const;
+    const deployType = [
+        'GLPOracle',
+        'TapOracle',
+        'DaiOracle',
+        'GMXOracle',
+        // '[-] Deprecated / ARBTriCryptoOracle',
+        // '[-] Deprecated / SGOracle',
+    ] as const;
+
     const { buildToDeploy }: { buildToDeploy: (typeof deployType)[number] } =
         await inquirer.prompt({
             message: '[+] Build to deploy: ',
@@ -31,12 +43,19 @@ export const deploySwappers__task = async (
         });
 
     const VM = await loadVM(hre, tag);
+
     // Build contracts
-    if (buildToDeploy === 'UniswapV2Swapper') {
-        VM.add(await buildUniswapV2Swapper(hre, tag));
+    if (buildToDeploy === 'GLPOracle') {
+        VM.add(await buildGLPOracle(hre));
     }
-    if (buildToDeploy === 'UniswapV3Swapper') {
-        VM.add(await buildUniswapV3Swapper(hre, tag));
+    if (buildToDeploy === 'TapOracle') {
+        VM.add(await buildTapOracle(hre));
+    }
+    if (buildToDeploy === 'DaiOracle') {
+        VM.add(await buildDaiOracle(hre));
+    }
+    if (buildToDeploy === 'GMXOracle') {
+        VM.add(await buildGMXOracle(hre));
     }
 
     const isLocal = hre.network.config.tags.includes('local');

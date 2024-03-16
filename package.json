@@ -78,11 +78,12 @@
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "@types/inquirer": "^9.0.3",
         "@types/uuid": "^9.0.1",
+        "@uniswap/v3-sdk": "^3.11.0",
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.6.14",
+        "tapioca-sdk": "^1.7.12",
         "tsconfig-paths": "^4.2.0",
         "uuid": "^9.0.0"
     }

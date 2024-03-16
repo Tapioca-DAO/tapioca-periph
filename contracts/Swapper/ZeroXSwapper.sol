@@ -29,7 +29,6 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     /// ************
 
     address public zeroXProxy;
-    address public oneInchProxy;
     ICluster public cluster;
 
     bool public isOneInchEnabled;
@@ -44,10 +43,9 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     error MinSwapFailed(uint256 amountOut);
     error SenderNotValid(address sender);
 
-    constructor(address _zeroXProxy, address _oneInchProxy, ICluster _cluster, address _owner) {
+    constructor(address _zeroXProxy, ICluster _cluster, address _owner) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
         zeroXProxy = _zeroXProxy;
-        oneInchProxy = _oneInchProxy;
         cluster = _cluster;
         transferOwnership(_owner);
     }
@@ -74,8 +72,6 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
 
         if (!isOneInchEnabled && swapData.swapTarget != zeroXProxy) {
             revert InvalidProxy(swapData.swapTarget, zeroXProxy);
-        } else if (isOneInchEnabled && swapData.swapTarget != oneInchProxy) {
-            revert InvalidProxy(swapData.swapTarget, oneInchProxy);
         }
 
         // Approve the 0x proxy to spend the sell token, and call the swap function
