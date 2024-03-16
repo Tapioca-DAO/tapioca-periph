@@ -1911,6 +1911,7 @@ export async function register(staging?: boolean) {
         magnetarHelper,
         deployLiquidationReceiverMock,
         marketHelper,
+        pearlmit
     };
 
     /**
