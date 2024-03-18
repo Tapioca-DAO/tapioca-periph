@@ -18,7 +18,12 @@ TAP_TASK(
 );
 
 TAP_TASK(
-    deployScope.task('postLbp', 'Deploy Oracles', deployPostLbpStack__task),
+    deployScope
+        .task('postLbp', 'Deploy Oracles', deployPostLbpStack__task)
+        .addFlag(
+            'mockExternalRepos',
+            'Deploy mocks for external repos instead of relying on their deployments. Used for testing.',
+        ),
 );
 
 TAP_TASK(

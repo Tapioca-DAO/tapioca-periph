@@ -18,7 +18,7 @@ import { DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { deployUniV3pool__task } from './misc/deployUniV3Pool';
 
 export const deployPostLbpStack__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs,
+    _taskArgs: TTapiocaDeployTaskArgs & { mockExternalRepos?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -30,12 +30,15 @@ export const deployPostLbpStack__task = async (
     );
 };
 
-async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaDeployTask(
+    params: TTapiocaDeployerVmPass<{ mockExternalRepos?: boolean }>,
+) {
     const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
         params;
+    const { mockExternalRepos } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    if (isTestnet) {
+    if (isTestnet && mockExternalRepos) {
         await deployTapWethUniV3Pool({
             hre,
             taskArgs,
@@ -47,6 +50,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         hre,
         taskArgs.tag,
         isTestnet,
+        !!mockExternalRepos,
     );
 
     if (
@@ -56,23 +60,25 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
-            .add(await buildGMXOracle(hre, owner))
-            .add(
-                await buildTapOptionOracle(
-                    hre,
-                    tapToken.address,
-                    tapWethLp.address,
-                    owner,
-                ),
-            )
-            .add(
+            .add(await buildGMXOracle(hre, owner));
+
+        if (isTestnet && mockExternalRepos) {
+            VM.add(
                 await buildTapOracle(
                     hre,
                     tapToken.address,
                     tapWethLp.address,
                     owner,
                 ),
+            ).add(
+                await buildTapOptionOracle(
+                    hre,
+                    tapToken.address,
+                    tapWethLp.address,
+                    owner,
+                ),
             );
+        }
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
         VM.add(await buildDaiOracle(hre, owner));
     }
@@ -82,6 +88,7 @@ async function loadContracts(
     hre: HardhatRuntimeEnvironment,
     tag: string,
     isTestnet: boolean,
+    mockExternalRepos: boolean,
 ) {
     // TapToken
     const tapToken = loadGlobalContract(
@@ -93,8 +100,7 @@ async function loadContracts(
     );
 
     let tapWethLp;
-    if (isTestnet) {
-        // TODO - remove this once we deploy the pool on TapToken
+    if (isTestnet && mockExternalRepos) {
         tapWethLp = loadGlobalContract(
             hre,
             TAPIOCA_PROJECTS_NAME.TapToken,
@@ -115,7 +121,6 @@ async function loadContracts(
     return { tapToken, tapWethLp };
 }
 
-// TODO - remove this once we deploy the pool on TapToken
 async function deployTapWethUniV3Pool(params: {
     hre: HardhatRuntimeEnvironment;
     taskArgs: TTapiocaDeployTaskArgs;
