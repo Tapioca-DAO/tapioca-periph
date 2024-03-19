@@ -31,6 +31,7 @@ type TPostLbp = {
         GLP_MANAGER: string;
         WETH_USD_CL_DATA_FEED_ADDRESS: string;
         DAI_USD_CL_DATA_FEED_ADDRESS: string;
+        USDC_USD_CL_DATA_FEED_ADDRESS: string;
     };
 };
 const POST_LBP: TPostLbp = {
@@ -42,6 +43,8 @@ const POST_LBP: TPostLbp = {
             '0x639fe6ab55c921f74e7fac1ee960c0b6293ba612',
         DAI_USD_CL_DATA_FEED_ADDRESS:
             '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9',
+        USDC_USD_CL_DATA_FEED_ADDRESS:
+            '0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         GMX_USD_CL_DATA_FEED_ADDRESS:
@@ -51,6 +54,8 @@ const POST_LBP: TPostLbp = {
             '0x1444F15C73FdCDA08B72592af855776Be88B45d4', // Locally deployed WETH/USD Chainlink Mock
         DAI_USD_CL_DATA_FEED_ADDRESS:
             '0x4cAfe3Df6Ae3E4ecbA6fD9663b494E10c5B648E5', // Locally deployed DAI/USD Chainlink Mock
+        USDC_USD_CL_DATA_FEED_ADDRESS:
+            '0xC23507096A67D62d511CBE9D9f335dbef8F5De27', // Locally deployed USDC/USD Chainlink Mock
     },
 };
 
