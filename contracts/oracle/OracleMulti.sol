@@ -108,24 +108,24 @@ contract OracleMulti is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti
     /// @dev If quoteAmount is `inBase`, rates are returned
     /// @return The first parameter is the lowest value and the second parameter is the highest
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
-    function _readAll(uint256 quoteAmount) internal view override returns (uint256, uint256) {
-        uint256 quoteAmountUni = _quoteUniswap(quoteAmount);
+    function _readAll(uint256 quoteAmount)
+        internal
+        view
+        override
+        returns (uint256 quoteAmountUni, uint256 quoteAmountCL)
+    {
+        quoteAmountUni = _quoteUniswap(quoteAmount);
 
         // The current uni rate is in `outBase` we want our rate to all be in base `BASE`
         quoteAmountUni = (quoteAmountUni * BASE) / outBase;
         // The current amount is in `inBase` we want our rate to all be in base `BASE`
-        uint256 quoteAmountCL = (quoteAmount * BASE) / inBase;
+        quoteAmountCL = (quoteAmount * BASE) / inBase;
         uint256 ratio;
 
         (quoteAmountCL, ratio) = _quoteChainlink(quoteAmountCL);
 
         if (uniFinalCurrency > 0) {
             quoteAmountUni = _changeUniswapNotFinal(ratio, quoteAmountUni);
-        }
-        if (quoteAmountCL <= quoteAmountUni) {
-            return (quoteAmountCL, quoteAmountUni);
-        } else {
-            return (quoteAmountUni, quoteAmountCL);
         }
     }
 
