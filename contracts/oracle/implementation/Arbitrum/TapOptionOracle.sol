@@ -9,16 +9,18 @@ import {SeerUniSolo, OracleUniSoloConstructorData} from "../../SeerUniSolo.sol";
 
 contract TapOptionOracle is SeerUniSolo {
     /// @notice Last prices of the oracle. get() will return the average.
-    uint256[3] public lastPrices = [0, 0, 0];
+    uint256[4] public lastPrices = [0, 0, 0, 0];
 
     /// @notice Last index update of the oracle. goes from 0 to 2.
-    uint8 private lastIndex = 0;
+    uint8 public lastIndex = 0;
 
     /// @notice Time in seconds after which get() can be called again (1 hour).
     uint32 public FETCH_TIME = 4 hours;
 
     /// @dev Last timestamp of the oracle update.
-    uint128 private lastCall = 0;
+    uint128 public lastCall = 0;
+
+    bytes32 public constant PRICE_UPDATER = keccak256("PRICE_UPDATER");
 
     event FetchTimeUpdated(uint256 newFetchTime);
     event LastPriceUpdated(uint256 newLastPrice, uint8 index);
@@ -39,41 +41,51 @@ contract TapOptionOracle is SeerUniSolo {
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
+        uint32 _fetchTime,
         OracleUniSoloConstructorData memory _oracleUniSoloConstructorData
-    ) SeerUniSolo(__name, __symbol, _decimals, _oracleUniSoloConstructorData) {}
+    ) SeerUniSolo(__name, __symbol, _decimals, _oracleUniSoloConstructorData) {
+        FETCH_TIME = _fetchTime;
+        _grantRole(PRICE_UPDATER, _oracleUniSoloConstructorData._admin);
+    }
 
     /// @notice Get the latest exchange rate.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(bytes calldata) external virtual override nonReentrant returns (bool success, uint256 rate) {
+    function get(bytes calldata)
+        external
+        virtual
+        override
+        nonReentrant
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        returns (bool success, uint256 rate)
+    {
         _sequencerBeatCheck();
-        (, uint256 price) = _readAll(inBase);
-
-        /// @dev If the last update was more than FETCH_TIME seconds ago, update the last price.
-        if (block.timestamp - lastCall > FETCH_TIME) {
-            _updateLastPrice(price);
-        }
-
         uint256 average = _computeAverage();
         return (true, average);
     }
 
     /// @notice Update the last price of the oracle.
-    function updateLastPrice() external {
+    function updateLastPrice() external onlyRole(PRICE_UPDATER) {
         (, uint256 price) = _readAll(inBase);
         _updateLastPrice(price);
     }
 
     /// @notice Update the last price of the oracle. Only if the last update was more than FETCH_TIME seconds ago.
     function _updateLastPrice(uint256 _price) internal {
-        require(block.timestamp - lastCall > FETCH_TIME, "TapOracle: too early");
+        require(block.timestamp - lastCall > FETCH_TIME, "TapOptionOracle: too early");
         uint8 _lastIndex = lastIndex;
         lastPrices[_lastIndex] = _price;
-        lastIndex = (_lastIndex + 1) % 3;
+        lastIndex = (_lastIndex + 1) % 4;
 
         lastCall = uint128(block.timestamp);
+        // Reset the observation if we are at the end of the array (Means it's a new epoch).
+        if (_lastIndex == 3) {
+            lastPrices[1] = 0;
+            lastPrices[2] = 0;
+            lastPrices[3] = 0;
+        }
 
         emit LastPriceUpdated(_price, _lastIndex);
     }
@@ -104,7 +116,7 @@ contract TapOptionOracle is SeerUniSolo {
 
     /// @notice Compute the average of the last 3 prices fetch by the oracle.
     function _computeAverage() internal view returns (uint256) {
-        require(lastPrices[2] > 0, "TapOracle: not enough data");
-        return (lastPrices[0] + lastPrices[1] + lastPrices[2]) / 3;
+        require(lastPrices[3] > 0, "TapOptionOracle: not enough data");
+        return (lastPrices[0] + lastPrices[1] + lastPrices[2] + lastPrices[3]) / 4;
     }
 }
