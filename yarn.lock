@@ -5238,11 +5238,14 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.12:
-  version "1.7.12"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.12.tgz#afc6733d387dd38095e0ae59371eebfb8b8aa30e"
-  integrity sha512-ftYuqkbnCbwLorGuJ5aVvjAKkZy5NRjp6NXKe6A8bmzjmp+/q0SzSEpxFiIqiwXhfNlScYNDEgNuiEHQNRnL7w==
+tapioca-sdk@^1.7.15:
+  version "1.7.15"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.15.tgz#bbb0e9f6e060ca09035ccad2153ccf9407e7f0e7"
+  integrity sha512-4M7PH1vzvsxPjtdOz6D3NwM7uoqL2CZnz3/B+vkQWpRcRgojc/plYm65KSs53gWaKDOoiBhW0ggEh0Nh+KaM6Q==
   dependencies:
+    "@uniswap/v3-core" "^1.0.1"
+    "@uniswap/v3-periphery" "^1.4.3"
+    "@uniswap/v3-sdk" "^3.11.0"
     deepmerge "^4.3.1"
     dotenv "^16.3.2"
     ethers "^5.4.7"
