@@ -5,9 +5,9 @@ pragma solidity 0.8.22;
 import {IUniswapV3Pool} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
 // Tapioca
-import {SeerUniSolo, OracleUniSoloConstructorData} from "../../SeerUniSolo.sol";
+import {Seer, OracleMultiConstructorData} from "../../Seer.sol";
 
-contract TapOptionOracle is SeerUniSolo {
+contract TapOptionOracle is Seer {
     /// @notice Last prices of the oracle. get() will return the average.
     uint256[4] public lastPrices = [0, 0, 0, 0];
 
@@ -29,23 +29,23 @@ contract TapOptionOracle is SeerUniSolo {
     /// @param __name Name of the oracle
     /// @param __symbol Symbol of the oracle
     /// @param _decimals Number of decimals of the oracle
-    /// @param _oracleUniSoloConstructorData.addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
-    /// @param _oracleUniSoloConstructorData._circuitUniswap Path of the Uniswap pools
-    /// @param _oracleUniSoloConstructorData._circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
-    /// @param _oracleUniSoloConstructorData._twapPeriod Time weighted average window for all Uniswap pools
-    /// @param _oracleUniSoloConstructorData.observationLength Number of observations that each pool should have stored
-    /// @param _oracleUniSoloConstructorData.guardians List of governor or guardian addresses
-    /// @param _oracleUniSoloConstructorData._description Description of the assets concerned by the oracle
-    /// @param _oracleUniSoloConstructorData._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+    /// @param _oracleMultiConstructorData.addressInAndOutUni List of 2 addresses representing the in-currency address and the out-currency address
+    /// @param _oracleMultiConstructorData._circuitUniswap Path of the Uniswap pools
+    /// @param _oracleMultiConstructorData._circuitUniIsMultiplied Whether we should multiply or divide by this rate in the path
+    /// @param _oracleMultiConstructorData._twapPeriod Time weighted average window for all Uniswap pools
+    /// @param _oracleMultiConstructorData.observationLength Number of observations that each pool should have stored
+    /// @param _oracleMultiConstructorData.guardians List of governor or guardian addresses
+    /// @param _oracleMultiConstructorData._description Description of the assets concerned by the oracle
+    /// @param _oracleMultiConstructorData._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
     constructor(
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
         uint32 _fetchTime,
-        OracleUniSoloConstructorData memory _oracleUniSoloConstructorData
-    ) SeerUniSolo(__name, __symbol, _decimals, _oracleUniSoloConstructorData) {
+        OracleMultiConstructorData memory _oracleMultiConstructorData
+    ) Seer(__name, __symbol, _decimals, _oracleMultiConstructorData) {
         FETCH_TIME = _fetchTime;
-        _grantRole(PRICE_UPDATER, _oracleUniSoloConstructorData._admin);
+        _grantRole(PRICE_UPDATER, _oracleMultiConstructorData._admin);
     }
 
     /// @notice Get the latest exchange rate.
