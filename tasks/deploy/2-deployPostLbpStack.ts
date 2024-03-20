@@ -16,11 +16,15 @@ import {
     buildTOBTapOptionOracle,
 } from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
 import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
-import { DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { deployUniV3pool__task } from './misc/deployUniV3Pool';
+import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
+import { deployUniV3TapWethPool } from 'tasks/deployBuilds/postLbp/deployUniV3TapWethPool';
+import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 
+/**
+ * @notice Called only after tap-token repo `postLbp1` task
+ */
 export const deployPostLbpStack__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & { mockExternalRepos?: boolean },
+    _taskArgs: TTapiocaDeployTaskArgs & { ratioTap: number; ratioWeth: number },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -33,32 +37,20 @@ export const deployPostLbpStack__task = async (
 };
 
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ mockExternalRepos?: boolean }>,
+    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
-        params;
-    const { mockExternalRepos } = taskArgs;
+    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs } = params;
+    const { tag, ratioTap, ratioWeth } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    if (isTestnet && mockExternalRepos) {
-        await deployTapWethUniV3Pool({
-            hre,
-            taskArgs,
-            tag: taskArgs.tag,
-        });
-    }
-
-    const { tapToken, tapWethLp } = await loadContracts(
-        hre,
-        taskArgs.tag,
-        isTestnet,
-        !!mockExternalRepos,
-    );
+    const { tapToken, tapWethLp } = await loadContracts(hre, tag);
 
     if (
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'arbitrum_sepolia'
     ) {
+        await deployUniV3TapWethPool(hre, tag, ratioTap, ratioWeth);
+
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
@@ -86,18 +78,14 @@ async function tapiocaDeployTask(
                     tapWethLp.address,
                     owner,
                 ),
-            );
+            )
+            .add(await buildUSDCOracle(hre, owner));
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
         VM.add(await buildDaiOracle(hre, owner));
     }
 }
 
-async function loadContracts(
-    hre: HardhatRuntimeEnvironment,
-    tag: string,
-    isTestnet: boolean,
-    mockExternalRepos: boolean,
-) {
+async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
     // TapToken
     const tapToken = loadGlobalContract(
         hre,
@@ -107,79 +95,13 @@ async function loadContracts(
         tag,
     );
 
-    let tapWethLp;
-    if (isTestnet && mockExternalRepos) {
-        tapWethLp = loadGlobalContract(
-            hre,
-            TAPIOCA_PROJECTS_NAME.TapToken,
-            hre.SDK.eChainId,
-            `${TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL}_MOCK`,
-            tag,
-        );
-    } else {
-        tapWethLp = loadGlobalContract(
-            hre,
-            TAPIOCA_PROJECTS_NAME.TapToken,
-            hre.SDK.eChainId,
-            TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
-            tag,
-        );
-    }
-
-    return { tapToken, tapWethLp };
-}
-
-async function deployTapWethUniV3Pool(params: {
-    hre: HardhatRuntimeEnvironment;
-    taskArgs: TTapiocaDeployTaskArgs;
-    tag: string;
-}) {
-    const { hre, taskArgs, tag } = params;
-    const tapToken = loadGlobalContract(
+    const tapWethLp = loadGlobalContract(
         hre,
         TAPIOCA_PROJECTS_NAME.TapToken,
         hre.SDK.eChainId,
-        TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
+        DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
         tag,
     );
 
-    const deploymentName = `${TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL}_MOCK`;
-    try {
-        loadGlobalContract(
-            hre,
-            TAPIOCA_PROJECTS_NAME.TapToken,
-            hre.SDK.eChainId,
-            deploymentName,
-            tag,
-        );
-    } catch (e) {
-        const poolAddress = await deployUniV3pool__task(
-            {
-                ...taskArgs,
-                feeTier: 3000,
-                token0: tapToken.address,
-                token1: DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH,
-                ratio0: 33,
-                ratio1: 10,
-            },
-            hre,
-        );
-        hre.SDK.db.saveGlobally(
-            {
-                [hre.SDK.eChainId]: {
-                    name: hre.network.name,
-                    lastBlockHeight: await hre.ethers.provider.getBlockNumber(),
-                    contracts: [
-                        {
-                            address: poolAddress,
-                            name: `${TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL}_MOCK`,
-                            meta: {},
-                        },
-                    ],
-                },
-            },
-            TAPIOCA_PROJECTS_NAME.TapToken,
-            tag,
-        );
-    }
+    return { tapToken, tapWethLp };
 }

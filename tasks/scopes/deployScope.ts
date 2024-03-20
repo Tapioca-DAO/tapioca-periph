@@ -19,10 +19,18 @@ TAP_TASK(
 
 TAP_TASK(
     deployScope
-        .task('postLbp', 'Deploy Oracles', deployPostLbpStack__task)
+        .task(
+            'postLbp',
+            'Deploy oracles. Deploy UniV3TapWeth pool and LP. Called only after tap-token repo `postLbp1` task',
+            deployPostLbpStack__task,
+        )
         .addFlag(
-            'mockExternalRepos',
-            'Deploy mocks for external repos instead of relying on their deployments. Used for testing.',
+            'ratioTap',
+            'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
+        )
+        .addFlag(
+            'ratioWeth',
+            'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
         ),
 );
 
