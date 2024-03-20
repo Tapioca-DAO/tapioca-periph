@@ -3,7 +3,6 @@ import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract } from 'tapioca-sdk';
 import {
-    DeployerVM,
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
@@ -12,7 +11,10 @@ import { buildETHOracle } from 'tasks/deployBuilds/oracle/buildETHOracle';
 import { buildEthGlpPOracle } from 'tasks/deployBuilds/oracle/buildEthGlpOracle';
 import { buildGLPOracle } from 'tasks/deployBuilds/oracle/buildGLPOracle';
 import { buildGMXOracle } from 'tasks/deployBuilds/oracle/buildGMXOracle';
-import { buildTapOptionOracle } from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
+import {
+    buildADBTapOptionOracle,
+    buildTOBTapOptionOracle,
+} from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
 import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { deployUniV3pool__task } from './misc/deployUniV3Pool';
@@ -70,14 +72,23 @@ async function tapiocaDeployTask(
                     tapWethLp.address,
                     owner,
                 ),
-            ).add(
-                await buildTapOptionOracle(
-                    hre,
-                    tapToken.address,
-                    tapWethLp.address,
-                    owner,
-                ),
-            );
+            )
+                .add(
+                    await buildADBTapOptionOracle(
+                        hre,
+                        tapToken.address,
+                        tapWethLp.address,
+                        owner,
+                    ),
+                )
+                .add(
+                    await buildTOBTapOptionOracle(
+                        hre,
+                        tapToken.address,
+                        tapWethLp.address,
+                        owner,
+                    ),
+                );
         }
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
         VM.add(await buildDaiOracle(hre, owner));
