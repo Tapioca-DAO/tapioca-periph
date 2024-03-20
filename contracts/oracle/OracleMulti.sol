@@ -106,7 +106,8 @@ contract OracleMulti is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti
     /// @notice Returns Uniswap and Chainlink values (with the first one being the smallest one)
     /// @param quoteAmount Amount expressed in the in-currency base.
     /// @dev If quoteAmount is `inBase`, rates are returned
-    /// @return The first parameter is the lowest value and the second parameter is the highest
+    /// @return quoteAmountUni Uniswap amount. If `uniFinalCurrency` is 1, the value is corrected with Chainlink
+    /// @return quoteAmountCL Chainlink amount
     /// @dev The amount returned is expressed with base `BASE` (and not the base of the out-currency)
     function _readAll(uint256 quoteAmount)
         internal

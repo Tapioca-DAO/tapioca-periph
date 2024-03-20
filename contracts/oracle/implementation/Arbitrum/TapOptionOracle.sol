@@ -81,7 +81,7 @@ contract TapOptionOracle is Seer {
     /// @notice Update the last price of the oracle.
     function updateLastPrice() external onlyRole(PRICE_UPDATER) {
         (uint256 uniswap,) = _readAll(inBase); // We'll use a _oracleMultiConstructorData._uniFinalCurrency == 1.
-        _updateLastPrice(uniswap > chainlink ? uniswap : chainlink); // Use the highest price.
+        _updateLastPrice(uniswap);
     }
 
     /// @notice Update the last price of the oracle. Only if the last update was more than FETCH_TIME seconds ago.
