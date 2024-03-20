@@ -49,7 +49,12 @@ async function tapiocaDeployTask(
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'arbitrum_sepolia'
     ) {
-        await deployUniV3TapWethPool(hre, tag, ratioTap, ratioWeth);
+        const tapWethPool = await deployUniV3TapWethPool(
+            hre,
+            tag,
+            ratioTap,
+            ratioWeth,
+        );
 
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))

@@ -1,6 +1,5 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import { TapiocaMulticall } from '@tapioca-sdk/typechain/tapioca-periphery';
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount, computePoolAddress } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -8,15 +7,15 @@ import { deployUniV3pool__task, loadGlobalContract } from 'tapioca-sdk';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 /**
- * Deploys TAP/WETH Uniswap V3 Pool.
+ * @notice Deploys TAP/WETH Uniswap V3 Pool.
+ * @returns Address of the deployed pool
  */
 export const deployUniV3TapWethPool = async (
     hre: HardhatRuntimeEnvironment,
     tag: string,
     ratioTap: number,
     ratioWeth: number,
-): Promise<TapiocaMulticall.CallStruct[]> => {
-    const calls: TapiocaMulticall.CallStruct[] = [];
+) => {
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
 
     /**
@@ -74,7 +73,7 @@ export const deployUniV3TapWethPool = async (
         await VM.save();
     }
 
-    return calls;
+    return computedPoolAddress;
 };
 
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
