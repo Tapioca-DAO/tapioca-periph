@@ -62,10 +62,8 @@ async function tapiocaDeployTask(
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
-            .add(await buildGMXOracle(hre, owner));
-
-        if (isTestnet && mockExternalRepos) {
-            VM.add(
+            .add(await buildGMXOracle(hre, owner))
+            .add(
                 await buildTapOracle(
                     hre,
                     tapToken.address,
@@ -73,23 +71,22 @@ async function tapiocaDeployTask(
                     owner,
                 ),
             )
-                .add(
-                    await buildADBTapOptionOracle(
-                        hre,
-                        tapToken.address,
-                        tapWethLp.address,
-                        owner,
-                    ),
-                )
-                .add(
-                    await buildTOBTapOptionOracle(
-                        hre,
-                        tapToken.address,
-                        tapWethLp.address,
-                        owner,
-                    ),
-                );
-        }
+            .add(
+                await buildADBTapOptionOracle(
+                    hre,
+                    tapToken.address,
+                    tapWethLp.address,
+                    owner,
+                ),
+            )
+            .add(
+                await buildTOBTapOptionOracle(
+                    hre,
+                    tapToken.address,
+                    tapWethLp.address,
+                    owner,
+                ),
+            );
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
         VM.add(await buildDaiOracle(hre, owner));
     }
