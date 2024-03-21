@@ -6,6 +6,7 @@ import { TAP_TASK } from 'tapioca-sdk';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMock';
+import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
 
 const deployScope = scope('deploys', 'Deployment tasks');
 
@@ -62,6 +63,14 @@ TAP_TASK(
 );
 
 // Mocks
+TAP_TASK(
+    deployScope.task(
+        'deploySwapper',
+        'Deploys a swapper contract with a deterministic address, with MulticallV3.',
+        deploySwappers__task,
+    ),
+);
+
 TAP_TASK(
     deployScope
         .task('erc20mock', 'Deploy an ERC20 Mock', deployERC20Mock__task)
