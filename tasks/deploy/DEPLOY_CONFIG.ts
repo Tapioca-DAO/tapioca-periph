@@ -70,8 +70,10 @@ type TMisc = {
         USDC: string;
         ZERO_X_PROXY: string;
         NONFUNGIBLE_POSITION_MANAGER: string;
+        V3_SWAP_ROUTER: string;
         V3_FACTORY: string;
         ARRAKIS_FACTORY: string;
+        ARRAKIS_RESOLVER: string;
     };
 };
 
@@ -86,7 +88,9 @@ const MISC: TMisc = {
         NONFUNGIBLE_POSITION_MANAGER:
             '0xc36442b4a4522e871399cd717abdd847ab11fe88',
         V3_FACTORY: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
+        V3_SWAP_ROUTER: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
         ARRAKIS_FACTORY: '0xECb8Ffcb2369EF188A082a662F496126f66c8288',
+        ARRAKIS_RESOLVER: '0x535C5fDf31477f799366DF6E4899a12A801cC7b8',
     },
     [EChainID.MAINNET]: {
         CL_SEQUENCER: '0x', // Arbitrum mainnet ChainLink sequencer uptime feed
@@ -97,7 +101,9 @@ const MISC: TMisc = {
         NONFUNGIBLE_POSITION_MANAGER:
             '0xc36442b4a4522e871399cd717abdd847ab11fe88',
         V3_FACTORY: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
-        ARRAKIS_FACTORY: '',
+        V3_SWAP_ROUTER: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+        ARRAKIS_FACTORY: '', // Empty means not needed/intended for this chain
+        ARRAKIS_RESOLVER: '', // Empty means not needed/intended for this chain
     },
     // Testnet
     [EChainID.ARBITRUM_SEPOLIA]: {
@@ -109,7 +115,9 @@ const MISC: TMisc = {
         NONFUNGIBLE_POSITION_MANAGER:
             '0xFd1a7CA61e49703da3618999B2EEdc0E79476759',
         V3_FACTORY: '0x76D8F1D83716bcd0f811449a76Fc2B3E3ef98454',
+        V3_SWAP_ROUTER: '0x20C5707e71872463c3063247636fbcE434076597',
         ARRAKIS_FACTORY: '0x1c90088A93e9c7844aE0f0a6A7573891342BFe93',
+        ARRAKIS_RESOLVER: '0xD0D11a8fFD49a4b0B90936dc97814DBbA6C8Dd78',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
         CL_SEQUENCER: '0x0000000000000000000000000000000000000000',
@@ -120,7 +128,9 @@ const MISC: TMisc = {
         NONFUNGIBLE_POSITION_MANAGER:
             '0x568DFf712af02F07A0b9dBEb6b019a9e11adC6Bd',
         V3_FACTORY: '0xd93F65e5Ee424891dBCDEAFE347a553C43d266b7',
-        ARRAKIS_FACTORY: '',
+        V3_SWAP_ROUTER: '', // Empty means not needed/intended for this chain
+        ARRAKIS_FACTORY: '', // Empty means not needed/intended for this chain
+        ARRAKIS_RESOLVER: '', // Empty means not needed/intended for this chain
     },
 };
 MISC['31337' as EChainID] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
