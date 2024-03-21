@@ -17,7 +17,7 @@ import {
 } from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
 import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
-import { deployUniV3TapWethPool } from 'tasks/deployBuilds/postLbp/deployUniV3TapWethPool';
+import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 
 /**
@@ -40,7 +40,7 @@ async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs } = params;
-    const { tag, ratioTap, ratioWeth } = taskArgs;
+    const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
     const { tapToken, tapWethLp } = await loadContracts(hre, tag);
@@ -49,12 +49,7 @@ async function tapiocaDeployTask(
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'arbitrum_sepolia'
     ) {
-        const tapWethPool = await deployUniV3TapWethPool(
-            hre,
-            tag,
-            ratioTap,
-            ratioWeth,
-        );
+        await deployUniPoolAndAddLiquidity(params);
 
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))

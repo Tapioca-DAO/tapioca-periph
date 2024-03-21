@@ -23,6 +23,10 @@ export const deployUniV3TapWethPool = async (
      */
     const { tapToken, weth, uniV3Factory, poolInitializer } =
         await loadContract(hre, tag);
+    const [token0, ratio0, token1, ratio1] =
+        tapToken.address < weth.address
+            ? [tapToken.address, ratioTap, weth.address, ratioWeth]
+            : [weth.address, ratioWeth, tapToken.address, ratioTap];
 
     const computedPoolAddress = computePoolAddress({
         factoryAddress: uniV3Factory.address,
@@ -44,14 +48,13 @@ export const deployUniV3TapWethPool = async (
         ).toLocaleLowerCase() ===
         hre.ethers.constants.AddressZero.toLocaleLowerCase()
     ) {
-        const [ratio0, ratio1] = [ratioTap, ratioWeth];
         await deployUniV3pool__task(
             {
                 factory: uniV3Factory.address,
-                token0: tapToken.address,
-                token1: weth.address,
-                feeTier: FeeAmount.MEDIUM,
                 positionManager: poolInitializer.address,
+                feeTier: FeeAmount.MEDIUM,
+                token0,
+                token1,
                 ratio0,
                 ratio1,
                 tag,
@@ -64,8 +67,10 @@ export const deployUniV3TapWethPool = async (
                 name: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
                 address: computedPoolAddress,
                 meta: {
-                    tap: tapToken.address,
-                    weth: weth.address,
+                    token0,
+                    token1,
+                    ratio0,
+                    ratio1,
                     fee: FeeAmount.MEDIUM,
                 },
             },
@@ -73,7 +78,14 @@ export const deployUniV3TapWethPool = async (
         await VM.save();
     }
 
-    return computedPoolAddress;
+    return {
+        computedPoolAddress,
+        token0,
+        token1,
+        ratio0,
+        ratio1,
+        fee: FeeAmount.MEDIUM,
+    };
 };
 
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
