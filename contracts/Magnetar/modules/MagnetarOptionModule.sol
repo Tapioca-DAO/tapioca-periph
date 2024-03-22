@@ -18,6 +18,7 @@ import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -38,6 +39,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  */
 contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
@@ -73,7 +75,9 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
         IMarket bigBang_ = IMarket(data.externalData.bigBang);
         ISingularity singularity_ = ISingularity(data.externalData.singularity);
-        IYieldBox yieldBox_ = IYieldBox(singularity_.yieldBox());
+        IYieldBox yieldBox_ = data.externalData.singularity != address(0)
+            ? IYieldBox(singularity_.yieldBox())
+            : IYieldBox(bigBang_.yieldBox());
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
@@ -171,8 +175,20 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             _setApprovalForYieldBox(address(bigBang_), yieldBox_);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
-                address(this), data.user, false, data.removeAndRepayData.repayAmount
+                data.user, data.user, false, data.removeAndRepayData.repayAmount
             );
+
+            {
+                uint256 share = yieldBox_.toShare(bigBang_.assetId(), data.removeAndRepayData.repayAmount, false);
+                pearlmit.approve(
+                    address(yieldBox_),
+                    bigBang_.assetId(),
+                    data.externalData.singularity,
+                    share.toUint200(),
+                    (block.timestamp + 1).toUint48()
+                );
+            }
+
             (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
 
             if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
@@ -196,6 +212,13 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper)
                 .removeCollateral(data.user, removeCollateralTo, collateralShare);
+            pearlmit.approve(
+                address(yieldBox_),
+                _collateralId,
+                address(bigBang_),
+                collateralShare.toUint200(),
+                (block.timestamp + 1).toUint48()
+            );
             bigBang_.execute(modules, calls, true);
 
             //withdraw

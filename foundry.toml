@@ -28,3 +28,7 @@ fs_permissions = [
 
 [etherscan]
 arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_API_KEY}", url = "https://api-sepolia.arbiscan.io/api"}
+
+[rpc_endpoints]
+mainnet = "${RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"

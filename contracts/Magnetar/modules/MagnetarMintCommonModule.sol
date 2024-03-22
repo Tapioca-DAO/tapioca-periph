@@ -24,6 +24,7 @@ import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -46,6 +47,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
     using SafeApprove for address;
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
@@ -182,6 +184,7 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             }
 
             _setApprovalForYieldBox(bigBangAddress, yieldBox_);
+            _setApprovalForYieldBox(address(pearlmit), yieldBox_);
 
             IMarket bigBang_ = IMarket(bigBangAddress);
 
@@ -215,6 +218,16 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
                     mintData.collateralDepositData.amount,
                     bbCollateralShare
                 );
+
+                if (mintData.collateralDepositData.deposit) {
+                    pearlmit.approve(
+                        address(yieldBox_),
+                        bbCollateralId,
+                        bigBangAddress,
+                        bbCollateralShare.toUint200(),
+                        (block.timestamp + 1).toUint48()
+                    );
+                }
                 bigBang_.execute(modules, calls, true);
             }
 
@@ -222,9 +235,19 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             {
                 (Module[] memory modules, bytes[] memory calls) =
                     IMarketHelper(marketHelper).borrow(user, user, mintData.mintAmount);
+
+                uint256 mintShare = yieldBox_.toShare(bigBang_.assetId(), mintData.mintAmount, false);
+                pearlmit.approve(
+                    address(yieldBox_),
+                    bigBang_.assetId(),
+                    bigBangAddress,
+                    mintShare.toUint200(),
+                    (block.timestamp + 1).toUint48()
+                );
                 bigBang_.execute(modules, calls, true);
             }
 
+            _revertYieldBoxApproval(address(pearlmit), yieldBox_);
             _revertYieldBoxApproval(bigBangAddress, yieldBox_);
         }
     }

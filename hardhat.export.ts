@@ -1,4 +1,5 @@
 // Plugins
+import fs from 'fs';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
 import '@nomicfoundation/hardhat-toolbox';
@@ -18,6 +19,8 @@ import {
 import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
+
+import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
