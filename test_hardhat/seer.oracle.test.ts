@@ -1,10 +1,10 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre from 'hardhat';
-import { __buildETHOracleArgs } from '../tasks/deploy/builds/buildETHOracle';
-import { __buildEthGlpOracleArgs } from '../tasks/deploy/builds/buildEthGlpOracle';
-import { __buildGLPOracleArgs } from '../tasks/deploy/builds/buildGLPOracle';
-import { __buildGMXOracleArgs } from '../tasks/deploy/builds/buildGMXOracle';
+import { __buildETHOracleArgs } from '../tasks/deployBuilds/oracle/buildETHOracle';
+import { __buildEthGlpOracleArgs } from '../tasks/deployBuilds/oracle/buildEthGlpOracle';
+import { __buildGLPOracleArgs } from '../tasks/deployBuilds/oracle/buildGLPOracle';
+import { __buildGMXOracleArgs } from '../tasks/deployBuilds/oracle/buildGMXOracle';
 import { register } from './test.utils';
 
 // TODO Foundry te

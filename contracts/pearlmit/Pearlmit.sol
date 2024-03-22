@@ -36,6 +36,7 @@ contract Pearlmit is PermitC {
      *      - Reverts if the permit is invalid.
      *      - Reverts if the permit is expired.
      * @dev Invalidate the nonce after checking it.
+     * @dev If past allowances for the token still exist, bypass the permit check.
      *
      * @param batch PermitBatchTransferFrom struct containing all necessary data for batch transfer.
      * batch.approvals - array of SignatureApproval structs.
@@ -72,6 +73,7 @@ contract Pearlmit is PermitC {
 
     /**
      * @notice Permit batch approve of multiple token types.
+     * @dev If past allowances for the token still exist, bypass the permit check.
      */
     function permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch) external {
         _checkPermitBatchApproval(batch);
@@ -105,15 +107,41 @@ contract Pearlmit is PermitC {
 
     /**
      * @dev Generate the digest and check its validity against the permit.
+     * @dev If past allowances for the token still exist, bypass the permit check.
      */
     function _checkPermitBatchApproval(IPearlmit.PermitBatchTransferFrom calldata batch) internal {
-        bytes32 digest = _hashTypedDataV4(
-            PearlmitHash.hashBatchTransferFrom(
-                batch.approvals, batch.nonce, batch.sigDeadline, masterNonce(batch.owner)
-            )
-        );
+        // Check if the batch is already allowed
+        if (!_batchAllowanceCheck(batch)) {
+            bytes32 digest = _hashTypedDataV4(
+                PearlmitHash.hashBatchTransferFrom(
+                    batch.approvals, batch.nonce, batch.sigDeadline, masterNonce(batch.owner)
+                )
+            );
 
-        _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+            _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+        }
+    }
+
+    /**
+     * @dev Checks if an approval has been already made and if it is still valid.
+     * This is to counter griefing attacks, where an attacker frontrun the approval.
+     */
+    function _batchAllowanceCheck(IPearlmit.PermitBatchTransferFrom calldata batch)
+        internal
+        returns (bool isBatchAllowed)
+    {
+        uint256 numPermits = batch.approvals.length;
+        isBatchAllowed = true;
+
+        for (uint256 i = 0; i < numPermits; ++i) {
+            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
+            (uint256 allowedAmount,) =
+                _allowance(batch.owner, approval.operator, approval.token, approval.id, ZERO_BYTES32);
+            if (allowedAmount < approval.amount) {
+                isBatchAllowed = false;
+                break;
+            }
+        }
     }
 
     /**

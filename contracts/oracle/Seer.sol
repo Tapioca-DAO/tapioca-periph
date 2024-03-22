@@ -54,14 +54,16 @@ contract Seer is ITapiocaOracle, OracleMulti {
         // Checking whether the sequencer is up
         _sequencerBeatCheck();
 
-        (uint256 low, uint256 high) = _readAll(inBase);
+        (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
-            if (query.useHigh) return (true, high);
+            if (query.useHigh) {
+                return (true, uniswap > chainlink ? uniswap : chainlink);
+            }
         }
 
-        return (true, low);
+        return (true, uniswap < chainlink ? uniswap : chainlink);
     }
 
     /// @notice Check the last exchange rate without any state changes.
@@ -70,14 +72,16 @@ contract Seer is ITapiocaOracle, OracleMulti {
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
     function peek(bytes calldata data) external view virtual returns (bool success, uint256 rate) {
-        (uint256 low, uint256 high) = _readAll(inBase);
+        (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
-            if (query.useHigh) return (true, high);
+            if (query.useHigh) {
+                return (true, uniswap > chainlink ? uniswap : chainlink);
+            }
         }
 
-        return (true, low);
+        return (true, uniswap < chainlink ? uniswap : chainlink);
     }
 
     /// @notice Check the current spot exchange rate without any state changes.
@@ -85,14 +89,16 @@ contract Seer is ITapiocaOracle, OracleMulti {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
     function peekSpot(bytes calldata data) external view virtual returns (uint256 rate) {
-        (uint256 low, uint256 high) = _readAll(inBase);
+        (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
-            if (query.useHigh) return high;
+            if (query.useHigh) {
+                return uniswap > chainlink ? uniswap : chainlink;
+            }
         }
 
-        return low;
+        return uniswap < chainlink ? uniswap : chainlink;
     }
 
     /// @notice Returns a human readable (short) name about this oracle.
