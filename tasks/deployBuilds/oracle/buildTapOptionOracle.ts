@@ -13,6 +13,7 @@ export async function buildTOBTapOptionOracle(
     console.log('[+] buildTOB_TAPOptionOracle');
     return await buildTapOptionOracle(
         hre,
+        'TOB_TAP_OPTION_ORACLE',
         tapAddress,
         tapWethLp,
         owner,
@@ -29,6 +30,7 @@ export async function buildADBTapOptionOracle(
     console.log('[+] buildADB_TAPOptionOracle');
     return await buildTapOptionOracle(
         hre,
+        'ADB_TAP_OPTION_ORACLE',
         tapAddress,
         tapWethLp,
         owner,
@@ -36,8 +38,13 @@ export async function buildADBTapOptionOracle(
     );
 }
 
+const _deploymentName = [
+    DEPLOYMENT_NAMES.TOB_TAP_OPTION_ORACLE,
+    DEPLOYMENT_NAMES.ADB_TAP_OPTION_ORACLE,
+] as const;
 const buildTapOptionOracle = async (
     hre: HardhatRuntimeEnvironment,
+    deploymentName: (typeof _deploymentName)[number],
     tapAddress: string,
     tapWethLpPair: string,
     owner: string,
@@ -66,7 +73,7 @@ const buildTapOptionOracle = async (
 
     return {
         contract: await hre.ethers.getContractFactory('TapOptionOracle'),
-        deploymentName: DEPLOYMENT_NAMES.TAP_OPTION_ORACLE,
+        deploymentName,
         args,
     };
 };

@@ -25,11 +25,11 @@ TAP_TASK(
             'Deploy oracles. Deploy UniV3TapWeth pool and LP. Called only after tap-token repo `postLbp1` task',
             deployPostLbpStack__task,
         )
-        .addFlag(
+        .addParam(
             'ratioTap',
             'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
         )
-        .addFlag(
+        .addParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
         ),

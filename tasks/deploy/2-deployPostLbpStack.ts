@@ -43,13 +43,12 @@ async function tapiocaDeployTask(
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    const { tapToken, tapWethLp } = await loadContracts(hre, tag);
-
     if (
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         await deployUniPoolAndAddLiquidity(params);
+        const { tapToken, tapWethLp } = await loadContracts(hre, tag);
 
         VM.add(await buildETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))

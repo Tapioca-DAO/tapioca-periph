@@ -18,7 +18,7 @@ export async function deployUniPoolAndAddLiquidity(
 
     const { computedPoolAddress, fee, ratio0, ratio1, token0, token1 } =
         await deployUniV3TapWethPool(hre, tag, ratioTap, ratioWeth);
-    const token0Erc20 = await hre.ethers.getContractAt('ERC20Mock', token0);
+    const token0Erc20 = await hre.ethers.getContractAt('ERC20Mock', token0); // ERC20Mock is used just for the interface
     const token1Erc20 = await hre.ethers.getContractAt('ERC20Mock', token1);
 
     await uniPoolInfo__task({ poolAddr: computedPoolAddress }, hre);
