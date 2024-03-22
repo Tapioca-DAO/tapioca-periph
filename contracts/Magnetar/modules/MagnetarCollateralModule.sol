@@ -89,7 +89,6 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         // performs .addCollateral on data.market
         if (data.collateralAmount > 0) {
             _setApprovalForYieldBox(data.market, yieldBox_);
-            _setApprovalForYieldBox(address(pearlmit), yieldBox_);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
                 data.deposit ? address(this) : data.user, data.user, false, data.collateralAmount, _share
