@@ -63,12 +63,11 @@ contract ZeroXSwapperTest is TestBase, StdAssertions, StdCheats, StdUtils, TestH
 
         cluster = new Cluster(aEid, address(this));
         swapperTarget = new ZerroXSwapperMockTarget();
-        swapper = new ZeroXSwapper(address(swapperTarget), address(0), ICluster(address(cluster)), address(this));
+        swapper = new ZeroXSwapper(address(swapperTarget), ICluster(address(cluster)), address(this));
     }
 
     function test_0x_constructor() public {
         assertEq(address(swapper.cluster()), address(cluster));
-        assertEq(swapper.oneInchProxy(), address(0));
         assertEq(swapper.zeroXProxy(), address(swapperTarget));
         assertEq(swapper.owner(), address(this));
     }
