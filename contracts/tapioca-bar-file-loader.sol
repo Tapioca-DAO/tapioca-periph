@@ -4,6 +4,10 @@ pragma solidity 0.8.22;
 /// THIS FILE IS USED TO LOAD THE TAPIOCA BAR CONTRACTS
 /// Comment the imports for faster compilation
 
+import {IERC20} from "forge-std/interfaces/IERC20.sol";
+
+interface ForgeIERC20 is IERC20 {}
+
 import {
     Singularity,
     SGLLiquidation,
