@@ -345,9 +345,6 @@ async function registerPenrose(
         [yieldBox, tapAddress, wethAddress],
         staging,
     );
-
-  
-
     await penrose.setPearlmit(pearlmit.address);
     return { penrose, pearlmit };
 }
@@ -1856,8 +1853,7 @@ export async function register(staging?: boolean) {
     await cluster.updateContract(0, weth.address, true);
     await cluster.updateContract(0, usdc.address, true);
 
-
-     await weth
+    await weth
         .connect(eoa1)
         .approve(yieldBox.address, ethers.constants.MaxUint256);
     await weth
@@ -1984,7 +1980,7 @@ export async function register(staging?: boolean) {
         .connect(eoa1)
         .approveBorrow(
             deployer.address,
-            ethers.utils.parseEther('900000000000000')
+            ethers.utils.parseEther('900000000000000'),
         );
 
     // Helper

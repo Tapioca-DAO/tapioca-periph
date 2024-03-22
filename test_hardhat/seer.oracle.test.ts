@@ -82,10 +82,11 @@ if (hre.network.config.chainId === 1) {
                     _circuitChainIsMultiplied: [1, 0], // Multiply/divide CL
                     _stalePeriod: 8640000, // CL period before stale
                     guardians: [deployer.address], // Owner
-                    _description: hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description,
+                    _description:
+                        hre.ethers.utils.formatBytes32String('ETH/USDC'), // Description,
                     _sequencerUptimeFeed: hre.ethers.constants.AddressZero,
                     _admin: deployer.address, // Owner
-                }
+                },
             );
 
             console.log(
