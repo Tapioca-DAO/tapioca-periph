@@ -15,6 +15,7 @@ import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwa
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { buildMagnetarBaseModuleExternal } from 'tasks/deployBuilds/magnetar/buildMagnetarBaseModuleExternal';
 
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
@@ -36,6 +37,13 @@ export const deployPreLbpStack__task = async (
                     '1',
                 ]),
             )
+                .add(
+                    await buildMagnetarBaseModuleExternal(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
+                        [],
+                    ),
+                )
                 .add(
                     await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
                         chainInfo.lzChainId,
@@ -67,21 +75,48 @@ export const deployPreLbpStack__task = async (
                     await buildMagnetarMintModule(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_MINT_MODULE,
-                        [],
+                        [
+                            '0x', // MagnetarBaseModuleExternal
+                        ],
+                        [
+                            {
+                                argPosition: 0,
+                                deploymentName:
+                                    DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
+                            },
+                        ],
                     ),
                 )
                 .add(
                     await buildMagnetarMintXChainModule(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_MINT_X_CHAIN_MODULE,
-                        [],
+                        [
+                            '0x', // MagnetarBaseModuleExternal
+                        ],
+                        [
+                            {
+                                argPosition: 0,
+                                deploymentName:
+                                    DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
+                            },
+                        ],
                     ),
                 )
                 .add(
                     await buildMagnetarOptionModule(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_OPTION_MODULE,
-                        [],
+                        [
+                            '0x', // MagnetarBaseModuleExternal
+                        ],
+                        [
+                            {
+                                argPosition: 0,
+                                deploymentName:
+                                    DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
+                            },
+                        ],
                     ),
                 )
                 .add(

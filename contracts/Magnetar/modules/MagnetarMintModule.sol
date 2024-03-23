@@ -24,6 +24,7 @@ import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
  * @notice Magnetar BigBang related operations
  */
 contract MagnetarMintModule is MagnetarMintCommonModule {
+    constructor(address _magnetarBaseModuleExternal) MagnetarMintCommonModule(_magnetarBaseModuleExternal) {}
     /// =====================
     /// Public
     /// =====================
@@ -46,6 +47,7 @@ contract MagnetarMintModule is MagnetarMintCommonModule {
      * @param data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
      * @param data.externalContracts the contracts' addresses used in all the operations performed by the helper
      */
+
     function mintBBLendSGLLockTOLP(MintFromBBAndLendOnSGLData memory data) public payable {
         // Check sender
         _checkSender(data.user);
