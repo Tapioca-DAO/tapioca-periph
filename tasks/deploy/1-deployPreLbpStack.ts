@@ -38,18 +38,12 @@ export const deployPreLbpStack__task = async (
                 ]),
             )
                 .add(
-                    await buildMagnetarBaseModuleExternal(
-                        hre,
-                        DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
-                        [],
-                    ),
-                )
-                .add(
                     await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
                         chainInfo.lzChainId,
                         tapiocaMulticallAddr,
                     ]),
                 )
+
                 .add(
                     await buildMagnetarAssetModule(
                         hre,
@@ -68,6 +62,13 @@ export const deployPreLbpStack__task = async (
                     await buildMagnetarCollateralModule(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
+                        [],
+                    ),
+                )
+                .add(
+                    await buildMagnetarBaseModuleExternal(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_BASE_MODULE_EXTERNAL,
                         [],
                     ),
                 )

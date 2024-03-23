@@ -1,4 +1,6 @@
 import { scope } from 'hardhat/config';
+import { TAP_TASK } from 'tapioca-sdk';
+import { mintMock__task } from 'tasks/exec/misc/mintMock';
 import { pauseAll__task } from 'tasks/exec/misc/pause-all';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
 
@@ -15,3 +17,19 @@ miscScope
         uniPoolInfo__task,
     )
     .addParam('poolAddr', 'The address of the UniswapV3 pool');
+
+// Testnet
+TAP_TASK(
+    miscScope
+        .task('mintMock', 'Mint mock tokens', mintMock__task)
+        .addParam('addr', 'The address of the token to mint')
+        .addParam('amount', 'The amount to mint')
+        .addFlag(
+            'useMulticall',
+            'true (use multicall) / false (use EOA caller)',
+        )
+        .addOptionalParam(
+            'to',
+            'The address to mint to. Else caller/multicall',
+        ),
+);

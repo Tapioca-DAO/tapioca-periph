@@ -1,7 +1,7 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadGlobalContract } from 'tapioca-sdk';
+import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
@@ -94,9 +94,8 @@ async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
         tag,
     );
 
-    const tapWethLp = loadGlobalContract(
+    const tapWethLp = loadLocalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.TapToken,
         hre.SDK.eChainId,
         DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
         tag,

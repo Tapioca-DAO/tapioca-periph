@@ -1,4 +1,4 @@
-import { ERC20Mock, IArrakisV2Vault } from '@typechain/index';
+import { ERC20Mock, IArrakisV2Vault, TapiocaMulticall } from '@typechain/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 import {
@@ -47,13 +47,14 @@ export async function deployUniPoolAndAddLiquidity(
     const vaultAddr = (
         await arrakisFactory.vaults(0, await arrakisFactory.numVaults())
     )[numVaults.toNumber() - 1];
-    console.log(`[+] Arrakis vault deployed at: ${vaultAddr}`);
+
     const arrakisVault = await hre.ethers.getContractAt(
         'IArrakisV2Vault',
         vaultAddr,
     );
-    console.log('Arrakis vault deployed at:', arrakisVault.address);
-    console.log(await arrakisVault.name());
+    console.log(
+        `[+] Arrakis vault [${await arrakisVault.name()}] deployed at: [${vaultAddr}]`,
+    );
 
     console.log('[+] Deposit liquidity in pool');
     const arrakisResolve = await hre.ethers.getContractAt(
@@ -61,28 +62,45 @@ export async function deployUniPoolAndAddLiquidity(
         DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.ARRAKIS_RESOLVER,
     );
 
-    // Mint tokens for liquidity
-    {
+    // Mint tokens for liquidity if one of them is missing
+    if (isTestnet) {
+        console.log('[+] TESTNET: Minting tokens for liquidity');
         // await token0.mintTo(owner, (1e18).toString());
         // await token1.mintTo(owner, (1e18).toString());
-        await VM.executeMulticall([
-            {
+        const calls: TapiocaMulticall.CallStruct[] = [];
+        if ((await token0Erc20.balanceOf(owner)).isZero()) {
+            console.log(
+                '[+] Minting missing balance for',
+                await token0Erc20.name(),
+                '. Minting...',
+            );
+            calls.push({
                 target: token0,
                 callData: token0Erc20.interface.encodeFunctionData('mintTo', [
                     owner,
                     (1e18).toString(),
                 ]),
                 allowFailure: false,
-            },
-            {
+            });
+        }
+        if ((await token1Erc20.balanceOf(owner)).isZero()) {
+            console.log(
+                '[+] Minting missing balance for',
+                await token1Erc20.name(),
+                '. Minting...',
+            );
+            calls.push({
                 target: token1,
-                callData: token0Erc20.interface.encodeFunctionData('mintTo', [
+                callData: token1Erc20.interface.encodeFunctionData('mintTo', [
                     owner,
                     (1e18).toString(),
                 ]),
                 allowFailure: false,
-            },
-        ]);
+            });
+        }
+        if (calls.length > 0) {
+            await VM.executeMulticall(calls);
+        }
     }
 
     // Mint Arrakis liquidity

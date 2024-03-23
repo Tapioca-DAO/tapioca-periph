@@ -62,7 +62,7 @@ export const deployUniV3TapWethPool = async (
             hre,
         );
 
-        VM.load([
+        await VM.load([
             {
                 name: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
                 address: computedPoolAddress,
@@ -74,8 +74,7 @@ export const deployUniV3TapWethPool = async (
                     fee: FeeAmount.MEDIUM,
                 },
             },
-        ]);
-        await VM.save();
+        ]).save();
     }
 
     return {
@@ -90,11 +89,11 @@ export const deployUniV3TapWethPool = async (
 
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
     const weth = await hre.ethers.getContractAt(
-        'ERC20',
+        'ForgeIERC20',
         DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH,
     );
     const tapToken = await hre.ethers.getContractAt(
-        'ERC20',
+        'ForgeIERC20',
         loadGlobalContract(
             hre,
             TAPIOCA_PROJECTS_NAME.TapToken,
@@ -109,7 +108,7 @@ async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
     );
     const poolInitializer = await hre.ethers.getContractAt(
         'IPoolInitializer',
-        DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.V3_FACTORY,
+        DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.NONFUNGIBLE_POSITION_MANAGER,
     );
 
     return {
