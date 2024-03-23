@@ -16,10 +16,12 @@ import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapioca
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {MagnetarBaseModuleExternal} from "./MagnetarBaseModuleExternal.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
 
@@ -37,13 +39,21 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  * @author TapiocaDAO
  * @notice Magnetar options related operations
  */
-contract MagnetarOptionModule is MagnetarBaseModule {
+contract MagnetarOptionModule is Ownable, MagnetarStorage {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
     error Magnetar_MarketCallFailed(bytes call);
+    error Magnetar_TargetNotWhitelisted(address target);
+    error Magnetar_ExtractTokenFail();
+
+    address immutable magnetarBaseModuleExternal;
+
+    constructor(address _magnetarBaseModuleExternal) MagnetarStorage(IPearlmit(address(0))) {
+        magnetarBaseModuleExternal = _magnetarBaseModuleExternal;
+    }
 
     /**
      * @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw
@@ -166,13 +176,25 @@ contract MagnetarOptionModule is MagnetarBaseModule {
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
-                _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
+                // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
+                _executeDelegateCall(
+                    magnetarBaseModuleExternal,
+                    abi.encodeWithSelector(
+                        MagnetarBaseModuleExternal.withdrawToChain.selector, data.removeAndRepayData.assetWithdrawData
+                    )
+                );
             }
         }
 
         // performs a BigBang repay operation
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
-            _setApprovalForYieldBox(address(bigBang_), yieldBox_);
+            // _setApprovalForYieldBox(address(bigBang_), yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
+                )
+            );
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
                 data.user, data.user, false, data.removeAndRepayData.repayAmount
@@ -226,9 +248,30 @@ contract MagnetarOptionModule is MagnetarBaseModule {
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
-                _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
+                // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
+                _executeDelegateCall(
+                    magnetarBaseModuleExternal,
+                    abi.encodeWithSelector(
+                        MagnetarBaseModuleExternal.withdrawToChain.selector,
+                        data.removeAndRepayData.collateralWithdrawData
+                    )
+                );
             }
         }
-        _revertYieldBoxApproval(address(bigBang_), yieldBox_);
+        // _revertYieldBoxApproval(address(bigBang_), yieldBox_);
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
+            )
+        );
+    }
+
+    function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
+        bool success = true;
+        (success, returnData) = _target.delegatecall(_data);
+        if (!success) {
+            _getRevertMsg(returnData);
+        }
     }
 }

@@ -21,13 +21,15 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
+import {MagnetarBaseModuleExternal} from "./MagnetarBaseModuleExternal.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
+import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
 
@@ -44,13 +46,20 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  * @title MagnetarMintCommonModule
  * @author TapiocaDAO
  */
-abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
+abstract contract MagnetarMintCommonModule is MagnetarStorage {
     using SafeApprove for address;
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
+    error Magnetar_TargetNotWhitelisted(address target);
+
+    address immutable magnetarBaseModuleExternal;
+
+    constructor(address _magnetarBaseModuleExternal) MagnetarStorage(IPearlmit(address(0))) {
+        magnetarBaseModuleExternal = _magnetarBaseModuleExternal;
+    }
 
     /// Internal
     /// =====================
@@ -115,14 +124,32 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
             //deposit to YieldBox
-            _extractTokens(user, singularityAddress, fraction);
+            // _extractTokens(user, singularityAddress, fraction);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.extractTokens.selector, user, singularityAddress, fraction
+                )
+            );
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
-            _setApprovalForYieldBox(lockData.target, yieldBox_);
+            // _setApprovalForYieldBox(lockData.target, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, lockData.target, yieldBox_
+                )
+            );
             tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target).lock(
                 participate ? address(this) : user, singularityAddress, lockData.lockDuration, lockData.amount
             );
-            _revertYieldBoxApproval(lockData.target, yieldBox_);
+            // _revertYieldBoxApproval(lockData.target, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, lockData.target, yieldBox_
+                )
+            );
         }
     }
 
@@ -137,7 +164,13 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             if (!cluster.isWhitelisted(0, singularityAddress)) {
                 revert Magnetar_TargetNotWhitelisted(singularityAddress);
             }
-            _setApprovalForYieldBox(singularityAddress, yieldBox_);
+            // _setApprovalForYieldBox(singularityAddress, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, singularityAddress, yieldBox_
+                )
+            );
 
             IMarket singularity_ = IMarket(singularityAddress);
 
@@ -146,7 +179,16 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
             uint256 sglAssetId = singularity_.assetId();
             (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
             if (depositData.deposit) {
-                depositData.amount = _extractTokens(user, sglAssetAddress, depositData.amount);
+                // depositData.amount = _extractTokens(user, sglAssetAddress, depositData.amount);
+                depositData.amount = abi.decode(
+                    _executeDelegateCall(
+                        magnetarBaseModuleExternal,
+                        abi.encodeWithSelector(
+                            MagnetarBaseModuleExternal.extractTokens.selector, user, sglAssetAddress, depositData.amount
+                        )
+                    ),
+                    (uint256)
+                );
 
                 sglAssetAddress.safeApprove(address(yieldBox_), depositData.amount);
                 yieldBox_.depositAsset(sglAssetId, address(this), user, depositData.amount, 0);
@@ -163,7 +205,13 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
                 fraction = ISingularity(singularityAddress).addAsset(user, user, false, lendShare);
             }
 
-            _revertYieldBoxApproval(singularityAddress, yieldBox_);
+            // _revertYieldBoxApproval(singularityAddress, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, singularityAddress, yieldBox_
+                )
+            );
         }
     }
 
@@ -183,8 +231,20 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
                 revert Magnetar_TargetNotWhitelisted(marketHelper);
             }
 
-            _setApprovalForYieldBox(bigBangAddress, yieldBox_);
-            _setApprovalForYieldBox(address(pearlmit), yieldBox_);
+            // _setApprovalForYieldBox(bigBangAddress, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, bigBangAddress, yieldBox_
+                )
+            );
+            // _setApprovalForYieldBox(address(pearlmit), yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(pearlmit), yieldBox_
+                )
+            );
 
             IMarket bigBang_ = IMarket(bigBangAddress);
 
@@ -197,8 +257,21 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
 
             // deposit collateral to YB
             if (mintData.collateralDepositData.deposit) {
-                mintData.collateralDepositData.amount =
-                    _extractTokens(user, bbCollateralAddress, mintData.collateralDepositData.amount);
+                // mintData.collateralDepositData.amount =
+                //     _extractTokens(user, bbCollateralAddress, mintData.collateralDepositData.amount);
+                mintData.collateralDepositData.amount = abi.decode(
+                    _executeDelegateCall(
+                        magnetarBaseModuleExternal,
+                        abi.encodeWithSelector(
+                            MagnetarBaseModuleExternal.extractTokens.selector,
+                            user,
+                            bbCollateralAddress,
+                            mintData.collateralDepositData.amount
+                        )
+                    ),
+                    (uint256)
+                );
+
                 bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
 
                 bbCollateralAddress.safeApprove(address(yieldBox_), mintData.collateralDepositData.amount);
@@ -209,7 +282,13 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
 
             // add collateral to BB
             if (mintData.collateralDepositData.amount > 0) {
-                _setApprovalForYieldBox(address(bigBang_), yieldBox_);
+                // _setApprovalForYieldBox(address(bigBang_), yieldBox_);
+                _executeDelegateCall(
+                    magnetarBaseModuleExternal,
+                    abi.encodeWithSelector(
+                        MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
+                    )
+                );
 
                 (Module[] memory modules, bytes[] memory calls) = IMarketHelper(marketHelper).addCollateral(
                     mintData.collateralDepositData.deposit ? address(this) : user,
@@ -247,8 +326,28 @@ abstract contract MagnetarMintCommonModule is MagnetarBaseModule {
                 bigBang_.execute(modules, calls, true);
             }
 
-            _revertYieldBoxApproval(address(pearlmit), yieldBox_);
-            _revertYieldBoxApproval(bigBangAddress, yieldBox_);
+            // _revertYieldBoxApproval(bigBangAddress, yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, bigBangAddress, yieldBox_
+                )
+            );
+            // _revertYieldBoxApproval(address(pearlmit), yieldBox_);
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(pearlmit), yieldBox_
+                )
+            );
+        }
+    }
+
+    function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
+        bool success = true;
+        (success, returnData) = _target.delegatecall(_data);
+        if (!success) {
+            _getRevertMsg(returnData);
         }
     }
 }
