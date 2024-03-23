@@ -29,7 +29,7 @@ export const buildUSDCOracle = async (
 
     return {
         contract: await hre.ethers.getContractFactory('SeerCLSolo'),
-        deploymentName: DEPLOYMENT_NAMES.ETH_ORACLE,
+        deploymentName: DEPLOYMENT_NAMES.USDC_SEER_CL_ORACLE,
         args,
     };
 };
