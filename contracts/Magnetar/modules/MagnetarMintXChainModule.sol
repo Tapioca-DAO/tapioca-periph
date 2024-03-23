@@ -13,6 +13,7 @@ import {
     MagnetarWithdrawData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
+import {MagnetarBaseModuleExternal} from "./MagnetarBaseModuleExternal.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarMintCommonModule} from "./MagnetarMintCommonModule.sol";
@@ -35,6 +36,8 @@ import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
  */
 contract MagnetarMintXChainModule is MagnetarMintCommonModule {
     using SafeERC20 for IERC20;
+
+    constructor(address _magnetarBaseModuleExternal) MagnetarMintCommonModule(_magnetarBaseModuleExternal) {}
 
     /// =====================
     /// Public
@@ -79,20 +82,39 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
             TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
 
         // send on another layer for lending
-        _withdrawToChain(
-            MagnetarWithdrawData({
-                yieldBox: yieldBox,
-                assetId: IMarket(data.bigBang).assetId(),
-                unwrap: false,
-                lzSendParams: data.lendSendParams.lzParams,
-                sendGas: data.lendSendParams.lzSendGas,
-                composeGas: data.lendSendParams.lzComposeGas,
-                sendVal: data.lendSendParams.lzSendVal,
-                composeVal: data.lendSendParams.lzComposeVal,
-                composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
-                composeMsgType: data.lendSendParams.lzComposeMsgType,
-                withdraw: true
-            })
+        // _withdrawToChain(
+        //     MagnetarWithdrawData({
+        //         yieldBox: yieldBox,
+        //         assetId: IMarket(data.bigBang).assetId(),
+        //         unwrap: false,
+        //         lzSendParams: data.lendSendParams.lzParams,
+        //         sendGas: data.lendSendParams.lzSendGas,
+        //         composeGas: data.lendSendParams.lzComposeGas,
+        //         sendVal: data.lendSendParams.lzSendVal,
+        //         composeVal: data.lendSendParams.lzComposeVal,
+        //         composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
+        //         composeMsgType: data.lendSendParams.lzComposeMsgType,
+        //         withdraw: true
+        //     })
+        // );
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.withdrawToChain.selector,
+                MagnetarWithdrawData({
+                    yieldBox: yieldBox,
+                    assetId: IMarket(data.bigBang).assetId(),
+                    unwrap: false,
+                    lzSendParams: data.lendSendParams.lzParams,
+                    sendGas: data.lendSendParams.lzSendGas,
+                    composeGas: data.lendSendParams.lzComposeGas,
+                    sendVal: data.lendSendParams.lzSendVal,
+                    composeVal: data.lendSendParams.lzComposeVal,
+                    composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
+                    composeMsgType: data.lendSendParams.lzComposeMsgType,
+                    withdraw: true
+                })
+            )
         );
     }
 

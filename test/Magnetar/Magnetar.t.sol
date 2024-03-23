@@ -11,6 +11,7 @@ import "forge-std/console.sol";
 // External
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import {MagnetarBaseModuleExternal} from "tapioca-periph/Magnetar/modules/MagnetarBaseModuleExternal.sol";
 import {MagnetarAssetXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarAssetXChainModule.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
@@ -140,9 +141,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         MagnetarAssetModule assetModule = new MagnetarAssetModule();
         MagnetarAssetXChainModule assetXChainModule = new MagnetarAssetXChainModule();
         MagnetarCollateralModule collateralModule = new MagnetarCollateralModule();
-        MagnetarMintModule mintModule = new MagnetarMintModule();
-        MagnetarMintXChainModule mintXChainModule = new MagnetarMintXChainModule();
-        MagnetarOptionModule optionModule = new MagnetarOptionModule();
+        address _magnetarBaseModuleExternal = address(new MagnetarBaseModuleExternal());
+        MagnetarMintModule mintModule = new MagnetarMintModule(_magnetarBaseModuleExternal);
+        MagnetarMintXChainModule mintXChainModule = new MagnetarMintXChainModule(_magnetarBaseModuleExternal);
+        MagnetarOptionModule optionModule = new MagnetarOptionModule(_magnetarBaseModuleExternal);
         MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule();
 
         magnetar = new Magnetar(
