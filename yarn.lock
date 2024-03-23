@@ -5243,24 +5243,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.17:
-  version "1.7.17"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.17.tgz#62c8375e7420db18c3fd8540d2b8e1e6a7dd847f"
-  integrity sha512-7/qqhf/CLM96OK16gSBA8ZHcog1Q1GuqGZOnIErytdAl3+qhZ0cAUXdWrLtnQwlhk5M8KY785kuVlD06lsyIcQ==
-  dependencies:
-    "@uniswap/v3-core" "^1.0.1"
-    "@uniswap/v3-periphery" "^1.4.3"
-    "@uniswap/v3-sdk" "^3.11.0"
-    deepmerge "^4.3.1"
-    dotenv "^16.3.2"
-    ethers "^5.4.7"
-    fs-extra "^11.1.1"
-    inquirer "^8.2.5"
-    lodash "^4.17.21"
-    lodash-es "^4.17.21"
-    typechain "^8.1.0"
-    uuid "^9.0.0"
-    write-json-file "4.3.0"
+tapioca-sdk@^1.7.19:
+  version "1.7.19"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.19.tgz#b6b9b0a680800554a6f74b8267205e29ae438a35"
+  integrity sha512-ItkNEEVXbNdKgZgFcCsUzj+22NSvdUtIU8+v1I7i+UR/9kpB9T8Z0IkLVPP6RHut3XEBhAjOuo5VM4gXaUUCWQ==
 
 text-table@^0.2.0:
   version "0.2.0"
