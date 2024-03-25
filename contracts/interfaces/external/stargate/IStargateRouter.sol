@@ -16,6 +16,15 @@ import {ILayerZeroEndpoint} from "../../../layerzero/v1/interfaces/ILayerZeroEnd
 
 // Tapioca
 
+
+interface IStargatePool {
+    function convertRate() external view returns (uint256);
+}
+
+interface IStargateFactory {
+    function getPool(uint256 _poolId) external view returns (address);
+}
+
 interface IStargateBridge {
     function quoteLayerZeroFee(
         uint16 _chainId,
