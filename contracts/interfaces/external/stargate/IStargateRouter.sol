@@ -19,6 +19,8 @@ import {ILayerZeroEndpoint} from "../../../layerzero/v1/interfaces/ILayerZeroEnd
 
 interface IStargatePool {
     function convertRate() external view returns (uint256);
+    function localDecimals() external view returns (uint256);
+    function sharedDecimals() external view returns (uint256);
 }
 
 interface IStargateFactory {
