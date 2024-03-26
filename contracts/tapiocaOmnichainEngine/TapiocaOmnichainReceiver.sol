@@ -221,7 +221,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
         _internalRemoteTransferSendPacket(
-            remoteTransferMsg_.owner, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg
+            _srcChainSender, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg
         );
 
         emit RemoteTransferReceived(
