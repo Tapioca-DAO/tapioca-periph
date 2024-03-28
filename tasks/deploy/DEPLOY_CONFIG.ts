@@ -2,6 +2,8 @@ import { EChainID } from '@tapioca-sdk/api/config';
 
 // Name of the contract deployments to be used in the deployment scripts and saved in the deployments file
 export const DEPLOYMENT_NAMES = {
+    // External
+    YieldBox: 'YieldBox',
     // Magnetar
     MAGNETAR: 'MAGNETAR',
     MAGNETAR_ASSET_MODULE: 'MAGNETAR_ASSET_MODULE',
