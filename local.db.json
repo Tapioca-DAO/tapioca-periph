@@ -542,6 +542,36 @@
             "lastBlockHeight": 5566586,
             "contracts": [
                 {
+                    "name": "wstETH",
+                    "address": "0x439a09c4040DaA9D5f777dAbe60E944E9de5548b",
+                    "meta": {
+                        "args": [
+                            "wstETH",
+                            "wstETH",
+                            "1000000000000000000",
+                            18,
+                            "0x46e0C2D6979034BA8bc82E63186E0723e51c7445"
+                        ],
+                        "salt": "0xaef63ef6b2d9544f828b09f69bf49a507c12aef3f7956329d3748e802942b5b6",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "tsDAI",
+                    "address": "0x8586258DCAD25B835942683A83CaFaF5B43542eB",
+                    "meta": {
+                        "args": [
+                            "tsDAI",
+                            "tsDAI",
+                            "1000000000000000000",
+                            18,
+                            "0x46e0C2D6979034BA8bc82E63186E0723e51c7445"
+                        ],
+                        "salt": "0xc7b5ddd587057a09202885aca5f3dc0caf2fe8fff3e29b815f01275ff815a538",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "WSTETH",
                     "address": "0xc43EcEeFdF1e53D22e017e692Be836611692F563",
                     "meta": {
