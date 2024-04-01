@@ -153,7 +153,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // If the msg type is not a permit/approval, it will call the other receivers.
         if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
-        } else if (!_extExec(msgType_, tapComposeMsg_)) {
+        } else if (!_extExec(msgType_, srcChainSender_, tapComposeMsg_)) {
             // Check if the TOE extender is set and the msg type is valid. If so, call the TOE extender to handle msg.
             if (
                 address(tapiocaOmnichainReceiveExtender) != address(0)
@@ -298,8 +298,9 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * @param _data The call data containing info about the message.
      * @return success is the success of the composed message handler. If no handler is found, it should return false to trigger `InvalidMsgType()`.
      */
-    function _extExec(uint16 _msgType, bytes memory _data) internal returns (bool) {
+    function _extExec(uint16 _msgType, address _srcChainSender, bytes memory _data) internal returns (bool) {
         string memory signature = "";
+        address sender = address(0);
         if (_msgType == MSG_APPROVALS) {
             // toeExtExec.erc20PermitApproval(_data);
             signature = "erc20PermitApproval(bytes)";
@@ -307,8 +308,9 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             // toeExtExec.erc721PermitApproval(_data);
             signature = "erc721PermitApproval(bytes)";
         } else if (_msgType == MSG_PEARLMIT_APPROVAL) {
-            // toeExtExec.pearlmitApproval(_data);
-            signature = "pearlmitApproval(bytes)";
+            // toeExtExec.pearlmitApproval(_srcChainSender,_data);
+            signature = "pearlmitApproval(address,bytes)";
+            sender = _srcChainSender;
         } else if (_msgType == MSG_YB_APPROVE_ALL) {
             // toeExtExec.yieldBoxPermitAll(_data);
             signature = "yieldBoxPermitAll(bytes)";
@@ -321,7 +323,12 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         } else {
             return false;
         }
-        address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
+
+        if (sender == address(0)) {
+            address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
+        } else {
+            address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, sender, _data));
+        }
         return true;
     }
 

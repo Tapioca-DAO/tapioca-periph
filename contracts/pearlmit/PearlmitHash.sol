@@ -21,9 +21,9 @@ library PearlmitHash {
     bytes32 public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
         0x9907ae0a8b239bb7feef50f64ab23ff79fe790ab79bf66ed21a188dbd846e268;
 
-    // keccak256("PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce)SignatureApproval(address token,uint256 id,uint200 amount,address operator)")
+    // keccak256("PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce,address executor)SignatureApproval(address token,uint256 id,uint200 amount,address operator)")
     bytes32 public constant _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH =
-        0xb59bf51f2ad95e38709b3bd22127b478138fe26ed8a454e461fd11e1423b53a6;
+        0xbd139e012b783220ab993964d8b16689e5100965854121dec042e897264bf171;
 
     /**
      * @dev Hashes the permit batch transfer from.
@@ -33,7 +33,7 @@ library PearlmitHash {
         uint256 nonce,
         uint48 sigDeadline,
         uint256 masterNonce
-    ) internal pure returns (bytes32) {
+    ) internal view returns (bytes32) {
         uint256 numPermits = approvals.length;
         bytes32[] memory permitHashes = new bytes32[](numPermits);
         for (uint256 i = 0; i < numPermits; ++i) {
@@ -46,7 +46,8 @@ library PearlmitHash {
                 keccak256(abi.encodePacked(permitHashes)),
                 nonce,
                 sigDeadline,
-                masterNonce
+                masterNonce,
+                msg.sender // executor
             )
         );
     }

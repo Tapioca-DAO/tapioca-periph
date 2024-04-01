@@ -99,9 +99,11 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @notice Executes a permit approval for a batch transfer from a Pearlmit contract.
      * @param _data The call data containing info about the approval. Expect a tuple of `(address, IPearlmit.PermitBatchTransferFrom)`.
      */
-    function pearlmitApproval(bytes memory _data) public {
+    function pearlmitApproval(address _srcChainSender, bytes memory _data) public {
         (address pearlmit, IPearlmit.PermitBatchTransferFrom memory batchApprovals) =
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
+
+        batchApprovals.owner = _srcChainSender; // overwrite the owner with the src chain sender
 
         try IPearlmit(pearlmit).permitBatchApprove(batchApprovals) {} catch {}
     }
