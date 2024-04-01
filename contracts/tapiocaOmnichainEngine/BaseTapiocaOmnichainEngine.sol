@@ -90,6 +90,13 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     }
 
     /**
+     * @dev Sets the `toeExtExec` contract.
+     */
+    function setToeExtExec(address _extExec) external onlyOwner {
+        toeExtExec = TapiocaOmnichainExtExec(_extExec);
+    }
+
+    /**
      * @dev public function to remove dust from the given local decimal amount.
      * @param _amountLD The amount in local decimals.
      * @return amountLD The amount after removing dust.

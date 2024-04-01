@@ -19,6 +19,7 @@ import {
     RemoteTransferMsg,
     LZSendParam
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
 import {TapiocaOmnichainEngineCodec} from "./TapiocaOmnichainEngineCodec.sol";
 import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 
@@ -298,21 +299,29 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * @return success is the success of the composed message handler. If no handler is found, it should return false to trigger `InvalidMsgType()`.
      */
     function _extExec(uint16 _msgType, bytes memory _data) internal returns (bool) {
+        string memory signature = "";
         if (_msgType == MSG_APPROVALS) {
-            toeExtExec.erc20PermitApproval(_data);
+            // toeExtExec.erc20PermitApproval(_data);
+            signature = "erc20PermitApproval(bytes)";
         } else if (_msgType == MSG_NFT_APPROVALS) {
-            toeExtExec.erc721PermitApproval(_data);
+            // toeExtExec.erc721PermitApproval(_data);
+            signature = "erc721PermitApproval(bytes)";
         } else if (_msgType == MSG_PEARLMIT_APPROVAL) {
-            toeExtExec.pearlmitApproval(_data);
+            // toeExtExec.pearlmitApproval(_data);
+            signature = "pearlmitApproval(bytes)";
         } else if (_msgType == MSG_YB_APPROVE_ALL) {
-            toeExtExec.yieldBoxPermitAll(_data);
+            // toeExtExec.yieldBoxPermitAll(_data);
+            signature = "yieldBoxPermitAll(bytes)";
         } else if (_msgType == MSG_YB_APPROVE_ASSET) {
-            toeExtExec.yieldBoxPermitAsset(_data);
+            // toeExtExec.yieldBoxPermitAsset(_data);
+            signature = "yieldBoxPermitAsset(bytes)";
         } else if (_msgType == MSG_MARKET_PERMIT) {
-            toeExtExec.marketPermit(_data);
+            // toeExtExec.marketPermit(_data);
+            signature = "marketPermit(bytes)";
         } else {
             return false;
         }
+        address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
         return true;
     }
 
