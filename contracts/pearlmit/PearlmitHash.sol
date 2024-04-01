@@ -33,7 +33,7 @@ library PearlmitHash {
         uint256 nonce,
         uint48 sigDeadline,
         uint256 masterNonce
-    ) internal view returns (bytes32) {
+    ) internal pure returns (bytes32) {
         uint256 numPermits = approvals.length;
         bytes32[] memory permitHashes = new bytes32[](numPermits);
         for (uint256 i = 0; i < numPermits; ++i) {
@@ -56,7 +56,7 @@ library PearlmitHash {
      */
     function _hashPermitSignatureApproval(IPearlmit.SignatureApproval memory approval)
         internal
-        view
+        pure
         returns (bytes32)
     {
         return keccak256(
@@ -66,7 +66,7 @@ library PearlmitHash {
                 approval.token,
                 approval.id,
                 approval.amount,
-                msg.sender
+                approval.operator
             )
         );
     }
