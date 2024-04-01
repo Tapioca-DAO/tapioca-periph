@@ -5,6 +5,21 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "sGLP",
+                    "address": "0x1B460E311753fDB46451EF3d11d7B9eE5542b369",
+                    "meta": {
+                        "args": [
+                            "sGLP",
+                            "sGLP",
+                            "1000000000000000000",
+                            18,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x8606e829341423b7993254efdd6e29d1e8af2532be3084a434b2a95ea89bd417",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "PEARLMIT",
                     "address": "0x05F66f5201ab13a8ba3A2d47C4192BBA14D9E03D",
                     "meta": {
@@ -541,6 +556,21 @@
             "name": "sepolia",
             "lastBlockHeight": 5566586,
             "contracts": [
+                {
+                    "name": "sDAI",
+                    "address": "0xC6EA2075314a58cf74DE8430b24714E600A21Dd8",
+                    "meta": {
+                        "args": [
+                            "sDAI",
+                            "sDAI",
+                            "1000000000000000000",
+                            18,
+                            "0x46e0C2D6979034BA8bc82E63186E0723e51c7445"
+                        ],
+                        "salt": "0xff7b538b14a8c7a6b329281ab839d96ad5b31bc394793bb51aa0c97734c69f3f",
+                        "create2": true
+                    }
+                },
                 {
                     "name": "wstETH",
                     "address": "0x439a09c4040DaA9D5f777dAbe60E944E9de5548b",
