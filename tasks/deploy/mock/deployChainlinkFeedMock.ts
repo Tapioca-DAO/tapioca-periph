@@ -17,7 +17,7 @@ export const deployChainlinkFeedMock__task = async (
             VM.add(
                 await buildChainlinkFeedMock(hre, {
                     deploymentName: taskArgs.name,
-                    args: [taskArgs.decimals, taskArgs.rate],
+                    args: [taskArgs.decimals, taskArgs.rate, taskArgs.name],
                 }),
             );
         },
