@@ -6,21 +6,21 @@ import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildDaiOracle } from 'tasks/deployBuilds/oracle/buildDaiOracle';
 import { buildETHOracle } from 'tasks/deployBuilds/oracle/buildETHOracle';
 import { buildEthGlpPOracle } from 'tasks/deployBuilds/oracle/buildEthGlpOracle';
 import { buildGLPOracle } from 'tasks/deployBuilds/oracle/buildGLPOracle';
 import { buildGMXOracle } from 'tasks/deployBuilds/oracle/buildGMXOracle';
+import { buildRethUsdOracle } from 'tasks/deployBuilds/oracle/buildRethUsdOracle';
+import { buildSDaiOracle } from 'tasks/deployBuilds/oracle/buildSDaiOracle';
 import {
     buildADBTapOptionOracle,
     buildTOBTapOptionOracle,
 } from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
 import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
+import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
-import { buildRethUsdOracle } from 'tasks/deployBuilds/oracle/buildRethUsdOracle';
-import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -46,15 +46,6 @@ async function postDeployTask(
         params;
     if (isTestnet) {
     }
-
-    const rethAddr = loadLocalContract(
-        hre,
-        hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
-        taskArgs.tag,
-    ).address;
-    const reth = await hre.ethers.getContractAt('SeerCLMulti', rethAddr);
-    console.log(await reth.peek('0x'));
 }
 
 async function tapiocaDeployTask(
@@ -104,7 +95,7 @@ async function tapiocaDeployTask(
             .add(await buildRethUsdOracle(hre, owner, isTestnet))
             .add(await buildWstethUsdOracle(hre, owner, isTestnet));
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
-        VM.add(await buildDaiOracle(hre, owner, isTestnet));
+        VM.add(await buildSDaiOracle(hre, owner));
     }
 }
 

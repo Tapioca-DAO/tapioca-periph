@@ -4,7 +4,7 @@ import { loadVM } from '../../utils';
 import inquirer from 'inquirer';
 import { buildGLPOracle } from '../../deployBuilds/oracle/buildGLPOracle';
 import { buildTapOracle } from '../../deployBuilds/oracle/buildTapOracle';
-import { buildDaiOracle } from '../../deployBuilds/oracle/buildDaiOracle';
+import { buildDaiOracle } from '../../deployBuilds/oracle/buildSDaiOracle';
 import { buildGMXOracle } from '../../deployBuilds/oracle/buildGMXOracle';
 
 // hh deployOracles --network goerli
