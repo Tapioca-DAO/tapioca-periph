@@ -681,6 +681,33 @@
             "lastBlockHeight": 5566586,
             "contracts": [
                 {
+                    "name": "SDAI_ORACLE",
+                    "address": "0x2DA351C7944A8ce17c709428089543b2Cd14F080",
+                    "meta": {
+                        "args": [
+                            "0xA30D6ad5f45EF99ea63A515F10bAA2C3B2f7720A",
+                            "0x46e0C2D6979034BA8bc82E63186E0723e51c7445"
+                        ],
+                        "salt": "0xd57b7d54f98aaa5ae91b48133c9911009188908f9cb182cfc674eb8c937f1d81",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "SDAI_USD_CUSTOM_CL_DATA_FEED_ADDRESS",
+                    "address": "0xA30D6ad5f45EF99ea63A515F10bAA2C3B2f7720A",
+                    "meta": {
+                        "decimals": 8,
+                        "rate": "106827548",
+                        "args": [
+                            8,
+                            "106827548",
+                            "SDAI_USD_CUSTOM_CL_DATA_FEED_ADDRESS"
+                        ],
+                        "salt": "0x6c0526675a98adca8c90cb9eb5ae9f8e1a7ede4ccb30a78e877fe4dc79fb0d87",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "sDAI",
                     "address": "0xC6EA2075314a58cf74DE8430b24714E600A21Dd8",
                     "meta": {
