@@ -35,6 +35,6 @@ interface IBigBang {
     function accrue() external;
 
     function computeOpenInterestMintable() external returns (uint256);
-    
-    function viewOpenInterest() public view returns (uint256);
+
+    function viewOpenInterest() external view returns (uint256);
 }
