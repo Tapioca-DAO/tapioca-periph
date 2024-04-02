@@ -38,6 +38,7 @@ type TPostLbp = {
         WETH_USD_CL_DATA_FEED_ADDRESS: string;
         DAI_USD_CL_DATA_FEED_ADDRESS: string;
         USDC_USD_CL_DATA_FEED_ADDRESS: string;
+        RETH_ETH_CL_DATA_FEED_ADDRESS: string;
     };
 };
 const POST_LBP: TPostLbp = {
@@ -51,6 +52,8 @@ const POST_LBP: TPostLbp = {
             '0xaed0c38402a5d19df6e4c03f4e2dced6e29c1ee9',
         USDC_USD_CL_DATA_FEED_ADDRESS:
             '0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3',
+        RETH_ETH_CL_DATA_FEED_ADDRESS:
+            '0xF3272CAfe65b190e76caAF483db13424a3e23dD2',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         GMX_USD_CL_DATA_FEED_ADDRESS:
@@ -62,6 +65,8 @@ const POST_LBP: TPostLbp = {
             '0x4cAfe3Df6Ae3E4ecbA6fD9663b494E10c5B648E5', // Locally deployed DAI/USD Chainlink Mock
         USDC_USD_CL_DATA_FEED_ADDRESS:
             '0xC23507096A67D62d511CBE9D9f335dbef8F5De27', // Locally deployed USDC/USD Chainlink Mock
+        RETH_ETH_CL_DATA_FEED_ADDRESS:
+            '0x4cca62F59dD20dAA00B322e575815a893920858d', // Locally deployed RETH/ETH Chainlink Mock
     },
 };
 
