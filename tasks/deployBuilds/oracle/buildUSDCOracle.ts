@@ -6,6 +6,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildUSDCOracle = async (
     hre: HardhatRuntimeEnvironment,
     owner: string,
+    isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
     console.log('[+] buildUSDCOracle');
     const chainID = hre.SDK.eChainId;
@@ -19,7 +20,7 @@ export const buildUSDCOracle = async (
                 DEPLOY_CONFIG.POST_LBP[chainID]!.USDC_USD_CL_DATA_FEED_ADDRESS, // CL Pool
             _isChainlinkMultiplied: 1, // Multiply/divide Uni
             _inBase: (1e6).toString(), // In base
-            stalePeriod: 86400, // CL stale period, 1 day
+            stalePeriod: isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
             guardians: [owner], // Guardians
             _description: hre.ethers.utils.formatBytes32String('USDC/USD'), // Description,
             _sequencerUptimeFeed: hre.ethers.constants.AddressZero, // CL Sequencer
