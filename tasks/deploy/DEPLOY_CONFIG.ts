@@ -24,6 +24,7 @@ export const DEPLOYMENT_NAMES = {
     TAP_ORACLE: 'TAP_ORACLE',
     ADB_TAP_OPTION_ORACLE: 'ADB_TAP_OPTION_ORACLE',
     TOB_TAP_OPTION_ORACLE: 'TOB_TAP_OPTION_ORACLE',
+    RETH_USD_SEER_CL_MULTI_ORACLE: 'RETH_USD_SEER_CL_MULTI_ORACLE',
     // Misc
     PEARLMIT: 'PEARLMIT',
     CLUSTER: 'CLUSTER',
@@ -66,7 +67,7 @@ const POST_LBP: TPostLbp = {
         USDC_USD_CL_DATA_FEED_ADDRESS:
             '0xC23507096A67D62d511CBE9D9f335dbef8F5De27', // Locally deployed USDC/USD Chainlink Mock
         RETH_ETH_CL_DATA_FEED_ADDRESS:
-            '0x4cca62F59dD20dAA00B322e575815a893920858d', // Locally deployed RETH/ETH Chainlink Mock
+            '0x4B86Ba35eB0e12a9CF9f5888111845B35470c753', // Locally deployed RETH/ETH Chainlink Mock
     },
 };
 
