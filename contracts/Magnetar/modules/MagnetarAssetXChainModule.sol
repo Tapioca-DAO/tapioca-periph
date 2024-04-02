@@ -101,7 +101,7 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
             MagnetarWithdrawData({
                 yieldBox: yieldBox,
                 assetId: data.assetId,
-                unwrap: false,
+                unwrap: true, //doesn't unwrap but calls it with `composeMsg`
                 lzSendParams: data.lockAndParticipateSendParams.lzParams,
                 sendGas: data.lockAndParticipateSendParams.lzSendGas,
                 composeGas: data.lockAndParticipateSendParams.lzComposeGas,
