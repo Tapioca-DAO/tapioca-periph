@@ -20,6 +20,7 @@ import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { buildRethUsdOracle } from 'tasks/deployBuilds/oracle/buildRethUsdOracle';
+import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -40,7 +41,21 @@ export const deployPostLbpStack__task = async (
 
 async function postDeployTask(
     params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
-) {}
+) {
+    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
+        params;
+    if (isTestnet) {
+    }
+
+    const rethAddr = loadLocalContract(
+        hre,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
+        taskArgs.tag,
+    ).address;
+    const reth = await hre.ethers.getContractAt('SeerCLMulti', rethAddr);
+    console.log(await reth.peek('0x'));
+}
 
 async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
@@ -86,7 +101,8 @@ async function tapiocaDeployTask(
                 ),
             )
             .add(await buildUSDCOracle(hre, owner, isTestnet))
-            .add(await buildRethUsdOracle(hre, owner, isTestnet));
+            .add(await buildRethUsdOracle(hre, owner, isTestnet))
+            .add(await buildWstethUsdOracle(hre, owner, isTestnet));
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
         VM.add(await buildDaiOracle(hre, owner, isTestnet));
     }
