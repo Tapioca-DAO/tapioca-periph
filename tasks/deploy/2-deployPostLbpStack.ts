@@ -19,6 +19,8 @@ import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { buildRethUsdOracle } from 'tasks/deployBuilds/oracle/buildRethUsdOracle';
+import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -33,13 +35,33 @@ export const deployPostLbpStack__task = async (
             hre,
         },
         tapiocaDeployTask,
+        postDeployTask,
     );
 };
+
+async function postDeployTask(
+    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
+) {
+    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
+        params;
+    if (isTestnet) {
+    }
+
+    const rethAddr = loadLocalContract(
+        hre,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
+        taskArgs.tag,
+    ).address;
+    const reth = await hre.ethers.getContractAt('SeerCLMulti', rethAddr);
+    console.log(await reth.peek('0x'));
+}
 
 async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs } = params;
+    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
+        params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
@@ -50,10 +72,10 @@ async function tapiocaDeployTask(
         await deployUniPoolAndAddLiquidity(params);
         const { tapToken, tapWethLp } = await loadContracts(hre, tag);
 
-        VM.add(await buildETHOracle(hre, owner))
+        VM.add(await buildETHOracle(hre, owner, isTestnet))
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
-            .add(await buildGMXOracle(hre, owner))
+            .add(await buildGMXOracle(hre, owner, isTestnet))
             .add(
                 await buildTapOracle(
                     hre,
@@ -78,9 +100,11 @@ async function tapiocaDeployTask(
                     owner,
                 ),
             )
-            .add(await buildUSDCOracle(hre, owner));
+            .add(await buildUSDCOracle(hre, owner, isTestnet))
+            .add(await buildRethUsdOracle(hre, owner, isTestnet))
+            .add(await buildWstethUsdOracle(hre, owner, isTestnet));
     } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
-        VM.add(await buildDaiOracle(hre, owner));
+        VM.add(await buildDaiOracle(hre, owner, isTestnet));
     }
 }
 

@@ -6,10 +6,10 @@ pragma solidity 0.8.22;
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Tapioca
-import {OracleChainlinkSingle, OracleChainlinkSingleConstructorData} from "./OracleChainlinkSingle.sol";
+import {OracleChainlinkMulti, OracleChainlinkMultiConstructorData} from "./OracleChainlinkMulti.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 
-contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle, ReentrancyGuard {
+contract SeerCLMulti is ITapiocaOracle, OracleChainlinkMulti, ReentrancyGuard {
     string public _name;
     string public _symbol;
     uint8 public immutable override decimals;
@@ -28,8 +28,8 @@ contract SeerCLSolo is ITapiocaOracle, OracleChainlinkSingle, ReentrancyGuard {
         string memory __name,
         string memory __symbol,
         uint8 _decimals,
-        OracleChainlinkSingleConstructorData memory _oracleChainlinkConstructorData
-    ) OracleChainlinkSingle(_oracleChainlinkConstructorData) {
+        OracleChainlinkMultiConstructorData memory _oracleChainlinkConstructorData
+    ) OracleChainlinkMulti(_oracleChainlinkConstructorData) {
         _name = __name;
         _symbol = __symbol;
         decimals = _decimals;

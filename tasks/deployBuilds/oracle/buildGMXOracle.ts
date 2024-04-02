@@ -6,6 +6,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildGMXOracle = async (
     hre: HardhatRuntimeEnvironment,
     owner: string,
+    isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
     console.log('[+] buildGMXOracle');
 
@@ -26,7 +27,7 @@ export const buildGMXOracle = async (
                 DEPLOY_CONFIG.POST_LBP[chainID]!.GMX_USD_CL_DATA_FEED_ADDRESS, // CL Pool
             _isChainlinkMultiplied: 1, // Multiply/divide CL
             _inBase: (1e18).toString(), // In base
-            stalePeriod: 86400, // CL stale period, 1 day
+            stalePeriod: isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
             guardians: [owner], // Guardians
             _description: hre.ethers.utils.formatBytes32String('GMX/USD'), // Description,
             _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
