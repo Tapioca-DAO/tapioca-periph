@@ -5,6 +5,36 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "rETH",
+                    "address": "0x518746126A545cC7F31EeD92bF2b04eb99eD103B",
+                    "meta": {
+                        "args": [
+                            "rETH",
+                            "rETH",
+                            "1000000000000000000",
+                            18,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xdc0f588c5c666454b68cc3e8980849ed31e2e45065e78533a46bc392253bc4f7",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "wstETH",
+                    "address": "0x568567fb156cDf083FA9e4A672fB462aA49673e9",
+                    "meta": {
+                        "args": [
+                            "wstETH",
+                            "wstETH",
+                            "1000000000000000000",
+                            18,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x128e3f45a712b6059794b90c326b855c611859eeba9c8dc19fe72552447db4dc",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "sGLP",
                     "address": "0x1B460E311753fDB46451EF3d11d7B9eE5542b369",
                     "meta": {
