@@ -3,9 +3,6 @@
 // contracts/oracle/OracleChainlinkSingle.sol
 pragma solidity 0.8.22;
 
-// External
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
 // Tapioca
 import {AccessControlDefaultAdminRules} from "./external/AccessControlDefaultAdminRules.sol";
 import {ModuleChainlinkSingle} from "./modules/ModuleChainlinkSingle.sol";
@@ -30,7 +27,7 @@ struct OracleChainlinkSingleConstructorData {
 /// @dev This is mainly going to be the contract used for the USD/EUR pool (or for other fiat currencies)
 /// @dev Like all oracle contracts, this contract is an instance of `OracleAstract` that contains some
 /// base functions
-contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, SequencerCheck, ReentrancyGuard {
+contract OracleChainlinkSingle is OracleAbstract, ModuleChainlinkSingle, SequencerCheck {
     /// @notice Constructor for the oracle using a single Chainlink pool
     /// @param _data._poolChainlink Chainlink pool address
     /// @param _data._isChainlinkMultiplied Whether we should multiply or divide by the Chainlink rate the

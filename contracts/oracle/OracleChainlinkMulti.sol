@@ -5,7 +5,19 @@ pragma solidity 0.8.22;
 // Tapioca
 import {AccessControlDefaultAdminRules} from "./external/AccessControlDefaultAdminRules.sol";
 import {ModuleChainlinkMulti} from "./modules/ModuleChainlinkMulti.sol";
+import {SequencerCheck} from "./utils/SequencerCheck.sol";
 import {OracleAbstract} from "./OracleAbstract.sol";
+
+struct OracleChainlinkMultiConstructorData {
+    address[] _circuitChainlink;
+    uint8[] _circuitChainIsMultiplied;
+    uint256 _inBase;
+    uint32 stalePeriod;
+    address[] guardians;
+    bytes32 _description;
+    address _sequencerUptimeFeed;
+    address _admin;
+}
 
 /// @title OracleChainlinkMulti
 /// @author Angle Core Team, modified by Tapioca
@@ -13,26 +25,25 @@ import {OracleAbstract} from "./OracleAbstract.sol";
 /// @dev This contract concerns an oracle that uses Chainlink with multiple pools to read from
 /// @dev It inherits the `ModuleChainlinkMulti` contract and like all oracle contracts, this contract
 /// is an instance of `OracleAstract` that contains some base functions
-contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti {
-    /// @notice Constructor for an oracle using Chainlink with multiple pools to read from
-    /// @param _circuitChainlink Chainlink pool addresses (in order)
-    /// @param _circuitChainIsMultiplied Whether we should multiply or divide by this rate
-    /// @param _description Description of the assets concerned by the oracle
-    /// @param _admin Address of the admin of the oracle
-    constructor(
-        address[] memory _circuitChainlink,
-        uint8[] memory _circuitChainIsMultiplied,
-        uint256 _inBase,
-        uint32 stalePeriod,
-        address[] memory guardians,
-        bytes32 _description,
-        address _admin
-    )
-        ModuleChainlinkMulti(_circuitChainlink, _circuitChainIsMultiplied, stalePeriod, guardians)
-        AccessControlDefaultAdminRules(3 days, _admin)
+contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti, SequencerCheck {
+    /**
+     * @notice Constructor for an oracle using Chainlink with multiple pools to read from
+     * @param _data._circuitChainlink ChainLink pool addresses put in order
+     * @param _data._circuitChainIsMultiplied Whether we should multiply or divide by this rate
+     * @param _data._inBase Number of units of the in-currency
+     * @param _data._stalePeriod Time in seconds after which the oracle is considered stale
+     * @param _data.guardians List of governor or guardian addresses
+     * @param _data._description Description of the assets concerned by the oracle
+     * @param _data._sequencerUptimeFeed Address of the sequencer uptime feed, 0x0 if not used
+     * @param _data._admin Address of the admin of the oracle
+     */
+    constructor(OracleChainlinkMultiConstructorData memory _data)
+        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data.stalePeriod, _data.guardians)
+        AccessControlDefaultAdminRules(3 days, _data._admin)
+        SequencerCheck(_data._sequencerUptimeFeed)
     {
-        inBase = _inBase;
-        description = _description;
+        inBase = _data._inBase;
+        description = _data._description;
     }
 
     /// @notice Reads the rate from the Chainlink circuit
