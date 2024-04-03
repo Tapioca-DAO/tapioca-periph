@@ -91,7 +91,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
         // @dev deposit to YieldBox
         if (data.depositAmount > 0) {
-            data.depositAmount = _extractTokens(msg.sender, assetAddress, data.depositAmount);
+            data.depositAmount = _extractTokens(data.user, assetAddress, data.depositAmount);
             IERC20(assetAddress).approve(address(_yieldBox), 0);
             IERC20(assetAddress).approve(address(_yieldBox), data.depositAmount);
             _yieldBox.depositAsset(assetId, address(this), data.repayAmount > 0 ? address(this) : data.user, data.depositAmount, 0);
