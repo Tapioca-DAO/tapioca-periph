@@ -60,7 +60,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
      *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
      *         - if `repayAmount` is 0, the repay step is skipped
      *         - if `collateralAmount` is 0, the add collateral step is skipped
-     *
+     *         - !!! data.repayAmount needs to be converted to parts by using MagnetarHelper.getBorrowPartForAmount
      * @param data.market the SGL/BigBang market
      * @param data.user the user to perform the action for
      * @param data.depositAmount the amount to deposit to YieldBox
