@@ -131,6 +131,8 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                     MagnetarBaseModuleExternal.extractTokens.selector, user, singularityAddress, fraction
                 )
             );
+            
+            singularityAddress.safeApprove(address(yieldBox_), fraction);
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
             // _setApprovalForYieldBox(lockData.target, yieldBox_);
