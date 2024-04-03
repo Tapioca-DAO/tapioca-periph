@@ -189,10 +189,10 @@ contract Magnetar is BaseMagnetar {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         /// @dev owner address should always be first param.
-        // permitAction(bytes,uint16)
         // permit(address owner...)
         // revoke(address owner...)
         // permitAll(address from,..)
+        // revokeAll(address from,..)
         // permit(address from,...)
         // setApprovalForAll(address from,...)
         // setApprovalForAsset(address from,...)
@@ -201,8 +201,7 @@ contract Magnetar is BaseMagnetar {
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
                 || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
                 || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
-                || funcSig == IERC20.approve.selector || funcSig == IPearlmit.approve.selector
-                || funcSig == IERC721.approve.selector
+                || funcSig == IERC20.approve.selector || funcSig == IERC721.approve.selector
         ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
@@ -213,7 +212,6 @@ contract Magnetar is BaseMagnetar {
         revert Magnetar_ActionNotValid(MagnetarAction.Permit, _actionCalldata);
     }
 
-    //TODO: decide
     /**
      * @dev Process a TOFT operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
