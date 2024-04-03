@@ -153,11 +153,6 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
-            if (_action.id == MagnetarAction.OFT) {
-                _processOFTOperation(_action.target, _action.call, _action.value, _action.allowFailure);
-                continue; // skip the rest of the loop
-            }
-
             // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
             if (
                 address(magnetarModuleExtender) != address(0)
@@ -329,24 +324,6 @@ contract Magnetar is BaseMagnetar {
         revert Magnetar_ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
     }
 
-    /**
-     * @dev Process an OFT operation, will only execute if the selector is allowed.
-     * @dev Different from the others. No need to check for sender. MsgType is sanitized by the OFT
-     *
-     * @param _target The contract address to call.
-     * @param _actionCalldata The calldata to send to the target.
-     * @param _actionValue The value to send with the call.
-     * @param _allowFailure Whether to allow the call to fail.
-     */
-    function _processOFTOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue,
-        bool _allowFailure
-    ) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
-        _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-    }
 
     /**
      * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
