@@ -1000,7 +1000,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         vm.label(address(yieldBox), "YieldBox");
 
         uint256 tokenAmount_ = 1 ether;
-        uint256 mintAmount_ = 1e17;
 
         // lend approvals
         sgl.approve(address(magnetar), type(uint256).max);
