@@ -272,7 +272,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_, amountToCreditLD_);
     }
 
     /**
