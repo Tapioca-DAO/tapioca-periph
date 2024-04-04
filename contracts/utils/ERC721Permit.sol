@@ -21,7 +21,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 abstract contract ERC721Permit is ERC721, EIP712 {
     using Counters for Counters.Counter;
 
-    mapping(address => Counters.Counter) private _nonces;
+    mapping(uint256 => Counters.Counter) private _nonces;
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 private constant _PERMIT_TYPEHASH =
@@ -46,7 +46,7 @@ abstract contract ERC721Permit is ERC721, EIP712 {
         require(block.timestamp <= deadline, "ERC721Permit: expired deadline");
 
         address owner = ownerOf(tokenId);
-        bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, spender, tokenId, _useNonce(owner), deadline));
+        bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, spender, tokenId, _useNonce(tokenId), deadline));
 
         bytes32 hash = _hashTypedDataV4(structHash);
 
@@ -59,10 +59,10 @@ abstract contract ERC721Permit is ERC721, EIP712 {
     /**
      * @dev See {IERC20Permit-nonces}.
      */
-    function nonces(address owner) public view virtual returns (uint256) {
-        return _nonces[owner].current();
+    function nonces(uint256 _tokenId) public view virtual returns (uint256) {
+        return _nonces[_tokenId].current();
     }
-
+    
     /**
      * @dev See {IERC20Permit-DOMAIN_SEPARATOR}.
      */
@@ -75,9 +75,19 @@ abstract contract ERC721Permit is ERC721, EIP712 {
      * @dev "Consume a nonce": return the current value and increment.
      *
      */
-    function _useNonce(address owner) internal virtual returns (uint256 current) {
-        Counters.Counter storage nonce = _nonces[owner];
+    function _useNonce(uint256 _tokenId) internal virtual returns (uint256 current) {
+        Counters.Counter storage nonce = _nonces[_tokenId];
         current = nonce.current();
         nonce.increment();
-    }
+    }   
+    
+    function _afterTokenTransfer(
+            address from,
+            address to,
+            uint256 firstTokenId,
+            uint256 batchSize
+        ) internal virtual override {
+            _useNonce(firstTokenId);
+            super._afterTokenTransfer(from, to, firstTokenId, batchSize);
+        }
 }
