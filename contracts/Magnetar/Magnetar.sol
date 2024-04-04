@@ -4,6 +4,7 @@ pragma solidity 0.8.22;
 // External
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -38,6 +39,8 @@ import {BaseMagnetar} from "./BaseMagnetar.sol";
  * @notice Magnetar helper contract
  */
 contract Magnetar is BaseMagnetar {
+    using SafeERC20 for IERC20;
+
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
 
@@ -234,9 +237,20 @@ contract Magnetar is BaseMagnetar {
         // unwrap(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
 
-        if (funcSig == ITOFT.wrap.selector || funcSig == ITOFT.unwrap.selector) {
+        if (funcSig == ITOFT.wrap.selector)
+        {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+        }
+
+        if (funcSig == ITOFT.unwrap.selector)
+        {
+            (, uint256 _amount) = abi.decode(_actionCalldata[4:36], (address, uint256));
+            IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
+            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+        }
+
+        if (funcSig == ITOFT.wrap.selector || funcSig == ITOFT.unwrap.selector) {
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
             return;
         }
