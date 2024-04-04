@@ -280,7 +280,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
 
         uint256 share = yieldBox.toShare(assetId, amount, false);
-        uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, true);
+        uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, false);
 
         fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
     }
