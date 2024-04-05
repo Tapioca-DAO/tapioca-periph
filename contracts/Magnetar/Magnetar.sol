@@ -283,19 +283,15 @@ contract Magnetar is BaseMagnetar {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         /// @dev owner address should always be first param.
-        // addCollateral(address from,...)
-        // borrow(address from,...)
-        // addAsset(address from,...)
-        // repay(address _from,...)
-        // buyCollateral(address from,...)
-        // sellCollateral(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        if (funcSig == ISingularity.addAsset.selector || funcSig == ISingularity.removeAsset.selector) {
+            /// @dev Owner param check. See Warning above.
+            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+        }
         if (
             funcSig == IMarket.execute.selector || funcSig == ISingularity.addAsset.selector
                 || funcSig == ISingularity.removeAsset.selector
         ) {
-            /// @dev Owner param check. See Warning above.
-            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
             return;
         }
