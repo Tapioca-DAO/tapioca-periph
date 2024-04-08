@@ -105,12 +105,6 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
-            /// @dev Tap singular operations
-            if (_action.id == MagnetarAction.TapToken) {
-                _processTapTokenOperation(_action.target, _action.call, _action.value, _action.allowFailure);
-                continue; // skip the rest of the loop
-            }
-
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.AssetModule) {
                 _executeModule(MagnetarModule.AssetModule, _action.call);
@@ -302,36 +296,6 @@ contract Magnetar is BaseMagnetar {
         revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
     }
 
-    /**
-     * @dev Process a TapToken operation, will only execute if the selector is allowed.
-     * @dev Different from the others. No need to check for sender.
-     *
-     * @param _target The contract address to call.
-     * @param _actionCalldata The calldata to send to the target.
-     * @param _actionValue The value to send with the call.
-     * @param _allowFailure Whether to allow the call to fail.
-     */
-    function _processTapTokenOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue,
-        bool _allowFailure
-    ) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
-
-        bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (
-            funcSig == ITapiocaOptionBroker.exerciseOption.selector
-                || funcSig == ITapiocaOptionBroker.participate.selector
-                || funcSig == ITapiocaOptionBroker.exitPosition.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.lock.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector
-        ) {
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            return;
-        }
-        revert Magnetar_ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
-    }
 
     /**
      * @dev Process an OFT operation, will only execute if the selector is allowed.
