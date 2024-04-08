@@ -23,6 +23,7 @@ import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -49,6 +50,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_WithdrawParamsMismatch();
+    error Magnetar_UserMismatch();
 
     /// =====================
     /// Public
@@ -151,6 +153,16 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
                 // @dev re-calculate amount
                 if (collateralShare > 0) {
+                    if (data.withdrawCollateralParams.unwrap) {
+                        // allow only unwrap receiver
+                        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg);
+
+                        // it should fail at this point if data != SendParamsMsg
+                        SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
+                        if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
+                    } 
+
                     uint256 computedCollateral = _yieldBox.toAmount(collateralId, collateralShare, false);
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
 

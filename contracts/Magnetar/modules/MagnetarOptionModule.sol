@@ -12,6 +12,7 @@ import {ITapiocaOptionLiquidityProvision} from
 import {
     ExitPositionAndRemoveCollateralData, MagnetarWithdrawData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
@@ -21,6 +22,7 @@ import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -48,6 +50,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
     error Magnetar_MarketCallFailed(bytes call);
     error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
+    error Magnetar_ComposeMsgNotAllowed();
+    error Magnetar_UserMismatch();
 
     address immutable magnetarBaseModuleExternal;
 
@@ -175,7 +179,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
-                // recompute amount after `removeAsset`
+                // assure unwrap is false because asset is not a TOFT
+                if (data.removeAndRepayData.assetWithdrawData.unwrap) revert Magnetar_ComposeMsgNotAllowed();
+
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
@@ -248,6 +254,18 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
             //withdraw
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {
+                if (data.removeAndRepayData.collateralWithdrawData.unwrap) {
+                    // allow only unwrap receiver
+                    (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                    TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
+                        data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.composeMsg
+                    );
+
+                    // it should fail at this point if data != SendParamsMsg
+                    SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
+                    if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
+                }
+
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;

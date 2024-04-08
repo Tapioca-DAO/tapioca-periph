@@ -37,6 +37,8 @@ import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 contract MagnetarMintXChainModule is MagnetarMintCommonModule {
     using SafeERC20 for IERC20;
 
+    error Magnetar_UserMismatch();
+
     constructor(address _magnetarBaseModuleExternal) MagnetarMintCommonModule(_magnetarBaseModuleExternal) {}
 
     /// =====================
@@ -75,28 +77,17 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lendSendParams.lzParams.sendParam.composeMsg);
 
+        // assert composeMsg format & user
         DepositAndSendForLockingData memory lendData = abi.decode(tapComposeMsg_, (DepositAndSendForLockingData));
+        if (lendData.user != data.user) revert Magnetar_UserMismatch();
+
         lendData.lendAmount = data.mintData.mintAmount;
 
         data.lendSendParams.lzParams.sendParam.composeMsg =
             TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
 
+
         // send on another layer for lending
-        // _withdrawToChain(
-        //     MagnetarWithdrawData({
-        //         yieldBox: yieldBox,
-        //         assetId: IMarket(data.bigBang).assetId(),
-        //         unwrap: false,
-        //         lzSendParams: data.lendSendParams.lzParams,
-        //         sendGas: data.lendSendParams.lzSendGas,
-        //         composeGas: data.lendSendParams.lzComposeGas,
-        //         sendVal: data.lendSendParams.lzSendVal,
-        //         composeVal: data.lendSendParams.lzComposeVal,
-        //         composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
-        //         composeMsgType: data.lendSendParams.lzComposeMsgType,
-        //         withdraw: true
-        //     })
-        // );
         _executeDelegateCall(
             magnetarBaseModuleExternal,
             abi.encodeWithSelector(
