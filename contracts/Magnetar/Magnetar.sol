@@ -206,14 +206,18 @@ contract Magnetar is BaseMagnetar {
         // setApprovalForAll(address from,...)
         // setApprovalForAsset(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (
-            funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
-                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
+        if (funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
+                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector) {
+            /// @dev Owner param check. See Warning above.
+            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+        }
+
+        /// @dev no need to check the owner for the rest; it's using `msg.sender`
+        if (funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
+                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector 
                 || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
                 || funcSig == IERC20.approve.selector || funcSig == IERC721.approve.selector
         ) {
-            /// @dev Owner param check. See Warning above.
-            _checkSender(abi.decode(_actionCalldata[4:36], (address)));
             // No need to send value on permit
             _executeCall(_target, _actionCalldata, 0, _allowFailure);
             return;
