@@ -6,7 +6,8 @@ import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildETHOracle } from 'tasks/deployBuilds/oracle/buildETHOracle';
+import { buildETHCLOracle } from 'tasks/deployBuilds/oracle/buildETHCLOracle';
+import { buildETHUniOracle } from 'tasks/deployBuilds/oracle/buildETHUniOracle';
 import { buildEthGlpPOracle } from 'tasks/deployBuilds/oracle/buildEthGlpOracle';
 import { buildGLPOracle } from 'tasks/deployBuilds/oracle/buildGLPOracle';
 import { buildGMXOracle } from 'tasks/deployBuilds/oracle/buildGMXOracle';
@@ -21,6 +22,7 @@ import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -44,8 +46,6 @@ async function postDeployTask(
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
-    if (isTestnet) {
-    }
 }
 
 async function tapiocaDeployTask(
@@ -63,7 +63,9 @@ async function tapiocaDeployTask(
         await deployUniPoolAndAddLiquidity(params);
         const { tapToken, tapWethLp } = await loadContracts(hre, tag);
 
-        VM.add(await buildETHOracle(hre, owner, isTestnet))
+        VM.add(await buildETHCLOracle(hre, owner, isTestnet))
+            .add(await buildETHUniOracle(hre, owner, isTestnet))
+            .add(await buildDualETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
             .add(await buildGMXOracle(hre, owner, isTestnet))
