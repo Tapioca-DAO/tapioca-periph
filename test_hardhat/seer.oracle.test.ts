@@ -1,7 +1,7 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre from 'hardhat';
-import { __buildETHOracleArgs } from '../tasks/deployBuilds/oracle/buildETHOracle';
+import { __buildETHOracleArgs } from '../tasks/deployBuilds/oracle/buildETHCLOracle';
 import { __buildEthGlpOracleArgs } from '../tasks/deployBuilds/oracle/buildEthGlpOracle';
 import { __buildGLPOracleArgs } from '../tasks/deployBuilds/oracle/buildGLPOracle';
 import { __buildGMXOracleArgs } from '../tasks/deployBuilds/oracle/buildGMXOracle';
