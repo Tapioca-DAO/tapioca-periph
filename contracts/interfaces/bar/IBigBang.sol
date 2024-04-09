@@ -12,7 +12,7 @@ pragma solidity 0.8.22;
    
 */
 
-interface IBigBang {
+interface IBigBang is IMarket {
     struct AccrueInfo {
         uint64 debtRate;
         uint64 lastAccrued;
