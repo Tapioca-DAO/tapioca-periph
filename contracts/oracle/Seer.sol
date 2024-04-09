@@ -55,6 +55,9 @@ contract Seer is ITapiocaOracle, OracleMulti {
         _sequencerBeatCheck();
 
         (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
+        if (uniFinalCurrency > 0) {
+            return (true, uniswap);
+        }
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
@@ -73,6 +76,9 @@ contract Seer is ITapiocaOracle, OracleMulti {
     /// @return rate The rate of the requested asset / pair / pool.
     function peek(bytes calldata data) external view virtual returns (bool success, uint256 rate) {
         (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
+        if (uniFinalCurrency > 0) {
+            return (true, uniswap);
+        }
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
@@ -90,6 +96,9 @@ contract Seer is ITapiocaOracle, OracleMulti {
     /// @return rate The rate of the requested asset / pair / pool.
     function peekSpot(bytes calldata data) external view virtual returns (uint256 rate) {
         (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
+        if (uniFinalCurrency > 0) {
+            return  uniswap;
+        }
 
         if (data.length > 0) {
             ISeerQuery memory query = abi.decode(data, (ISeerQuery));
