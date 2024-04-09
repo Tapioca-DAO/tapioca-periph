@@ -25,7 +25,7 @@ export const buildSDaiOracle = async (
 
     return {
         contract: await hre.ethers.getContractFactory('SDaiOracle'),
-        deploymentName: DEPLOYMENT_NAMES.SDAI_ORACLE,
+        deploymentName: DEPLOYMENT_NAMES.S_DAI_ORACLE,
         args,
     };
 };

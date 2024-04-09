@@ -30,7 +30,7 @@ export const buildEthGlpPOracle = async (
         args,
         dependsOn: [
             {
-                deploymentName: DEPLOYMENT_NAMES.ETH_ORACLE,
+                deploymentName: DEPLOYMENT_NAMES.ETH_SEER_CL_ORACLE,
                 argPosition: 0,
             },
             {
