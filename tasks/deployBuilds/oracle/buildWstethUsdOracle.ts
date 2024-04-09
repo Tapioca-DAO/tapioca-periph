@@ -29,7 +29,7 @@ export const buildWstethUsdOracle = async (
             _description: hre.ethers.utils.formatBytes32String(
                 'WSTETH -> STETH -> USD',
             ), // Description,
-            _sequencerUptimeFeed: hre.ethers.constants.AddressZero, // CL Sequencer
+            _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
             _admin: owner, // Owner
         },
     ];

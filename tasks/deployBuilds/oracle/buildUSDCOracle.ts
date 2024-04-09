@@ -23,7 +23,7 @@ export const buildUSDCOracle = async (
             stalePeriod: isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
             guardians: [owner], // Guardians
             _description: hre.ethers.utils.formatBytes32String('USDC/USD'), // Description,
-            _sequencerUptimeFeed: hre.ethers.constants.AddressZero, // CL Sequencer
+            _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
             _admin: owner, // Owner
         },
     ];
