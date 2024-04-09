@@ -50,7 +50,7 @@ export const deployUniV3pool__task = async (
             feeTier,
             encodeSqrtRatioX96(ratio0, ratio1).toString(),
             {
-                gasLimit: 5_000_000,
+                gasLimit: 10_000_000,
             },
         )
     ).wait(3);
