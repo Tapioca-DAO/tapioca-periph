@@ -169,7 +169,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 || data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
 
             // convert share to fraction
-            uint256 fraction = _getFractionForAmount(singularity_, _removeAmount);
+            uint256 fraction = helper.getFractionForAmount(singularity_, _removeAmount);
 
             uint256 share = singularity_.removeAsset(data.user, removeAssetTo, fraction);
 
@@ -268,21 +268,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
             )
         );
-    }
-
-    /// @dev same method from MagnetarHelper
-    ///      copied here to avoid gas increasal for `exitPositionAndRemoveCollateral`
-    function _getFractionForAmount(ISingularity singularity, uint256 amount) private view returns (uint256 fraction) {
-        (uint128 totalAssetShare, uint128 totalAssetBase) = singularity.totalAsset();
-        (uint128 totalBorrowElastic,) = singularity.totalBorrow();
-        uint256 assetId = singularity.assetId();
-
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
-
-        uint256 share = yieldBox.toShare(assetId, amount, false);
-        uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, false);
-
-        fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
     }
 
     function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
