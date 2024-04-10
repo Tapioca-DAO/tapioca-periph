@@ -11,6 +11,7 @@ import {ITapiocaOptionLiquidityProvision} from
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
@@ -35,6 +36,7 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
  */
 contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     ICluster internal cluster;
+    IMagnetarHelper public helper;
     mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
 
     // Helpers for external usage. Not used in the contract.
