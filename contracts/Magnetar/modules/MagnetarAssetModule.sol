@@ -114,6 +114,12 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             _market.execute(modules, calls, true);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
             _revertYieldBoxApproval(data.market, _yieldBox);
+
+            // refund difference to the user
+            if (data.depositAmount > data.repayAmount) {
+                uint256 share = _yieldBox.toShare(assetId, data.depositAmount - data.repayAmount, false);
+                _yieldBox.transfer(address(this), data.user, assetId, share);
+            }
         }
 
         /**
