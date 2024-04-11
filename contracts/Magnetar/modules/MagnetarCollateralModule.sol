@@ -83,7 +83,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             // deposit to YieldBox
             IERC20(collateralAddress).approve(address(yieldBox_), 0);
             IERC20(collateralAddress).approve(address(yieldBox_), data.collateralAmount);
-            yieldBox_.depositAsset(collateralId, address(this), address(this), data.collateralAmount, 0);
+            yieldBox_.depositAsset(collateralId, address(this), data.user, data.collateralAmount, 0);
         }
 
         // performs .addCollateral on data.market
@@ -91,17 +91,15 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             _setApprovalForYieldBox(data.market, yieldBox_);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
-                data.deposit ? address(this) : data.user, data.user, false, data.collateralAmount, _share
+                data.user, data.user, false, data.collateralAmount, _share
             );
-            if (data.deposit) {
-                pearlmit.approve(
-                    address(yieldBox_),
-                    collateralId,
-                    address(market_),
-                    _share.toUint200(),
-                    (block.timestamp + 1).toUint48()
-                );
-            }
+            pearlmit.approve(
+                address(yieldBox_),
+                collateralId,
+                address(market_),
+                _share.toUint200(),
+                (block.timestamp + 1).toUint48()
+            );
             market_.execute(modules, calls, true);
             _revertYieldBoxApproval(data.market, yieldBox_);
         }

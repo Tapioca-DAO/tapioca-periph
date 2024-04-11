@@ -60,7 +60,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
      *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
      *         - if `repayAmount` is 0, the repay step is skipped
      *         - if `collateralAmount` is 0, the add collateral step is skipped
-     *
      * @param data.market the SGL/BigBang market
      * @param data.user the user to perform the action for
      * @param data.depositAmount the amount to deposit to YieldBox
@@ -94,21 +93,23 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             data.depositAmount = _extractTokens(data.user, assetAddress, data.depositAmount);
             IERC20(assetAddress).approve(address(_yieldBox), 0);
             IERC20(assetAddress).approve(address(_yieldBox), data.depositAmount);
-            _yieldBox.depositAsset(assetId, address(this), data.repayAmount > 0 ? address(this) : data.user, data.depositAmount, 0);
+            _yieldBox.depositAsset(assetId, address(this), data.user, data.depositAmount, 0);
         }
 
         // @dev performs a repay operation for the specified market
         if (data.repayAmount > 0) {
+            uint256 repayPart = helper.getBorrowPartForAmount(data.market, data.repayAmount);
+
             _setApprovalForYieldBox(data.market, _yieldBox);
-            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).repay(
-                data.depositAmount > 0 ? address(this) : data.user, data.user, false, data.repayAmount
+
+            (Module[] memory modules, bytes[] memory calls) =
+                IMarketHelper(data.marketHelper).repay(data.user, data.user, false, repayPart);
+
+            uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
+            pearlmit.approve(
+                address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
             );
-            if (data.depositAmount > 0) {
-                uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
-                pearlmit.approve(
-                    address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
-                );
-            }
+
             _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
