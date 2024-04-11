@@ -33,6 +33,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
+    error MagnetarCollateralModule_ComposeMsgNotAllowed();
+
     /**
      * @notice helper for deposit to YieldBox, add collateral to a market, borrow from the same market and withdraw
      * @dev all operations are optional:
@@ -123,6 +125,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             market_.execute(modules, calls, true);
 
             if (data.withdrawParams.withdraw) {
+                // asset is USDO which doesn't have unwrap
+                if (data.withdrawParams.unwrap) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
                 _withdrawToChain(data.withdrawParams);
             }
         }

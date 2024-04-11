@@ -47,6 +47,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
 
+    error Magnetar_UserMismatch();
+
     /// =====================
     /// Public
     /// =====================
@@ -91,6 +93,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg);
 
         LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
+        if (lockData.user != data.user) revert Magnetar_UserMismatch();
+
         lockData.fraction = toftAmount;
 
         data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg =
