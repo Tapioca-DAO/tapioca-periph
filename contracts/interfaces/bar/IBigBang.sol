@@ -33,4 +33,8 @@ interface IBigBang {
     function getTotalDebt() external view returns (uint256);
 
     function accrue() external;
+
+    function computeOpenInterestMintable() external returns (uint256);
+
+    function viewOpenInterest() external view returns (uint256);
 }
