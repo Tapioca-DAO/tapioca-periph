@@ -84,7 +84,7 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
 
         // wrap SGL receipt into tReceipt
         // ! User should approve `address(this)` for `IERC20(data.singularity)` !
-        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
+        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId, true, address(this));
 
         data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
 

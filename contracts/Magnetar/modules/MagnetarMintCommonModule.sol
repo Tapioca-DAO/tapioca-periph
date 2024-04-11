@@ -63,19 +63,6 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
     /// Internal
     /// =====================
-    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
-        internal
-        returns (uint256 toftAmount)
-    {
-        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
-
-        (, address tReceiptAddress,,) = yieldBox.assets(assetId);
-
-        IERC20(sgl).approve(tReceiptAddress, fraction);
-        toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
-        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
-    }
-
     function _participateOnTOLP(
         IOptionsParticipateData memory participateData,
         address user,
