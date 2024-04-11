@@ -253,12 +253,13 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         _lzSendParam.sendParam.minAmountLD = amountToCreditLD_;
 
         // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
-        if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) {
+        if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) { 
+            // Send the difference back to the user
+            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
+
             // Overwrite the amount to credit with the amount debited
             _lzSendParam.sendParam.amountLD = amountDebitedLD_;
             _lzSendParam.sendParam.minAmountLD = amountDebitedLD_;
-            // Send the difference back to the user
-            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
         }
 
         // Builds the options and OFT message to quote in the endpoint.
