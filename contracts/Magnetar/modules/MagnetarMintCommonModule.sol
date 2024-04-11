@@ -80,7 +80,8 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         IOptionsParticipateData memory participateData,
         address user,
         address lockDataTarget,
-        uint256 tOLPTokenId
+        uint256 tOLPTokenId,
+        bool lock
     ) internal {
         if (!cluster.isWhitelisted(0, participateData.target)) {
             revert Magnetar_TargetNotWhitelisted(participateData.target);
@@ -95,6 +96,11 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             tOLPTokenId = participateData.tOLPTokenId;
         }
         if (tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+
+        // lock didn't happen; need to transfer NFT here
+        if (!lock) {
+            IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
+        }
 
         IERC721(lockDataTarget).approve(participateData.target, tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
