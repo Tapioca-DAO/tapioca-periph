@@ -43,6 +43,7 @@ contract Magnetar is BaseMagnetar {
 
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
+    error Magnetar_PearlmitTransferFailed(); // Transfer failed in pearlmit
 
     constructor(
         ICluster _cluster,
@@ -102,12 +103,6 @@ contract Magnetar is BaseMagnetar {
             /// @dev Market singular operations
             if (_action.id == MagnetarAction.Market) {
                 _processMarketOperation(_action.target, _action.call, _action.value, _action.allowFailure);
-                continue; // skip the rest of the loop
-            }
-
-            /// @dev Tap singular operations
-            if (_action.id == MagnetarAction.TapToken) {
-                _processTapTokenOperation(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
@@ -178,8 +173,8 @@ contract Magnetar is BaseMagnetar {
 
         // @dev Magnetar shouldn't hold eth so this is safe
         // @dev if allowFailure is `true` and action fails, ETH might be left here
-        if(address(this).balance>0){
-            msg.sender.call{value:address(this).balance}(""); 
+        if (address(this).balance > 0) {
+            msg.sender.call{value: address(this).balance}("");
         }
     }
 
@@ -206,15 +201,18 @@ contract Magnetar is BaseMagnetar {
         // setApprovalForAll(address from,...)
         // setApprovalForAsset(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
-                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector) {
+        if (
+            funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
+                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
+        ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
 
         /// @dev no need to check the owner for the rest; it's using `msg.sender`
-        if (funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
-                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector 
+        if (
+            funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
+                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
                 || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
                 || funcSig == IERC20.approve.selector || funcSig == IERC721.approve.selector
         ) {
@@ -258,7 +256,7 @@ contract Magnetar is BaseMagnetar {
             // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
             {
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount);
-                if (isErr) revert Failed();
+                if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
         }
 
@@ -300,37 +298,6 @@ contract Magnetar is BaseMagnetar {
             return;
         }
         revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
-    }
-
-    /**
-     * @dev Process a TapToken operation, will only execute if the selector is allowed.
-     * @dev Different from the others. No need to check for sender.
-     *
-     * @param _target The contract address to call.
-     * @param _actionCalldata The calldata to send to the target.
-     * @param _actionValue The value to send with the call.
-     * @param _allowFailure Whether to allow the call to fail.
-     */
-    function _processTapTokenOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue,
-        bool _allowFailure
-    ) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
-
-        bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (
-            funcSig == ITapiocaOptionBroker.exerciseOption.selector
-                || funcSig == ITapiocaOptionBroker.participate.selector
-                || funcSig == ITapiocaOptionBroker.exitPosition.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.lock.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector
-        ) {
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            return;
-        }
-        revert Magnetar_ActionNotValid(MagnetarAction.TapToken, _actionCalldata);
     }
 
     /**
