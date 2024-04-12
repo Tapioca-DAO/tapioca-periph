@@ -158,7 +158,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             }
 
             ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
-                tOLPId, data.externalData.singularity, data.user
+                tOLPId, data.externalData.singularity
             );
         }
 
@@ -256,8 +256,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {
                 if (data.removeAndRepayData.collateralWithdrawData.unwrap) {
                     // allow only unwrap receiver
-                    (,,, bytes memory tapComposeMsg_,) =
-                    TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
+                    (,,, bytes memory tapComposeMsg_,) = TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
                         data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.composeMsg
                     );
 
