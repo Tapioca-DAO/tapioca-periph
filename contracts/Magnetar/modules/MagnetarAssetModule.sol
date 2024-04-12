@@ -23,6 +23,7 @@ import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -49,6 +50,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_WithdrawParamsMismatch();
+    error Magnetar_UserMismatch();
 
     /// =====================
     /// Public
@@ -60,7 +62,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
      *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
      *         - if `repayAmount` is 0, the repay step is skipped
      *         - if `collateralAmount` is 0, the add collateral step is skipped
-     *
      * @param data.market the SGL/BigBang market
      * @param data.user the user to perform the action for
      * @param data.depositAmount the amount to deposit to YieldBox
@@ -91,28 +92,36 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
         // @dev deposit to YieldBox
         if (data.depositAmount > 0) {
-            data.depositAmount = _extractTokens(msg.sender, assetAddress, data.depositAmount);
+            data.depositAmount = _extractTokens(data.user, assetAddress, data.depositAmount);
             IERC20(assetAddress).approve(address(_yieldBox), 0);
             IERC20(assetAddress).approve(address(_yieldBox), data.depositAmount);
-            _yieldBox.depositAsset(assetId, address(this), address(this), data.depositAmount, 0);
+            _yieldBox.depositAsset(assetId, address(this), data.user, data.depositAmount, 0);
         }
 
         // @dev performs a repay operation for the specified market
         if (data.repayAmount > 0) {
+            uint256 repayPart = helper.getBorrowPartForAmount(data.market, data.repayAmount);
+
             _setApprovalForYieldBox(data.market, _yieldBox);
-            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).repay(
-                data.depositAmount > 0 ? address(this) : data.user, data.user, false, data.repayAmount
+
+            (Module[] memory modules, bytes[] memory calls) =
+                IMarketHelper(data.marketHelper).repay(data.user, data.user, false, repayPart);
+
+            uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
+            pearlmit.approve(
+                address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
             );
-            if (data.depositAmount > 0) {
-                uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
-                pearlmit.approve(
-                    address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
-                );
-            }
+
             _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
             _revertYieldBoxApproval(data.market, _yieldBox);
+
+            // refund difference to the user
+            if (data.depositAmount > data.repayAmount) {
+                uint256 share = _yieldBox.toShare(assetId, data.depositAmount - data.repayAmount, false);
+                _yieldBox.transfer(address(this), data.user, assetId, share);
+            }
         }
 
         /**
@@ -144,6 +153,16 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
                 // @dev re-calculate amount
                 if (collateralShare > 0) {
+                    if (data.withdrawCollateralParams.unwrap) {
+                        // allow only unwrap receiver
+                        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg);
+
+                        // it should fail at this point if data != SendParamsMsg
+                        SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
+                        if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
+                    } 
+
                     uint256 computedCollateral = _yieldBox.toAmount(collateralId, collateralShare, false);
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
 

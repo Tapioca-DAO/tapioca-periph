@@ -63,24 +63,12 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
     /// Internal
     /// =====================
-    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
-        internal
-        returns (uint256 toftAmount)
-    {
-        IERC20(sgl).safeTransferFrom(user, address(this), fraction);
-
-        (, address tReceiptAddress,,) = yieldBox.assets(assetId);
-
-        IERC20(sgl).approve(tReceiptAddress, fraction);
-        toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
-        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
-    }
-
     function _participateOnTOLP(
         IOptionsParticipateData memory participateData,
         address user,
         address lockDataTarget,
-        uint256 tOLPTokenId
+        uint256 tOLPTokenId,
+        bool lock
     ) internal {
         if (!cluster.isWhitelisted(0, participateData.target)) {
             revert Magnetar_TargetNotWhitelisted(participateData.target);
@@ -95,6 +83,11 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             tOLPTokenId = participateData.tOLPTokenId;
         }
         if (tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+
+        // lock didn't happen; need to transfer NFT here
+        if (!lock) {
+            IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
+        }
 
         IERC721(lockDataTarget).approve(participateData.target, tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
@@ -131,6 +124,8 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                     MagnetarBaseModuleExternal.extractTokens.selector, user, singularityAddress, fraction
                 )
             );
+            
+            singularityAddress.safeApprove(address(yieldBox_), fraction);
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
             // _setApprovalForYieldBox(lockData.target, yieldBox_);

@@ -92,7 +92,7 @@ contract MagnetarMintModule is MagnetarMintCommonModule {
         //      - performs tOB.participate
         //      - transfer `oTAPTokenId` to data.user
         if (data.participateData.participate) {
-            _participateOnTOLP(data.participateData, data.user, data.lockData.target, tOLPTokenId);
+            _participateOnTOLP(data.participateData, data.user, data.lockData.target, tOLPTokenId, data.lockData.lock);
         }
     }
 }

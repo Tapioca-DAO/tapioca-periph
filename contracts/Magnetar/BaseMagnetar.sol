@@ -27,7 +27,6 @@ import {MagnetarStorage, IPearlmit} from "./MagnetarStorage.sol";
  * @notice Base contract for Magnetar
  */
 contract BaseMagnetar is Ownable, MagnetarStorage {
-    IMagnetarHelper public helper;
     IMagnetarModuleExtender public magnetarModuleExtender; // For future implementations
 
     error Magnetar_FailRescueEth();

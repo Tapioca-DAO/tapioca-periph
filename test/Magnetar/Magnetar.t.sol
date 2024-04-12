@@ -23,7 +23,6 @@ import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
-import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
@@ -64,6 +63,7 @@ import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol
 import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
 import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
+import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
@@ -186,6 +186,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         collateral.approve(address(pearlmit), type(uint256).max);
         asset.approve(address(magnetar), type(uint256).max);
         collateral.approve(address(magnetar), type(uint256).max);
+
+        magnetar.setHelper(address(magnetarHelper));
     }
 
     function _setupSgl(address _oracle) private returns (Singularity, Penrose, YieldBox) {
@@ -1000,7 +1002,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         vm.label(address(yieldBox), "YieldBox");
 
         uint256 tokenAmount_ = 1 ether;
-        uint256 mintAmount_ = 1e17;
 
         // lend approvals
         sgl.approve(address(magnetar), type(uint256).max);

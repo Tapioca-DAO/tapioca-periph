@@ -33,6 +33,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
+    error MagnetarCollateralModule_ComposeMsgNotAllowed();
+
     /**
      * @notice helper for deposit to YieldBox, add collateral to a market, borrow from the same market and withdraw
      * @dev all operations are optional:
@@ -83,7 +85,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             // deposit to YieldBox
             IERC20(collateralAddress).approve(address(yieldBox_), 0);
             IERC20(collateralAddress).approve(address(yieldBox_), data.collateralAmount);
-            yieldBox_.depositAsset(collateralId, address(this), address(this), data.collateralAmount, 0);
+            yieldBox_.depositAsset(collateralId, address(this), data.user, data.collateralAmount, 0);
         }
 
         // performs .addCollateral on data.market
@@ -91,17 +93,15 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             _setApprovalForYieldBox(data.market, yieldBox_);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
-                data.deposit ? address(this) : data.user, data.user, false, data.collateralAmount, _share
+                data.user, data.user, false, data.collateralAmount, _share
             );
-            if (data.deposit) {
-                pearlmit.approve(
-                    address(yieldBox_),
-                    collateralId,
-                    address(market_),
-                    _share.toUint200(),
-                    (block.timestamp + 1).toUint48()
-                );
-            }
+            pearlmit.approve(
+                address(yieldBox_),
+                collateralId,
+                address(market_),
+                _share.toUint200(),
+                (block.timestamp + 1).toUint48()
+            );
             market_.execute(modules, calls, true);
             _revertYieldBoxApproval(data.market, yieldBox_);
         }
@@ -125,6 +125,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             market_.execute(modules, calls, true);
 
             if (data.withdrawParams.withdraw) {
+                // asset is USDO which doesn't have unwrap
+                if (data.withdrawParams.unwrap) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
                 _withdrawToChain(data.withdrawParams);
             }
         }

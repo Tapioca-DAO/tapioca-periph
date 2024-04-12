@@ -47,6 +47,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
 
+    error Magnetar_UserMismatch();
+
     /// =====================
     /// Public
     /// =====================
@@ -82,7 +84,7 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
 
         // wrap SGL receipt into tReceipt
         // ! User should approve `address(this)` for `IERC20(data.singularity)` !
-        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId);
+        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId, true, address(this));
 
         data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
 
@@ -91,6 +93,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg);
 
         LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
+        if (lockData.user != data.user) revert Magnetar_UserMismatch();
+
         lockData.fraction = toftAmount;
 
         data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg =
@@ -101,7 +105,7 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
             MagnetarWithdrawData({
                 yieldBox: yieldBox,
                 assetId: data.assetId,
-                unwrap: false,
+                unwrap: true, //doesn't unwrap but calls it with `composeMsg`
                 lzSendParams: data.lockAndParticipateSendParams.lzParams,
                 sendGas: data.lockAndParticipateSendParams.lzSendGas,
                 composeGas: data.lockAndParticipateSendParams.lzComposeGas,

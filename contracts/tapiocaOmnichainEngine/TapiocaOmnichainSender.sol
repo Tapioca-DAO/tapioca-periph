@@ -7,8 +7,8 @@ import {
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 
 /*
 
@@ -62,8 +62,12 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         // @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
-        (uint256 amountDebitedLD, uint256 amountToCreditLD) =
-            _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
+        );
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) =
@@ -75,6 +79,6 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         // @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD, amountToCreditLD);
     }
 }

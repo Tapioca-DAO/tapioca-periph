@@ -49,7 +49,7 @@ contract MagnetarAssetCommonModule is MagnetarBaseModule {
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
 
-    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId)
+    function _wrapSglReceipt(IYieldBox yieldBox, address sgl, address user, uint256 fraction, uint256 assetId, bool ybDeposit, address receiver)
         internal
         returns (uint256 toftAmount)
     {
@@ -59,7 +59,13 @@ contract MagnetarAssetCommonModule is MagnetarBaseModule {
 
         IERC20(sgl).approve(tReceiptAddress, fraction);
         toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
-        IERC20(tReceiptAddress).safeTransfer(user, toftAmount);
+
+        if (ybDeposit) {
+            IERC20(tReceiptAddress).safeApprove(address(yieldBox), toftAmount);
+            yieldBox.depositAsset(assetId, address(this), receiver, toftAmount, 0);
+        } else {
+            IERC20(tReceiptAddress).safeTransfer(receiver, toftAmount);
+        }
     }
 
     function _depositYBLendSGL(

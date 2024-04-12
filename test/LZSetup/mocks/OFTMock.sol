@@ -18,7 +18,7 @@ contract OFTMock is OFT {
         public
         returns (uint256 amountDebitedLD, uint256 amountToCreditLD)
     {
-        return _debit(_amountToSendLD, _minAmountToCreditLD, _dstEid);
+        return _debit(msg.sender, _amountToSendLD, _minAmountToCreditLD, _dstEid);
     }
 
     function debitView(uint256 _amountToSendLD, uint256 _minAmountToCreditLD, uint32 _dstEid)

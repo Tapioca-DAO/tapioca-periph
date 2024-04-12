@@ -130,6 +130,7 @@ contract Pearlmit is PermitC {
      */
     function _batchAllowanceCheck(IPearlmit.PermitBatchTransferFrom calldata batch)
         internal
+        view
         returns (bool isBatchAllowed)
     {
         uint256 numPermits = batch.approvals.length;

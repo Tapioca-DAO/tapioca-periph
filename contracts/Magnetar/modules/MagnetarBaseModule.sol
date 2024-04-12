@@ -157,7 +157,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: _lzSendGas + _lzComposeGas,
-                lzReceiveValue: _lzComposeVal
+                lzReceiveValue: _lzComposeVal,
+                refundAddress: _lzSendParam.refundAddress
             })
         );
 
@@ -192,7 +193,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: _lzSendGas,
-                lzReceiveValue: _lzSendVal
+                lzReceiveValue: _lzSendVal,
+                refundAddress: _lzSendParam.refundAddress
             })
         );
     }
