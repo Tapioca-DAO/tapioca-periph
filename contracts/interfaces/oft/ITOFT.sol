@@ -30,7 +30,7 @@ interface ITOFT is ITapiocaOmnichainEngine {
 
     function hostEid() external view returns (uint256);
     function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
-    function unwrap(address _toAddress, uint256 _amount) external;
+    function unwrap(address _toAddress, uint256 _amount) external returns (uint256 unwrapped);
     function erc20() external view returns (address);
     function vault() external view returns (address);
     function balanceOf(address _holder) external view returns (uint256);
