@@ -174,7 +174,9 @@ contract Magnetar is BaseMagnetar {
         // @dev Magnetar shouldn't hold eth so this is safe
         // @dev if allowFailure is `true` and action fails, ETH might be left here
         if (address(this).balance > 0) {
-            msg.sender.call{value: address(this).balance}("");
+            (bool refundSuccess, ) = msg.sender.call{value: address(this).balance}("");
+            if (!refundSuccess) revert Magnetar_FailRescueEth();
+             
         }
     }
 

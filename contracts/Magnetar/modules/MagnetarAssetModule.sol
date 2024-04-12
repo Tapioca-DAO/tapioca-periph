@@ -116,12 +116,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             _market.execute(modules, calls, true);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
             _revertYieldBoxApproval(data.market, _yieldBox);
-
-            // refund difference to the user
-            if (data.depositAmount > data.repayAmount) {
-                uint256 share = _yieldBox.toShare(assetId, data.depositAmount - data.repayAmount, false);
-                _yieldBox.transfer(address(this), data.user, assetId, share);
-            }
         }
 
         /**
@@ -155,7 +149,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                 if (collateralShare > 0) {
                     if (data.withdrawCollateralParams.unwrap) {
                         // allow only unwrap receiver
-                        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                        (,,, bytes memory tapComposeMsg_, ) =
                             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg);
 
                         // it should fail at this point if data != SendParamsMsg

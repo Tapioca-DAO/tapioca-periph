@@ -11,7 +11,7 @@ import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.so
 contract SDaiOracle is ITapiocaOracle, ReentrancyGuard {
     AggregatorInterface private immutable sDaiOracle;
 
-    constructor(AggregatorInterface _sDaiOracle, address _admin) {
+    constructor(AggregatorInterface _sDaiOracle) {
         sDaiOracle = _sDaiOracle;
     }
 
