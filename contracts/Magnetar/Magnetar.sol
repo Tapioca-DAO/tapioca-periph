@@ -210,12 +210,22 @@ contract Magnetar is BaseMagnetar {
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
 
+        // IPearlmit.permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch)
+        if (funcSig == IPearlmit.permitBatchApprove.selector) {
+            IPearlmit.PermitBatchTransferFrom memory batch =
+                abi.decode(_actionCalldata[4:], (IPearlmit.PermitBatchTransferFrom));
+
+            /// @dev Owner param check. See Warning above.
+            _checkSender(batch.owner);
+        }
+
         /// @dev no need to check the owner for the rest; it's using `msg.sender`
         if (
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
                 || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
                 || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
                 || funcSig == IERC20.approve.selector || funcSig == IERC721.approve.selector
+                || funcSig == IPearlmit.permitBatchApprove.selector
         ) {
             // No need to send value on permit
             _executeCall(_target, _actionCalldata, 0, _allowFailure);
