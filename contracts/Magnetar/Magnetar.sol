@@ -2,15 +2,17 @@
 pragma solidity 0.8.22;
 
 // External
+import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -94,9 +96,8 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
-            /// @dev Wrap/unwrap singular operations
-            if (_action.id == MagnetarAction.Wrap) {
-                _processWrapOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+            if (_action.id == MagnetarAction.OFT) {
+                _processOFTOperation(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
@@ -145,11 +146,6 @@ contract Magnetar is BaseMagnetar {
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.YieldBoxModule) {
                 _executeModule(MagnetarModule.YieldBoxModule, _action.call);
-                continue; // skip the rest of the loop
-            }
-
-            if (_action.id == MagnetarAction.OFT) {
-                _processOFTOperation(_action.target, _action.call, _action.value, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
@@ -237,13 +233,15 @@ contract Magnetar is BaseMagnetar {
      * @dev Process a TOFT operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
      *
+     * @dev !!! WARNING !!! Some functionalities of ITapiocaOmnichainEngine.sendPacket might not work on dst
+     * as the `srcChainSender` on dst will be Magnetar
+     *
      * @param _target The contract address to call.
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      * @param _allowFailure Whether to allow the call to fail.
      */
-    // TODO: rename to `_processToftOperation` and add sendFrom operation
-    function _processWrapOperation(
+    function _processOFTOperation(
         address _target,
         bytes calldata _actionCalldata,
         uint256 _actionValue,
@@ -254,6 +252,7 @@ contract Magnetar is BaseMagnetar {
         /// @dev owner address should always be first param.
         // wrap(address from,...)
         // unwrap(address from,...)
+        // sendFrom(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
 
         if (funcSig == ITOFT.wrap.selector) {
@@ -270,7 +269,24 @@ contract Magnetar is BaseMagnetar {
             }
         }
 
-        if (funcSig == ITOFT.wrap.selector || funcSig == ITOFT.unwrap.selector) {
+        if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
+            (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
+            uint256 amount_ = lzSendParam_.sendParam.amountLD;
+
+            address owner_ = OFTMsgCodec.bytes32ToAddress(lzSendParam_.sendParam.to);
+            _checkSender(owner_);
+
+            // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
+            {
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_);
+                if (isErr) revert Magnetar_PearlmitTransferFailed();
+            }
+        }
+
+        if (
+            funcSig == ITOFT.wrap.selector || funcSig == ITOFT.unwrap.selector
+                || funcSig == ITapiocaOmnichainEngine.sendPacket.selector
+        ) {
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
             return;
         }
@@ -308,25 +324,6 @@ contract Magnetar is BaseMagnetar {
             return;
         }
         revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
-    }
-
-    /**
-     * @dev Process an OFT operation, will only execute if the selector is allowed.
-     * @dev Different from the others. No need to check for sender. MsgType is sanitized by the OFT
-     *
-     * @param _target The contract address to call.
-     * @param _actionCalldata The calldata to send to the target.
-     * @param _actionValue The value to send with the call.
-     * @param _allowFailure Whether to allow the call to fail.
-     */
-    function _processOFTOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue,
-        bool _allowFailure
-    ) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
-        _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
     }
 
     /**

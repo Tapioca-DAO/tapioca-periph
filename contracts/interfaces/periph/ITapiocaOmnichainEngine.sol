@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+// LZ
+import {
+    SendParam,
+    MessagingFee,
+    OFTReceipt,
+    MessagingReceipt
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 /*
 
@@ -36,6 +42,11 @@ interface ITapiocaOmnichainEngine {
      * Tapioca added functions
      * =======================
      */
+    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        external
+        payable
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt);
+
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) external view returns (bytes32);
 
     function quoteSendPacket(
