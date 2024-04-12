@@ -41,7 +41,6 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
 
     // Helpers for external usage. Not used in the contract.
     uint8 public constant MAGNETAR_ACTION_PERMIT = 0;
-    uint8 public constant MAGNETAR_ACTION_WRAP = 1;
     uint8 public constant MAGNETAR_ACTION_MARKET = 2;
     uint8 public constant MAGNETAR_ACTION_OFT = 4;
     uint8 public constant MAGNETAR_ACTION_ASSET_MODULE = 5;
