@@ -34,6 +34,7 @@ interface IPearlmit {
         uint256 nonce; // Nonce of the owner.
         uint48 sigDeadline; // Deadline for the signature.
         bytes signedPermit; // Signature of the permit.
+        address executor; // Address of the allowed executor of the permit.
     }
 
     function approve(address token, uint256 id, address operator, uint200 amount, uint48 expiration) external;

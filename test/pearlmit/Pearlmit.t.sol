@@ -90,7 +90,8 @@ contract PearlmitTest is PearlmitBaseTest {
                 owner: alice,
                 nonce: nonce,
                 sigDeadline: uint48(sigDeadline),
-                signedPermit: signedPermit
+                signedPermit: signedPermit,
+                executor: address(this)
             });
         }
 
