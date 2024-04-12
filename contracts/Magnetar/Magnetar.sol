@@ -335,7 +335,7 @@ contract Magnetar is BaseMagnetar {
     }
 
     /**
-     * @dev Process a TOB/TOLP/TWTAP operation, will only execute if the selector is allowed.
+     * @dev Process a TOB/TOLP/TWTAP lock operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
      *
      * @param _target The contract address to call.
@@ -418,6 +418,36 @@ contract Magnetar is BaseMagnetar {
             return;
         }
 
+        revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
+    }
+
+    /**
+     * @dev Process a TOB/TOLP/TWTAP unlock operation, will only execute if the selector is allowed.
+     *
+     * @param _target The contract address to call.
+     * @param _actionCalldata The calldata to send to the target.
+     * @param _actionValue The value to send with the call.
+     * @param _allowFailure Whether to allow the call to fail.
+     */
+    function _processTapUnlockOperation(
+        address _target,
+        bytes calldata _actionCalldata,
+        uint256 _actionValue,
+        bool _allowFailure
+    ) private {
+        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+
+        /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
+        /// Owner of the token receives the unlocked tokens.
+
+        // Token is sent to the owner after execute
+        if (
+            funcSig == ITwTap.exitPosition.selector || ITapiocaOptionBroker.exitPosition.selector
+                || ITapiocaOptionLiquidityProvision.unlock.selector
+        ) {
+            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+            return;
+        }
         revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
     }
 

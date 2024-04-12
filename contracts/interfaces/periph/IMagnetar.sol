@@ -163,14 +163,15 @@ enum MagnetarAction {
     Wrap, // 1 Wrap/unwrap singular operations.
     Market, // 2 Market singular operations.
     TapLock, // 3 TapLock singular operations.
-    OFT, // 4 LZ OFT singular operations.
-    AssetModule, // 5  Usdo Singular operations.
-    AssetXChainModule, // 6  Usdo Singular operations.
-    CollateralModule, // 7 Collateral Singular related operations.
-    MintModule, // 8 BigBang Singular related operations.
-    MintXChainModule, // 9 BigBang Singular related operations.
-    OptionModule, // 10 Market Module related operations.
-    YieldBoxModule // 11 YieldBox module related operations.
+    TapUnlock, // 4 TapLock singular operations.
+    OFT, // 5 LZ OFT singular operations.
+    AssetModule, // 6  Usdo Singular operations.
+    AssetXChainModule, // 7  Usdo Singular operations.
+    CollateralModule, // 8 Collateral Singular related operations.
+    MintModule, // 9 BigBang Singular related operations.
+    MintXChainModule, // 10 BigBang Singular related operations.
+    OptionModule, // 11 Market Module related operations.
+    YieldBoxModule // 12 YieldBox module related operations.
 
 }
 
