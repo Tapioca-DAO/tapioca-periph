@@ -109,6 +109,11 @@ contract Magnetar is BaseMagnetar {
                 continue; // skip the rest of the loop
             }
 
+            if (_action.id == MagnetarAction.TapUnlock) {
+                _processTapUnlockOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+                continue; // skip the rest of the loop
+            }
+
             /// @dev Market singular operations
             if (_action.id == MagnetarAction.Market) {
                 _processMarketOperation(_action.target, _action.call, _action.value, _action.allowFailure);
@@ -437,13 +442,13 @@ contract Magnetar is BaseMagnetar {
     ) private {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
+        bytes4 funcSig = bytes4(_actionCalldata[:4]);
+
         /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
         /// Owner of the token receives the unlocked tokens.
-
-        // Token is sent to the owner after execute
         if (
-            funcSig == ITwTap.exitPosition.selector || ITapiocaOptionBroker.exitPosition.selector
-                || ITapiocaOptionLiquidityProvision.unlock.selector
+            funcSig == ITwTap.exitPosition.selector || funcSig == ITapiocaOptionBroker.exitPosition.selector
+                || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector
         ) {
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
             return;
