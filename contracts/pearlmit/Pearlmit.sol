@@ -73,6 +73,8 @@ contract Pearlmit is PermitC {
 
     /**
      * @notice Permit batch approve of multiple token types.
+     * @dev When performing the hash check, it uses the msg.sender as the expected operator,
+     * countering the possibility of grief.
      * @dev If past allowances for the token still exist, bypass the permit check.
      */
     function permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch) external {
