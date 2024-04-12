@@ -162,7 +162,7 @@ enum MagnetarAction {
     Permit, // 0 Permit singular operations.
     Wrap, // 1 Wrap/unwrap singular operations.
     Market, // 2 Market singular operations.
-    TapToken, // 3 TapToken singular operations.
+    TapLock, // 3 TapLock singular operations.
     OFT, // 4 LZ OFT singular operations.
     AssetModule, // 5  Usdo Singular operations.
     AssetXChainModule, // 6  Usdo Singular operations.

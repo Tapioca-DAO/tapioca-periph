@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -12,7 +13,7 @@ pragma solidity 0.8.22;
    
 */
 
-interface ITapiocaOptionLiquidityProvision {
+interface ITapiocaOptionLiquidityProvision is IERC721 {
     function yieldBox() external view returns (address);
 
     function activeSingularities(address singularity)
