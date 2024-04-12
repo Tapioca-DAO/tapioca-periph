@@ -411,7 +411,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             sgl.approve(address(magnetar), type(uint256).max);
             sgl.approveBorrow(address(magnetar), type(uint256).max);
         }
-
         {
             uint256 assetShare = yieldBox.toShare(assetId, tokenAmount_, false);
             bytes memory depositToYbData = abi.encodeWithSelector(
@@ -516,7 +515,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     marketHelper: address(marketHelper),
                     user: address(this),
                     depositAmount: repayDepositAmount_,
-                    repayAmount: repayAmount_,
+                    repayAmount: repayAmount_ ,
                     collateralAmount: 0,
                     withdrawCollateralParams: MagnetarWithdrawData({
                         withdraw: false,

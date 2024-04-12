@@ -256,7 +256,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {
                 if (data.removeAndRepayData.collateralWithdrawData.unwrap) {
                     // allow only unwrap receiver
-                    (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                    (,,, bytes memory tapComposeMsg_,) =
                     TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
                         data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.composeMsg
                     );

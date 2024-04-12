@@ -73,6 +73,11 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         if (!cluster.isWhitelisted(0, participateData.target)) {
             revert Magnetar_TargetNotWhitelisted(participateData.target);
         }
+        if (lockDataTarget != address(0)) {
+            if (!cluster.isWhitelisted(0, lockDataTarget)) {
+                revert Magnetar_TargetNotWhitelisted(lockDataTarget);
+            }
+        }
 
         // Check tOLPTokenId
         if (participateData.tOLPTokenId != 0) {
