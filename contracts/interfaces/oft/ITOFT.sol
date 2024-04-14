@@ -28,6 +28,7 @@ interface ITOFT is ITapiocaOmnichainEngine {
         TOFTGenericReceiver
     }
 
+    function decimalConversionRate() external view returns (uint256);
     function hostEid() external view returns (uint256);
     function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
     function unwrap(address _toAddress, uint256 _amount) external returns (uint256 unwrapped);
