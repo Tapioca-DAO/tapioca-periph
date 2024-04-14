@@ -104,8 +104,8 @@ contract TapiocaOmnichainExtExec is Ownable {
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
 
         batchApprovals.owner = _srcChainSender; // overwrite the owner with the src chain sender
-
-        try IPearlmit(pearlmit).permitBatchApprove(batchApprovals) {} catch {}
+        // Redundant security measure, just for the sake of it
+        try IPearlmit(pearlmit).permitBatchApprove(batchApprovals, keccak256(abi.encode(_srcChainSender))) {} catch {}
     }
 
     /**

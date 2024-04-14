@@ -91,7 +91,8 @@ contract PearlmitTest is PearlmitBaseTest {
                 nonce: nonce,
                 sigDeadline: uint48(sigDeadline),
                 signedPermit: signedPermit,
-                executor: address(this)
+                executor: address(this),
+                hashedData: keccak256("0x")
             });
         }
 
@@ -104,7 +105,7 @@ contract PearlmitTest is PearlmitBaseTest {
 
         // Execute the permit batch transfer from
         vm.startPrank(bob);
-        pearlmit.permitBatchTransferFrom(batchData);
+        pearlmit.permitBatchTransferFrom(batchData, keccak256("0x"));
         vm.stopPrank();
 
         // Assert final state

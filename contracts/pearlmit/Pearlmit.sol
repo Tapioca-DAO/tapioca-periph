@@ -28,14 +28,19 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
  * to allow batch transfer of multiple token types.
  */
 contract Pearlmit is PermitC {
+    error Pearlmit__BadHashedData();
+
     constructor(string memory name, string memory version) PermitC(name, version) {}
 
     /**
-     * @notice Permit batch transfer of multiple token types.
+     * @notice Permit batch approve of multiple token types.
      * @dev Check the validity of a permit batch transfer.
      *      - Reverts if the permit is invalid.
      *      - Reverts if the permit is expired.
      * @dev Invalidate the nonce after checking it.
+     * @dev If past allowances for the token still exist, bypass the permit check.
+     * @dev When performing the hash check, it uses the msg.sender as the expected operator,
+     * countering the possibility of grief.
      * @dev If past allowances for the token still exist, bypass the permit check.
      *
      * @param batch PermitBatchTransferFrom struct containing all necessary data for batch transfer.
@@ -50,12 +55,36 @@ contract Pearlmit is PermitC {
      * batch.nonce - nonce of the owner.
      * batch.sigDeadline - deadline for the signature.
      * batch.signedPermit - signature of the permit.
+     *
+     * @param hashedData Hashed data that comes with the permit execution. Will be `msg.sender` -> `srcMsgSender` from an LZ perspective.
+     * This is useful in an async scenario
+     * where the permit is signed to execute some certain actions. The payload can be hashed and used
+     * in `hashedData` to trust that the permit is being used for the intended purpose, from the intended executor.
+     * The source needs to be trusted to pass a valid `hashedData`, in the case of Pearlmit usage, this'll be
+     * a TapiocaOmnichainReceiver contract.
+     *
      */
-    function permitBatchTransferFrom(IPearlmit.PermitBatchTransferFrom calldata batch)
+    function permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) external {
+        _checkPermitBatchApproval(batch, hashedData);
+
+        uint256 numPermits = batch.approvals.length;
+        for (uint256 i = 0; i < numPermits; ++i) {
+            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
+            __storeApproval(
+                approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
+            );
+        }
+    }
+
+    /**
+     * @notice Permit batch transfer of multiple token types.
+     * @dev Same documentation as permitBatchApprove.
+     */
+    function permitBatchTransferFrom(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData)
         external
         returns (bool[] memory errorStatus)
     {
-        _checkPermitBatchApproval(batch);
+        _checkPermitBatchApproval(batch, hashedData);
         uint256 numPermits = batch.approvals.length;
         errorStatus = new bool[](numPermits);
         for (uint256 i = 0; i < numPermits; ++i) {
@@ -68,24 +97,6 @@ contract Pearlmit is PermitC {
                 errorStatus[i] =
                     _transferFromERC1155(approval.token, batch.owner, approval.operator, approval.id, approval.amount);
             }
-        }
-    }
-
-    /**
-     * @notice Permit batch approve of multiple token types.
-     * @dev When performing the hash check, it uses the msg.sender as the expected operator,
-     * countering the possibility of grief.
-     * @dev If past allowances for the token still exist, bypass the permit check.
-     */
-    function permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch) external {
-        _checkPermitBatchApproval(batch);
-
-        uint256 numPermits = batch.approvals.length;
-        for (uint256 i = 0; i < numPermits; ++i) {
-            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
-            __storeApproval(
-                approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
-            );
         }
     }
 
@@ -111,15 +122,14 @@ contract Pearlmit is PermitC {
      * @dev Generate the digest and check its validity against the permit.
      * @dev If past allowances for the token still exist, bypass the permit check.
      */
-    function _checkPermitBatchApproval(IPearlmit.PermitBatchTransferFrom calldata batch) internal {
+    function _checkPermitBatchApproval(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) internal {
         // Check if the batch is already allowed
         if (!_batchAllowanceCheck(batch)) {
-            bytes32 digest = _hashTypedDataV4(
-                PearlmitHash.hashBatchTransferFrom(
-                    batch.approvals, batch.nonce, batch.sigDeadline, masterNonce(batch.owner)
-                )
-            );
+            bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, masterNonce(batch.owner)));
 
+            if (batch.hashedData != hashedData) {
+                revert Pearlmit__BadHashedData();
+            }
             _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
         }
     }
