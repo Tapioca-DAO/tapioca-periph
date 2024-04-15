@@ -8,6 +8,7 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ModuleManager} from "tapioca-periph/utils/ModuleManager.sol";
 
 /*
@@ -35,8 +36,12 @@ contract ToeTokenMock is BaseTapiocaOmnichainEngine, ModuleManager, ERC20Permit 
         address _extExec,
         address _senderModule,
         address _receiverModule,
-        IPearlmit _pearlmit
-    ) BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec, _pearlmit) ERC20Permit("TOEM") {
+        IPearlmit _pearlmit,
+        ICluster _cluster
+    )
+        BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec, _pearlmit, _cluster)
+        ERC20Permit("TOEM")
+    {
         _setModule(uint8(Module.ToeTokenSender), _senderModule);
         _setModule(uint8(Module.ToeTokenReceiver), _receiverModule);
     }

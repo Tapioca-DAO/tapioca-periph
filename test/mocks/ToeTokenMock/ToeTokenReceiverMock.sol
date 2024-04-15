@@ -10,6 +10,7 @@ import {
     BaseTapiocaOmnichainEngine, IPearlmit
 } from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 /*
 
@@ -32,8 +33,9 @@ contract ToeTokenReceiverMock is BaseTapiocaOmnichainEngine, TapiocaOmnichainRec
         address _endpoint,
         address _delegate,
         address _extExec,
-        IPearlmit _pearlmit
-    ) BaseTapiocaOmnichainEngine(_name, _symbol, _endpoint, _delegate, _extExec, _pearlmit) {}
+        IPearlmit _pearlmit,
+        ICluster _cluster
+    ) BaseTapiocaOmnichainEngine(_name, _symbol, _endpoint, _delegate, _extExec, _pearlmit, _cluster) {}
 
     // ********************* //
     // ***** RECEIVERS ***** //
