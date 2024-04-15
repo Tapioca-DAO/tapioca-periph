@@ -10,12 +10,14 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {ITapiocaOmnichainReceiveExtender} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {BaseToeMsgType} from "./BaseToeMsgType.sol";
 
 /*
@@ -43,15 +45,21 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     error BaseTapiocaOmnichainEngine_PearlmitNotApproved();
     error BaseTapiocaOmnichainEngine_PearlmitFailed();
 
+    // keccak256("BaseToe.cluster.slot")
+    bytes32 public constant CLUSTER_SLOT = 0x7cdf5007585d1c7d3dfb23c59fcda5f9f02da78637d692495255a57630b72162;
+
     constructor(
         string memory _name,
         string memory _symbol,
         address _endpoint,
         address _delegate,
         address _extExec,
-        IPearlmit _pearlmit
+        IPearlmit _pearlmit,
+        ICluster _cluster
     ) OFT(_name, _symbol, _endpoint, _delegate) PearlmitHandler(_pearlmit) {
         toeExtExec = TapiocaOmnichainExtExec(_extExec);
+
+        StorageSlot.getAddressSlot(CLUSTER_SLOT).value = address(_cluster);
     }
 
     /**
@@ -99,6 +107,20 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      */
     function setToeExtExec(address _extExec) external onlyOwner {
         toeExtExec = TapiocaOmnichainExtExec(_extExec);
+    }
+
+    /**
+     * @dev Returns the current cluster.
+     */
+    function getCluster() public view returns (ICluster) {
+        return ICluster(StorageSlot.getAddressSlot(CLUSTER_SLOT).value);
+    }
+
+    /**
+     * @dev Sets the cluster.
+     */
+    function setCluster(ICluster _cluster) external onlyOwner {
+        StorageSlot.getAddressSlot(CLUSTER_SLOT).value = address(_cluster);
     }
 
     /**
