@@ -95,7 +95,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
         pearlmit = new Pearlmit("Pearlmit", "1");
         cluster = ICluster(address(new Cluster(1, address(__owner))));
 
-        __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
+        __extExec = address(new TapiocaOmnichainExtExec(cluster));
         aToeOFT = ToeTokenMock(
             payable(
                 _deployOApp(
