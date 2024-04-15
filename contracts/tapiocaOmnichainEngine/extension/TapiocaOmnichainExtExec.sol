@@ -38,11 +38,10 @@ import {ERC721Permit} from "tapioca-periph/utils/ERC721Permit.sol";
  * @notice Used to execute external DELEGATE calls from a TapiocaOmnichainEngine contract. So to not use TapiocaOmnichainEngine in the call context.
  */
 contract TapiocaOmnichainExtExec {
-    // keccak256("tapioca.cluster.slot")
-    bytes32 public constant CLUSTER_SLOT = 0x87430bd8eb00b58ce3306fe6288492e8971a9d2b73073bacae31433b4b6991f7;
-
     constructor(ICluster _cluster) {
-        StorageSlot.getAddressSlot(CLUSTER_SLOT).value = address(_cluster);
+        // keccak256("tapioca.cluster.slot")
+        StorageSlot.getAddressSlot(0x87430bd8eb00b58ce3306fe6288492e8971a9d2b73073bacae31433b4b6991f7).value =
+            address(_cluster);
     }
 
     error InvalidApprovalTarget(address _target);
@@ -273,7 +272,10 @@ contract TapiocaOmnichainExtExec {
     }
 
     function _sanitizeTarget(address target) private view {
-        ICluster cluster = ICluster(StorageSlot.getAddressSlot(CLUSTER_SLOT).value);
+        // keccak256("tapioca.cluster.slot")
+        ICluster cluster = ICluster(
+            StorageSlot.getAddressSlot(0x87430bd8eb00b58ce3306fe6288492e8971a9d2b73073bacae31433b4b6991f7).value
+        );
         if (!cluster.isWhitelisted(0, target)) {
             revert InvalidApprovalTarget(target);
         }
