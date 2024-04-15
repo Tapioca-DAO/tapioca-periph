@@ -45,6 +45,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     error InvalidComposer(address composer);
     error InvalidCaller(address caller); // Should be the endpoint address
     error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
+    error ExtExecFailed(string signature);
 
     /// @dev Compose received.
     event ComposeReceived(uint16 indexed msgType, bytes32 indexed guid, bytes composeMsg);
@@ -254,7 +255,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         _lzSendParam.sendParam.minAmountLD = amountToCreditLD_;
 
         // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
-        if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) { 
+        if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) {
             // Send the difference back to the user
             _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
 
@@ -274,7 +275,9 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_, amountToCreditLD_);
+        emit OFTSent(
+            msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_, amountToCreditLD_
+        );
     }
 
     /**
@@ -325,11 +328,13 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             return false;
         }
 
+        bool success;
         if (sender == address(0)) {
-            address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
+            (success,) = address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
         } else {
-            address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, sender, _data));
+            (success,) = address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, sender, _data));
         }
+        if (!success) revert ExtExecFailed(signature);
         return true;
     }
 

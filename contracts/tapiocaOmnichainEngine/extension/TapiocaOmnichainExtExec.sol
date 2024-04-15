@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 // Tapioca
 import {
@@ -35,17 +35,16 @@ import {ERC721Permit} from "tapioca-periph/utils/ERC721Permit.sol";
 /**
  * @title TapiocaOmnichainExtExec
  * @author TapiocaDAO
- * @notice Used to execute external calls from a TapiocaOmnichainEngine contract. So to not use TapiocaOmnichainEngine in the call context.
+ * @notice Used to execute external DELEGATE calls from a TapiocaOmnichainEngine contract. So to not use TapiocaOmnichainEngine in the call context.
  */
-contract TapiocaOmnichainExtExec is Ownable {
-    ICluster public cluster;
+contract TapiocaOmnichainExtExec {
+    constructor(ICluster _cluster) {
+        // keccak256("tapioca.cluster.slot")
+        StorageSlot.getAddressSlot(0x87430bd8eb00b58ce3306fe6288492e8971a9d2b73073bacae31433b4b6991f7).value =
+            address(_cluster);
+    }
 
     error InvalidApprovalTarget(address _target);
-
-    constructor(ICluster _cluster, address _owner) {
-        cluster = _cluster;
-        _transferOwnership(_owner);
-    }
 
     /**
      * @notice Executes an ERC20 permit approval.
@@ -104,8 +103,8 @@ contract TapiocaOmnichainExtExec is Ownable {
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
 
         batchApprovals.owner = _srcChainSender; // overwrite the owner with the src chain sender
-
-        try IPearlmit(pearlmit).permitBatchApprove(batchApprovals) {} catch {}
+        // Redundant security measure, just for the sake of it
+        try IPearlmit(pearlmit).permitBatchApprove(batchApprovals, keccak256(abi.encode(_srcChainSender))) {} catch {}
     }
 
     /**
@@ -273,6 +272,10 @@ contract TapiocaOmnichainExtExec is Ownable {
     }
 
     function _sanitizeTarget(address target) private view {
+        // keccak256("tapioca.cluster.slot")
+        ICluster cluster = ICluster(
+            StorageSlot.getAddressSlot(0x87430bd8eb00b58ce3306fe6288492e8971a9d2b73073bacae31433b4b6991f7).value
+        );
         if (!cluster.isWhitelisted(0, target)) {
             revert InvalidApprovalTarget(target);
         }

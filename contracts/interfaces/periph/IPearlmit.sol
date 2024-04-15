@@ -35,6 +35,8 @@ interface IPearlmit {
         uint48 sigDeadline; // Deadline for the signature.
         bytes signedPermit; // Signature of the permit.
         address executor; // Address of the allowed executor of the permit.
+        // In the case of Tapioca, it'll be the `msg.sender` from src chain, checked against `TOE` trusted `srcChainSender`.
+        bytes32 hashedData; // Hashed data that comes with the permit execution. See more in Pearlmit.sol.
     }
 
     function approve(address token, uint256 id, address operator, uint200 amount, uint48 expiration) external;
@@ -44,11 +46,11 @@ interface IPearlmit {
         view
         returns (uint256 allowedAmount, uint256 expiration);
 
-    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch)
+    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch, bytes32 hashedData)
         external
         returns (bool[] memory errorStatus);
 
-    function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
+    function permitBatchApprove(PermitBatchTransferFrom calldata batch, bytes32 hashedData) external;
 
     function transferFromERC1155(address owner, address to, address token, uint256 id, uint256 amount)
         external
