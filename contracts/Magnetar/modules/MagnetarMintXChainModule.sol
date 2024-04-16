@@ -95,7 +95,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
                 MagnetarWithdrawData({
                     yieldBox: yieldBox,
                     assetId: IMarket(data.bigBang).assetId(),
-                    unwrap: false,
+                    compose: true,
                     lzSendParams: data.lendSendParams.lzParams,
                     sendGas: data.lendSendParams.lzSendGas,
                     composeGas: data.lendSendParams.lzComposeGas,

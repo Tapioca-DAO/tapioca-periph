@@ -68,7 +68,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
 
         _yieldBox.withdraw(data.assetId, address(this), address(this), data.lzSendParams.sendParam.amountLD, 0);
         // TODO: decide about try-catch here
-        if (data.unwrap) {
+        if (data.compose) {
             _lzCustomWithdraw(
                 asset,
                 data.lzSendParams,

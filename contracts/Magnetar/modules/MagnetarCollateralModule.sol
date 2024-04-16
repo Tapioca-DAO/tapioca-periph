@@ -126,7 +126,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
 
             if (data.withdrawParams.withdraw) {
                 // asset is USDO which doesn't have unwrap
-                if (data.withdrawParams.unwrap) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
+                if (data.withdrawParams.compose) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
                 _withdrawToChain(data.withdrawParams);
             }
         }

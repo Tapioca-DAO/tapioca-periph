@@ -180,7 +180,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
                 // assure unwrap is false because asset is not a TOFT
-                if (data.removeAndRepayData.assetWithdrawData.unwrap) revert Magnetar_ComposeMsgNotAllowed();
+                if (data.removeAndRepayData.assetWithdrawData.compose) revert Magnetar_ComposeMsgNotAllowed();
 
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
@@ -254,7 +254,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
             //withdraw
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {
-                if (data.removeAndRepayData.collateralWithdrawData.unwrap) {
+                if (data.removeAndRepayData.collateralWithdrawData.compose) {
                     // allow only unwrap receiver
                     (,,, bytes memory tapComposeMsg_,) = TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
                         data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.composeMsg

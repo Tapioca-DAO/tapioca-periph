@@ -147,7 +147,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
                 // @dev re-calculate amount
                 if (collateralShare > 0) {
-                    if (data.withdrawCollateralParams.unwrap) {
+                    if (data.withdrawCollateralParams.compose) {
                         // allow only unwrap receiver
                         (,,, bytes memory tapComposeMsg_, ) =
                             TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg);

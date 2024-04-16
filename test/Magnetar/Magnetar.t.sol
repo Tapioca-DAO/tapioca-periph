@@ -462,7 +462,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        unwrap: false,
+                        compose: false,
                         lzSendParams: LZSendParam({
                             refundAddress: address(this),
                             fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -521,7 +521,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        unwrap: false,
+                        compose: false,
                         lzSendParams: LZSendParam({
                             refundAddress: address(this),
                             fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -658,7 +658,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        unwrap: false,
+                        compose: false,
                         lzSendParams: LZSendParam({
                             refundAddress: address(this),
                             fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -716,7 +716,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: assetId,
-                unwrap: false,
+                compose: false,
                 lzSendParams: LZSendParam({
                     refundAddress: address(this),
                     fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -920,7 +920,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             withdraw: false,
                             yieldBox: address(yieldBox),
                             assetId: 0,
-                            unwrap: false,
+                            compose: false,
                             lzSendParams: LZSendParam({
                                 refundAddress: address(this),
                                 fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -946,7 +946,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             withdraw: false,
                             yieldBox: address(yieldBox),
                             assetId: 0,
-                            unwrap: false,
+                            compose: false,
                             lzSendParams: LZSendParam({
                                 refundAddress: address(this),
                                 fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),

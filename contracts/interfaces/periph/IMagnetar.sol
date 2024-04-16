@@ -22,7 +22,7 @@ import {IRemoveAndRepay, IMintData} from "../oft/IUsdo.sol";
 struct MagnetarWithdrawData {
     address yieldBox;
     uint256 assetId;
-    bool unwrap;
+    bool compose;
     //@dev LZv2 send params
     LZSendParam lzSendParams;
     uint128 sendGas;
