@@ -90,8 +90,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         IMarket bigBang_ = IMarket(data.externalData.bigBang);
         ISingularity singularity_ = ISingularity(data.externalData.singularity);
         IYieldBox yieldBox_ = data.externalData.singularity != address(0)
-            ? IYieldBox(singularity_.yieldBox())
-            : IYieldBox(bigBang_.yieldBox());
+            ? IYieldBox(singularity_._yieldBox())
+            : IYieldBox(bigBang_._yieldBox());
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
@@ -167,7 +167,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         //      - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
         uint256 _removeAmount = data.removeAndRepayData.removeAmount;
         if (data.removeAndRepayData.removeAssetFromSGL) {
-            uint256 _assetId = singularity_.assetId();
+            uint256 _assetId = singularity_._assetId();
 
             address removeAssetTo = data.removeAndRepayData.assetWithdrawData.withdraw
                 || data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
@@ -210,10 +210,10 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             );
 
             {
-                uint256 share = yieldBox_.toShare(bigBang_.assetId(), data.removeAndRepayData.repayAmount, false);
+                uint256 share = yieldBox_.toShare(bigBang_._assetId(), data.removeAndRepayData.repayAmount, false);
                 pearlmit.approve(
                     address(yieldBox_),
-                    bigBang_.assetId(),
+                    bigBang_._assetId(),
                     data.externalData.singularity,
                     share.toUint200(),
                     (block.timestamp + 1).toUint48()
@@ -226,7 +226,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             uint256 repayed = IMarketHelper(data.externalData.marketHelper).repayView(results[0]);
             // transfer excess amount to the data.user
             if (repayed < _removeAmount) {
-                uint256 bbAssetId = bigBang_.assetId();
+                uint256 bbAssetId = bigBang_._assetId();
                 yieldBox_.transfer(
                     address(this), data.user, bbAssetId, yieldBox_.toShare(bbAssetId, _removeAmount - repayed, false)
                 );
@@ -236,7 +236,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         // performs a BigBang removeCollateral operation
         // if `data.removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
         if (data.removeAndRepayData.removeCollateralFromBB) {
-            uint256 _collateralId = bigBang_.collateralId();
+            uint256 _collateralId = bigBang_._collateralId();
             uint256 collateralShare = yieldBox_.toShare(_collateralId, data.removeAndRepayData.collateralAmount, false);
             address removeCollateralTo =
                 data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : data.user;

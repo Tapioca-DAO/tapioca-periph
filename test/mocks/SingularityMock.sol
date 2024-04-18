@@ -12,18 +12,18 @@ import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 contract SingularityMock is EIP712 {
     using SafeERC20 for IERC20;
 
-    IYieldBox public yieldBox;
-    uint256 public collateralId;
-    uint256 public assetId;
-    IERC20 public collateral;
-    IERC20 public asset;
+    IYieldBox public _yieldBox;
+    uint256 public _collateralId;
+    uint256 public _assetId;
+    IERC20 public _collateral;
+    IERC20 public _asset;
 
     /// @notice total collateral supplied
-    uint256 public totalCollateralShare;
+    uint256 public _totalCollateralShare;
     /// @notice borrow amount per user
-    mapping(address => uint256) public userBorrowPart;
+    mapping(address => uint256) public _userBorrowPart;
     /// @notice collateral share per user
-    mapping(address => uint256) public userCollateralShare;
+    mapping(address => uint256) public _userCollateralShare;
 
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 private constant _PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
@@ -44,14 +44,14 @@ contract SingularityMock is EIP712 {
     error SingularityMock_ModuleNotSet();
     error SingularityMock_NotValid();
 
-    constructor(address _yieldBox, uint256 _collateralId, uint256 _assetId, address _collateral, address _asset)
+    constructor(address yieldBox, uint256 collateralId, uint256 assetId, address collateral, address asset)
         EIP712("Tapioca Singularity", "1")
     {
-        yieldBox = IYieldBox(_yieldBox);
-        collateralId = _collateralId;
-        assetId = _assetId;
-        collateral = IERC20(_collateral);
-        asset = IERC20(_asset);
+        _yieldBox = IYieldBox(yieldBox);
+        _collateralId = collateralId;
+        _assetId = assetId;
+        _collateral = IERC20(collateral);
+        _asset = IERC20(asset);
     }
 
     function nonces(address owner) external view returns (uint256) {
@@ -93,27 +93,27 @@ contract SingularityMock is EIP712 {
     function borrow(address from, address to, uint256 amount) external returns (uint256 part, uint256 share) {
         if (amount == 0) return (0, 0);
 
-        userBorrowPart[from] += amount;
+        _userBorrowPart[from] += amount;
 
-        share = yieldBox.toShare(assetId, amount, true);
+        share = _yieldBox.toShare(_assetId, amount, true);
 
-        yieldBox.transfer(address(this), to, assetId, share);
+        _yieldBox.transfer(address(this), to, _assetId, share);
     }
 
     function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share) external {
         if (share == 0) {
-            share = yieldBox.toShare(collateralId, amount, false);
+            share = _yieldBox.toShare(_collateralId, amount, false);
         }
 
-        uint256 oldTotalCollateralShare = totalCollateralShare;
-        userCollateralShare[to] += share;
-        totalCollateralShare = oldTotalCollateralShare + share;
+        uint256 oldTotalCollateralShare = _totalCollateralShare;
+        _userCollateralShare[to] += share;
+        _totalCollateralShare = oldTotalCollateralShare + share;
 
-        _addTokens(from, to, collateralId, share, oldTotalCollateralShare, skim);
+        _addTokens(from, to, _collateralId, share, oldTotalCollateralShare, skim);
     }
 
     function removeCollateral(address, address to, uint256 share) external {
-        yieldBox.transfer(address(this), to, collateralId, share);
+        _yieldBox.transfer(address(this), to, _collateralId, share);
     }
 
     struct _BuyCollateralCalldata {
@@ -137,41 +137,41 @@ contract SingularityMock is EIP712 {
         }
 
         // Let this fail first to save gas:
-        uint256 supplyShare = yieldBox.toShare(assetId, calldata_.supplyAmount, true);
+        uint256 supplyShare = _yieldBox.toShare(_assetId, calldata_.supplyAmount, true);
         uint256 supplyShareToAmount;
         if (supplyShare > 0) {
-            (supplyShareToAmount,) = yieldBox.withdraw(assetId, calldata_.from, address(this), 0, supplyShare);
+            (supplyShareToAmount,) = _yieldBox.withdraw(_assetId, calldata_.from, address(this), 0, supplyShare);
         }
 
-        userBorrowPart[from] += calldata_.borrowAmount;
+        _userBorrowPart[from] += calldata_.borrowAmount;
 
         (uint256 borrowShareToAmount,) =
-            yieldBox.withdraw(assetId, address(this), address(this), calldata_.borrowAmount, 0);
+            _yieldBox.withdraw(_assetId, address(this), address(this), calldata_.borrowAmount, 0);
 
         //swap 1:1
         uint256 collateralAmount = borrowShareToAmount;
 
         // @dev !Contract needs to be prefunded with the right amount of collateral!
-        // yieldBox.depositAsset(collateralId, address(this), address(this), collateralAmount, 0);
+        // _yieldBox.depositAsset(_collateralId, address(this), address(this), collateralAmount, 0);
 
-        uint256 collateralShare = yieldBox.toShare(collateralId, collateralAmount, false);
+        uint256 collateralShare = _yieldBox.toShare(_collateralId, collateralAmount, false);
 
-        uint256 oldTotalCollateralShare = totalCollateralShare;
-        userCollateralShare[from] += collateralShare;
-        totalCollateralShare = oldTotalCollateralShare + collateralShare;
+        uint256 oldTotalCollateralShare = _totalCollateralShare;
+        _userCollateralShare[from] += collateralShare;
+        _totalCollateralShare = oldTotalCollateralShare + collateralShare;
 
-        _addTokens(address(this), from, collateralId, collateralShare, oldTotalCollateralShare, false);
+        _addTokens(address(this), from, _collateralId, collateralShare, oldTotalCollateralShare, false);
 
         return collateralAmount;
     }
 
-    function _addTokens(address from, address, uint256 _assetId, uint256 share, uint256 total, bool skim) internal {
+    function _addTokens(address from, address, uint256 assetId, uint256 share, uint256 total, bool skim) internal {
         if (skim) {
-            if (share > yieldBox.balanceOf(address(this), _assetId) - total) {
+            if (share > _yieldBox.balanceOf(address(this), assetId) - total) {
                 revert SingularityMock_TooMuch();
             }
         } else {
-            yieldBox.transfer(from, address(this), _assetId, share);
+            _yieldBox.transfer(from, address(this), assetId, share);
         }
     }
 
@@ -180,7 +180,7 @@ contract SingularityMock is EIP712 {
     }
 
     function _permit(
-        bool _asset, // 1 = asset, 0 = collateral
+        bool asset, // 1 = asset, 0 = collateral
         address owner,
         address spender,
         uint256 value,
@@ -195,7 +195,7 @@ contract SingularityMock is EIP712 {
 
         structHash = keccak256(
             abi.encode(
-                _asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW, owner, spender, value, _useNonce(owner), deadline
+                asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW, owner, spender, value, _useNonce(owner), deadline
             )
         );
 
@@ -205,7 +205,7 @@ contract SingularityMock is EIP712 {
 
         require(signer == owner, "ERC20Permit: invalid signature");
 
-        if (_asset) {
+        if (asset) {
             _approve(owner, spender, value);
         } else {
             _approveBorrow(owner, spender, value);

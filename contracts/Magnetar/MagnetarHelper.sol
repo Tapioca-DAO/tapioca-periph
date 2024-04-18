@@ -119,8 +119,8 @@ contract MagnetarHelper {
      * @return amount The amount.
      */
     function getCollateralAmountForShare(IMarket market, uint256 share) external view returns (uint256 amount) {
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
-        return yieldBox.toAmount(market.collateralId(), share, false);
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
+        return yieldBox.toAmount(market._collateralId(), share, false);
     }
 
     /**
@@ -137,15 +137,15 @@ contract MagnetarHelper {
         uint256 exchangeRatePrecision
     ) external view returns (uint256 collateralShares) {
         Rebase memory _totalBorrowed;
-        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
         uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
 
-        uint256 val = (borrowAmount * collateralizationRatePrecision * market.exchangeRate())
-            / (market.collateralizationRate() * exchangeRatePrecision);
-        return yieldBox.toShare(market.collateralId(), val, false);
+        uint256 val = (borrowAmount * collateralizationRatePrecision * market._exchangeRate())
+            / (market._collateralizationRate() * exchangeRatePrecision);
+        return yieldBox.toShare(market._collateralId(), val, false);
     }
 
     /**
@@ -156,7 +156,7 @@ contract MagnetarHelper {
      */
     function getAmountForBorrowPart(IMarket market, uint256 borrowPart) external view returns (uint256 amount) {
         Rebase memory _totalBorrowed;
-        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
         return _totalBorrowed.toElastic(borrowPart, false);
@@ -170,7 +170,7 @@ contract MagnetarHelper {
      */
     function getBorrowPartForAmount(IMarket market, uint256 amount) external view returns (uint256 part) {
         Rebase memory _totalBorrowed;
-        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
         return _totalBorrowed.toBase(amount, false);
@@ -189,13 +189,13 @@ contract MagnetarHelper {
         returns (uint256 amount)
     {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity.totalAsset();
-        (uint128 totalBorrowElastic,) = singularity.totalBorrow();
+        (uint128 totalBorrowElastic,) = singularity._totalBorrow();
 
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity._yieldBox());
 
-        uint256 allShare = totalAssetElastic + yieldBox.toShare(singularity.assetId(), totalBorrowElastic, true);
+        uint256 allShare = totalAssetElastic + yieldBox.toShare(singularity._assetId(), totalBorrowElastic, true);
 
-        return yieldBox.toAmount(singularity.assetId(), (fraction * allShare) / totalAssetBase, false);
+        return yieldBox.toAmount(singularity._assetId(), (fraction * allShare) / totalAssetBase, false);
     }
 
     /**
@@ -207,10 +207,10 @@ contract MagnetarHelper {
      */
     function getFractionForAmount(ISingularity singularity, uint256 amount) external view returns (uint256 fraction) {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity.totalAsset();
-        (uint128 totalBorrowElastic,) = singularity.totalBorrow();
-        uint256 assetId = singularity.assetId();
+        (uint128 totalBorrowElastic,) = singularity._totalBorrow();
+        uint256 assetId = singularity._assetId();
 
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity._yieldBox());
 
         uint256 share = yieldBox.toShare(assetId, amount, false);
         uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, false);
@@ -277,7 +277,7 @@ contract MagnetarHelper {
             result[i].debtRateAgainstEthMarket = bigBang.debtRateAgainstEthMarket();
             result[i].currentDebtRate = bigBang.getDebtRate();
 
-            IPenrose penrose = IPenrose(bigBang.penrose());
+            IPenrose penrose = IPenrose(bigBang._penrose());
             result[i].mainBBMarket = penrose.bigBangEthMarket();
             result[i].mainBBDebtRate = penrose.bigBangEthDebtRate();
         }
@@ -289,27 +289,27 @@ contract MagnetarHelper {
         Rebase memory _totalBorrowed;
         MarketInfo memory info;
 
-        info.collateral = market.collateral();
-        info.asset = market.asset();
-        info.oracle = ITapiocaOracle(market.oracle());
-        info.oracleData = market.oracleData();
-        info.totalCollateralShare = market.totalCollateralShare();
-        info.userCollateralShare = market.userCollateralShare(who);
+        info.collateral = market._collateral();
+        info.asset = market._asset();
+        info.oracle = ITapiocaOracle(market._oracle());
+        info.oracleData = market._oracleData();
+        info.totalCollateralShare = market._totalCollateralShare();
+        info.userCollateralShare = market._userCollateralShare(who);
 
-        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market.totalBorrow();
+        (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
         info.totalBorrow = _totalBorrowed;
-        info.userBorrowPart = market.userBorrowPart(who);
+        info.userBorrowPart = market._userBorrowPart(who);
 
-        info.currentExchangeRate = market.exchangeRate();
-        (, info.oracleExchangeRate) = ITapiocaOracle(market.oracle()).peek(market.oracleData());
-        info.spotExchangeRate = ITapiocaOracle(market.oracle()).peekSpot(market.oracleData());
-        info.totalBorrowCap = market.totalBorrowCap();
-        info.assetId = market.assetId();
-        info.collateralId = market.collateralId();
-        info.collateralizationRate = market.collateralizationRate();
+        info.currentExchangeRate = market._exchangeRate();
+        (, info.oracleExchangeRate) = ITapiocaOracle(market._oracle()).peek(market._oracleData());
+        info.spotExchangeRate = ITapiocaOracle(market._oracle()).peekSpot(market._oracleData());
+        info.totalBorrowCap = market._totalBorrowCap();
+        info.assetId = market._assetId();
+        info.collateralId = market._collateralId();
+        info.collateralizationRate = market._collateralizationRate();
 
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
 
         (info.totalYieldBoxCollateralShare, info.totalYieldBoxCollateralAmount) =
             yieldBox.assetTotals(info.collateralId);

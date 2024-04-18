@@ -63,7 +63,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         // Check sender
         _checkSender(data.user);
 
-        address yieldBox = IMarket(data.bigBang).yieldBox();
+        address yieldBox = IMarket(data.bigBang)._yieldBox();
 
         // if `mint` was requested the following actions are performed:
         //  - extracts & deposits collateral to YB
@@ -86,7 +86,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         data.lendSendParams.lzParams.sendParam.composeMsg =
             TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
 
-
         // send on another layer for lending
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -94,7 +93,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
                 MagnetarBaseModuleExternal.withdrawToChain.selector,
                 MagnetarWithdrawData({
                     yieldBox: yieldBox,
-                    assetId: IMarket(data.bigBang).assetId(),
+                    assetId: IMarket(data.bigBang)._assetId(),
                     compose: true,
                     lzSendParams: data.lendSendParams.lzParams,
                     sendGas: data.lendSendParams.lzSendGas,
@@ -134,7 +133,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         //      - performs tOLP.lock
         uint256 tOLPTokenId = _lockOnTOB(
             data.lockData,
-            IYieldBox(IMarket(data.singularity).yieldBox()),
+            IYieldBox(IMarket(data.singularity)._yieldBox()),
             data.fraction,
             data.participateData.participate,
             data.user,

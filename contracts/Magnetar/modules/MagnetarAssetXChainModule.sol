@@ -73,7 +73,7 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         // Check sender
         _checkSender(data.user);
 
-        address yieldBox = IMarket(data.singularity).yieldBox();
+        address yieldBox = IMarket(data.singularity)._yieldBox();
 
         // if `depositData.deposit`:
         //      - deposit SGL asset to YB for `data.user`
