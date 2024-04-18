@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -18,6 +19,7 @@ import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagneta
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
+import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {ITwTap} from "tapioca-periph/interfaces/tap-token/ITwTap.sol";
@@ -42,7 +44,7 @@ import {BaseMagnetar} from "./BaseMagnetar.sol";
  * @author TapiocaDAO
  * @notice Magnetar helper contract
  */
-contract Magnetar is BaseMagnetar {
+contract Magnetar is BaseMagnetar, IERC1155Receiver {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
@@ -69,6 +71,48 @@ contract Magnetar is BaseMagnetar {
         modules[MagnetarModule.MintXChainModule] = _mintXChainModule;
         modules[MagnetarModule.OptionModule] = _optionModule;
         modules[MagnetarModule.YieldBoxModule] = _yieldBoxModule;
+    }
+
+    /// =====================
+    /// View
+    /// =====================
+    /**
+     * @inheritdoc IERC1155Receiver
+    */
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    /**
+     * @inheritdoc IERC1155Receiver
+    */
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
+    ) external pure override returns (bytes4){
+        return this.onERC1155Received.selector;
+    }
+
+    /**
+     * @dev Returns true if this contract implements the interface defined by
+     * `interfaceId`. See the corresponding
+     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
+     * to learn more about how these ids are created.
+     *
+     * This function call must use less than 30 000 gas.
+     */
+    function supportsInterface(bytes4 interfaceId) external view returns (bool)
+    {
+        return interfaceId == type(IMagnetar).interfaceId;
     }
 
     /// =====================
