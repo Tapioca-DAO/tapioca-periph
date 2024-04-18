@@ -557,25 +557,25 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@layerzerolabs/lz-evm-messagelib-v2@^2.1.25":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.2.2.tgz#09516ff809c3c3200f91b69daf70e4e19f218c20"
-  integrity sha512-Ko/NawHaRit8AhBmr46cgLCb4uA7Voa877OKq/NOTWtD6DAJl/HHvR0/IPifauoHMqbjNHVwb5gy2ZntoNG1jg==
+"@layerzerolabs/lz-evm-messagelib-v2@2.1.25":
+  version "2.1.25"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.1.25.tgz#917f63f7f9cafd595d0e3d77a817c1d5fe19f538"
+  integrity sha512-crZwePVIAVsLD8L95/C2/YHjXV78jFTo6QpUjULAAMvr3NSFHf2YJjAsIaTDtku13R+sYv+6AYVZg5YKajzrsA==
 
-"@layerzerolabs/lz-evm-oapp-v2@^2.1.25":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.2.2.tgz#4898b35f6e74c91a9351ba4aafb5e7ae49ce6537"
-  integrity sha512-6AmnL3Hdbtgu5ivxglIYGkpyNItMVlbqrTrnxmw1cGIY/gNwjSQJT7ZUo4DyDlJ1vhZha+xibO3LCQtOsZv3JA==
+"@layerzerolabs/lz-evm-oapp-v2@2.1.25":
+  version "2.1.25"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.1.25.tgz#1ed122458a210d7950fd691134158e4c0aa85c94"
+  integrity sha512-0V253EGo/RSjudsfOBMmabnLHCL+AHuBqLZCzYaxdkk7DFGAyRA8PgjfTc1Md201FSrPW62EymMRZPhtOF4DqQ==
 
-"@layerzerolabs/lz-evm-protocol-v2@^2.1.25":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.2.2.tgz#4aba03b235ac3bc1000e6615a2313580bf7c8183"
-  integrity sha512-51uej6akcFsxNrgUeQ2f1Kq8RbMxOAp2v5NZPrkDkmA8laWbZEiXmx+6Vu62Rc5CwWJZMqNIDOzpYeo0wj5UNQ==
+"@layerzerolabs/lz-evm-protocol-v2@2.1.25":
+  version "2.1.25"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.1.25.tgz#97e355cdd595f8fa8c227fbfa037aac47be64a76"
+  integrity sha512-XXwC2zg80s0Gmcj35FIZ71tRKhzbrPf83+etOACVpjrAyroHcGXUiO+QyR/nt3Y2wlobH/+96EftW3WFBSqupg==
 
-"@layerzerolabs/lz-evm-v1-0.7@^2.1.25":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.2.2.tgz#604194232e4107347423a1c56cc3a555d2f3038d"
-  integrity sha512-w0kg8VKFqgEXVzxr2cAWevRJ63T+7eMB1K0cqg2QbBgqt2tMYGFUh0ym5UW6ubexESY27V+//6uFNqGpVbrzlw==
+"@layerzerolabs/lz-evm-v1-0.7@2.1.25":
+  version "2.1.25"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.1.25.tgz#76e0a3286d39abf97eee32d20f9c9807fe0892bb"
+  integrity sha512-Yo8bG+IDN97MpFKCFX0vrHKq5ss1qpLtMmhevU/6U7nslYEy/a56PQG9BKkzUPYxRqlwkuUYsQ7TgXaTva4cQA==
 
 "@layerzerolabs/solidity-bytes-utils@^0.8.0":
   version "0.8.0"
@@ -5279,10 +5279,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.30:
-  version "1.7.32"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.32.tgz#4419b1789beb16acad92bda2cda32a3f5de6e87b"
-  integrity sha512-h21w5wa2OeT2lnuI6wSyDVXeQ2IkHq3tI2JF72vO4Y1WPTg3fTc7+auAeeTqYmQa4GBnn/+f8T/h4X0zldvBow==
+tapioca-sdk@^1.7.34:
+  version "1.7.34"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.34.tgz#769da96e4a2f2d4ce0db882d66f57b81e3158e5d"
+  integrity sha512-cz6DyeMfW36XvanY9gA32iZoIeMBvKa6ymsRGP/WPdUiJbcFU6APIP9sZUtz3wBqaID0E6lpvXAiwvgCJfDung==
   dependencies:
     "@uniswap/v3-core" "^1.0.1"
     "@uniswap/v3-periphery" "^1.4.3"
