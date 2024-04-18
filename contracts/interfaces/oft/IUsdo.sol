@@ -103,7 +103,6 @@ struct ExerciseOptionsMsg {
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;
-    bytes composeMsg;
 }
 
 struct IRemoveAndRepay {
