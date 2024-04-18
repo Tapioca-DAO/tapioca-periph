@@ -277,7 +277,7 @@ contract MagnetarHelper {
             result[i].debtRateAgainstEthMarket = bigBang.debtRateAgainstEthMarket();
             result[i].currentDebtRate = bigBang.getDebtRate();
 
-            IPenrose penrose = IPenrose(bigBang.penrose());
+            IPenrose penrose = IPenrose(bigBang._penrose());
             result[i].mainBBMarket = penrose.bigBangEthMarket();
             result[i].mainBBDebtRate = penrose.bigBangEthDebtRate();
         }
