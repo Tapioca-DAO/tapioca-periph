@@ -1,7 +1,11 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
+import {
+    createEmptyStratYbAsset__task,
+    loadGlobalContract,
+    loadLocalContract,
+} from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
@@ -23,7 +27,6 @@ import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOr
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle';
-import { createEmptyStratYbAsset__task } from './misc/createEmptyStratYbAsset';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task

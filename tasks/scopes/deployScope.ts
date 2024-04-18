@@ -63,17 +63,6 @@ TAP_TASK(
         ),
 );
 
-TAP_TASK(
-    deployScope
-        .task(
-            'createEmptyStratYbAsset',
-            'Deploys an empty strat and register the token as an asset on YieldBox with the strat',
-            createEmptyStratYbAsset__task,
-        )
-        .addParam('token', 'The address of the token to deploy.')
-        .addParam('deploymentName', 'The name of the deployment.'),
-);
-
 // Mocks
 TAP_TASK(
     deployScope.task(
