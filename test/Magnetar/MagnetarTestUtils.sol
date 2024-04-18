@@ -61,6 +61,11 @@ struct TestBigBangData {
 }
 
 contract MagnetarTestUtils {
+
+    function setBBEthMarket(Penrose penrose, address market) external {
+        penrose.setBigBangEthMarket(market);
+    }
+    
     function createPenrose(
         address pearlmit,
         IYieldBox _yieldBox,

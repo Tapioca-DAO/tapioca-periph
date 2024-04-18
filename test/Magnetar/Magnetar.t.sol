@@ -756,7 +756,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
     }
 
     function test_mint() public {
-        (BigBang bb,, YieldBox yieldBox) = _setupBb(address(oracle));
+        (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
+        utils.setBBEthMarket(penrose, address(bb));
 
         cluster.updateContract(0, address(bb), true);
         cluster.updateContract(0, address(yieldBox), true);
@@ -819,7 +820,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
     }
 
     function test_exit_and_remove_collateral() public {
-        (BigBang bb,, YieldBox yieldBox) = _setupBb(address(oracle));
+        (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
+        utils.setBBEthMarket(penrose, address(bb));
 
         cluster.updateContract(0, address(bb), true);
         cluster.updateContract(0, address(yieldBox), true);
