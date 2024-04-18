@@ -90,8 +90,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         IMarket bigBang_ = IMarket(data.externalData.bigBang);
         ISingularity singularity_ = ISingularity(data.externalData.singularity);
         IYieldBox yieldBox_ = data.externalData.singularity != address(0)
-            ? IYieldBox(singularity_.yieldBox())
-            : IYieldBox(bigBang_.yieldBox());
+            ? IYieldBox(singularity_._yieldBox())
+            : IYieldBox(bigBang_._yieldBox());
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract

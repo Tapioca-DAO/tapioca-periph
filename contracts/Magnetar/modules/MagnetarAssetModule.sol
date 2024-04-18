@@ -85,7 +85,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         }
 
         IMarket _market = IMarket(data.market);
-        IYieldBox _yieldBox = IYieldBox(_market.yieldBox());
+        IYieldBox _yieldBox = IYieldBox(_market._yieldBox());
 
         uint256 assetId = _market._assetId();
         (, address assetAddress,,) = _yieldBox.assets(assetId);

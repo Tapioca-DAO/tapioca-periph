@@ -119,7 +119,7 @@ contract MagnetarHelper {
      * @return amount The amount.
      */
     function getCollateralAmountForShare(IMarket market, uint256 share) external view returns (uint256 amount) {
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
         return yieldBox.toAmount(market._collateralId(), share, false);
     }
 
@@ -140,7 +140,7 @@ contract MagnetarHelper {
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
         uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
 
         uint256 val = (borrowAmount * collateralizationRatePrecision * market._exchangeRate())
@@ -191,7 +191,7 @@ contract MagnetarHelper {
         (uint128 totalAssetElastic, uint128 totalAssetBase) = singularity.totalAsset();
         (uint128 totalBorrowElastic,) = singularity._totalBorrow();
 
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity._yieldBox());
 
         uint256 allShare = totalAssetElastic + yieldBox.toShare(singularity._assetId(), totalBorrowElastic, true);
 
@@ -210,7 +210,7 @@ contract MagnetarHelper {
         (uint128 totalBorrowElastic,) = singularity._totalBorrow();
         uint256 assetId = singularity._assetId();
 
-        IYieldBox yieldBox = IYieldBox(singularity.yieldBox());
+        IYieldBox yieldBox = IYieldBox(singularity._yieldBox());
 
         uint256 share = yieldBox.toShare(assetId, amount, false);
         uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, false);
@@ -309,7 +309,7 @@ contract MagnetarHelper {
         info.collateralId = market._collateralId();
         info.collateralizationRate = market._collateralizationRate();
 
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market._yieldBox());
 
         (info.totalYieldBoxCollateralShare, info.totalYieldBoxCollateralAmount) =
             yieldBox.assetTotals(info.collateralId);

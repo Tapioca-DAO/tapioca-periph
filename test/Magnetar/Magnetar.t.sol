@@ -500,12 +500,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         // check collateral
         {
-            uint256 colShare = sgl.userCollateralShare(address(this));
+            uint256 colShare = sgl._userCollateralShare(address(this));
             uint256 colAmount = yieldBox.toAmount(collateralId, colShare, false);
             assertEq(colAmount, tokenAmount_);
         }
 
-        uint256 userBorrowPartBefore = sgl.userBorrowPart(address(this));
+        uint256 userBorrowPartBefore = sgl._userBorrowPart(address(this));
         // repay
         {
             bytes memory repayData = abi.encodeWithSelector(
@@ -562,7 +562,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         // check repayment
         {
-            uint256 userBorrowPart = sgl.userBorrowPart(address(this));
+            uint256 userBorrowPart = sgl._userBorrowPart(address(this));
             assertLt(userBorrowPart, userBorrowPartBefore);
         }
     }
@@ -695,7 +695,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         }
 
         {
-            uint256 colShare = sgl.userCollateralShare(address(this));
+            uint256 colShare = sgl._userCollateralShare(address(this));
             uint256 colAmount = yieldBox.toAmount(collateralId, colShare, false);
             assertEq(colAmount, tokenAmount_);
         }
@@ -705,7 +705,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 marketHelper.borrow(address(this), address(this), borrowAmount_);
             sgl.execute(borrowCallModules, borrowCalls, true);
 
-            uint256 borrowPart = sgl.userBorrowPart(address(this));
+            uint256 borrowPart = sgl._userBorrowPart(address(this));
             assertGt(borrowPart, 0);
 
             yieldBox.transfer(address(this), address(magnetar), assetId, yieldBox.balanceOf(address(this), assetId));
@@ -813,7 +813,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         // checks
         {
-            uint256 colShare = bb.userCollateralShare(address(this));
+            uint256 colShare = bb._userCollateralShare(address(this));
             assertGt(colShare, 0);
         }
     }
@@ -875,22 +875,22 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             magnetar.burst(calls);
         }
 
-        uint256 colShare = bb.userCollateralShare(address(this));
+        uint256 colShare = bb._userCollateralShare(address(this));
         assertGt(colShare, 0);
 
-        uint256 repayAmount_ = bb.userBorrowPart(address(this));
+        uint256 repayAmount_ = bb._userBorrowPart(address(this));
         // exit and remove
         {
-            bb.asset().approve(address(yieldBox), type(uint256).max); //for yb deposit
+            IERC20(bb._asset()).approve(address(yieldBox), type(uint256).max); //for yb deposit
             yieldBox.setApprovalForAll(address(bb), true); //for repay
 
             deal(address(asset), address(this), repayAmount_); //deal more asset to be able to fully repay
-            uint256 assetShare = yieldBox.toShare(bb.assetId(), repayAmount_, false);
+            uint256 assetShare = yieldBox.toShare(bb._assetId(), repayAmount_, false);
 
             bytes memory depositToYbData = abi.encodeWithSelector(
                 MagnetarYieldBoxModule.depositAsset.selector,
                 address(yieldBox),
-                bb.assetId(),
+                bb._assetId(),
                 address(this),
                 address(this),
                 0,

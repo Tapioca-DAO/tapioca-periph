@@ -67,7 +67,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         }
 
         IMarket market_ = IMarket(data.market);
-        IYieldBox yieldBox_ = IYieldBox(market_.yieldBox());
+        IYieldBox yieldBox_ = IYieldBox(market_._yieldBox());
 
         uint256 collateralId = market_._collateralId();
         (, address collateralAddress,,) = yieldBox_.assets(collateralId);

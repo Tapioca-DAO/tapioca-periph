@@ -57,7 +57,7 @@ interface IMarket {
 
     function _liquidationCollateralizationRate() external view returns (uint256);
 
-    function yieldBox() external view returns (address payable);
+    function _yieldBox() external view returns (address payable);
 
     function refreshPenroseFees() external returns (uint256 feeShares);
 

@@ -53,8 +53,8 @@ contract MagnetarMintModule is MagnetarMintCommonModule {
         _checkSender(data.user);
 
         IYieldBox yieldBox_ = data.externalContracts.singularity != address(0)
-            ? IYieldBox(IMarket(data.externalContracts.singularity).yieldBox())
-            : IYieldBox(IMarket(data.externalContracts.bigBang).yieldBox());
+            ? IYieldBox(IMarket(data.externalContracts.singularity)._yieldBox())
+            : IYieldBox(IMarket(data.externalContracts.bigBang)._yieldBox());
 
         // if `mint` was requested the following actions are performed:
         //  - extracts & deposits collateral to YB
