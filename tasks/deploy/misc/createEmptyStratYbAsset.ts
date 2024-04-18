@@ -57,8 +57,7 @@ export const createEmptyStratYbAsset__task = async (
                     name: deploymentName,
                     meta: {
                         token,
-                        yieldBox: yieldBox.address,
-                        assetId: tokenStratId.toNumber(),
+                        ybAssetId: tokenStratId.toNumber(),
                     },
                 },
             ],
