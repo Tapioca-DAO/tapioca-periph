@@ -86,7 +86,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         data.lendSendParams.lzParams.sendParam.composeMsg =
             TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
 
-
         // send on another layer for lending
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -94,7 +93,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
                 MagnetarBaseModuleExternal.withdrawToChain.selector,
                 MagnetarWithdrawData({
                     yieldBox: yieldBox,
-                    assetId: IMarket(data.bigBang).assetId(),
+                    assetId: IMarket(data.bigBang)._assetId(),
                     compose: true,
                     lzSendParams: data.lendSendParams.lzParams,
                     sendGas: data.lendSendParams.lzSendGas,

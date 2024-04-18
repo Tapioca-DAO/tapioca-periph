@@ -129,7 +129,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                     MagnetarBaseModuleExternal.extractTokens.selector, user, singularityAddress, fraction
                 )
             );
-            
+
             singularityAddress.safeApprove(address(yieldBox_), fraction);
             yieldBox_.depositAsset(tOLPSglAssetId, address(this), address(this), fraction, 0);
 
@@ -176,7 +176,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
             // if `depositData.deposit`:
             //      - deposit SGL asset to YB for `user`
-            uint256 sglAssetId = singularity_.assetId();
+            uint256 sglAssetId = singularity_._assetId();
             (, address sglAssetAddress,,) = yieldBox_.assets(sglAssetId);
             if (depositData.deposit) {
                 // depositData.amount = _extractTokens(user, sglAssetAddress, depositData.amount);
@@ -249,7 +249,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             IMarket bigBang_ = IMarket(bigBangAddress);
 
             // retrieve collateral id & address
-            uint256 bbCollateralId = bigBang_.collateralId();
+            uint256 bbCollateralId = bigBang_._collateralId();
             (, address bbCollateralAddress,,) = yieldBox_.assets(bbCollateralId);
 
             // compute collateral share
@@ -315,10 +315,10 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                 (Module[] memory modules, bytes[] memory calls) =
                     IMarketHelper(marketHelper).borrow(user, user, mintData.mintAmount);
 
-                uint256 mintShare = yieldBox_.toShare(bigBang_.assetId(), mintData.mintAmount, false);
+                uint256 mintShare = yieldBox_.toShare(bigBang_._assetId(), mintData.mintAmount, false);
                 pearlmit.approve(
                     address(yieldBox_),
-                    bigBang_.assetId(),
+                    bigBang_._assetId(),
                     bigBangAddress,
                     mintShare.toUint200(),
                     (block.timestamp + 1).toUint48()

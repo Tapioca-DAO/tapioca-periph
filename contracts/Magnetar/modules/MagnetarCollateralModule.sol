@@ -69,7 +69,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         IMarket market_ = IMarket(data.market);
         IYieldBox yieldBox_ = IYieldBox(market_.yieldBox());
 
-        uint256 collateralId = market_.collateralId();
+        uint256 collateralId = market_._collateralId();
         (, address collateralAddress,,) = yieldBox_.assets(collateralId);
 
         uint256 _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
@@ -96,11 +96,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
                 data.user, data.user, false, data.collateralAmount, _share
             );
             pearlmit.approve(
-                address(yieldBox_),
-                collateralId,
-                address(market_),
-                _share.toUint200(),
-                (block.timestamp + 1).toUint48()
+                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp + 1).toUint48()
             );
             market_.execute(modules, calls, true);
             _revertYieldBoxApproval(data.market, yieldBox_);
@@ -114,10 +110,10 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             (Module[] memory modules, bytes[] memory calls) =
                 IMarketHelper(data.marketHelper).borrow(data.user, borrowReceiver, data.borrowAmount);
 
-            uint256 borrowShare = yieldBox_.toShare(market_.assetId(), data.borrowAmount, false);
+            uint256 borrowShare = yieldBox_.toShare(market_._assetId(), data.borrowAmount, false);
             pearlmit.approve(
                 address(yieldBox_),
-                market_.assetId(),
+                market_._assetId(),
                 address(market_),
                 borrowShare.toUint200(),
                 (block.timestamp + 1).toUint48()

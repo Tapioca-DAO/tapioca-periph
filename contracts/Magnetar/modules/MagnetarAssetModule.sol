@@ -87,7 +87,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         IMarket _market = IMarket(data.market);
         IYieldBox _yieldBox = IYieldBox(_market.yieldBox());
 
-        uint256 assetId = _market.assetId();
+        uint256 assetId = _market._assetId();
         (, address assetAddress,,) = _yieldBox.assets(assetId);
 
         // @dev deposit to YieldBox
@@ -124,14 +124,14 @@ contract MagnetarAssetModule is MagnetarBaseModule {
          */
         if (data.collateralAmount > 0) {
             address collateralWithdrawReceiver = data.withdrawCollateralParams.withdraw ? address(this) : data.user;
-            uint256 collateralShare = _yieldBox.toShare(_market.collateralId(), data.collateralAmount, false);
+            uint256 collateralShare = _yieldBox.toShare(_market._collateralId(), data.collateralAmount, false);
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).removeCollateral(
                 data.user, collateralWithdrawReceiver, collateralShare
             );
             pearlmit.approve(
                 address(_yieldBox),
-                _market.collateralId(),
+                _market._collateralId(),
                 address(_market),
                 collateralShare.toUint200(),
                 (block.timestamp + 1).toUint48()
@@ -142,20 +142,21 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
             //withdraw
             if (data.withdrawCollateralParams.withdraw) {
-                uint256 collateralId = _market.collateralId();
+                uint256 collateralId = _market._collateralId();
                 if (data.withdrawCollateralParams.assetId != collateralId) revert Magnetar_WithdrawParamsMismatch();
 
                 // @dev re-calculate amount
                 if (collateralShare > 0) {
                     if (data.withdrawCollateralParams.compose) {
                         // allow only unwrap receiver
-                        (,,, bytes memory tapComposeMsg_, ) =
-                            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg);
+                        (,,, bytes memory tapComposeMsg_,) = TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
+                            data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg
+                        );
 
                         // it should fail at this point if data != SendParamsMsg
                         SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
                         if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
-                    } 
+                    }
 
                     uint256 computedCollateral = _yieldBox.toAmount(collateralId, collateralShare, false);
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
