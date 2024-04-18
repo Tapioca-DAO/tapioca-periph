@@ -7,6 +7,7 @@ import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMock';
 import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
+import { createEmptyStratYbAsset__task } from 'tasks/deploy/misc/createEmptyStratYbAsset';
 
 const deployScope = scope('deploys', 'Deployment tasks');
 
@@ -60,6 +61,17 @@ TAP_TASK(
             3000,
             types.int,
         ),
+);
+
+TAP_TASK(
+    deployScope
+        .task(
+            'createEmptyStratYbAsset',
+            'Deploys an empty strat and register the token as an asset on YieldBox with the strat',
+            createEmptyStratYbAsset__task,
+        )
+        .addParam('token', 'The address of the token to deploy.')
+        .addParam('deploymentName', 'The name of the deployment.'),
 );
 
 // Mocks
