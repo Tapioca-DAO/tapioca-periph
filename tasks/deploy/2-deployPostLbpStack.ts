@@ -1,7 +1,11 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
+import {
+    createEmptyStratYbAsset__task,
+    loadGlobalContract,
+    loadLocalContract,
+} from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
@@ -21,7 +25,7 @@ import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
-import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle';
 
 /**
@@ -46,6 +50,27 @@ async function postDeployTask(
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
+
+    const { tapToken } = await loadContracts(hre, taskArgs.tag);
+
+    // Used in Bar
+    await createEmptyStratYbAsset__task(
+        {
+            ...taskArgs,
+            token: tapToken.address,
+            deploymentName: DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+        },
+        hre,
+    );
+
+    await createEmptyStratYbAsset__task(
+        {
+            ...taskArgs,
+            token: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+            deploymentName: DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+        },
+        hre,
+    );
 }
 
 async function tapiocaDeployTask(

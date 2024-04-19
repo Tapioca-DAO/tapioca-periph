@@ -7,6 +7,7 @@ import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMock';
 import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
+import { createEmptyStratYbAsset__task } from 'tasks/deploy/misc/createEmptyStratYbAsset';
 
 const deployScope = scope('deploys', 'Deployment tasks');
 

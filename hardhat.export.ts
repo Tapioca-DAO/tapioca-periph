@@ -95,7 +95,7 @@ const config: HardhatUserConfig &
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 9999,
+                        runs: 2000,
                     },
                 },
             },
@@ -105,7 +105,7 @@ const config: HardhatUserConfig &
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 5000,
+                        runs: 2000,
                     },
                 },
             },
