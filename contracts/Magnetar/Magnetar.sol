@@ -348,13 +348,6 @@ contract Magnetar is BaseMagnetar {
             for(uint i; i < callsLength; i++) {
                 bytes memory _call = calls[i];
 
-
-                // bytes4 executeSelector;
-                // assembly {
-                //     executeSelector := mload(add(data, 0x20)) 
-                // }
-                // if (executeSelector == IMarket.add)
-
                 address _from;
                 assembly {
                     let dataPointer := add(_call, 0x24)
