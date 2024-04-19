@@ -286,7 +286,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,
                     abi.encodeWithSelector(
-                        MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
+                        MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
                     )
                 );
 
