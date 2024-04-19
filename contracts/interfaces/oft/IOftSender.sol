@@ -23,4 +23,6 @@ interface IOftSender {
         external
         payable
         returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt);
+
+    function endpoint() external view returns (address);
 }
