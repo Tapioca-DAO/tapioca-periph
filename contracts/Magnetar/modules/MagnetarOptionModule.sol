@@ -158,7 +158,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             }
 
             ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
-                tOLPId, data.externalData.singularity
+                tOLPId, data.externalData.singularity, data.user
             );
         }
 
