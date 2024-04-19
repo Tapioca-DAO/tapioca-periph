@@ -17,11 +17,13 @@ import {
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainEngineHelper} from
     "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -42,6 +44,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     error Magnetar_GasMismatch(uint256 expected, uint256 received);
     error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
+    error Magnetar_UserMismatch();
 
     constructor() MagnetarStorage(IPearlmit(address(0))) {}
 
@@ -67,8 +70,11 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         }
 
         _yieldBox.withdraw(data.assetId, address(this), address(this), data.lzSendParams.sendParam.amountLD, 0);
-        // TODO: decide about try-catch here
         if (data.compose) {
+            // it should fail at this point if data != SendParamsMsg
+            SendParamsMsg memory unwrapReceiverData = abi.decode(data.composeMsg, (SendParamsMsg));
+            if (unwrapReceiverData.receiver != OFTMsgCodec.bytes32ToAddress(data.lzSendParams.sendParam.to)) revert Magnetar_UserMismatch();
+
             _lzCustomWithdraw(
                 asset,
                 data.lzSendParams,
