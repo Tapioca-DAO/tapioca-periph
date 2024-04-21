@@ -243,13 +243,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper)
                 .removeCollateral(data.user, removeCollateralTo, collateralShare);
-            pearlmit.approve(
-                address(yieldBox_),
-                _collateralId,
-                address(bigBang_),
-                collateralShare.toUint200(),
-                (block.timestamp + 1).toUint48()
-            );
             bigBang_.execute(modules, calls, true);
 
             //withdraw
