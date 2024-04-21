@@ -107,11 +107,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
             (Module[] memory modules, bytes[] memory calls) =
                 IMarketHelper(data.marketHelper).repay(data.user, data.user, false, repayPart);
 
-            uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
-            pearlmit.approve(
-                address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
-            );
-
             _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
