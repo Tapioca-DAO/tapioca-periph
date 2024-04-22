@@ -108,15 +108,20 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         {
             // send on another layer for lending
             // already validated above
-            (, address asset,,) = IYieldBox(yieldBox).assets(data.assetId);
-            _lzCustomWithdraw(
-                asset,
-                data.lockAndParticipateSendParams.lzParams,
-                data.lockAndParticipateSendParams.lzSendGas,
-                data.lockAndParticipateSendParams.lzSendVal,
-                data.lockAndParticipateSendParams.lzComposeGas,
-                data.lockAndParticipateSendParams.lzComposeVal,
-                data.lockAndParticipateSendParams.lzComposeMsgType
+            _withdrawToChain(
+                MagnetarWithdrawData({
+                    yieldBox: yieldBox,
+                    assetId: data.assetId,
+                    compose: true,
+                    lzSendParams: data.lockAndParticipateSendParams.lzParams,
+                    sendGas: data.lockAndParticipateSendParams.lzSendGas,
+                    composeGas: data.lockAndParticipateSendParams.lzComposeGas,
+                    sendVal: data.lockAndParticipateSendParams.lzSendVal,
+                    composeVal: data.lockAndParticipateSendParams.lzComposeVal,
+                    composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
+                    composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
+                    withdraw: true
+                })
             );
         }
     }

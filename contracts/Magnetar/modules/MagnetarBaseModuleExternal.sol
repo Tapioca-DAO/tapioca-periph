@@ -13,16 +13,6 @@ contract MagnetarBaseModuleExternal is MagnetarBaseModule {
         _withdrawToChain(data);
     }
 
-    function lzCustomWithdraw(address _asset,
-        LZSendParam memory _lzSendParam,
-        uint128 _lzSendGas,
-        uint128 _lzSendVal,
-        uint128 _lzComposeGas,
-        uint128 _lzComposeVal,
-        uint16 _lzComposeMsgType) external {
-            _lzCustomWithdraw(_asset, _lzSendParam, _lzSendGas, _lzSendVal, _lzComposeGas, _lzComposeVal, _lzComposeMsgType);
-    }
-
     function setApprovalForYieldBox(address _target, IYieldBox _yieldBox) external {
         _setApprovalForYieldBox(_target, _yieldBox);
     }

@@ -139,7 +139,8 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
                     data.withdrawCollateralParams.lzSendParams.sendParam.amountLD = computedCollateral;
                     data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD = computedCollateral;
-
+                    
+                    // data validated in `_validateDepositRepayAndRemoveCollateralFromMarketData`
                     _withdrawToChain(data.withdrawCollateralParams);
                 }
             }

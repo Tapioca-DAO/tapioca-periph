@@ -91,18 +91,23 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         {
             // send on another layer for lending
             // already validated above
-            (, address asset,,) = IYieldBox(yieldBox).assets(IMarket(data.bigBang)._assetId());
             _executeDelegateCall(
                 magnetarBaseModuleExternal,
                 abi.encodeWithSelector(
-                    MagnetarBaseModuleExternal.lzCustomWithdraw.selector,
-                    asset,
-                    data.lendSendParams.lzParams,
-                    data.lendSendParams.lzSendGas,
-                    data.lendSendParams.lzSendVal,
-                    data.lendSendParams.lzComposeGas,
-                    data.lendSendParams.lzComposeVal,
-                    data.lendSendParams.lzComposeMsgType
+                    MagnetarBaseModuleExternal.withdrawToChain.selector,
+                    MagnetarWithdrawData({
+                        yieldBox: yieldBox,
+                        assetId: IMarket(data.bigBang)._assetId(),
+                        compose: true,
+                        lzSendParams: data.lendSendParams.lzParams,
+                        sendGas: data.lendSendParams.lzSendGas,
+                        composeGas: data.lendSendParams.lzComposeGas,
+                        sendVal: data.lendSendParams.lzSendVal,
+                        composeVal: data.lendSendParams.lzComposeVal,
+                        composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
+                        composeMsgType: data.lendSendParams.lzComposeMsgType,
+                        withdraw: true
+                    })
                 )
             );
         }

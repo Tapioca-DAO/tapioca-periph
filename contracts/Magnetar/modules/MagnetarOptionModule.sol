@@ -172,6 +172,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+
+                // already validated above
                 // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,
@@ -255,6 +257,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+                
+                // already validated above
                 // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,

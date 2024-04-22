@@ -113,6 +113,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             );
             market_.execute(modules, calls, true);
 
+            // data validated in `_validateDepositAddCollateralAndBorrowFromMarket`
             if (data.withdrawParams.withdraw) _withdrawToChain(data.withdrawParams);
         }
 
