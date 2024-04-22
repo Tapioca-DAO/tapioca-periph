@@ -47,8 +47,6 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
 
-    error Magnetar_UserMismatch();
-
     /// =====================
     /// Public
     /// =====================

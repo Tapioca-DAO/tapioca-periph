@@ -50,7 +50,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_WithdrawParamsMismatch();
-    error Magnetar_UserMismatch();
 
     /// =====================
     /// Public
