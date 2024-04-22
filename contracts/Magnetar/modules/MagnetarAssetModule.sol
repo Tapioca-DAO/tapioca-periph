@@ -73,22 +73,17 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         public
         payable
     {
-        // Check sender
-        _checkSender(data.user);
-
-        // Check target
-        if (!cluster.isWhitelisted(0, address(data.market))) {
-            revert Magnetar_TargetNotWhitelisted(address(data.market));
-        }
-        if (!cluster.isWhitelisted(0, address(data.marketHelper))) {
-            revert Magnetar_TargetNotWhitelisted(address(data.marketHelper));
-        }
+        // validate data
+        _validateDepositRepayAndRemoveCollateralFromMarketData(data);
 
         IMarket _market = IMarket(data.market);
         IYieldBox _yieldBox = IYieldBox(_market._yieldBox());
 
         uint256 assetId = _market._assetId();
         (, address assetAddress,,) = _yieldBox.assets(assetId);
+
+        _setApprovalForYieldBox(data.market, _yieldBox);
+        _setApprovalForYieldBox(address(pearlmit), _yieldBox);
 
         // @dev deposit to YieldBox
         if (data.depositAmount > 0) {
@@ -102,8 +97,6 @@ contract MagnetarAssetModule is MagnetarBaseModule {
         if (data.repayAmount > 0) {
             uint256 repayPart = helper.getBorrowPartForAmount(data.market, data.repayAmount);
 
-            _setApprovalForYieldBox(data.market, _yieldBox);
-
             (Module[] memory modules, bytes[] memory calls) =
                 IMarketHelper(data.marketHelper).repay(data.user, data.user, false, repayPart);
 
@@ -112,10 +105,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                 address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
             );
 
-            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
-            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
-            _revertYieldBoxApproval(data.market, _yieldBox);
         }
 
         /**
@@ -136,9 +126,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                 collateralShare.toUint200(),
                 (block.timestamp + 1).toUint48()
             );
-            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
             _market.execute(modules, calls, true);
-            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
 
             //withdraw
             if (data.withdrawCollateralParams.withdraw) {
@@ -147,25 +135,48 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
                 // @dev re-calculate amount
                 if (collateralShare > 0) {
-                    if (data.withdrawCollateralParams.compose) {
-                        // allow only unwrap receiver
-                        (,,, bytes memory tapComposeMsg_,) = TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
-                            data.withdrawCollateralParams.lzSendParams.sendParam.composeMsg
-                        );
-
-                        // it should fail at this point if data != SendParamsMsg
-                        SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
-                        if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
-                    }
-
                     uint256 computedCollateral = _yieldBox.toAmount(collateralId, collateralShare, false);
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
 
                     data.withdrawCollateralParams.lzSendParams.sendParam.amountLD = computedCollateral;
                     data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD = computedCollateral;
+
                     _withdrawToChain(data.withdrawCollateralParams);
                 }
             }
+        }
+
+        _revertYieldBoxApproval(address(pearlmit), _yieldBox);
+        _revertYieldBoxApproval(data.market, _yieldBox);
+    }
+
+    function _validateDepositRepayAndRemoveCollateralFromMarketData(
+        DepositRepayAndRemoveCollateralFromMarketData memory data
+    ) private view {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkExternalData(data);
+
+        // Check withdraw data
+        _checkWithdrawData(data.withdrawCollateralParams, data.user);
+    }
+
+    function _checkExternalData(DepositRepayAndRemoveCollateralFromMarketData memory data) private view {
+        _checkWhitelisted(data.market);
+        _checkWhitelisted(data.marketHelper);
+    }
+
+    function _checkWithdrawData(MagnetarWithdrawData memory data, address user) private pure {
+        if (data.compose) {
+            // allow only unwrap receiver
+            (,,, bytes memory tapComposeMsg_,) =
+                TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lzSendParams.sendParam.composeMsg);
+
+            // it should fail at this point if data != SendParamsMsg
+            SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
+            if (unwrapReceiverData.receiver != user) revert Magnetar_UserMismatch();
         }
     }
 }

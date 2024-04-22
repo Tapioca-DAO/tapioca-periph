@@ -10,7 +10,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
-    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData
+    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData, ICommonExternalContracts, IRemoveAndRepay
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -48,7 +48,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
     error Magnetar_MarketCallFailed(bytes call);
-    error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
     error Magnetar_ComposeMsgNotAllowed();
     error Magnetar_UserMismatch();
@@ -72,20 +71,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
      *     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
      */
     function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory data) public payable {
-        // Check sender
-        _checkSender(data.user);
-
-        // Check whitelisted
-        if (data.externalData.bigBang != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalData.bigBang)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalData.bigBang);
-            }
-        }
-        if (data.externalData.singularity != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalData.singularity)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalData.singularity);
-            }
-        }
+        // validate data
+        _validateExitPositionAndRemoveCollateral(data);
 
         IMarket bigBang_ = IMarket(data.externalData.bigBang);
         ISingularity singularity_ = ISingularity(data.externalData.singularity);
@@ -293,5 +280,30 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         if (!success) {
             _getRevertMsg(returnData);
         }
+    }
+
+
+    function _validateExitPositionAndRemoveCollateral(
+        ExitPositionAndRemoveCollateralData memory data
+    ) private view {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkExternalData(data.externalData);
+        _checkRemoveAndRepayData(data.removeAndRepayData);
+    }
+
+    function _checkExternalData(ICommonExternalContracts memory data) private view {
+        _checkWhitelisted(data.marketHelper);
+        _checkWhitelisted(data.magnetar);
+        _checkWhitelisted(data.bigBang);
+        _checkWhitelisted(data.singularity);
+
+    }
+
+    function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {
+        _checkWhitelisted(data.exitData.target);
+        _checkWhitelisted(data.unlockData.target);
     }
 }

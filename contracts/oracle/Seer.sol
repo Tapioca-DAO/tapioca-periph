@@ -97,7 +97,7 @@ contract Seer is ITapiocaOracle, OracleMulti {
     function peekSpot(bytes calldata data) external view virtual returns (uint256 rate) {
         (uint256 uniswap, uint256 chainlink) = _readAll(inBase);
         if (uniFinalCurrency > 0) {
-            return  uniswap;
+            return uniswap;
         }
 
         if (data.length > 0) {

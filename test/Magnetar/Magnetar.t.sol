@@ -515,7 +515,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     marketHelper: address(marketHelper),
                     user: address(this),
                     depositAmount: repayDepositAmount_,
-                    repayAmount: repayAmount_ ,
+                    repayAmount: repayAmount_,
                     collateralAmount: 0,
                     withdrawCollateralParams: MagnetarWithdrawData({
                         withdraw: false,

@@ -40,7 +40,6 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     using SafeCast for uint256;
 
     error Magnetar_GasMismatch(uint256 expected, uint256 received);
-    error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
 
     constructor() MagnetarStorage(IPearlmit(address(0))) {}
@@ -81,6 +80,50 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         } else {
             _lzWithdraw(asset, data.lzSendParams, data.sendGas, data.sendVal);
         }
+    }
+
+    // !!! do not call this directly without proper validation
+    function _lzCustomWithdraw(
+        address _asset,
+        LZSendParam memory _lzSendParam,
+        uint128 _lzSendGas,
+        uint128 _lzSendVal,
+        uint128 _lzComposeGas,
+        uint128 _lzComposeVal,
+        uint16 _lzComposeMsgType
+    ) internal {
+        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
+
+        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
+        PrepareLzCallReturn memory prepareLzCallReturn2 = _toeHelper.prepareLzCall(
+            ITapiocaOmnichainEngine(_asset),
+            PrepareLzCallData({
+                dstEid: _lzSendParam.sendParam.dstEid,
+                recipient: _lzSendParam.sendParam.to,
+                amountToSendLD: 0,
+                minAmountToCreditLD: 0,
+                msgType: _lzComposeMsgType,
+                composeMsgData: ComposeMsgData({
+                    index: 0,
+                    gas: _lzComposeGas,
+                    value: prepareLzCallReturn.msgFee.nativeFee.toUint128(),
+                    data: _lzSendParam.sendParam.composeMsg,
+                    prevData: bytes(""),
+                    prevOptionsData: bytes("")
+                }),
+                lzReceiveGas: _lzSendGas + _lzComposeGas,
+                lzReceiveValue: _lzComposeVal,
+                refundAddress: _lzSendParam.refundAddress
+            })
+        );
+
+        if (msg.value < prepareLzCallReturn2.msgFee.nativeFee) {
+            revert Magnetar_GasMismatch(prepareLzCallReturn2.msgFee.nativeFee, msg.value);
+        }
+
+        IOftSender(_asset).sendPacket{value: prepareLzCallReturn2.msgFee.nativeFee}(
+            prepareLzCallReturn2.lzSendParam, prepareLzCallReturn2.composeMsg
+        );
     }
 
     function _setApprovalForYieldBox(address _target, IYieldBox _yieldBox) internal {
@@ -125,49 +168,6 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
 
         IOftSender(_asset).sendPacket{value: prepareLzCallReturn.msgFee.nativeFee}(
             prepareLzCallReturn.lzSendParam, prepareLzCallReturn.composeMsg
-        );
-    }
-
-    function _lzCustomWithdraw(
-        address _asset,
-        LZSendParam memory _lzSendParam,
-        uint128 _lzSendGas,
-        uint128 _lzSendVal,
-        uint128 _lzComposeGas,
-        uint128 _lzComposeVal,
-        uint16 _lzComposeMsgType
-    ) private {
-        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
-
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        PrepareLzCallReturn memory prepareLzCallReturn2 = _toeHelper.prepareLzCall(
-            ITapiocaOmnichainEngine(_asset),
-            PrepareLzCallData({
-                dstEid: _lzSendParam.sendParam.dstEid,
-                recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
-                msgType: _lzComposeMsgType,
-                composeMsgData: ComposeMsgData({
-                    index: 0,
-                    gas: _lzComposeGas,
-                    value: prepareLzCallReturn.msgFee.nativeFee.toUint128(),
-                    data: _lzSendParam.sendParam.composeMsg,
-                    prevData: bytes(""),
-                    prevOptionsData: bytes("")
-                }),
-                lzReceiveGas: _lzSendGas + _lzComposeGas,
-                lzReceiveValue: _lzComposeVal,
-                refundAddress: _lzSendParam.refundAddress
-            })
-        );
-
-        if (msg.value < prepareLzCallReturn2.msgFee.nativeFee) {
-            revert Magnetar_GasMismatch(prepareLzCallReturn2.msgFee.nativeFee, msg.value);
-        }
-
-        IOftSender(_asset).sendPacket{value: prepareLzCallReturn2.msgFee.nativeFee}(
-            prepareLzCallReturn2.lzSendParam, prepareLzCallReturn2.composeMsg
         );
     }
 

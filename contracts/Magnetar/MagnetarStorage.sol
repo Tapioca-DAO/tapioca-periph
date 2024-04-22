@@ -56,6 +56,7 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     error Magnetar_NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error Magnetar_ModuleNotFound(MagnetarModule module); // Module not found
     error Magnetar_UnknownReason(); // Revert reason not recognized
+    error Magnetar_TargetNotWhitelisted(address addy); // cluster.isWhitelisted(lzChainId, _addr) => false
 
     constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {}
 
@@ -95,6 +96,14 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     function _checkSender(address _from) internal view {
         if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender)) {
             revert Magnetar_NotAuthorized(msg.sender, _from);
+        }
+    }
+
+    function _checkWhitelisted(address addy) internal view {
+        if (addy != address(0)) {
+            if (!cluster.isWhitelisted(0, addy)) {
+                revert Magnetar_TargetNotWhitelisted(addy);
+            }
         }
     }
 

@@ -60,8 +60,7 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
      * @param data.lendSendParams LZ send params for lending on another layer
      */
     function mintBBLendXChainSGL(CrossChainMintFromBBAndLendOnSGLData memory data) public payable {
-        // Check sender
-        _checkSender(data.user);
+        _validateMintBBLendXChainSGL(data);
 
         address yieldBox = IMarket(data.bigBang)._yieldBox();
 
@@ -73,39 +72,40 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
             _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user, data.marketHelper);
         }
 
-        // decode `composeMsg` and re-encode it with updated params
-        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
-            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lendSendParams.lzParams.sendParam.composeMsg);
 
-        // assert composeMsg format & user
-        DepositAndSendForLockingData memory lendData = abi.decode(tapComposeMsg_, (DepositAndSendForLockingData));
-        if (lendData.user != data.user) revert Magnetar_UserMismatch();
+        {
+            // decode `composeMsg` and re-encode it with updated params
+            (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+                TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lendSendParams.lzParams.sendParam.composeMsg);
 
-        lendData.lendAmount = data.mintData.mintAmount;
+            // assert composeMsg format & user
+            DepositAndSendForLockingData memory lendData = abi.decode(tapComposeMsg_, (DepositAndSendForLockingData));
+            if (lendData.user != data.user) revert Magnetar_UserMismatch();
 
-        data.lendSendParams.lzParams.sendParam.composeMsg =
-            TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
+            lendData.lendAmount = data.mintData.mintAmount;
 
-        // send on another layer for lending
-        _executeDelegateCall(
-            magnetarBaseModuleExternal,
-            abi.encodeWithSelector(
-                MagnetarBaseModuleExternal.withdrawToChain.selector,
-                MagnetarWithdrawData({
-                    yieldBox: yieldBox,
-                    assetId: IMarket(data.bigBang)._assetId(),
-                    compose: true,
-                    lzSendParams: data.lendSendParams.lzParams,
-                    sendGas: data.lendSendParams.lzSendGas,
-                    composeGas: data.lendSendParams.lzComposeGas,
-                    sendVal: data.lendSendParams.lzSendVal,
-                    composeVal: data.lendSendParams.lzComposeVal,
-                    composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
-                    composeMsgType: data.lendSendParams.lzComposeMsgType,
-                    withdraw: true
-                })
-            )
-        );
+            data.lendSendParams.lzParams.sendParam.composeMsg =
+                TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
+        }
+
+        {
+            // send on another layer for lending
+            // already validated above
+            (, address asset,,) = IYieldBox(yieldBox).assets(IMarket(data.bigBang)._assetId());
+            _executeDelegateCall(
+                magnetarBaseModuleExternal,
+                abi.encodeWithSelector(
+                    MagnetarBaseModuleExternal.lzCustomWithdraw.selector,
+                    asset,
+                    data.lendSendParams.lzParams,
+                    data.lendSendParams.lzSendGas,
+                    data.lendSendParams.lzSendVal,
+                    data.lendSendParams.lzComposeGas,
+                    data.lendSendParams.lzComposeVal,
+                    data.lendSendParams.lzComposeMsgType
+                )
+            );
+        }
     }
 
     /**
@@ -124,9 +124,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
      * @param data.participateData the data needed to participate on tOLP
      */
     function lockAndParticipate(LockAndParticipateData memory data) public payable {
-        // Check sender
-        _checkSender(data.user);
-
         // if `lockData.lock`:
         //      - transfer `fraction` from data.user to `address(this)
         //      - deposits `fraction` to YB for `address(this)`
@@ -147,5 +144,20 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
         if (data.participateData.participate) {
             _participateOnTOLP(data.participateData, data.user, data.lockData.target, tOLPTokenId, data.lockData.lock);
         }
+    }
+
+    function _validateMintBBLendXChainSGL(CrossChainMintFromBBAndLendOnSGLData memory data) private view {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkWhitelisted(data.bigBang);
+        _checkWhitelisted(data.magnetar);
+        _checkWhitelisted(data.marketHelper);
+
+        // Check lend data
+        IMarket marketBB = IMarket(data.bigBang);
+        (, address asset,,) = IYieldBox(marketBB._yieldBox()).assets(marketBB._assetId());
+        _checkWhitelisted(asset);
     }
 }
