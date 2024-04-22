@@ -17,6 +17,7 @@ remappings = [
 	"tapioca-bar/=gitmodule/Tapioca-bar/contracts/",
 	"tapioca-mocks/=gitmodule/tapioca-mocks/contracts/",
 	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
+	"tapioca-lbp/=gitmodule/tapioca-lbp/contracts/",
 	"permitc/=gitmodule/permitc/src/",
 ]
 
