@@ -26,4 +26,7 @@ interface IOftSender {
 
     // available in BaseTapiocaOmnichainEngine
     function removeDust(uint256 _amountLD) external view returns (uint256 amountLD);
+
+    function endpoint() external view returns (address);
+
 }
