@@ -25,6 +25,7 @@ import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {ITwTap} from "tapioca-periph/interfaces/tap-token/ITwTap.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseMagnetar} from "./BaseMagnetar.sol";
 
@@ -51,6 +52,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
     error Magnetar_PearlmitTransferFailed(); // Transfer failed in pearlmit
+    error Magnetar_MarketOperationNotAllowed();
 
     constructor(
         ICluster _cluster,
@@ -327,6 +329,38 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         /// @dev owner address should always be first param.
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        
+
+        // function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
+        // function removeCollateral(address from, address to, uint256 share)
+        // function borrow(address from, address to, uint256 amount)
+        // function repay(address from, address to, bool skim, uint256 part)
+        // function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data)
+        // function sellCollateral(address from, uint256 share, bytes calldata data)
+        if (funcSig == IMarket.execute.selector) {
+            (Module[] memory modules, bytes[] memory calls,) = abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
+            // sanitize modules
+            uint256 modulesLength;
+            for (uint i; i < modulesLength; i++) {
+                if (modules[i] == Module.Liquidation) revert Magnetar_MarketOperationNotAllowed();
+            }
+
+            // sanitize call
+            uint256 callsLength = calls.length;
+            for(uint i; i < callsLength; i++) {
+                bytes memory _call = calls[i];
+
+                address _from;
+                assembly {
+                    let dataPointer := add(_call, 0x24)
+                    _from := mload(dataPointer)
+                }
+                _checkSender(_from);
+            }
+        }
+
+        // function addAsset(address from, address to, bool skim, uint256 share)
+        // function removeAsset(address from, address to, uint256 fraction)
         if (funcSig == ISingularity.addAsset.selector || funcSig == ISingularity.removeAsset.selector) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
