@@ -47,8 +47,6 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
     using SafeERC20 for IERC20;
     using SafeApprove for address;
 
-    error Magnetar_UserMismatch();
-
     /// =====================
     /// Public
     /// =====================
@@ -70,8 +68,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
      * @param data.lockAndParticipateSendParams LZ send params for the lock or/and the participate operations
      */
     function depositYBLendSGLLockXchainTOLP(DepositAndSendForLockingData memory data) public payable {
-        // Check sender
-        _checkSender(data.user);
+        //validate data
+        _validateDepositYBLendSGLLockXchainTOLP(data);
 
         address yieldBox = IMarket(data.singularity)._yieldBox();
 
@@ -82,39 +80,65 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         uint256 fraction =
             _depositYBLendSGL(data.depositData, data.singularity, IYieldBox(yieldBox), data.user, data.lendAmount);
 
-        // wrap SGL receipt into tReceipt
-        // ! User should approve `address(this)` for `IERC20(data.singularity)` !
-        uint256 toftAmount = _wrapSglReceipt(IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId, true, address(this));
-
-        data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+        {
+            // wrap SGL receipt into tReceipt
+            // ! User should approve `address(this)` for `IERC20(data.singularity)` !
+            uint256 toftAmount = _wrapSglReceipt(
+                IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId, true, address(this)
+            );
+            data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+        }
 
         // decode `composeMsg` and re-encode it with updated params
-        (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
-        TapiocaOmnichainEngineCodec.decodeToeComposeMsg(data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg);
+        {
+            (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
+            TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
+                data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg
+            );
 
-        LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
-        if (lockData.user != data.user) revert Magnetar_UserMismatch();
+            LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
+            if (lockData.user != data.user) revert Magnetar_UserMismatch();
 
-        lockData.fraction = toftAmount;
+            lockData.fraction = data.lockAndParticipateSendParams.lzParams.sendParam.amountLD;
 
-        data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg =
-            TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lockData), msgType_, msgIndex_, nextMsg_);
+            data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg =
+                TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lockData), msgType_, msgIndex_, nextMsg_);
+        }
 
-        // send on another layer for lending
-        _withdrawToChain(
-            MagnetarWithdrawData({
-                yieldBox: yieldBox,
-                assetId: data.assetId,
-                compose: true,
-                lzSendParams: data.lockAndParticipateSendParams.lzParams,
-                sendGas: data.lockAndParticipateSendParams.lzSendGas,
-                composeGas: data.lockAndParticipateSendParams.lzComposeGas,
-                sendVal: data.lockAndParticipateSendParams.lzSendVal,
-                composeVal: data.lockAndParticipateSendParams.lzComposeVal,
-                composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
-                composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
-                withdraw: true
-            })
-        );
+        {
+            // send on another layer for lending
+            // already validated above
+            _withdrawToChain(
+                MagnetarWithdrawData({
+                    yieldBox: yieldBox,
+                    assetId: data.assetId,
+                    compose: true,
+                    lzSendParams: data.lockAndParticipateSendParams.lzParams,
+                    sendGas: data.lockAndParticipateSendParams.lzSendGas,
+                    composeGas: data.lockAndParticipateSendParams.lzComposeGas,
+                    sendVal: data.lockAndParticipateSendParams.lzSendVal,
+                    composeVal: data.lockAndParticipateSendParams.lzComposeVal,
+                    composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
+                    composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
+                    withdraw: true
+                })
+            );
+        }
+    }
+
+    function _validateDepositYBLendSGLLockXchainTOLP(DepositAndSendForLockingData memory data) private view {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkExternalData(data);
+    }
+
+    function _checkExternalData(DepositAndSendForLockingData memory data) private view {
+        _checkWhitelisted(data.singularity);
+        _checkWhitelisted(data.magnetar);
+
+        (, address asset,,) = IYieldBox(IMarket(data.singularity)._yieldBox()).assets(data.assetId);
+        _checkWhitelisted(asset);
     }
 }

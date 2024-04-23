@@ -62,7 +62,7 @@ abstract contract ERC721Permit is ERC721, EIP712 {
     function nonces(uint256 _tokenId) public view virtual returns (uint256) {
         return _nonces[_tokenId].current();
     }
-    
+
     /**
      * @dev See {IERC20Permit-DOMAIN_SEPARATOR}.
      */
@@ -79,15 +79,14 @@ abstract contract ERC721Permit is ERC721, EIP712 {
         Counters.Counter storage nonce = _nonces[_tokenId];
         current = nonce.current();
         nonce.increment();
-    }   
-    
-    function _afterTokenTransfer(
-            address from,
-            address to,
-            uint256 firstTokenId,
-            uint256 batchSize
-        ) internal virtual override {
-            _useNonce(firstTokenId);
-            super._afterTokenTransfer(from, to, firstTokenId, batchSize);
-        }
+    }
+
+    function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
+        internal
+        virtual
+        override
+    {
+        _useNonce(firstTokenId);
+        super._afterTokenTransfer(from, to, firstTokenId, batchSize);
+    }
 }
