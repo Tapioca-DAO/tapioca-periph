@@ -160,7 +160,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             uint256 _assetId = singularity_._assetId();
 
             address removeAssetTo = data.removeAndRepayData.assetWithdrawData.withdraw
-                || data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
+                && !data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
 
             // convert share to fraction
             uint256 fraction = helper.getFractionForAmount(singularity_, _removeAmount);
@@ -174,7 +174,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(singularity_._asset()).removeDust(computedAmount);
 
                 // already validated above
                 // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);

@@ -86,7 +86,9 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
             uint256 toftAmount = _wrapSglReceipt(
                 IYieldBox(yieldBox), data.singularity, data.user, fraction, data.assetId, true, address(this)
             );
+            (, address tReceiptAddress,,) = IYieldBox(yieldBox).assets(data.assetId);
             data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
+            data.lockAndParticipateSendParams.lzParams.sendParam.minAmountLD = ITOFT(tReceiptAddress).removeDust(toftAmount);
         }
 
         // decode `composeMsg` and re-encode it with updated params
@@ -99,13 +101,14 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
             LockAndParticipateData memory lockData = abi.decode(tapComposeMsg_, (LockAndParticipateData));
             if (lockData.user != data.user) revert Magnetar_UserMismatch();
 
-            lockData.fraction = data.lockAndParticipateSendParams.lzParams.sendParam.amountLD;
+            lockData.fraction = data.lockAndParticipateSendParams.lzParams.sendParam.amountLD; // tOftAmount
 
             data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg =
                 TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lockData), msgType_, msgIndex_, nextMsg_);
         }
 
         {
+            IYieldBox(yieldBox).transfer(data.user, address(this), data.assetId, data.lockAndParticipateSendParams.lzParams.sendParam.amountLD);
             // send on another layer for lending
             // already validated above
             _withdrawToChain(
