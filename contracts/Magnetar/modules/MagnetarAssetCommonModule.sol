@@ -102,9 +102,6 @@ contract MagnetarAssetCommonModule is MagnetarBaseModule {
             // if `lendAmount` > 0:
             //      - add asset to SGL
             fraction = 0;
-            if (lendAmount == 0 && depositData.deposit) {
-                lendAmount = depositData.amount;
-            }
             if (lendAmount > 0) {
                 uint256 lendShare = yieldBox_.toShare(sglAssetId, lendAmount, false);
                 fraction = ISingularity(singularityAddress).addAsset(user, user, false, lendShare);
