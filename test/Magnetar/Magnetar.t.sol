@@ -31,6 +31,8 @@ import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
 
+import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
+
 import {
     PrepareLzCallData,
     PrepareLzCallReturn,
@@ -255,6 +257,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         utils.setAssetOracle(penrose, bb, _oracle);
 
         return (bb, penrose, yb);
+    }
+
+    function test_receive_erc1155() public {
+        ERC1155Mock erc1155 = new ERC1155Mock();
+        erc1155.mint(address(magnetar), 1, 1);
+        assertEq(erc1155.balanceOf(address(magnetar),1), 1);
     }
 
     function test_get_sgl_info() public {
