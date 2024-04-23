@@ -495,7 +495,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
-                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
@@ -554,7 +553,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
-                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
@@ -691,7 +689,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
-                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
@@ -740,7 +737,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     extraOptions: "0x",
                     sendParam: SendParam({
                         amountLD: borrowAmount_,
-                        composeMsg: "0x",
+                        composeMsg: abi.encode(sendParamMsg),
                         dstEid: aEid,
                         extraOptions: "0x",
                         minAmountLD: 0,
@@ -752,7 +749,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
-                composeMsg: abi.encode(sendParamMsg),
                 composeMsgType: 0
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -879,7 +875,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
-                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
@@ -937,7 +932,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
-                composeMsg: "0x",
                 composeMsgType: 0
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -1208,7 +1202,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             composeGas: 0,
                             sendVal: 0,
                             composeVal: 0,
-                            composeMsg: "0x",
                             composeMsgType: 0
                         }),
                         collateralWithdrawData: MagnetarWithdrawData({
@@ -1234,7 +1227,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             composeGas: 0,
                             sendVal: 0,
                             composeVal: 0,
-                            composeMsg: "0x",
                             composeMsgType: 0
                         })
                     })
