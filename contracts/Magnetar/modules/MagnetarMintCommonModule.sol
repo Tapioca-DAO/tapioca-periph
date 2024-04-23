@@ -91,14 +91,15 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
         // lock didn't happen; need to transfer NFT here
         if (!lock) {
-            IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
+            // IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
+            pearlmit.transferFromERC721(user, address(this), lockDataTarget, tOLPTokenId);
         }
 
         IERC721(lockDataTarget).approve(participateData.target, tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
 
         address oTapAddress = ITapiocaOptionBroker(participateData.target).oTAP();
-        IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "0x");
+        IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "");
     }
 
     function _lockOnTOB(
@@ -114,12 +115,14 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             if (!cluster.isWhitelisted(0, lockData.target)) {
                 revert Magnetar_TargetNotWhitelisted(lockData.target);
             }
+            
+            // replace fraction with the amount provided by the caller
             if (lockData.fraction > 0) fraction = lockData.fraction;
+            if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
             // retrieve and deposit SGLAssetId registered in tOLP
             (uint256 tOLPSglAssetId,,) =
                 ITapiocaOptionLiquidityProvision(lockData.target).activeSingularities(singularityAddress);
-            if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
             //deposit to YieldBox
             // _extractTokens(user, singularityAddress, fraction);
@@ -253,7 +256,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             (, address bbCollateralAddress,,) = yieldBox_.assets(bbCollateralId);
 
             // compute collateral share
-            uint256 bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
+            uint256 bbCollateralShare;
 
             // deposit collateral to YB
             if (mintData.collateralDepositData.deposit) {
@@ -272,12 +275,12 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                     (uint256)
                 );
 
-                bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
-
                 bbCollateralAddress.safeApprove(address(yieldBox_), mintData.collateralDepositData.amount);
-                yieldBox_.depositAsset(
+                (, bbCollateralShare) = yieldBox_.depositAsset(
                     bbCollateralId, address(this), address(this), mintData.collateralDepositData.amount, 0
                 );
+            } else {
+                bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
             }
 
             // add collateral to BB
@@ -307,14 +310,6 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                 (Module[] memory modules, bytes[] memory calls) =
                     IMarketHelper(marketHelper).borrow(user, user, mintData.mintAmount);
 
-                uint256 mintShare = yieldBox_.toShare(bigBang_._assetId(), mintData.mintAmount, false);
-                pearlmit.approve(
-                    address(yieldBox_),
-                    bigBang_._assetId(),
-                    bigBangAddress,
-                    mintShare.toUint200(),
-                    (block.timestamp + 1).toUint48()
-                );
                 bigBang_.execute(modules, calls, true);
             }
 
