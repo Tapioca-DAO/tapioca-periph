@@ -261,7 +261,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
             // Overwrite the amount to credit with the amount debited
             _lzSendParam.sendParam.amountLD = amountDebitedLD_;
-            _lzSendParam.sendParam.minAmountLD = amountDebitedLD_;
+            _lzSendParam.sendParam.minAmountLD = _removeDust(amountDebitedLD_);
         }
 
         // Builds the options and OFT message to quote in the endpoint.
