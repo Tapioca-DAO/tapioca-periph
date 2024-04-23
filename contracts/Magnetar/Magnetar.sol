@@ -399,7 +399,9 @@ contract Magnetar is BaseMagnetar {
             pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp + 1).toUint48());
 
             (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            ITapiocaOptionLiquidityProvision(tOLP).safeTransferFrom(
+
+            address oTAP = ITapiocaOptionBroker(_target).oTAP();
+            ITapiocaOptionLiquidityProvision(oTAP).safeTransferFrom(
                 address(this), msg.sender, abi.decode(tokenIdData, (uint256))
             );
 
