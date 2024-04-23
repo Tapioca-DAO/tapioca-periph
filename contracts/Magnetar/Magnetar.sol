@@ -274,7 +274,7 @@ contract Magnetar is BaseMagnetar {
         }
 
         if (funcSig == ITOFT.unwrap.selector) {
-            (, uint256 _amount) = abi.decode(_actionCalldata[4:36], (address, uint256));
+            (, uint256 _amount) = abi.decode(_actionCalldata[4:68], (address, uint256));
             // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
             {
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount);
