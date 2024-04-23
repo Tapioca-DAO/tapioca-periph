@@ -145,8 +145,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
             PrepareLzCallData({
                 dstEid: _lzSendParam.sendParam.dstEid,
                 recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
+                amountToSendLD: _lzSendParam.sendParam.amountLD,
+                minAmountToCreditLD: _lzSendParam.sendParam.minAmountLD,
                 msgType: _lzComposeMsgType,
                 composeMsgData: ComposeMsgData({
                     index: 0,
