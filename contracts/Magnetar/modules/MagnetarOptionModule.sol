@@ -80,6 +80,20 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         IYieldBox yieldBox_ = data.externalData.singularity != address(0)
             ? IYieldBox(singularity_._yieldBox())
             : IYieldBox(bigBang_._yieldBox());
+        
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
+            )
+        );
+
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(pearlmit), yieldBox_
+            )
+        );
 
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
@@ -87,11 +101,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
         uint256 tOLPId = 0;
         if (data.removeAndRepayData.exitData.exit) {
-            if (data.removeAndRepayData.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();
-            if (!cluster.isWhitelisted(0, data.removeAndRepayData.exitData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.removeAndRepayData.exitData.target);
-            }
-
             address oTapAddress = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).oTAP();
             (, ITapiocaOption.TapOption memory oTAPPosition) =
                 ITapiocaOption(oTapAddress).attributes(data.removeAndRepayData.exitData.oTAPTokenID);
@@ -128,10 +137,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
         // performs a tOLP.unlock operation
         if (data.removeAndRepayData.unlockData.unlock) {
-            if (!cluster.isWhitelisted(0, data.removeAndRepayData.unlockData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.removeAndRepayData.unlockData.target);
-            }
-
             if (data.removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
                     if (tOLPId != data.removeAndRepayData.unlockData.tokenId) {
@@ -189,14 +194,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
         // performs a BigBang repay operation
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
-            // _setApprovalForYieldBox(address(bigBang_), yieldBox_);
-            _executeDelegateCall(
-                magnetarBaseModuleExternal,
-                abi.encodeWithSelector(
-                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
-                )
-            );
-
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
                 data.user, data.user, false, data.removeAndRepayData.repayAmount
             );
@@ -271,6 +268,13 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
             )
         );
+
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(pearlmit), yieldBox_
+            )
+        );
     }
 
     function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
@@ -304,5 +308,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
     function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {
         _checkWhitelisted(data.exitData.target);
         _checkWhitelisted(data.unlockData.target);
+
+        if (data.exitData.exit) {
+            if (data.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();
+        }
     }
 }
