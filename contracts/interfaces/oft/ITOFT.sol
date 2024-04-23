@@ -37,6 +37,8 @@ interface ITOFT is ITapiocaOmnichainEngine {
     function balanceOf(address _holder) external view returns (uint256);
     function approve(address _spender, uint256 _amount) external returns (bool);
     function extractUnderlying(uint256 _amount) external; //mTOFT
+    // available in BaseTapiocaOmnichainEngine
+    function removeDust(uint256 _amountLD) external view returns (uint256 amountLD);
 }
 
 interface IToftVault {
