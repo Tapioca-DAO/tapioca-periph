@@ -24,6 +24,7 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {ITwTap} from "tapioca-periph/interfaces/tap-token/ITwTap.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -48,6 +49,7 @@ import {BaseMagnetar} from "./BaseMagnetar.sol";
 contract Magnetar is BaseMagnetar, ERC1155Holder {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
+    using SafeApprove for address;
 
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
@@ -412,10 +414,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 }
             }
             pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp + 1).toUint48());
+            IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), true);
 
-            IYieldBox(yieldBox).setApprovalForAll(_target, true);
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
-            IYieldBox(yieldBox).setApprovalForAll(_target, true);
+
+            IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), false);
             return;
         }
 
@@ -432,8 +435,10 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp + 1).toUint48());
+            ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), true);
 
             (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+            ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), false);
 
             address oTAP = ITapiocaOptionBroker(_target).oTAP();
             ITapiocaOptionLiquidityProvision(oTAP).safeTransferFrom(
@@ -456,7 +461,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             pearlmit.approve(tapOFT, 0, _target, amount.toUint200(), (block.timestamp + 1).toUint48());
+            tapOFT.safeApprove(address(pearlmit), type(uint256).max);
+
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+
+            tapOFT.safeApprove(address(pearlmit), 0);
             return;
         }
 
