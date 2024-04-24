@@ -151,7 +151,7 @@ struct LendOrLockSendParams {
 }
 
 struct MagnetarCall {
-    MagnetarAction id;
+    uint8 id;
     address target;
     uint256 value;
     bool allowFailure;
@@ -172,7 +172,6 @@ enum MagnetarAction {
     MintXChainModule, // 10 BigBang Singular related operations.
     OptionModule, // 11 Market Module related operations.
     YieldBoxModule // 12 YieldBox module related operations.
-
 }
 
 enum MagnetarModule {
