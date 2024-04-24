@@ -174,6 +174,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 || data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
 
             // convert share to fraction
+            singularity_.accrue();
             uint256 fraction = helper.getFractionForAmount(singularity_, _removeAmount);
 
             uint256 share = singularity_.removeAsset(data.user, removeAssetTo, fraction);
