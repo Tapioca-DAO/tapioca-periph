@@ -646,13 +646,13 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: MagnetarAction.YieldBoxModule,
+                id: uint8(MagnetarAction.YieldBoxModule),
                 target: address(yieldBox),
                 value: 0,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
-                id: MagnetarAction.Market,
+                id: uint8(MagnetarAction.Market),
                 target: address(sgl),
                 value: 0,
                 call: lendData
@@ -704,7 +704,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             );
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: MagnetarAction.CollateralModule,
+                id: uint8(MagnetarAction.CollateralModule),
                 target: address(yieldBox),
                 value: 0,
                 call: depositAddCollateralAndBorrowFromMarketData
@@ -761,7 +761,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: MagnetarAction.YieldBoxModule,
+                id: uint8(MagnetarAction.YieldBoxModule),
                 target: address(yieldBox),
                 value: 0,
                 call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)

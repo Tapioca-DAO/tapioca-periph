@@ -182,6 +182,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
 
     function _prepareLzSend(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
         private
+        view
         returns (PrepareLzCallReturn memory prepareLzCallReturn)
     {
         prepareLzCallReturn = toeHelper.prepareLzCall(

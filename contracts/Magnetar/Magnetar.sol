@@ -96,28 +96,28 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             /// @dev Permit on YB, or an SGL/BB market
             if (_action.id == uint8(MagnetarAction.Permit)) {
-                _processPermitOperation(_action.target, _action.call, _action.allowFailure);
+                _processPermitOperation(_action.target, _action.call);
                 continue; // skip the rest of the loop
             }
 
             if (_action.id == uint8(MagnetarAction.OFT)) {
-                _processOFTOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+                _processOFTOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
             if (_action.id == uint8(MagnetarAction.TapLock)) {
-                _processTapLockOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+                _processTapLockOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
             if (_action.id == uint8(MagnetarAction.TapUnlock)) {
-                _processTapUnlockOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+                _processTapUnlockOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Market singular operations
             if (_action.id == uint8(MagnetarAction.Market)) {
-                _processMarketOperation(_action.target, _action.call, _action.value, _action.allowFailure);
+                _processMarketOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
