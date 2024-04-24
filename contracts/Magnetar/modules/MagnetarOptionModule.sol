@@ -125,6 +125,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 );
                 if (isErr) revert Magnetar_ExtractTokenFail();
             }
+            IERC721(oTapAddress).approve(
+                data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID
+            );
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
                 data.removeAndRepayData.exitData.oTAPTokenID
             );
