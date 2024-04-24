@@ -91,7 +91,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         for (uint256 i; i < length; i++) {
             MagnetarCall calldata _action = calls[i];
-            
+
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
@@ -291,7 +291,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
 
         if (selectorValidated) {
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+            _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
@@ -354,7 +354,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
 
         if (selectorValidated) {
-            _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
+            _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
