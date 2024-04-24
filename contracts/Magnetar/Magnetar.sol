@@ -500,12 +500,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         returns (bytes memory returnData)
     {
         bool success;
-
-        if (_actionValue > 0) {
-            (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
-        } else {
-            (success, returnData) = _target.call(_actionCalldata);
-        }
+        (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
 
         if (!success && !_allowFailure) {
             _getRevertMsg(returnData);
