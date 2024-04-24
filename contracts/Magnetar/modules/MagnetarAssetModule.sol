@@ -100,6 +100,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
         // @dev performs a repay operation for the specified market
         if (data.repayAmount > 0) {
+            _market.accrue();
             uint256 repayPart = helper.getBorrowPartForAmount(data.market, data.repayAmount);
 
             _setApprovalForYieldBox(data.market, _yieldBox);
