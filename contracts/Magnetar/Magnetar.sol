@@ -76,7 +76,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         modules[MagnetarModule.OptionModule] = _optionModule;
         modules[MagnetarModule.YieldBoxModule] = _yieldBoxModule;
     }
-    
+
     /// =====================
     /// Public
     /// =====================
@@ -164,10 +164,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
-            if (
-                address(magnetarModuleExtender) != address(0)
-                    && magnetarModuleExtender.isValidActionId(_action.id)
-            ) {
+            if (address(magnetarModuleExtender) != address(0) && magnetarModuleExtender.isValidActionId(_action.id)) {
                 bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
                 (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
                 if (!success) {
@@ -245,11 +242,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
-    function _processOFTOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue
-    ) private {
+    function _processOFTOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         /// @dev owner address should always be first param.
@@ -305,11 +298,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
-    function _processMarketOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue
-    ) private {
+    function _processMarketOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         /// @dev owner address should always be first param.
@@ -324,16 +313,17 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // function sellCollateral(address from, uint256 share, bytes calldata data)
         if (funcSig == IMarket.execute.selector) {
             selectorValidated = true;
-            (Module[] memory modules, bytes[] memory calls,) = abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
+            (Module[] memory modules, bytes[] memory calls,) =
+                abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
             // sanitize modules
             uint256 modulesLength;
-            for (uint i; i < modulesLength; i++) {
+            for (uint256 i; i < modulesLength; i++) {
                 if (modules[i] == Module.Liquidation) revert Magnetar_MarketOperationNotAllowed();
             }
 
             // sanitize call
             uint256 callsLength = calls.length;
-            for(uint i; i < callsLength; i++) {
+            for (uint256 i; i < callsLength; i++) {
                 bytes memory _call = calls[i];
 
                 address _from;
@@ -368,11 +358,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
-    function _processTapLockOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue
-    ) private {
+    function _processTapLockOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         /// @dev owner address should always be first param.
@@ -396,7 +382,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 }
             }
 
-            
             pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp + 1).toUint48());
             IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), true);
             _executeCall(_target, _actionCalldata, _actionValue);
@@ -460,11 +445,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
-    function _processTapUnlockOperation(
-        address _target,
-        bytes calldata _actionCalldata,
-        uint256 _actionValue
-    ) private {
+    function _processTapUnlockOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
+        private
+    {
         if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);

@@ -213,13 +213,20 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
 
             (penrose, mc,) = utils.createPenrose(
-                address(pearlmit), IYieldBox(address(yb)), ICluster(address(cluster)), address(aERC20), address(aERC20), aERC20Id, aERC20Id
+                address(pearlmit),
+                IYieldBox(address(yb)),
+                ICluster(address(cluster)),
+                address(aERC20),
+                address(aERC20),
+                aERC20Id,
+                aERC20Id
             );
         }
 
         Singularity sgl;
         {
-            ERC20WithoutStrategy collateralStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
+            ERC20WithoutStrategy collateralStrategy =
+                utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
             collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
 
             ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
@@ -253,7 +260,13 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
 
         (Penrose penrose,, BigBang bbMediumRiskMC) = utils.createPenrose(
-            address(pearlmit), IYieldBox(address(yb)), ICluster(address(cluster)), address(aERC20), address(aERC20), aERC20Id, aERC20Id
+            address(pearlmit),
+            IYieldBox(address(yb)),
+            ICluster(address(cluster)),
+            address(aERC20),
+            address(aERC20),
+            aERC20Id,
+            aERC20Id
         );
 
         {
@@ -286,7 +299,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
     function test_receive_erc1155() public {
         ERC1155Mock erc1155 = new ERC1155Mock();
         erc1155.mint(address(magnetar), 1, 1);
-        assertEq(erc1155.balanceOf(address(magnetar),1), 1);
+        assertEq(erc1155.balanceOf(address(magnetar), 1), 1);
     }
 
     function test_get_sgl_info() public {
@@ -387,12 +400,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 value: 0,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.Market),
-                target: address(sgl),
-                value: 0,
-                call: lendData
-            });
+            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
 
             magnetar.burst(calls);
 
@@ -461,12 +469,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 value: 0,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.Market),
-                target: address(sgl),
-                value: 0,
-                call: lendData
-            });
+            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
 
             magnetar.burst(calls);
 
@@ -651,12 +654,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 value: 0,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.Market),
-                target: address(sgl),
-                value: 0,
-                call: lendData
-            });
+            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
 
             magnetar.burst(calls);
 
@@ -732,7 +730,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         {
             address randomAddr = makeAddr("randomAddr");
-            SendParamsMsg memory sendParamMsg = SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
+            SendParamsMsg memory sendParamMsg =
+                SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
 
             MagnetarWithdrawData memory withdrawData = MagnetarWithdrawData({
                 withdraw: true,
@@ -833,12 +832,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 value: 0,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.Market),
-                target: address(sgl),
-                value: 0,
-                call: lendData
-            });
+            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
 
             magnetar.burst(calls);
 
@@ -973,17 +967,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         {
             MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
 
-            
-            pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-            pearlmit.approve(address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(
+                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)
+            ); // Atomic approval
+            pearlmit.approve(
+                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)
+            ); // Atomic approval
             collateral.approve(address(magnetar), type(uint256).max);
             yieldBox.setApprovalForAll(address(pearlmit), true);
 
             //deposit approvals
             yieldBox.setApprovalForAll(address(magnetar), true);
             collateral.approve(address(yieldBox), type(uint256).max); //for yb deposit
-            
-        
+
             uint256 collateralShare = yieldBox.toShare(collateralId, tokenAmount_, false);
             bytes memory depositToYbData = abi.encodeWithSelector(
                 MagnetarYieldBoxModule.depositAsset.selector,
@@ -1006,12 +1002,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             (modules, calls) = marketHelper.addCollateral(address(this), address(this), false, tokenAmount_, 0);
             bytes memory data = abi.encodeWithSelector(Singularity.execute.selector, modules, calls, true);
 
-            magnetarCalls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.Market),
-                target: address(bb), 
-                value: 0,
-                call: data
-            }); 
+            magnetarCalls[1] =
+                MagnetarCall({id: uint8(MagnetarAction.Market), target: address(bb), value: 0, call: data});
 
             magnetar.burst(magnetarCalls);
         }

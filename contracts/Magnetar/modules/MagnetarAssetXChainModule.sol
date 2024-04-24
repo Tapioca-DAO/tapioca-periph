@@ -88,7 +88,8 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
             );
             (, address tReceiptAddress,,) = IYieldBox(yieldBox).assets(data.assetId);
             data.lockAndParticipateSendParams.lzParams.sendParam.amountLD = toftAmount;
-            data.lockAndParticipateSendParams.lzParams.sendParam.minAmountLD = ITOFT(tReceiptAddress).removeDust(toftAmount);
+            data.lockAndParticipateSendParams.lzParams.sendParam.minAmountLD =
+                ITOFT(tReceiptAddress).removeDust(toftAmount);
         }
 
         // decode `composeMsg` and re-encode it with updated params
@@ -108,7 +109,9 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
         }
 
         {
-            IYieldBox(yieldBox).transfer(data.user, address(this), data.assetId, data.lockAndParticipateSendParams.lzParams.sendParam.amountLD);
+            IYieldBox(yieldBox).transfer(
+                data.user, address(this), data.assetId, data.lockAndParticipateSendParams.lzParams.sendParam.amountLD
+            );
             // send on another layer for lending
             // already validated above
             _withdrawToChain(

@@ -150,7 +150,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         if (singularityAddress == address(0)) return 0;
 
         _validateDepositYBLendSGL(singularityAddress, yieldBox_, user);
-        
+
         // _setApprovalForYieldBox(singularityAddress, yieldBox_);
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -209,9 +209,9 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         address marketHelper
     ) internal {
         if (bigBangAddress == address(0)) return;
-        
+
         _validateDepositYBBorrowBB(bigBangAddress, yieldBox_, user, marketHelper);
-        
+
         // _setApprovalForYieldBox(bigBangAddress, yieldBox_);
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -365,27 +365,22 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         if (fraction == 0 && lockData.fraction == 0) revert Magnetar_ActionParamsMismatch();
     }
 
-    function _validateDepositYBLendSGL(
-        address singularityAddress,
-        IYieldBox yieldBox_,
-        address user) private view {
-
+    function _validateDepositYBLendSGL(address singularityAddress, IYieldBox yieldBox_, address user) private view {
         // Check sender
         _checkSender(user);
 
         // Check provided addresses
         _checkWhitelisted(address(yieldBox_));
         _checkWhitelisted(singularityAddress);
-       
+
         // Check deposit data
         if (singularityAddress == address(0)) revert Magnetar_ActionParamsMismatch();
     }
 
-    function _validateDepositYBBorrowBB(address bigBangAddress,
-        IYieldBox yieldBox_,
-        address user,
-        address marketHelper) private view {
-
+    function _validateDepositYBBorrowBB(address bigBangAddress, IYieldBox yieldBox_, address user, address marketHelper)
+        private
+        view
+    {
         // Check sender
         _checkSender(user);
 

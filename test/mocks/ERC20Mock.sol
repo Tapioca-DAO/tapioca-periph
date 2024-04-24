@@ -8,6 +8,7 @@ import {
     MessagingReceipt,
     OFTReceipt
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+
 contract ERC20Mock is ERC20 {
     constructor() ERC20("ERC-20C Mock", "MOCK") {}
 
@@ -19,13 +20,10 @@ contract ERC20Mock is ERC20 {
         _burn(from, amount);
     }
 
-    function combineOptions(uint32, uint16, bytes calldata)
-        external
-        pure
-        returns (bytes memory)
-        {
-            return "0x";
-        }
+    function combineOptions(uint32, uint16, bytes calldata) external pure returns (bytes memory) {
+        return "0x";
+    }
+
     function quoteSendPacket(
         SendParam calldata,
         bytes calldata,

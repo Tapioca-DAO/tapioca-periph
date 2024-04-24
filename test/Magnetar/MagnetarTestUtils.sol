@@ -74,8 +74,16 @@ contract MagnetarTestUtils {
         uint256 tapTokenId_,
         uint256 mainTokenId_
     ) external returns (Penrose penrose, Singularity mediumRiskMC, BigBang bbMediumRiskMC) {
-        penrose =
-            new Penrose(_yieldBox, _cluster, IERC20(tapToken_), IERC20(mainToken_), IPearlmit(pearlmit), tapTokenId_, mainTokenId_, address(this));
+        penrose = new Penrose(
+            _yieldBox,
+            _cluster,
+            IERC20(tapToken_),
+            IERC20(mainToken_),
+            IPearlmit(pearlmit),
+            tapTokenId_,
+            mainTokenId_,
+            address(this)
+        );
         mediumRiskMC = new Singularity();
         bbMediumRiskMC = new BigBang();
 

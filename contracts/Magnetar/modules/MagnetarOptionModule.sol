@@ -10,7 +10,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
-    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData, ICommonExternalContracts, IRemoveAndRepay
+    ExitPositionAndRemoveCollateralData,
+    MagnetarWithdrawData,
+    ICommonExternalContracts,
+    IRemoveAndRepay
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -80,7 +83,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         IYieldBox yieldBox_ = data.externalData.singularity != address(0)
             ? IYieldBox(singularity_._yieldBox())
             : IYieldBox(bigBang_._yieldBox());
-        
+
         _executeDelegateCall(
             magnetarBaseModuleExternal,
             abi.encodeWithSelector(
@@ -121,7 +124,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 );
                 if (isErr) revert Magnetar_ExtractTokenFail();
             }
-            IERC721(oTapAddress).approve(data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID);
+            IERC721(oTapAddress).approve(
+                data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID
+            );
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
                 data.removeAndRepayData.exitData.oTAPTokenID
             );
@@ -180,7 +185,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(singularity_._asset()).removeDust(computedAmount);
+                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD =
+                    ITOFT(singularity_._asset()).removeDust(computedAmount);
 
                 // already validated above
                 // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
@@ -250,7 +256,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(bigBang_._collateral()).removeDust(computedAmount);
+                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD =
+                    ITOFT(bigBang_._collateral()).removeDust(computedAmount);
 
                 // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
                 _executeDelegateCall(
@@ -286,10 +293,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         }
     }
 
-
-    function _validateExitPositionAndRemoveCollateral(
-        ExitPositionAndRemoveCollateralData memory data
-    ) private view {
+    function _validateExitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory data) private view {
         // Check sender
         _checkSender(data.user);
 
@@ -303,7 +307,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         _checkWhitelisted(data.magnetar);
         _checkWhitelisted(data.bigBang);
         _checkWhitelisted(data.singularity);
-
     }
 
     function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {

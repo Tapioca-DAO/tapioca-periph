@@ -170,6 +170,7 @@ enum MagnetarAction {
     MintXChainModule, // 10 BigBang Singular related operations.
     OptionModule, // 11 Market Module related operations.
     YieldBoxModule // 12 YieldBox module related operations.
+
 }
 
 enum MagnetarModule {
