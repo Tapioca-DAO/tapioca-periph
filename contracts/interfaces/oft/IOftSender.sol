@@ -25,4 +25,6 @@ interface IOftSender {
         returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt);
 
     function endpoint() external view returns (address);
+    // available in BaseTapiocaOmnichainEngine
+    function removeDust(uint256 _amountLD) external view returns (uint256 amountLD);
 }
