@@ -139,8 +139,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     ) private {
         PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
 
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        PrepareLzCallReturn memory prepareLzCallReturn2 = _toeHelper.prepareLzCall(
+        PrepareLzCallReturn memory prepareLzCallReturn2 = toeHelper.prepareLzCall(
             ITapiocaOmnichainEngine(_asset),
             PrepareLzCallData({
                 dstEid: _lzSendParam.sendParam.dstEid,
@@ -175,8 +174,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         private
         returns (PrepareLzCallReturn memory prepareLzCallReturn)
     {
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        prepareLzCallReturn = _toeHelper.prepareLzCall(
+        prepareLzCallReturn = toeHelper.prepareLzCall(
             ITapiocaOmnichainEngine(_asset),
             PrepareLzCallData({
                 dstEid: _lzSendParam.sendParam.dstEid,
