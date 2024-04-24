@@ -317,7 +317,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             magnetar.burst(calls);
@@ -368,14 +367,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.Market,
                 target: address(sgl),
                 value: 0,
-                allowFailure: false,
                 call: lendData
             });
 
@@ -444,14 +441,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.Market,
                 target: address(sgl),
                 value: 0,
-                allowFailure: false,
                 call: lendData
             });
 
@@ -504,7 +499,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -565,7 +559,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.AssetModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: repayData
             });
 
@@ -638,14 +631,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.Market,
                 target: address(sgl),
                 value: 0,
-                allowFailure: false,
                 call: lendData
             });
 
@@ -698,7 +689,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -756,7 +746,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
             });
 
@@ -824,14 +813,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.Market,
                 target: address(sgl),
                 value: 0,
-                allowFailure: false,
                 call: lendData
             });
 
@@ -884,7 +871,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -939,7 +925,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
             });
 
@@ -995,7 +980,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
 
@@ -1008,7 +992,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.Market,
                 target: address(bb), 
                 value: 0,
-                allowFailure: false,
                 call: data
             }); 
 
@@ -1066,7 +1049,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
-                allowFailure: false,
                 call: mintData
             });
 
@@ -1131,7 +1113,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
-                allowFailure: false,
                 call: mintData
             });
 
@@ -1238,14 +1219,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.OptionModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
-                allowFailure: false,
                 call: removeData
             });
 
@@ -1316,14 +1295,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
-                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
                 id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
-                allowFailure: false,
                 call: mintData
             });
 
