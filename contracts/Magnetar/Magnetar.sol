@@ -89,12 +89,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         for (uint256 i; i < length; i++) {
             MagnetarCall calldata _action = calls[i];
-            if (!_action.allowFailure) {
-                require(
-                    _action.call.length > 0,
-                    string.concat("Magnetar: Missing call for action with index", string(abi.encode(i)))
-                );
-            }
+          
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
