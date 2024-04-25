@@ -3,7 +3,7 @@
 pragma solidity 0.8.22;
 
 // Lz
-import {TestHelper} from "./LZSetup/TestHelper.sol";
+import {TestHelper} from "../LZSetup/TestHelper.sol";
 
 // Tapioca
 import {

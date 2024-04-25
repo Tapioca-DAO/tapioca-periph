@@ -35,4 +35,4 @@ arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_API_KEY}", url = "https://api-sep
 # Use source .env/${NETWORK}.env to set the following variables
 [rpc_endpoints]
 mainnet = "${RPC_URL}"
-arbitrum = "${RPC_URL}"
+arbitrum = "${RPC_URL_ARBITRUM}"
