@@ -78,7 +78,9 @@ contract PearlmitTest is PearlmitBaseTest {
                         keccak256(abi.encodePacked(hashApprovals)),
                         nonce,
                         sigDeadline,
-                        pearlmit.masterNonce(alice)
+                        pearlmit.masterNonce(alice),
+                        address(this),
+                        keccak256("0x")
                     )
                 )
             );
@@ -106,8 +108,12 @@ contract PearlmitTest is PearlmitBaseTest {
 
         // Execute the permit batch transfer from
         vm.startPrank(bob);
+        vm.expectRevert(); // Revert because executor is different
         pearlmit.permitBatchTransferFrom(batchData, keccak256("0x"));
         vm.stopPrank();
+
+        // Doesn't revert because executor is address(this)
+        pearlmit.permitBatchTransferFrom(batchData, keccak256("0x"));
 
         // Assert final state
         assertEq(ERC20Mock(erc20Token).balanceOf(bob), 1e18);
