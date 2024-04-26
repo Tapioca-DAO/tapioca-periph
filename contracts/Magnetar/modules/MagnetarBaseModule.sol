@@ -2,6 +2,7 @@
 pragma solidity 0.8.22;
 
 // LZ
+import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 
 // External
@@ -53,15 +54,21 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
             revert Magnetar_TargetNotWhitelisted(address(data.yieldBox));
         }
         IYieldBox _yieldBox = IYieldBox(data.yieldBox);
+        (, address asset,,) = _yieldBox.assets(data.assetId);
 
         // perform a same chain withdrawal
         if (data.lzSendParams.sendParam.dstEid == 0) {
             _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
             return;
+        } 
+
+        uint32 srcEid = IMessagingChannel(IOftSender(asset).endpoint()).eid();
+        if (data.lzSendParams.sendParam.dstEid == srcEid) {
+            _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
+            return;
         }
 
         // perform a cross chain withdrawal
-        (, address asset,,) = _yieldBox.assets(data.assetId);
         if (!cluster.isWhitelisted(0, asset)) {
             revert Magnetar_TargetNotWhitelisted(asset);
         }
@@ -145,8 +152,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
             PrepareLzCallData({
                 dstEid: _lzSendParam.sendParam.dstEid,
                 recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
+                amountToSendLD: _lzSendParam.sendParam.amountLD,
+                minAmountToCreditLD: _lzSendParam.sendParam.minAmountLD,
                 msgType: _lzComposeMsgType,
                 composeMsgData: ComposeMsgData({
                     index: 0,

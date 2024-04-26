@@ -26,10 +26,13 @@ import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol"
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
+import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
+
+import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
 
 import {
     PrepareLzCallData,
@@ -255,6 +258,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         utils.setAssetOracle(penrose, bb, _oracle);
 
         return (bb, penrose, yb);
+    }
+
+    function test_receive_erc1155() public {
+        ERC1155Mock erc1155 = new ERC1155Mock();
+        erc1155.mint(address(magnetar), 1, 1);
+        assertEq(erc1155.balanceOf(address(magnetar),1), 1);
     }
 
     function test_get_sgl_info() public {
@@ -752,6 +761,71 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 balanceOf = asset.balanceOf(address(this));
             assertGt(balanceOf, 0);
             assertEq(balanceOf, borrowAmount_);
+        }
+    }
+
+    function test_magnetar_execute_decode() public {
+        (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
+        utils.setBBEthMarket(penrose, address(bb));
+
+        cluster.updateContract(0, address(bb), true);
+        cluster.updateContract(0, address(yieldBox), true);
+        vm.label(address(bb), "BigBang");
+        vm.label(address(yieldBox), "YieldBox");
+
+        uint256 tokenAmount_ = 1 ether;
+
+        //deal
+        {
+            deal(address(collateral), address(this), tokenAmount_);
+        }
+
+        {
+            MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
+
+            
+            pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            collateral.approve(address(magnetar), type(uint256).max);
+            yieldBox.setApprovalForAll(address(pearlmit), true);
+
+            //deposit approvals
+            yieldBox.setApprovalForAll(address(magnetar), true);
+            collateral.approve(address(yieldBox), type(uint256).max); //for yb deposit
+            
+        
+            uint256 collateralShare = yieldBox.toShare(collateralId, tokenAmount_, false);
+            bytes memory depositToYbData = abi.encodeWithSelector(
+                MagnetarYieldBoxModule.depositAsset.selector,
+                address(yieldBox),
+                collateralId,
+                address(this),
+                address(this),
+                0,
+                collateralShare
+            );
+            magnetarCalls[0] = MagnetarCall({
+                id: MagnetarAction.YieldBoxModule,
+                target: address(yieldBox),
+                value: 0,
+                allowFailure: false,
+                call: depositToYbData
+            });
+
+            Module[] memory modules;
+            bytes[] memory calls;
+            (modules, calls) = marketHelper.addCollateral(address(this), address(this), false, tokenAmount_, 0);
+            bytes memory data = abi.encodeWithSelector(Singularity.execute.selector, modules, calls, true);
+
+            magnetarCalls[1] = MagnetarCall({
+                id: MagnetarAction.Market,
+                target: address(bb), 
+                value: 0,
+                allowFailure: false,
+                call: data
+            }); 
+
+            magnetar.burst(magnetarCalls);
         }
     }
 

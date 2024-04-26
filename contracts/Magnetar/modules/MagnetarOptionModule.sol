@@ -23,6 +23,7 @@ import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -124,6 +125,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 );
                 if (isErr) revert Magnetar_ExtractTokenFail();
             }
+            IERC721(oTapAddress).approve(
+                data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID
+            );
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
                 data.removeAndRepayData.exitData.oTAPTokenID
             );
@@ -260,7 +264,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(bigBang_._collateral()).removeDust(computedAmount);
                 // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,
