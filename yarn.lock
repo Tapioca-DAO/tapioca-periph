@@ -582,29 +582,29 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@layerzerolabs/lz-evm-messagelib-v2@2.3.1":
-  version "2.3.1"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.1.tgz#f929e36bb7733bd805a9199467a97039cc5ae80b"
-  integrity sha512-dMnogVaCNSOBYFA5eZt5I0+X0cdgKRWvdft66APY+cH85/Kmtih3Em1ml3zvn6RuaASHtHbsXfDL/H1haCx7pA==
+"@layerzerolabs/lz-evm-messagelib-v2@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.3.tgz#e4af0233dce94c76f064793dff364e32f0ba6f86"
+  integrity sha512-lDiYLpryEJOKBbmibIx1GRLqUjYBZ0yfzD2g7e2FMaDxbv0sEiINu22VMF3LoER10SDefYS43DSNRI6ns4QKvQ==
 
-"@layerzerolabs/lz-evm-oapp-v2@2.3.1":
-  version "2.3.1"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.3.1.tgz#9926d661379d00de4cbd0d11161b19baa9107953"
-  integrity sha512-AVFZSrDHpSgQB+pkr4slmGMpqadW6TbqRnIPzGwtCJXPQ/y5FNPnZaSnNMmDqOGCNSSLf2dWArjbgiAF9Oh6YA==
+"@layerzerolabs/lz-evm-oapp-v2@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.3.3.tgz#4182898481781ea08d65135365ea3bc4a52f9a21"
+  integrity sha512-LQd9/Vz8YxZrCMBTOiGbmNCei0wH0zKnP8Q5apnOm+EfDk0V9PLHYuaGsyuSRjnyxh524FDOfEJf509XiJeNZw==
 
-"@layerzerolabs/lz-evm-protocol-v2@2.3.1":
-  version "2.3.1"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.1.tgz#cd35e5661936c321ae4aca3754459bc2c63ad5ae"
-  integrity sha512-4EFmcJG2pHumfHYBvDoqse3XbvFLreRhAY4Nbq/Wt5o/aBjmCBakuxTiAJOMJTcrfFZUZkakuOMm2kgpTE94Eg==
+"@layerzerolabs/lz-evm-protocol-v2@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.3.tgz#4ec9eacc5e59124f784c2b77a4e023ff262fb4eb"
+  integrity sha512-u8RmXvC0AfmYgeNCGcfHLkOB9am5VQTQ+4YrX7AuRUuF6CpUNvJd8aaL30+NIGwZzgfE6+np83hj5rXmwlmlzA==
 
-"@layerzerolabs/lz-evm-v1-0.7@2.3.1":
-  version "2.3.1"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.3.1.tgz#527b7bbf8521213f8449b7576ac5b7daa8c70d85"
-  integrity sha512-JsyFwSpq4i7qNOmo4mxFI8ZT4chSLmI+o55YAbQVS1//lkvrlDRSWi9iS3R0Ah4ji1qggH0WVjaMJc3V/5Lx5g==
+"@layerzerolabs/lz-evm-v1-0.7@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.3.3.tgz#7fda83f6847a2c99ec3462d405d83cea642d56be"
+  integrity sha512-TltdE4+WaOPzZD2x4Y3LPWmJJKQd6j1cnqfPUo2fCLiP+t7nzh6AS+U/0LM02UI/ro/mtYENb3SEVdz+fwUw9A==
 
-"@layerzerolabs/solidity-bytes-utils@^0.8.2":
+"@layerzerolabs/solidity-bytes-utils@^0.8.0":
   version "0.8.0"
-  resolved "https://registry.npmjs.org/@layerzerolabs/solidity-bytes-utils/-/solidity-bytes-utils-0.8.0.tgz#9173a8597ece5f8d0e8e5e5b970e3f2159c883a5"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/solidity-bytes-utils/-/solidity-bytes-utils-0.8.0.tgz#9173a8597ece5f8d0e8e5e5b970e3f2159c883a5"
   integrity sha512-lrqilEQGqcYViMh63vVjjyamwGhOJuqykUv7cad56Epx2vEcJtcKZytw2K4eebUREYpNHpsMNxO9iLmp06aEqg==
 
 "@metamask/eth-sig-util@^4.0.0":
@@ -5391,9 +5391,9 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.34:
+tapioca-sdk@^1.7.37:
   version "1.7.37"
-  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.7.37.tgz#ad55a926cf5cef2289e45be40abea1283fe006f0"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.37.tgz#ad55a926cf5cef2289e45be40abea1283fe006f0"
   integrity sha512-mzk5a3sB7jJFrHyzXtrwLig97t5ahqhCAjmHIAghEAGFZr5L1xWsDshxEktVE5NCdWSjRVU4t9r9WNWwtgb73w==
   dependencies:
     "@uniswap/v3-core" "^1.0.1"
