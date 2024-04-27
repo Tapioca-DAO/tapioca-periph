@@ -140,6 +140,8 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                     MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, lockData.target, yieldBox_
                 )
             );
+            // TODO lockData.amount and lockData.fraction should be the same, remove one
+            pearlmit.approve(yieldBox_, tOLPSglAssetId, lockData.target, lockData.amount, (block.timestamp).toUint48());
             tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target).lock(
                 participate ? address(this) : user, singularityAddress, lockData.lockDuration, lockData.amount
             );
@@ -282,14 +284,6 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
             // add collateral to BB
             if (mintData.collateralDepositData.amount > 0) {
-                // _setApprovalForYieldBox(address(bigBang_), yieldBox_);
-                _executeDelegateCall(
-                    magnetarBaseModuleExternal,
-                    abi.encodeWithSelector(
-                        MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
-                    )
-                );
-
                 (Module[] memory modules, bytes[] memory calls) = IMarketHelper(marketHelper).addCollateral(
                     mintData.collateralDepositData.deposit ? address(this) : user,
                     user,
