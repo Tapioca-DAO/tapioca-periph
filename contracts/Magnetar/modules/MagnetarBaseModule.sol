@@ -2,6 +2,7 @@
 pragma solidity 0.8.22;
 
 // LZ
+import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 
 // External
@@ -17,11 +18,13 @@ import {
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainEngineHelper} from
     "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -40,8 +43,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
     using SafeCast for uint256;
 
     error Magnetar_GasMismatch(uint256 expected, uint256 received);
-    error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
+    error Magnetar_UserMismatch();
 
     constructor() MagnetarStorage(IPearlmit(address(0))) {}
 
@@ -53,22 +56,28 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
             revert Magnetar_TargetNotWhitelisted(address(data.yieldBox));
         }
         IYieldBox _yieldBox = IYieldBox(data.yieldBox);
+        (, address asset,,) = _yieldBox.assets(data.assetId);
 
         // perform a same chain withdrawal
         if (data.lzSendParams.sendParam.dstEid == 0) {
             _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
             return;
+        } 
+
+        uint32 srcEid = IMessagingChannel(IOftSender(asset).endpoint()).eid();
+        if (data.lzSendParams.sendParam.dstEid == srcEid) {
+            _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
+            return;
         }
 
         // perform a cross chain withdrawal
-        (, address asset,,) = _yieldBox.assets(data.assetId);
         if (!cluster.isWhitelisted(0, asset)) {
             revert Magnetar_TargetNotWhitelisted(asset);
         }
 
         _yieldBox.withdraw(data.assetId, address(this), address(this), data.lzSendParams.sendParam.amountLD, 0);
-        // TODO: decide about try-catch here
         if (data.compose) {
+            // !!! make sure data.composeMsg was sanitized
             _lzCustomWithdraw(
                 asset,
                 data.lzSendParams,
@@ -83,6 +92,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         }
     }
 
+    
     function _setApprovalForYieldBox(address _target, IYieldBox _yieldBox) internal {
         bool isApproved = _yieldBox.isApprovedForAll(address(this), _target);
         if (!isApproved) {
@@ -145,8 +155,8 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
             PrepareLzCallData({
                 dstEid: _lzSendParam.sendParam.dstEid,
                 recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
+                amountToSendLD: _lzSendParam.sendParam.amountLD,
+                minAmountToCreditLD: _lzSendParam.sendParam.minAmountLD,
                 msgType: _lzComposeMsgType,
                 composeMsgData: ComposeMsgData({
                     index: 0,

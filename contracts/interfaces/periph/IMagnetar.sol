@@ -29,7 +29,6 @@ struct MagnetarWithdrawData {
     uint128 composeGas;
     uint128 sendVal;
     uint128 composeVal;
-    bytes composeMsg;
     uint16 composeMsgType;
     //@dev actions data
     bool withdraw;

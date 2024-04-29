@@ -10,7 +10,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
-    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData
+    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData, ICommonExternalContracts, IRemoveAndRepay
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -23,6 +23,7 @@ import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -48,7 +49,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
     error Magnetar_MarketCallFailed(bytes call);
-    error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
     error Magnetar_ComposeMsgNotAllowed();
     error Magnetar_UserMismatch();
@@ -72,20 +72,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
      *     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
      */
     function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory data) public payable {
-        // Check sender
-        _checkSender(data.user);
-
-        // Check whitelisted
-        if (data.externalData.bigBang != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalData.bigBang)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalData.bigBang);
-            }
-        }
-        if (data.externalData.singularity != address(0)) {
-            if (!cluster.isWhitelisted(0, data.externalData.singularity)) {
-                revert Magnetar_TargetNotWhitelisted(data.externalData.singularity);
-            }
-        }
+        // validate data
+        _validateExitPositionAndRemoveCollateral(data);
 
         IMarket bigBang_ = IMarket(data.externalData.bigBang);
         ISingularity singularity_ = ISingularity(data.externalData.singularity);
@@ -124,6 +112,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 );
                 if (isErr) revert Magnetar_ExtractTokenFail();
             }
+            IERC721(oTapAddress).approve(
+                data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID
+            );
             ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
                 data.removeAndRepayData.exitData.oTAPTokenID
             );
@@ -170,7 +161,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             uint256 _assetId = singularity_._assetId();
 
             address removeAssetTo = data.removeAndRepayData.assetWithdrawData.withdraw
-                || data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
+                && !data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
 
             // convert share to fraction
             uint256 fraction = helper.getFractionForAmount(singularity_, _removeAmount);
@@ -184,7 +175,9 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(singularity_._asset()).removeDust(computedAmount);
+
+                // already validated above
                 // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,
@@ -243,13 +236,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper)
                 .removeCollateral(data.user, removeCollateralTo, collateralShare);
-            pearlmit.approve(
-                address(yieldBox_),
-                _collateralId,
-                address(bigBang_),
-                collateralShare.toUint200(),
-                (block.timestamp + 1).toUint48()
-            );
             bigBang_.execute(modules, calls, true);
 
             //withdraw
@@ -267,7 +253,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = computedAmount;
+                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(bigBang_._collateral()).removeDust(computedAmount);
+
                 // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
                 _executeDelegateCall(
                     magnetarBaseModuleExternal,
@@ -293,5 +280,30 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         if (!success) {
             _getRevertMsg(returnData);
         }
+    }
+
+
+    function _validateExitPositionAndRemoveCollateral(
+        ExitPositionAndRemoveCollateralData memory data
+    ) private view {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkExternalData(data.externalData);
+        _checkRemoveAndRepayData(data.removeAndRepayData);
+    }
+
+    function _checkExternalData(ICommonExternalContracts memory data) private view {
+        _checkWhitelisted(data.marketHelper);
+        _checkWhitelisted(data.magnetar);
+        _checkWhitelisted(data.bigBang);
+        _checkWhitelisted(data.singularity);
+
+    }
+
+    function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {
+        _checkWhitelisted(data.exitData.target);
+        _checkWhitelisted(data.unlockData.target);
     }
 }

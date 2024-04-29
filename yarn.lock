@@ -44,6 +44,31 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@balancer-labs/v2-interfaces@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/v2-interfaces/-/v2-interfaces-0.2.0.tgz#327c6a6d663c5e07872c59c590bb687e5b2e0f4e"
+  integrity sha512-p317Ojk3iZ6ja689u72HZvi03mG02LRkS+40J/EO2o1SDdOxbKThP7cWaZNbNJBC3IP8hzRcsZI+zmLqGa6Emw==
+
+"@balancer-labs/v2-interfaces@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/v2-interfaces/-/v2-interfaces-0.2.1.tgz#df6f02496939fe1599fc17232fbb6704cef63cc8"
+  integrity sha512-CBbUKjIJKdPwPGW5PCjqwStbvu9+qonnx0sY8vhIn1hJ17kopio6HCe7SsyMF7vWOd4YqzUq4Zc/6kyHH+8Bpg==
+
+"@balancer-labs/v2-solidity-utils@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/v2-solidity-utils/-/v2-solidity-utils-3.0.1.tgz#8af2b5bab500577c0af05232890025f73b0febfb"
+  integrity sha512-uhaQbgFyT5uRWW39aPWH0ZARzqIICJvwZXKJpv7EPG2NAUrf03ZsF/Zb3gxpTZXfNoKsKznJWtxgJ1W0rnLu9w==
+  dependencies:
+    "@balancer-labs/v2-interfaces" "0.2.0"
+
+"@balancer-labs/v2-vault@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/v2-vault/-/v2-vault-3.0.1.tgz#dc13d4faf84ec833aa96d0f6ad180c20ba049068"
+  integrity sha512-uVvHWDR8sGUCxdMOluYPEjeqeNYHo9/47ALYnpv4NLdXwNH8nw7PWun+cExLLdTBJ3XEc/6IyuYUlfcoWWpfcw==
+  dependencies:
+    "@balancer-labs/v2-interfaces" "0.2.1"
+    "@balancer-labs/v2-solidity-utils" "3.0.1"
+
 "@boringcrypto/boring-solidity@https://github.com/boringcrypto/BoringSolidity#e0ff4a7771edfa09a90694c4e0f891938cf62a43":
   version "2.0.1"
   resolved "https://github.com/boringcrypto/BoringSolidity#e0ff4a7771edfa09a90694c4e0f891938cf62a43"
@@ -557,29 +582,29 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@layerzerolabs/lz-evm-messagelib-v2@2.1.25":
-  version "2.1.25"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.1.25.tgz#917f63f7f9cafd595d0e3d77a817c1d5fe19f538"
-  integrity sha512-crZwePVIAVsLD8L95/C2/YHjXV78jFTo6QpUjULAAMvr3NSFHf2YJjAsIaTDtku13R+sYv+6AYVZg5YKajzrsA==
+"@layerzerolabs/lz-evm-messagelib-v2@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.1.tgz#f929e36bb7733bd805a9199467a97039cc5ae80b"
+  integrity sha512-dMnogVaCNSOBYFA5eZt5I0+X0cdgKRWvdft66APY+cH85/Kmtih3Em1ml3zvn6RuaASHtHbsXfDL/H1haCx7pA==
 
-"@layerzerolabs/lz-evm-oapp-v2@2.1.25":
-  version "2.1.25"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.1.25.tgz#1ed122458a210d7950fd691134158e4c0aa85c94"
-  integrity sha512-0V253EGo/RSjudsfOBMmabnLHCL+AHuBqLZCzYaxdkk7DFGAyRA8PgjfTc1Md201FSrPW62EymMRZPhtOF4DqQ==
+"@layerzerolabs/lz-evm-oapp-v2@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.3.1.tgz#9926d661379d00de4cbd0d11161b19baa9107953"
+  integrity sha512-AVFZSrDHpSgQB+pkr4slmGMpqadW6TbqRnIPzGwtCJXPQ/y5FNPnZaSnNMmDqOGCNSSLf2dWArjbgiAF9Oh6YA==
 
-"@layerzerolabs/lz-evm-protocol-v2@2.1.25":
-  version "2.1.25"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.1.25.tgz#97e355cdd595f8fa8c227fbfa037aac47be64a76"
-  integrity sha512-XXwC2zg80s0Gmcj35FIZ71tRKhzbrPf83+etOACVpjrAyroHcGXUiO+QyR/nt3Y2wlobH/+96EftW3WFBSqupg==
+"@layerzerolabs/lz-evm-protocol-v2@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.1.tgz#cd35e5661936c321ae4aca3754459bc2c63ad5ae"
+  integrity sha512-4EFmcJG2pHumfHYBvDoqse3XbvFLreRhAY4Nbq/Wt5o/aBjmCBakuxTiAJOMJTcrfFZUZkakuOMm2kgpTE94Eg==
 
-"@layerzerolabs/lz-evm-v1-0.7@2.1.25":
-  version "2.1.25"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.1.25.tgz#76e0a3286d39abf97eee32d20f9c9807fe0892bb"
-  integrity sha512-Yo8bG+IDN97MpFKCFX0vrHKq5ss1qpLtMmhevU/6U7nslYEy/a56PQG9BKkzUPYxRqlwkuUYsQ7TgXaTva4cQA==
+"@layerzerolabs/lz-evm-v1-0.7@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.3.1.tgz#527b7bbf8521213f8449b7576ac5b7daa8c70d85"
+  integrity sha512-JsyFwSpq4i7qNOmo4mxFI8ZT4chSLmI+o55YAbQVS1//lkvrlDRSWi9iS3R0Ah4ji1qggH0WVjaMJc3V/5Lx5g==
 
-"@layerzerolabs/solidity-bytes-utils@^0.8.0":
+"@layerzerolabs/solidity-bytes-utils@^0.8.2":
   version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/solidity-bytes-utils/-/solidity-bytes-utils-0.8.0.tgz#9173a8597ece5f8d0e8e5e5b970e3f2159c883a5"
+  resolved "https://registry.npmjs.org/@layerzerolabs/solidity-bytes-utils/-/solidity-bytes-utils-0.8.0.tgz#9173a8597ece5f8d0e8e5e5b970e3f2159c883a5"
   integrity sha512-lrqilEQGqcYViMh63vVjjyamwGhOJuqykUv7cad56Epx2vEcJtcKZytw2K4eebUREYpNHpsMNxO9iLmp06aEqg==
 
 "@metamask/eth-sig-util@^4.0.0":
@@ -3315,6 +3340,15 @@ hardhat-gas-reporter@^1.0.8:
     eth-gas-reporter "^0.2.25"
     sha1 "^1.1.1"
 
+hardhat-ignore-warnings@^0.2.11:
+  version "0.2.11"
+  resolved "https://registry.yarnpkg.com/hardhat-ignore-warnings/-/hardhat-ignore-warnings-0.2.11.tgz#edf357d92f77c99c90017e7a0fb75ca6f2a725a5"
+  integrity sha512-+nHnRbP6COFZaXE7HAY7TZNE3au5vHe5dkcnyq0XaP07ikT2fJ3NhFY0vn7Deh4Qbz0Z/9Xpnj2ki6Ktgk61pg==
+  dependencies:
+    minimatch "^5.1.0"
+    node-interval-tree "^2.0.1"
+    solidity-comments "^0.0.2"
+
 hardhat-tracer@2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/hardhat-tracer/-/hardhat-tracer-2.7.0.tgz#af04e5cd7ec2525c24a70634f6d1051252992d03"
@@ -4124,7 +4158,7 @@ minimatch@5.0.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@^5.0.1:
+minimatch@^5.0.1, minimatch@^5.1.0:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.6.tgz#1cfcb8cf5522ea69952cd2af95ae09477f122a96"
   integrity sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==
@@ -4286,6 +4320,13 @@ node-gyp-build@^4.2.0, node-gyp-build@^4.3.0:
   version "4.8.0"
   resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.8.0.tgz#3fee9c1731df4581a3f9ead74664369ff00d26dd"
   integrity sha512-u6fs2AEUljNho3EYTJNBfImO5QTo/J/1Etd+NVdCj7qWKUSN/bSLkZwhDv7I+w/MSC6qJ4cknepkAYykDdK8og==
+
+node-interval-tree@^2.0.1:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/node-interval-tree/-/node-interval-tree-2.1.2.tgz#316e380db08d1c0de0a620d551f0327e8397dad8"
+  integrity sha512-bJ9zMDuNGzVQg1xv0bCPzyEDxHgbrx7/xGj6CDokvizZZmastPsOh0JJLuY8wA5q2SfX1TLNMk7XNV8WxbGxzA==
+  dependencies:
+    shallowequal "^1.1.0"
 
 nofilter@^3.1.0:
   version "3.1.0"
@@ -4955,6 +4996,11 @@ sha1@^1.1.1:
     charenc ">= 0.0.1"
     crypt ">= 0.0.1"
 
+shallowequal@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-1.1.0.tgz#188d521de95b9087404fd4dcb68b13df0ae4e7f8"
+  integrity sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==
+
 shebang-command@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/shebang-command/-/shebang-command-2.0.0.tgz#ccd0af4f8835fbdc265b82461aaf0c36663f34ea"
@@ -5063,10 +5109,76 @@ solhint@^3.4.1:
   optionalDependencies:
     prettier "^2.8.3"
 
+solidity-comments-darwin-arm64@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-darwin-arm64/-/solidity-comments-darwin-arm64-0.0.2.tgz#07d89176967d805d41177b38d4f7b16f17c4fa29"
+  integrity sha512-HidWkVLSh7v+Vu0CA7oI21GWP/ZY7ro8g8OmIxE8oTqyMwgMbE8F1yc58Sj682Hj199HCZsjmtn1BE4PCbLiGA==
+
+solidity-comments-darwin-x64@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-darwin-x64/-/solidity-comments-darwin-x64-0.0.2.tgz#aaadbfcc08d9fdd1b564c8ce71d6ba50d67b1829"
+  integrity sha512-Zjs0Ruz6faBTPT6fBecUt6qh4CdloT8Bwoc0+qxRoTn9UhYscmbPQkUgQEbS0FQPysYqVzzxJB4h1Ofbf4wwtA==
+
 solidity-comments-extractor@^0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/solidity-comments-extractor/-/solidity-comments-extractor-0.0.8.tgz#f6e148ab0c49f30c1abcbecb8b8df01ed8e879f8"
   integrity sha512-htM7Vn6LhHreR+EglVMd2s+sZhcXAirB1Zlyrv5zBuTxieCvjfnRpd7iZk75m/u6NOlEyQ94C6TWbBn2cY7w8g==
+
+solidity-comments-freebsd-x64@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-freebsd-x64/-/solidity-comments-freebsd-x64-0.0.2.tgz#b2bbf4fe04daefb5e97d595ef5581d56b61ea275"
+  integrity sha512-8Qe4mpjuAxFSwZJVk7B8gAoLCdbtS412bQzBwk63L8dmlHogvE39iT70aAk3RHUddAppT5RMBunlPUCFYJ3ZTw==
+
+solidity-comments-linux-arm64-gnu@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-linux-arm64-gnu/-/solidity-comments-linux-arm64-gnu-0.0.2.tgz#db9cd6c46606d46ce66ff781aa37d596bf06b5f1"
+  integrity sha512-spkb0MZZnmrP+Wtq4UxP+nyPAVRe82idOjqndolcNR0S9Xvu4ebwq+LvF4HiUgjTDmeiqYiFZQ8T9KGdLSIoIg==
+
+solidity-comments-linux-arm64-musl@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-linux-arm64-musl/-/solidity-comments-linux-arm64-musl-0.0.2.tgz#e37d20bb18447a4761cb48c80909833874b60d27"
+  integrity sha512-guCDbHArcjE+JDXYkxx5RZzY1YF6OnAKCo+sTC5fstyW/KGKaQJNPyBNWuwYsQiaEHpvhW1ha537IvlGek8GqA==
+
+solidity-comments-linux-x64-gnu@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-linux-x64-gnu/-/solidity-comments-linux-x64-gnu-0.0.2.tgz#19d09f0d52181ed2661d188ded0f9f22399eb17d"
+  integrity sha512-zIqLehBK/g7tvrFmQljrfZXfkEeLt2v6wbe+uFu6kH/qAHZa7ybt8Vc0wYcmjo2U0PeBm15d79ee3AkwbIjFdQ==
+
+solidity-comments-linux-x64-musl@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-linux-x64-musl/-/solidity-comments-linux-x64-musl-0.0.2.tgz#ec1297208481c70bcdceae11ab1ef50c5a955553"
+  integrity sha512-R9FeDloVlFGTaVkOlELDVC7+1Tjx5WBPI5L8r0AGOPHK3+jOcRh6sKYpI+VskSPDc3vOO46INkpDgUXrKydlIw==
+
+solidity-comments-win32-arm64-msvc@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-win32-arm64-msvc/-/solidity-comments-win32-arm64-msvc-0.0.2.tgz#48dc8a623f9e34a7c1ff62e406d67862d660ff04"
+  integrity sha512-QnWJoCQcJj+rnutULOihN9bixOtYWDdF5Rfz9fpHejL1BtNjdLW1om55XNVHGAHPqBxV4aeQQ6OirKnp9zKsug==
+
+solidity-comments-win32-ia32-msvc@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-win32-ia32-msvc/-/solidity-comments-win32-ia32-msvc-0.0.2.tgz#5110e57d247d59131c82310ee1c88a8a9cfc7da5"
+  integrity sha512-vUg4nADtm/NcOtlIymG23NWJUSuMsvX15nU7ynhGBsdKtt8xhdP3C/zA6vjDk8Jg+FXGQL6IHVQ++g/7rSQi0w==
+
+solidity-comments-win32-x64-msvc@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments-win32-x64-msvc/-/solidity-comments-win32-x64-msvc-0.0.2.tgz#271ad8fbbaf17f6026362964ba3e1880e3dc3685"
+  integrity sha512-36j+KUF4V/y0t3qatHm/LF5sCUCBx2UndxE1kq5bOzh/s+nQgatuyB+Pd5BfuPQHdWu2KaExYe20FlAa6NL7+Q==
+
+solidity-comments@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/solidity-comments/-/solidity-comments-0.0.2.tgz#e1158d243ad55d5803882f2a67c0298466df573b"
+  integrity sha512-G+aK6qtyUfkn1guS8uzqUeua1dURwPlcOjoTYW/TwmXAcE7z/1+oGCfZUdMSe4ZMKklNbVZNiG5ibnF8gkkFfw==
+  optionalDependencies:
+    solidity-comments-darwin-arm64 "0.0.2"
+    solidity-comments-darwin-x64 "0.0.2"
+    solidity-comments-freebsd-x64 "0.0.2"
+    solidity-comments-linux-arm64-gnu "0.0.2"
+    solidity-comments-linux-arm64-musl "0.0.2"
+    solidity-comments-linux-x64-gnu "0.0.2"
+    solidity-comments-linux-x64-musl "0.0.2"
+    solidity-comments-win32-arm64-msvc "0.0.2"
+    solidity-comments-win32-ia32-msvc "0.0.2"
+    solidity-comments-win32-x64-msvc "0.0.2"
 
 solidity-coverage@^0.8.1:
   version "0.8.12"
@@ -5279,9 +5391,9 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.7.37:
+tapioca-sdk@^1.7.34:
   version "1.7.37"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.7.37.tgz#ad55a926cf5cef2289e45be40abea1283fe006f0"
+  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.7.37.tgz#ad55a926cf5cef2289e45be40abea1283fe006f0"
   integrity sha512-mzk5a3sB7jJFrHyzXtrwLig97t5ahqhCAjmHIAghEAGFZr5L1xWsDshxEktVE5NCdWSjRVU4t9r9WNWwtgb73w==
   dependencies:
     "@uniswap/v3-core" "^1.0.1"

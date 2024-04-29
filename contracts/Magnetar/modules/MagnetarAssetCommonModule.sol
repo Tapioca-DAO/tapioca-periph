@@ -15,7 +15,6 @@ import {
     IDepositData,
     LockAndParticipateData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
@@ -102,9 +101,6 @@ contract MagnetarAssetCommonModule is MagnetarBaseModule {
             // if `lendAmount` > 0:
             //      - add asset to SGL
             fraction = 0;
-            if (lendAmount == 0 && depositData.deposit) {
-                lendAmount = depositData.amount;
-            }
             if (lendAmount > 0) {
                 uint256 lendShare = yieldBox_.toShare(sglAssetId, lendAmount, false);
                 fraction = ISingularity(singularityAddress).addAsset(user, user, false, lendShare);
