@@ -5,10 +5,11 @@ libs = ['node_modules', 'lib']
 cache_path  = 'gen/cache_forge'
 broadcast = 'gen/broadcast'
 
-solc_version='0.8.22'
+auto_detect_solc=true
 evm_version='paris'
 optimizer = true
 optimizer_runs = 100
+ignored_error_codes = ["shadowing"] # For LBP
 
 remappings = [
     "tapioca-periph/=contracts/",
@@ -17,8 +18,10 @@ remappings = [
 	"tapioca-bar/=gitmodule/Tapioca-bar/contracts/",
 	"tapioca-mocks/=gitmodule/tapioca-mocks/contracts/",
 	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
+	"tapioca-lbp/=gitmodule/tapioca-lbp/contracts/",
 	"permitc/=gitmodule/permitc/src/",
 ]
+
 
 # forge-dpeloy
 fs_permissions = [
@@ -32,4 +35,4 @@ arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_API_KEY}", url = "https://api-sep
 # Use source .env/${NETWORK}.env to set the following variables
 [rpc_endpoints]
 mainnet = "${RPC_URL}"
-arbitrum = "${RPC_URL}"
+arbitrum = "${RPC_URL_ARBITRUM}"

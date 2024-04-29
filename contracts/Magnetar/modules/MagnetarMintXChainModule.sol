@@ -72,7 +72,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
             _depositYBBorrowBB(data.mintData, data.bigBang, IYieldBox(yieldBox), data.user, data.marketHelper);
         }
 
-
         {
             // decode `composeMsg` and re-encode it with updated params
             (uint16 msgType_,, uint16 msgIndex_, bytes memory tapComposeMsg_, bytes memory nextMsg_) =
@@ -82,13 +81,25 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
             DepositAndSendForLockingData memory lendData = abi.decode(tapComposeMsg_, (DepositAndSendForLockingData));
             if (lendData.user != data.user) revert Magnetar_UserMismatch();
 
-            lendData.lendAmount = data.mintData.mintAmount;
+            // if omitted by user, make sure to overwrite it with the deposited amount
+            if (data.mintData.mint && lendData.lendAmount == 0) {
+                lendData.lendAmount = data.mintData.mintAmount;
+                data.lendSendParams.lzParams.sendParam.amountLD = data.mintData.mintAmount;
+                data.lendSendParams.lzParams.sendParam.minAmountLD =
+                    ITOFT(IMarket(data.bigBang)._asset()).removeDust(data.mintData.mintAmount);
+            }
 
             data.lendSendParams.lzParams.sendParam.composeMsg =
                 TapiocaOmnichainEngineCodec.encodeToeComposeMsg(abi.encode(lendData), msgType_, msgIndex_, nextMsg_);
         }
 
         {
+            IYieldBox(yieldBox).transfer(
+                data.user,
+                address(this),
+                IMarket(data.bigBang)._assetId(),
+                data.lendSendParams.lzParams.sendParam.amountLD
+            );
             // send on another layer for lending
             // already validated above
             _executeDelegateCall(
@@ -104,7 +115,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
                         composeGas: data.lendSendParams.lzComposeGas,
                         sendVal: data.lendSendParams.lzSendVal,
                         composeVal: data.lendSendParams.lzComposeVal,
-                        composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
                         composeMsgType: data.lendSendParams.lzComposeMsgType,
                         withdraw: true
                     })
