@@ -29,6 +29,7 @@ struct MagnetarWithdrawData {
     uint128 composeGas;
     uint128 sendVal;
     uint128 composeVal;
+    bytes composeMsg;
     uint16 composeMsgType;
     //@dev actions data
     bool withdraw;
@@ -150,9 +151,10 @@ struct LendOrLockSendParams {
 }
 
 struct MagnetarCall {
-    uint8 id;
+    MagnetarAction id;
     address target;
     uint256 value;
+    bool allowFailure;
     bytes call;
 }
 

@@ -14,7 +14,6 @@ import {
     HttpNetworkUserConfig,
     NetworksUserConfig,
 } from 'hardhat/types';
-import 'hardhat-ignore-warnings';
 
 // Utils
 import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
@@ -59,7 +58,6 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-
 const forkNetwork = process.env.NETWORK as TNetwork;
 const forkChainInfo = supportedChains[forkNetwork];
 const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
@@ -79,15 +77,6 @@ const config: HardhatUserConfig &
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriph },
     solidity: {
         compilers: [
-            {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 9999,
-                    },
-                },
-            },
             {
                 version: '0.8.22',
                 settings: {
@@ -140,51 +129,6 @@ const config: HardhatUserConfig &
                     },
                 },
             },
-            '@balancer-labs/v2-vault/contracts/Vault.sol': {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 500,
-                    },
-                },
-            },
-            'contracts/LiquidityBootstrappingPoolFactory.sol': {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 500,
-                    },
-                },
-            },
-            'contracts/managed/ManagedPoolFactory.sol': {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-            'contracts/managed/ManagedPool.sol': {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-            'contracts/test/MockManagedPool.sol': {
-                version: '0.7.1',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
         },
     },
     paths: {
@@ -217,13 +161,6 @@ const config: HardhatUserConfig &
             ...forkInfo,
         },
         ...supportedChains,
-    },
-    warnings: {
-        '*': {
-            'code-size': 'warn',
-            'shadowing-opcode': 'off',
-            default: 'error',
-        },
     },
     etherscan: {
         apiKey: {

@@ -19,6 +19,3 @@
 [submodule "gitmodule/tapioca-mocks"]
 	path = gitmodule/tapioca-mocks
 	url = https://github.com/Tapioca-DAO/tapioca-mocks
-[submodule "gitmodule/tapioca-lbp"]
-	path = gitmodule/tapioca-lbp
-	url = https://github.com/Tapioca-DAO/tapioca-lbp

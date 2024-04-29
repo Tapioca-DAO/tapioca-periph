@@ -30,12 +30,10 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
-import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
-import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
 import {
     PrepareLzCallData,
     PrepareLzCallReturn,
@@ -206,45 +204,28 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         YieldBoxURIBuilder ybUri = new YieldBoxURIBuilder();
         YieldBox yb = new YieldBox(IWrappedNative(address(aERC20)), ybUri);
 
-        Penrose penrose;
-        Singularity mc;
-        {
-            ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
-            uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
+        ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
+        assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
 
-            (penrose, mc,) = utils.createPenrose(
-                address(pearlmit),
-                IYieldBox(address(yb)),
-                ICluster(address(cluster)),
-                address(aERC20),
-                address(aERC20),
-                aERC20Id,
-                aERC20Id
-            );
-        }
+        ERC20WithoutStrategy collateralStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
+        collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
 
-        Singularity sgl;
-        {
-            ERC20WithoutStrategy collateralStrategy =
-                utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
-            collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
+        (Penrose penrose, Singularity mc,) = utils.createPenrose(
+            address(pearlmit), IYieldBox(address(yb)), ICluster(address(cluster)), address(aERC20), address(aERC20)
+        );
 
-            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
-            assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
-
-            sgl = utils.createSingularity(
-                TestSingularityData(
-                    address(penrose),
-                    address(asset),
-                    assetId,
-                    address(collateral),
-                    collateralId,
-                    ITapiocaOracle(_oracle),
-                    ILeverageExecutor(address(0))
-                ),
-                address(mc)
-            );
-        }
+        Singularity sgl = utils.createSingularity(
+            TestSingularityData(
+                address(penrose),
+                address(asset),
+                assetId,
+                address(collateral),
+                collateralId,
+                ITapiocaOracle(_oracle),
+                ILeverageExecutor(address(0))
+            ),
+            address(mc)
+        );
 
         return (sgl, penrose, yb);
     }
@@ -256,26 +237,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         ERC20WithoutStrategy collateralStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
         collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
 
-        ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
-        uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
-
         (Penrose penrose,, BigBang bbMediumRiskMC) = utils.createPenrose(
-            address(pearlmit),
-            IYieldBox(address(yb)),
-            ICluster(address(cluster)),
-            address(aERC20),
-            address(aERC20),
-            aERC20Id,
-            aERC20Id
+            address(pearlmit), IYieldBox(address(yb)), ICluster(address(cluster)), address(aERC20), address(aERC20)
         );
 
-        {
-            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
-            uint256 assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
-
-            vm.prank(address(utils));
-            penrose.setUsdoToken(address(asset), assetId);
-        }
+        vm.prank(address(utils));
+        penrose.setUsdoToken(address(asset));
 
         BigBang bb = utils.createBigBang(
             TestBigBangData(
@@ -294,12 +261,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         utils.setAssetOracle(penrose, bb, _oracle);
 
         return (bb, penrose, yb);
-    }
-
-    function test_receive_erc1155() public {
-        ERC1155Mock erc1155 = new ERC1155Mock();
-        erc1155.mint(address(magnetar), 1, 1);
-        assertEq(erc1155.balanceOf(address(magnetar), 1), 1);
     }
 
     function test_get_sgl_info() public {
@@ -345,9 +306,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             );
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
             magnetar.burst(calls);
@@ -395,12 +357,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
+            calls[1] = MagnetarCall({
+                id: MagnetarAction.Market,
+                target: address(sgl),
+                value: 0,
+                allowFailure: false,
+                call: lendData
+            });
 
             magnetar.burst(calls);
 
@@ -464,12 +433,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
+            calls[1] = MagnetarCall({
+                id: MagnetarAction.Market,
+                target: address(sgl),
+                value: 0,
+                allowFailure: false,
+                call: lendData
+            });
 
             magnetar.burst(calls);
 
@@ -511,15 +487,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
+                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
             );
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.CollateralModule),
+                id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -568,6 +546,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
+                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
@@ -577,9 +556,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.AssetModule),
+                id: MagnetarAction.AssetModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: repayData
             });
 
@@ -649,12 +629,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
+            calls[1] = MagnetarCall({
+                id: MagnetarAction.Market,
+                target: address(sgl),
+                value: 0,
+                allowFailure: false,
+                call: lendData
+            });
 
             magnetar.burst(calls);
 
@@ -696,15 +683,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
+                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
             );
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.CollateralModule),
+                id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -730,8 +719,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         {
             address randomAddr = makeAddr("randomAddr");
-            SendParamsMsg memory sendParamMsg =
-                SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
+            SendParamsMsg memory sendParamMsg = SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
 
             MagnetarWithdrawData memory withdrawData = MagnetarWithdrawData({
                 withdraw: true,
@@ -744,7 +732,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     extraOptions: "0x",
                     sendParam: SendParam({
                         amountLD: borrowAmount_,
-                        composeMsg: abi.encode(sendParamMsg),
+                        composeMsg: "0x",
                         dstEid: aEid,
                         extraOptions: "0x",
                         minAmountLD: 0,
@@ -756,13 +744,15 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
+                composeMsg: abi.encode(sendParamMsg),
                 composeMsgType: 0
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
             });
 
@@ -827,12 +817,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
-            calls[1] = MagnetarCall({id: uint8(MagnetarAction.Market), target: address(sgl), value: 0, call: lendData});
+            calls[1] = MagnetarCall({
+                id: MagnetarAction.Market,
+                target: address(sgl),
+                value: 0,
+                allowFailure: false,
+                call: lendData
+            });
 
             magnetar.burst(calls);
 
@@ -874,15 +871,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         composeGas: 0,
                         sendVal: 0,
                         composeVal: 0,
+                        composeMsg: "0x",
                         composeMsgType: 0
                     })
                 })
             );
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.CollateralModule),
+                id: MagnetarAction.CollateralModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositAddCollateralAndBorrowFromMarketData
             });
 
@@ -930,13 +929,15 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
+                composeMsg: "0x",
                 composeMsgType: 0
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
             });
 
@@ -945,67 +946,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 balanceOf = asset.balanceOf(address(this));
             assertGt(balanceOf, 0);
             assertEq(balanceOf, borrowAmount_);
-        }
-    }
-
-    function test_magnetar_execute_decode() public {
-        (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
-        utils.setBBEthMarket(penrose, address(bb));
-
-        cluster.updateContract(0, address(bb), true);
-        cluster.updateContract(0, address(yieldBox), true);
-        vm.label(address(bb), "BigBang");
-        vm.label(address(yieldBox), "YieldBox");
-
-        uint256 tokenAmount_ = 1 ether;
-
-        //deal
-        {
-            deal(address(collateral), address(this), tokenAmount_);
-        }
-
-        {
-            MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
-
-            pearlmit.approve(
-                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)
-            ); // Atomic approval
-            pearlmit.approve(
-                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)
-            ); // Atomic approval
-            collateral.approve(address(magnetar), type(uint256).max);
-            yieldBox.setApprovalForAll(address(pearlmit), true);
-
-            //deposit approvals
-            yieldBox.setApprovalForAll(address(magnetar), true);
-            collateral.approve(address(yieldBox), type(uint256).max); //for yb deposit
-
-            uint256 collateralShare = yieldBox.toShare(collateralId, tokenAmount_, false);
-            bytes memory depositToYbData = abi.encodeWithSelector(
-                MagnetarYieldBoxModule.depositAsset.selector,
-                address(yieldBox),
-                collateralId,
-                address(this),
-                address(this),
-                0,
-                collateralShare
-            );
-            magnetarCalls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
-                target: address(yieldBox),
-                value: 0,
-                call: depositToYbData
-            });
-
-            Module[] memory modules;
-            bytes[] memory calls;
-            (modules, calls) = marketHelper.addCollateral(address(this), address(this), false, tokenAmount_, 0);
-            bytes memory data = abi.encodeWithSelector(Singularity.execute.selector, modules, calls, true);
-
-            magnetarCalls[1] =
-                MagnetarCall({id: uint8(MagnetarAction.Market), target: address(bb), value: 0, call: data});
-
-            magnetar.burst(magnetarCalls);
         }
     }
 
@@ -1056,9 +996,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.MintModule),
+                id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
+                allowFailure: false,
                 call: mintData
             });
 
@@ -1120,9 +1061,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.MintModule),
+                id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
+                allowFailure: false,
                 call: mintData
             });
 
@@ -1193,6 +1135,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             composeGas: 0,
                             sendVal: 0,
                             composeVal: 0,
+                            composeMsg: "0x",
                             composeMsgType: 0
                         }),
                         collateralWithdrawData: MagnetarWithdrawData({
@@ -1218,6 +1161,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             composeGas: 0,
                             sendVal: 0,
                             composeVal: 0,
+                            composeMsg: "0x",
                             composeMsgType: 0
                         })
                     })
@@ -1226,15 +1170,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.OptionModule),
+                id: MagnetarAction.OptionModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
+                allowFailure: false,
                 call: removeData
             });
 
@@ -1302,15 +1248,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](2);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.YieldBoxModule),
+                id: MagnetarAction.YieldBoxModule,
                 target: address(yieldBox),
                 value: 0,
+                allowFailure: false,
                 call: depositToYbData
             });
             calls[1] = MagnetarCall({
-                id: uint8(MagnetarAction.MintModule),
+                id: MagnetarAction.MintModule,
                 target: address(yieldBox), //this is ignored
                 value: 0,
+                allowFailure: false,
                 call: mintData
             });
 
@@ -1320,6 +1268,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         // checks
         {
             uint256 lentAmount = sgl.balanceOf(address(this));
+            console.log("---- lentAmount %s", lentAmount);
             assertGt(lentAmount, 0);
         }
     }

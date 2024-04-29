@@ -94,13 +94,15 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
         // @dev performs a repay operation for the specified market
         if (data.repayAmount > 0) {
-            _market.accrue();
             uint256 repayPart = helper.getBorrowPartForAmount(data.market, data.repayAmount);
 
             (Module[] memory modules, bytes[] memory calls) =
                 IMarketHelper(data.marketHelper).repay(data.user, data.user, false, repayPart);
 
-            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
+            uint256 _share = _yieldBox.toShare(assetId, data.repayAmount, false);
+            pearlmit.approve(
+                address(_yieldBox), assetId, address(_market), _share.toUint200(), (block.timestamp + 1).toUint48()
+            );
 
             _market.execute(modules, calls, true);
         }
@@ -136,9 +138,8 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
 
                     data.withdrawCollateralParams.lzSendParams.sendParam.amountLD = computedCollateral;
-                    data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD =
-                        ITOFT(_market._collateral()).removeDust(computedCollateral);
-
+                    data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD = computedCollateral;
+                    
                     // data validated in `_validateDepositRepayAndRemoveCollateralFromMarketData`
                     _withdrawToChain(data.withdrawCollateralParams);
                 }

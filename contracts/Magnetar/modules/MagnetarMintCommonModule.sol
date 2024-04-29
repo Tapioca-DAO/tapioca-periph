@@ -78,15 +78,14 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
         // lock didn't happen; need to transfer NFT here
         if (!lock) {
-            // IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
-            pearlmit.transferFromERC721(user, address(this), lockDataTarget, tOLPTokenId);
+            IERC721(lockDataTarget).safeTransferFrom(user, address(this), tOLPTokenId);
         }
 
         IERC721(lockDataTarget).approve(participateData.target, tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(participateData.target).participate(tOLPTokenId);
 
         address oTapAddress = ITapiocaOptionBroker(participateData.target).oTAP();
-        IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "");
+        IERC721(oTapAddress).safeTransferFrom(address(this), user, oTAPTokenId, "0x");
     }
 
     function _lockOnTOB(
@@ -103,11 +102,11 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         _validateLockOnTOB(lockData, yieldBox_, user, singularityAddress, fraction);
 
         if (lockData.fraction > 0) fraction = lockData.fraction;
-        if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
         (uint256 tOLPSglAssetId,,) =
             ITapiocaOptionLiquidityProvision(lockData.target).activeSingularities(singularityAddress);
+        if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         //deposit to YieldBox
         // _extractTokens(user, singularityAddress, fraction);
@@ -150,7 +149,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         if (singularityAddress == address(0)) return 0;
 
         _validateDepositYBLendSGL(singularityAddress, yieldBox_, user);
-
+        
         // _setApprovalForYieldBox(singularityAddress, yieldBox_);
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -209,9 +208,9 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         address marketHelper
     ) internal {
         if (bigBangAddress == address(0)) return;
-
+        
         _validateDepositYBBorrowBB(bigBangAddress, yieldBox_, user, marketHelper);
-
+        
         // _setApprovalForYieldBox(bigBangAddress, yieldBox_);
         _executeDelegateCall(
             magnetarBaseModuleExternal,
@@ -271,7 +270,6 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                 bbCollateralShare
             );
 
-            // bigBang_.execute(modules, calls, true);
             if (mintData.collateralDepositData.deposit) {
                 pearlmit.approve(
                     address(yieldBox_),
@@ -365,22 +363,27 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         if (fraction == 0 && lockData.fraction == 0) revert Magnetar_ActionParamsMismatch();
     }
 
-    function _validateDepositYBLendSGL(address singularityAddress, IYieldBox yieldBox_, address user) private view {
+    function _validateDepositYBLendSGL(
+        address singularityAddress,
+        IYieldBox yieldBox_,
+        address user) private view {
+
         // Check sender
         _checkSender(user);
 
         // Check provided addresses
         _checkWhitelisted(address(yieldBox_));
         _checkWhitelisted(singularityAddress);
-
+       
         // Check deposit data
         if (singularityAddress == address(0)) revert Magnetar_ActionParamsMismatch();
     }
 
-    function _validateDepositYBBorrowBB(address bigBangAddress, IYieldBox yieldBox_, address user, address marketHelper)
-        private
-        view
-    {
+    function _validateDepositYBBorrowBB(address bigBangAddress,
+        IYieldBox yieldBox_,
+        address user,
+        address marketHelper) private view {
+
         // Check sender
         _checkSender(user);
 
