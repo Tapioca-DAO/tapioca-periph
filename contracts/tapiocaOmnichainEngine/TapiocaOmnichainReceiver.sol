@@ -263,7 +263,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
             _lzSendParam.sendParam.amountLD = amountDebitedLD_;
             _lzSendParam.sendParam.minAmountLD = _removeDust(amountDebitedLD_);
         }
-
         // Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptionsMemory(
             _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD_, _srcChainSender

@@ -236,7 +236,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         if (
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
                 || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
-                || funcSig == IYieldBox.setApprovalForAll.selector || funcSig == IYieldBox.setApprovalForAsset.selector
                 || funcSig == IPearlmit.permitBatchApprove.selector
         ) {
             // No need to send value on permit
