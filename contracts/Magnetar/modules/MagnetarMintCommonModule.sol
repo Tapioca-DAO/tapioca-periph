@@ -115,7 +115,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
             if (!cluster.isWhitelisted(0, lockData.target)) {
                 revert Magnetar_TargetNotWhitelisted(lockData.target);
             }
-            
+
             // replace fraction with the amount provided by the caller
             if (lockData.fraction > 0) fraction = lockData.fraction;
             if (fraction == 0) revert Magnetar_ActionParamsMismatch();
@@ -144,7 +144,9 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
                 )
             );
             // TODO lockData.amount and lockData.fraction should be the same, remove one
-            pearlmit.approve(yieldBox_, tOLPSglAssetId, lockData.target, lockData.amount, (block.timestamp).toUint48());
+            pearlmit.approve(
+                address(yieldBox_), tOLPSglAssetId, lockData.target, lockData.amount, (block.timestamp).toUint48()
+            );
             tOLPTokenId = ITapiocaOptionLiquidityProvision(lockData.target).lock(
                 participate ? address(this) : user, singularityAddress, lockData.lockDuration, lockData.amount
             );
