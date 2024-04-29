@@ -201,30 +201,21 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         // performs a BigBang repay operation
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
-                data.user, data.user, false, data.removeAndRepayData.repayAmount
+                data.user, data.user, false, helper.getBorrowPartForAmount(data.externalData.bigBang, data.removeAndRepayData.repayAmount)
             );
 
             {
-                uint256 share = yieldBox_.toShare(bigBang_._assetId(), data.removeAndRepayData.repayAmount, false);
-                pearlmit.approve(
-                    address(yieldBox_),
-                    bigBang_._assetId(),
-                    data.externalData.singularity,
-                    share.toUint200(),
-                    (block.timestamp + 1).toUint48()
-                );
-            }
-
-            (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
-
-            if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
-            uint256 repayed = IMarketHelper(data.externalData.marketHelper).repayView(results[0]);
-            // transfer excess amount to the data.user
-            if (repayed < _removeAmount) {
-                uint256 bbAssetId = bigBang_._assetId();
-                yieldBox_.transfer(
-                    address(this), data.user, bbAssetId, yieldBox_.toShare(bbAssetId, _removeAmount - repayed, false)
-                );
+                (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
+                if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+                
+                uint256 repayed = IMarketHelper(data.externalData.marketHelper).repayView(results[0]);
+                // transfer excess amount to the data.user
+                if (repayed < _removeAmount) {
+                    uint256 bbAssetId = bigBang_._assetId();
+                    yieldBox_.transfer(
+                        address(this), data.user, bbAssetId, yieldBox_.toShare(bbAssetId, _removeAmount - repayed, false)
+                    );
+                }
             }
         }
 
@@ -283,6 +274,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             )
         );
     }
+
 
     function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
         bool success = true;
