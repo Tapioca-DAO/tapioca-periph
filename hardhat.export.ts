@@ -59,7 +59,6 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-
 const forkNetwork = process.env.NETWORK as TNetwork;
 const forkChainInfo = supportedChains[forkNetwork];
 const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
