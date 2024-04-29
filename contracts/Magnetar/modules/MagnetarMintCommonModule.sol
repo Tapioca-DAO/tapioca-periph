@@ -255,6 +255,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
 
             bbCollateralShare = yieldBox_.toShare(bbCollateralId, mintData.collateralDepositData.amount, false);
 
+
             bbCollateralAddress.safeApprove(address(yieldBox_), mintData.collateralDepositData.amount);
             yieldBox_.depositAsset(
                 bbCollateralId, address(this), address(this), mintData.collateralDepositData.amount, 0

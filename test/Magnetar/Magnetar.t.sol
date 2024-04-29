@@ -109,11 +109,13 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     ERC20Mock aERC20;
     ERC20Mock bERC20;
+    ERC20Mock tapToken;
 
     ERC20Mock asset;
     ERC20Mock collateral;
     uint256 assetId;
     uint256 collateralId;
+    uint256 tapTokenId;
 
     /**
      * DEPLOY setup addresses
@@ -140,6 +142,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         aERC20 = new ERC20Mock();
         bERC20 = new ERC20Mock();
+        tapToken = new ERC20Mock();
         asset = new ERC20Mock();
         collateral = new ERC20Mock();
 
@@ -223,6 +226,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             );
         }
 
+
         Singularity sgl;
         {
             ERC20WithoutStrategy collateralStrategy =
@@ -259,6 +263,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
         uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
 
+
         (Penrose penrose,, BigBang bbMediumRiskMC) = utils.createPenrose(
             address(pearlmit),
             IYieldBox(address(yb)),
@@ -276,6 +281,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             vm.prank(address(utils));
             penrose.setUsdoToken(address(asset), assetId);
         }
+
 
         BigBang bb = utils.createBigBang(
             TestBigBangData(
@@ -1004,6 +1010,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             magnetarCalls[1] =
                 MagnetarCall({id: uint8(MagnetarAction.Market), target: address(bb), value: 0, call: data});
+
 
             magnetar.burst(magnetarCalls);
         }

@@ -73,6 +73,7 @@ contract MagnetarTestUtils {
         address mainToken_,
         uint256 tapTokenId_,
         uint256 mainTokenId_
+
     ) external returns (Penrose penrose, Singularity mediumRiskMC, BigBang bbMediumRiskMC) {
         penrose = new Penrose(
             _yieldBox,
