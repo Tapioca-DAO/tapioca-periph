@@ -413,7 +413,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                     revert Magnetar_PearlmitTransferFailed();
                 }
             }
-            pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp + 1).toUint48());
+            pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp).toUint48());
             IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), true);
 
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
@@ -434,7 +434,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 }
             }
 
-            pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp + 1).toUint48());
+            pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp).toUint48());
             ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), true);
 
             (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);
@@ -460,7 +460,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 }
             }
 
-            pearlmit.approve(tapOFT, 0, _target, amount.toUint200(), (block.timestamp + 1).toUint48());
+            pearlmit.approve(tapOFT, 0, _target, amount.toUint200(), (block.timestamp).toUint48());
             tapOFT.safeApprove(address(pearlmit), type(uint256).max);
 
             _executeCall(_target, _actionCalldata, _actionValue, _allowFailure);

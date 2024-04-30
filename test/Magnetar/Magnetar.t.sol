@@ -368,7 +368,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             yieldBox.setApprovalForAll(address(magnetar), true);
 
             // lend approvals
-            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             yieldBox.setApprovalForAll(address(pearlmit), true);
             sgl.approve(address(magnetar), type(uint256).max);
         }
@@ -434,18 +434,18 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             yieldBox.setApprovalForAll(address(pearlmit), true);
 
             // lend approvals
-            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
 
             // collateral approvals
             pearlmit.approve(
-                address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)
+                address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)
             ); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
 
             // market operations approvals
-            pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-            pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
             sgl.approveBorrow(address(magnetar), type(uint256).max);
         }
@@ -614,14 +614,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 borrowAmount_ = 1e17;
 
-        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
-        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
@@ -748,7 +748,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         {
             address randomAddr = makeAddr("randomAddr");
-            SendParamsMsg memory sendParamMsg = SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
+            SendParamsMsg memory sendParamMsg =
+                SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
 
             MagnetarWithdrawData memory withdrawData = MagnetarWithdrawData({
                 withdraw: true,
@@ -800,14 +801,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 borrowAmount_ = 1e17;
 
-        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
-        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
@@ -995,10 +996,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
 
             pearlmit.approve(
-                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)
+                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)
             ); // Atomic approval
             pearlmit.approve(
-                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)
+                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp)
             ); // Atomic approval
             collateral.approve(address(magnetar), type(uint256).max);
             yieldBox.setApprovalForAll(address(pearlmit), true);
@@ -1054,8 +1055,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 1e17;
 
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
@@ -1118,8 +1119,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 1e17;
 
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
@@ -1291,7 +1292,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         // lend approvals
         sgl.approve(address(magnetar), type(uint256).max);
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
         //yb deposit approvals
