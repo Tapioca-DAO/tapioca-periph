@@ -8,6 +8,8 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {TapiocaOmnichainEngineHelper} from
+    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
@@ -37,6 +39,8 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     ICluster internal cluster;
     IMagnetarHelper public helper;
+    TapiocaOmnichainEngineHelper public toeHelper;
+
     mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
 
     // Helpers for external usage. Not used in the contract.
@@ -58,7 +62,9 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     error Magnetar_UnknownReason(); // Revert reason not recognized
     error Magnetar_TargetNotWhitelisted(address addy); // cluster.isWhitelisted(lzChainId, _addr) => false
 
-    constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {}
+    constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {
+        toeHelper = new TapiocaOmnichainEngineHelper();
+    }
 
     receive() external payable virtual {}
 

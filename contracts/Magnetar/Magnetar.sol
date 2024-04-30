@@ -91,10 +91,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         for (uint256 i; i < length; i++) {
             MagnetarCall calldata _action = calls[i];
-            require(
-                _action.call.length > 0,
-                string.concat("Magnetar: Missing call for action with index", string(abi.encode(i)))
-            );
+
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
@@ -207,16 +204,19 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // setApprovalForAll(address from,...)
         // setApprovalForAsset(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        bool selectorValidated;
         if (
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
                 || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
         ) {
+            selectorValidated = true;
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
 
         // IPearlmit.permitBatchApprove(IPearlmit.PermitBatchTransferFrom calldata batch)
         if (funcSig == IPearlmit.permitBatchApprove.selector) {
+            selectorValidated = true;
             IPearlmit.PermitBatchTransferFrom memory batch =
                 abi.decode(_actionCalldata[4:], (IPearlmit.PermitBatchTransferFrom));
 
@@ -225,11 +225,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
 
         /// @dev no need to check the owner for the rest; it's using `msg.sender`
-        if (
-            funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
-                || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
-                || funcSig == IPearlmit.permitBatchApprove.selector
-        ) {
+        if (selectorValidated) {
             // No need to send value on permit
             _executeCall(_target, _actionCalldata, 0);
             return;
@@ -256,13 +252,16 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // unwrap(address from,...)
         // sendFrom(address from,...)
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        bool selectorValidated;
 
         if (funcSig == ITOFT.wrap.selector) {
+            selectorValidated = true;
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
 
         if (funcSig == ITOFT.unwrap.selector) {
+            selectorValidated = true;
             (, uint256 _amount) = abi.decode(_actionCalldata[4:68], (address, uint256));
             // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
             {
@@ -272,6 +271,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
 
         if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
+            selectorValidated = true;
             (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
             uint256 amount_ = lzSendParam_.sendParam.amountLD;
 
@@ -285,10 +285,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
         }
 
-        if (
-            funcSig == ITOFT.wrap.selector || funcSig == ITOFT.unwrap.selector
-                || funcSig == ITapiocaOmnichainEngine.sendPacket.selector
-        ) {
+        if (selectorValidated) {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
@@ -308,6 +305,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         /// @dev owner address should always be first param.
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        bool selectorValidated;
 
         // function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
         // function removeCollateral(address from, address to, uint256 share)
@@ -316,8 +314,8 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data)
         // function sellCollateral(address from, uint256 share, bytes calldata data)
         if (funcSig == IMarket.execute.selector) {
-            (Module[] memory modules, bytes[] memory calls,) =
-                abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
+            selectorValidated = true;
+            (Module[] memory modules, bytes[] memory calls,) = abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
             // sanitize modules
             uint256 modulesLength;
             for (uint256 i; i < modulesLength; i++) {
@@ -341,13 +339,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // function addAsset(address from, address to, bool skim, uint256 share)
         // function removeAsset(address from, address to, uint256 fraction)
         if (funcSig == ISingularity.addAsset.selector || funcSig == ISingularity.removeAsset.selector) {
+            selectorValidated = true;
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
-        if (
-            funcSig == IMarket.execute.selector || funcSig == ISingularity.addAsset.selector
-                || funcSig == ISingularity.removeAsset.selector
-        ) {
+
+        if (selectorValidated) {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
@@ -476,12 +473,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         returns (bytes memory returnData)
     {
         bool success;
-
-        if (_actionValue > 0) {
-            (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
-        } else {
-            (success, returnData) = _target.call(_actionCalldata);
-        }
+        (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
 
         if (!success) {
             _getRevertMsg(returnData);
