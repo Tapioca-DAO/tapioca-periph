@@ -5,7 +5,10 @@ pragma solidity 0.8.22;
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {DepositAddCollateralAndBorrowFromMarketData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {
+    DepositAddCollateralAndBorrowFromMarketData,
+    MagnetarWithdrawData
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
@@ -55,16 +58,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         public
         payable
     {
-        // Check sender
-        _checkSender(data.user);
-
-        // Check
-        if (!cluster.isWhitelisted(0, data.market)) {
-            revert Magnetar_TargetNotWhitelisted(data.market);
-        }
-        if (!cluster.isWhitelisted(0, data.marketHelper)) {
-            revert Magnetar_TargetNotWhitelisted(data.marketHelper);
-        }
+        // validate data
+        _validateDepositAddCollateralAndBorrowFromMarket(data);
 
         IMarket market_ = IMarket(data.market);
         IYieldBox yieldBox_ = IYieldBox(market_._yieldBox());
@@ -75,6 +70,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         uint256 _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
 
         _setApprovalForYieldBox(address(pearlmit), yieldBox_);
+        _setApprovalForYieldBox(data.market, yieldBox_);
 
         // deposit to YieldBox
         if (data.deposit) {
@@ -90,16 +86,13 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
 
         // performs .addCollateral on data.market
         if (data.collateralAmount > 0) {
-            _setApprovalForYieldBox(data.market, yieldBox_);
-
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
                 data.user, data.user, false, data.collateralAmount, _share
             );
             pearlmit.approve(
-                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp + 1).toUint48()
+                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp).toUint48()
             );
             market_.execute(modules, calls, true);
-            _revertYieldBoxApproval(data.market, yieldBox_);
         }
 
         // performs .borrow on data.market
@@ -116,18 +109,41 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
                 market_._assetId(),
                 address(market_),
                 borrowShare.toUint200(),
-                (block.timestamp + 1).toUint48()
+                (block.timestamp).toUint48()
             );
             market_.execute(modules, calls, true);
 
-            if (data.withdrawParams.withdraw) {
-                // asset is USDO which doesn't have unwrap
-                if (data.withdrawParams.compose) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
-                _withdrawToChain(data.withdrawParams);
-            }
+            // data validated in `_validateDepositAddCollateralAndBorrowFromMarket`
+            if (data.withdrawParams.withdraw) _withdrawToChain(data.withdrawParams);
         }
 
         _revertYieldBoxApproval(address(pearlmit), yieldBox_);
         _revertYieldBoxApproval(data.market, yieldBox_);
+    }
+
+    function _validateDepositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory data)
+        private
+        view
+    {
+        // Check sender
+        _checkSender(data.user);
+
+        // Check provided addresses
+        _checkExternalData(data);
+
+        // Check withdraw data
+        _checkWithdrawData(data.withdrawParams);
+    }
+
+    function _checkExternalData(DepositAddCollateralAndBorrowFromMarketData memory data) private view {
+        _checkWhitelisted(data.market);
+        _checkWhitelisted(data.marketHelper);
+    }
+
+    function _checkWithdrawData(MagnetarWithdrawData memory data) private pure {
+        if (data.withdraw) {
+            // USDO doesn't have unwrap
+            if (data.compose) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
+        }
     }
 }
