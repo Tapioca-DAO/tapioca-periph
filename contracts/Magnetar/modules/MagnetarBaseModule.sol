@@ -62,7 +62,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         if (data.lzSendParams.sendParam.dstEid == 0) {
             _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
             return;
-        } 
+        }
 
         uint32 srcEid = IMessagingChannel(IOftSender(asset).endpoint()).eid();
         if (data.lzSendParams.sendParam.dstEid == srcEid) {
@@ -92,7 +92,6 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         }
     }
 
-    
     function _setApprovalForYieldBox(address _target, IYieldBox _yieldBox) internal {
         bool isApproved = _yieldBox.isApprovedForAll(address(this), _target);
         if (!isApproved) {
@@ -182,6 +181,7 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
 
     function _prepareLzSend(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
         private
+        view
         returns (PrepareLzCallReturn memory prepareLzCallReturn)
     {
         prepareLzCallReturn = toeHelper.prepareLzCall(

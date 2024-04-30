@@ -62,7 +62,7 @@ interface IMarket {
     function refreshPenroseFees() external returns (uint256 feeShares);
 
     function accrue() external;
-    
+
     function owner() external view returns (address);
 
     function execute(Module[] calldata modules, bytes[] calldata calls, bool revertOnFail)

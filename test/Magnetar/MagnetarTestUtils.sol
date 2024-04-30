@@ -80,8 +80,8 @@ contract MagnetarTestUtils {
             IERC20(tapToken_),
             IERC20(mainToken_),
             IPearlmit(pearlmit),
-            tapAssetId,
-            mainAssetId,
+            tapTokenId_,
+            mainTokenId_,
             address(this)
         );
         mediumRiskMC = new Singularity();

@@ -16,6 +16,7 @@ remappings = [
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/src/",
 	"tapioca-bar/=gitmodule/Tapioca-bar/contracts/",
+	"tapiocaz/=gitmodule/tapiocaz/contracts/",
 	"tapioca-mocks/=gitmodule/tapioca-mocks/contracts/",
 	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
 	"tapioca-lbp/=gitmodule/tapioca-lbp/contracts/",
@@ -35,4 +36,4 @@ arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_API_KEY}", url = "https://api-sep
 # Use source .env/${NETWORK}.env to set the following variables
 [rpc_endpoints]
 mainnet = "${RPC_URL}"
-arbitrum = "${RPC_URL}"
+arbitrum = "${RPC_URL_ARBITRUM}"

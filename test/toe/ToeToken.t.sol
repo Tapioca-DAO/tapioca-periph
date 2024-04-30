@@ -126,7 +126,8 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 cluster
                             )
                         ),
-                        IPearlmit(address(pearlmit))
+                        IPearlmit(address(pearlmit)),
+                        cluster
                     )
                 )
             )
@@ -162,12 +163,14 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 cluster
                             )
                         ),
-                        IPearlmit(address(pearlmit))
+                        IPearlmit(address(pearlmit)),
+                        cluster
                     )
                 )
             )
         );
         vm.label(address(bToeOFT), "bToeOFT");
+        console.log("----------------F");
 
         toeTestHelper = new ToeTestHelper();
 
@@ -176,6 +179,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
         ofts[0] = address(aToeOFT);
         ofts[1] = address(bToeOFT);
         this.wireOApps(ofts);
+        console.log("----------------G");
     }
 
     /**
@@ -190,7 +194,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
      * Airdrop: 2.5m
      * == 100M ==
      */
-    function test_constructor() public {
+    function test_constructor_toe_token() public {
         // A tests
         assertEq(aToeOFT.owner(), address(this));
         assertEq(aToeOFT.token(), address(aToeOFT));

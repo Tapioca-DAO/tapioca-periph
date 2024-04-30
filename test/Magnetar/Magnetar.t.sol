@@ -212,8 +212,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         Penrose penrose;
         Singularity mc;
         {
-            ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
-            uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
+            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
+            assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
 
             ERC20WithoutStrategy tapTokenStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(tapToken));
             tapTokenId = utils.registerYieldBoxAsset(address(yb), address(tapToken), address(tapTokenStrategy));

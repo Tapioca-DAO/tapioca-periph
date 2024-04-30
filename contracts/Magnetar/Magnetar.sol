@@ -164,10 +164,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
-            if (
-                address(magnetarModuleExtender) != address(0)
-                    && magnetarModuleExtender.isValidActionId(_action.id)
-            ) {
+            if (address(magnetarModuleExtender) != address(0) && magnetarModuleExtender.isValidActionId(_action.id)) {
                 bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
                 (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
                 if (!success) {
@@ -315,7 +312,8 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         // function sellCollateral(address from, uint256 share, bytes calldata data)
         if (funcSig == IMarket.execute.selector) {
             selectorValidated = true;
-            (Module[] memory modules, bytes[] memory calls,) = abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
+            (Module[] memory modules, bytes[] memory calls,) =
+                abi.decode(_actionCalldata[4:], (Module[], bytes[], bool));
             // sanitize modules
             uint256 modulesLength;
             for (uint256 i; i < modulesLength; i++) {
