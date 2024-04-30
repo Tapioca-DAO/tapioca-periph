@@ -10,7 +10,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
-    ExitPositionAndRemoveCollateralData, MagnetarWithdrawData, ICommonExternalContracts, IRemoveAndRepay
+    ExitPositionAndRemoveCollateralData,
+    MagnetarWithdrawData,
+    ICommonExternalContracts,
+    IRemoveAndRepay
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -81,17 +84,26 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             ? IYieldBox(singularity_._yieldBox())
             : IYieldBox(bigBang_._yieldBox());
 
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
+            )
+        );
+
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(pearlmit), yieldBox_
+            )
+        );
+
         // if `removeAndRepayData.exitData.exit` the following operations are performed
         //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
         //      - tOB.exitPosition
         //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
         uint256 tOLPId = 0;
         if (data.removeAndRepayData.exitData.exit) {
-            if (data.removeAndRepayData.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();
-            if (!cluster.isWhitelisted(0, data.removeAndRepayData.exitData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.removeAndRepayData.exitData.target);
-            }
-
             address oTapAddress = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).oTAP();
             (, ITapiocaOption.TapOption memory oTAPPosition) =
                 ITapiocaOption(oTapAddress).attributes(data.removeAndRepayData.exitData.oTAPTokenID);
@@ -129,10 +141,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
         // performs a tOLP.unlock operation
         if (data.removeAndRepayData.unlockData.unlock) {
-            if (!cluster.isWhitelisted(0, data.removeAndRepayData.unlockData.target)) {
-                revert Magnetar_TargetNotWhitelisted(data.removeAndRepayData.unlockData.target);
-            }
-
             if (data.removeAndRepayData.unlockData.tokenId != 0) {
                 if (tOLPId != 0) {
                     if (tOLPId != data.removeAndRepayData.unlockData.tokenId) {
@@ -175,7 +183,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
                 data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(singularity_._asset()).removeDust(computedAmount);
+                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD =
+                    ITOFT(singularity_._asset()).removeDust(computedAmount);
 
                 // already validated above
                 // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
@@ -190,14 +199,6 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
         // performs a BigBang repay operation
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
-            // _setApprovalForYieldBox(address(bigBang_), yieldBox_);
-            _executeDelegateCall(
-                magnetarBaseModuleExternal,
-                abi.encodeWithSelector(
-                    MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
-                )
-            );
-
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
                 data.user, data.user, false, data.removeAndRepayData.repayAmount
             );
@@ -209,7 +210,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                     bigBang_._assetId(),
                     data.externalData.singularity,
                     share.toUint200(),
-                    (block.timestamp + 1).toUint48()
+                    (block.timestamp).toUint48()
                 );
             }
 
@@ -253,7 +254,8 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
 
                 uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
                 data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD = ITOFT(bigBang_._collateral()).removeDust(computedAmount);
+                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD =
+                    ITOFT(bigBang_._collateral()).removeDust(computedAmount);
 
                 // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
                 _executeDelegateCall(
@@ -272,6 +274,13 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
                 MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
             )
         );
+
+        _executeDelegateCall(
+            magnetarBaseModuleExternal,
+            abi.encodeWithSelector(
+                MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(pearlmit), yieldBox_
+            )
+        );
     }
 
     function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
@@ -282,10 +291,7 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         }
     }
 
-
-    function _validateExitPositionAndRemoveCollateral(
-        ExitPositionAndRemoveCollateralData memory data
-    ) private view {
+    function _validateExitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory data) private view {
         // Check sender
         _checkSender(data.user);
 
@@ -299,11 +305,14 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         _checkWhitelisted(data.magnetar);
         _checkWhitelisted(data.bigBang);
         _checkWhitelisted(data.singularity);
-
     }
 
     function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {
         _checkWhitelisted(data.exitData.target);
         _checkWhitelisted(data.unlockData.target);
+
+        if (data.exitData.exit) {
+            if (data.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();
+        }
     }
 }
