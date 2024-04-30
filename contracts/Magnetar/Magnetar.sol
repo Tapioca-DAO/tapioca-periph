@@ -52,7 +52,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     using SafeApprove for address;
 
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
-    error Magnetar_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
+    error Magnetar_ActionNotValid(uint8 action, bytes actionCalldata); // Burst did not find what to execute
     error Magnetar_PearlmitTransferFailed(); // Transfer failed in pearlmit
     error Magnetar_MarketOperationNotAllowed();
 
@@ -98,70 +98,70 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
-            if (_action.id == MagnetarAction.Permit) {
+            if (_action.id == uint8(MagnetarAction.Permit)) {
                 _processPermitOperation(_action.target, _action.call);
                 continue; // skip the rest of the loop
             }
 
-            if (_action.id == MagnetarAction.OFT) {
+            if (_action.id == uint8(MagnetarAction.OFT)) {
                 _processOFTOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
-            if (_action.id == MagnetarAction.TapLock) {
+            if (_action.id == uint8(MagnetarAction.TapLock)) {
                 _processTapLockOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
-            if (_action.id == MagnetarAction.TapUnlock) {
+            if (_action.id == uint8(MagnetarAction.TapUnlock)) {
                 _processTapUnlockOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Market singular operations
-            if (_action.id == MagnetarAction.Market) {
+            if (_action.id == uint8(MagnetarAction.Market)) {
                 _processMarketOperation(_action.target, _action.call, _action.value);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.AssetModule) {
+            if (_action.id == uint8(MagnetarAction.AssetModule)) {
                 _executeModule(MagnetarModule.AssetModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.AssetXChainModule) {
+            if (_action.id == uint8(MagnetarAction.AssetXChainModule)) {
                 _executeModule(MagnetarModule.AssetXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.CollateralModule) {
+            if (_action.id == uint8(MagnetarAction.CollateralModule)) {
                 _executeModule(MagnetarModule.CollateralModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.MintModule) {
+            if (_action.id == uint8(MagnetarAction.MintModule)) {
                 _executeModule(MagnetarModule.MintModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.MintXChainModule) {
+            if (_action.id == uint8(MagnetarAction.MintXChainModule)) {
                 _executeModule(MagnetarModule.MintXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.OptionModule) {
+            if (_action.id == uint8(MagnetarAction.OptionModule)) {
                 _executeModule(MagnetarModule.OptionModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.YieldBoxModule) {
+            if (_action.id == uint8(MagnetarAction.YieldBoxModule)) {
                 _executeModule(MagnetarModule.YieldBoxModule, _action.call);
                 continue; // skip the rest of the loop
             }
@@ -169,7 +169,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
             if (
                 address(magnetarModuleExtender) != address(0)
-                    && magnetarModuleExtender.isValidActionId(uint8(_action.id))
+                    && magnetarModuleExtender.isValidActionId(_action.id)
             ) {
                 bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
                 (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
@@ -234,7 +234,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, 0);
             return;
         }
-        revert Magnetar_ActionNotValid(MagnetarAction.Permit, _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
     }
 
     /**
@@ -292,7 +292,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
-        revert Magnetar_ActionNotValid(MagnetarAction.Wrap, _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
     }
 
     /**
@@ -351,7 +351,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
-        revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
 
     /**
@@ -439,7 +439,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             return;
         }
 
-        revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
 
     /**
@@ -465,7 +465,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
-        revert Magnetar_ActionNotValid(MagnetarAction.Market, _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
 
     /**
