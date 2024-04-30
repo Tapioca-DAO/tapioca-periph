@@ -210,10 +210,10 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
             {
                 uint256 bbAssetId = bigBang_._assetId();
                 pearlmit.approve(
-                    yieldBox,
+                    address(yieldBox_),
                     bbAssetId,
                     address(bigBang_),
-                    data.removeAndRepayData.repayAmount,
+                    uint200(data.removeAndRepayData.repayAmount),
                     (block.timestamp).toUint48()
                 ); // TODO check approval
                 (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
