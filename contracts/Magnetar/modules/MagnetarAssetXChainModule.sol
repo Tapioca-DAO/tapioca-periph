@@ -121,7 +121,6 @@ contract MagnetarAssetXChainModule is MagnetarAssetCommonModule {
                     composeGas: data.lockAndParticipateSendParams.lzComposeGas,
                     sendVal: data.lockAndParticipateSendParams.lzSendVal,
                     composeVal: data.lockAndParticipateSendParams.lzComposeVal,
-                    composeMsg: data.lockAndParticipateSendParams.lzParams.sendParam.composeMsg,
                     composeMsgType: data.lockAndParticipateSendParams.lzComposeMsgType,
                     withdraw: true
                 })

@@ -111,7 +111,6 @@ contract MagnetarMintXChainModule is MagnetarMintCommonModule {
                         composeGas: data.lendSendParams.lzComposeGas,
                         sendVal: data.lendSendParams.lzSendVal,
                         composeVal: data.lendSendParams.lzComposeVal,
-                        composeMsg: data.lendSendParams.lzParams.sendParam.composeMsg,
                         composeMsgType: data.lendSendParams.lzComposeMsgType,
                         withdraw: true
                     })

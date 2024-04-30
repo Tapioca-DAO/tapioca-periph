@@ -98,6 +98,7 @@ abstract contract MagnetarMintCommonModule is MagnetarStorage {
         address singularityAddress
     ) internal returns (uint256 tOLPTokenId) {
         tOLPTokenId = 0;
+
         if (!lockData.lock) return tOLPTokenId;
 
         _validateLockOnTOB(lockData, yieldBox_, user, singularityAddress, fraction);
