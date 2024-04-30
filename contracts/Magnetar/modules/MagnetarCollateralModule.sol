@@ -90,7 +90,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
                 data.user, data.user, false, data.collateralAmount, _share
             );
             pearlmit.approve(
-                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp + 1).toUint48()
+                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp).toUint48()
             );
             market_.execute(modules, calls, true);
         }
@@ -109,7 +109,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
                 market_._assetId(),
                 address(market_),
                 borrowShare.toUint200(),
-                (block.timestamp + 1).toUint48()
+                (block.timestamp).toUint48()
             );
             market_.execute(modules, calls, true);
 

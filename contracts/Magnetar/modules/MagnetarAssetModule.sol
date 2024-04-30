@@ -120,7 +120,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                 _market._collateralId(),
                 address(_market),
                 collateralShare.toUint200(),
-                (block.timestamp + 1).toUint48()
+                (block.timestamp).toUint48()
             );
             _market.execute(modules, calls, true);
 
@@ -135,9 +135,9 @@ contract MagnetarAssetModule is MagnetarBaseModule {
                     if (computedCollateral == 0) revert Magnetar_WithdrawParamsMismatch();
 
                     data.withdrawCollateralParams.lzSendParams.sendParam.amountLD = computedCollateral;
-                    data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD = ITOFT(_market._collateral()).removeDust(computedCollateral);
+                    data.withdrawCollateralParams.lzSendParams.sendParam.minAmountLD =
+                        ITOFT(_market._collateral()).removeDust(computedCollateral);
 
-                    
                     // data validated in `_validateDepositRepayAndRemoveCollateralFromMarketData`
                     _withdrawToChain(data.withdrawCollateralParams);
                 }

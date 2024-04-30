@@ -65,7 +65,7 @@ contract MagnetarAssetCommonModule is MagnetarBaseModule {
         toftAmount = ITOFT(tReceiptAddress).wrap(address(this), address(this), fraction);
 
         if (ybDeposit) {
-            IERC20(tReceiptAddress).safeApprove(address(yieldBox), toftAmount);
+            tReceiptAddress.safeApprove(address(yieldBox), toftAmount);
             yieldBox.depositAsset(assetId, address(this), receiver, toftAmount, 0);
         } else {
             IERC20(tReceiptAddress).safeTransfer(receiver, toftAmount);
