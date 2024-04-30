@@ -153,7 +153,6 @@ struct MagnetarCall {
     MagnetarAction id;
     address target;
     uint256 value;
-    bool allowFailure;
     bytes call;
 }
 
