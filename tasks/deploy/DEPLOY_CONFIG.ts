@@ -1,7 +1,12 @@
 import { EChainID } from '@tapioca-sdk/api/config';
+import { BigNumber, fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
 
 // Name of the contract deployments to be used in the deployment scripts and saved in the deployments file
 export const DEPLOYMENT_NAMES = {
+    // LBP
+    LBP_AUTHORIZER: 'LBP_AUTHORIZER',
+    LBP_VAULT: 'LBP_VAULT',
+    TAP_USDC_LBP: 'TAP_USDC_LBP',
     // External
     YieldBox: 'YieldBox',
     // Magnetar
@@ -37,7 +42,20 @@ export const DEPLOYMENT_NAMES = {
     WETH_YB_EMPTY_STRAT: 'WETH_YB_EMPTY_STRAT',
 } as const;
 
-type TPostLbp = {
+/**
+ * @notice !!! LBP CONFIG IS IN LBP DEPLOY SCRIPT !!!
+ */
+export type TLbp = {
+    LBP_DURATION: number;
+    START_BALANCES: [BigNumber, BigNumber];
+    START_WEIGHTS: [BigNumber, BigNumber];
+    END_WEIGHTS: [BigNumber, BigNumber];
+    SWAP_FEE_PERCENTAGE: BigNumber;
+    PAUSE_WINDOW_DURATION: number;
+    BUFFER_PERIOD_DURATION: number;
+};
+
+export type TPostLbp = {
     [key in EChainID]?: {
         GMX_USD_CL_DATA_FEED_ADDRESS: string;
         GLP_MANAGER: string;
@@ -49,6 +67,7 @@ type TPostLbp = {
         STETH_ETH_CL_DATA_FEED_ADDRESS: string;
     };
 };
+
 const POST_LBP: TPostLbp = {
     [EChainID.MAINNET]: {
         GMX_USD_CL_DATA_FEED_ADDRESS: '',
