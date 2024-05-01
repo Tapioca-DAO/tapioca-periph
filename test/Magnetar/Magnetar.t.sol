@@ -218,7 +218,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             ERC20WithoutStrategy tapTokenStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(tapToken));
             tapTokenId = utils.registerYieldBoxAsset(address(yb), address(tapToken), address(tapTokenStrategy));
 
-            (Penrose penrose, Singularity mc,) = utils.createPenrose(
+            (penrose, mc,) = utils.createPenrose(
                 address(pearlmit),
                 IYieldBox(address(yb)),
                 ICluster(address(cluster)),
@@ -261,6 +261,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         ERC20WithoutStrategy tapTokenStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(tapToken));
         tapTokenId = utils.registerYieldBoxAsset(address(yb), address(tapToken), address(tapTokenStrategy));
+        
+        ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
+        assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
 
         (Penrose penrose,, BigBang bbMediumRiskMC) = utils.createPenrose(
             address(pearlmit),
@@ -271,10 +274,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             tapTokenId,
             assetId
         );
-
-        ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
-        assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
-
+        
         vm.prank(address(utils));
         penrose.setUsdoToken(address(asset), assetId);
 
