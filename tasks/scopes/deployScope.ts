@@ -1,15 +1,22 @@
 import { scope, types } from 'hardhat/config';
+import { TAP_TASK } from 'tapioca-sdk';
+import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
 import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
-import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
-import { TAP_TASK } from 'tapioca-sdk';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
+import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
 import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMock';
-import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
-import { createEmptyStratYbAsset__task } from 'tasks/deploy/misc/createEmptyStratYbAsset';
 
 const deployScope = scope('deploys', 'Deployment tasks');
+
+TAP_TASK(
+    deployScope.task(
+        'lbp',
+        'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
+        deployLbp__task,
+    ),
+);
 
 TAP_TASK(
     deployScope.task(
@@ -64,13 +71,6 @@ TAP_TASK(
 );
 
 // Mocks
-TAP_TASK(
-    deployScope.task(
-        'deploySwapper',
-        'Deploys a swapper contract with a deterministic address, with MulticallV3.',
-        deploySwappers__task,
-    ),
-);
 
 TAP_TASK(
     deployScope
