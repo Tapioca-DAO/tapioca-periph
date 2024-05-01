@@ -405,7 +405,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue);
             ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), false);
 
-            address oTAP = ITapiocaOptionBroker(_target).oTAP();
             ITapiocaOptionLiquidityProvision(tOLP).safeTransferFrom(
                 address(this), msg.sender, abi.decode(tokenIdData, (uint256))
             );
