@@ -74,6 +74,7 @@
         "write-json-file": "4.3.0"
     },
     "dependencies": {
+        "@balancer-labs/balancer-js": "^2.0.0",
         "@balancer-labs/v2-vault": "^3.0.1",
         "@chainlink/contracts": "^0.6.1",
         "@primitivefi/hardhat-dodoc": "^0.2.3",

@@ -44,6 +44,25 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@balancer-labs/balancer-js@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/balancer-js/-/balancer-js-2.0.0.tgz#16c532c4d2a4ae166f22951263e6471f9402588a"
+  integrity sha512-QFoLW4hQh/6W0XaCM8WEIWkNGrvUeKZkJyUTrJBfuyaK38y3BsTDzYyLujyDH6/CgmAmKw9h+YAt5/JRLeOirw==
+  dependencies:
+    "@balancer-labs/typechain" "1.0.0"
+    "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@ethersproject/address" "^5.7.0"
+    "@ethersproject/bignumber" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/constants" "^5.7.0"
+    "@ethersproject/contracts" "^5.7.0"
+
+"@balancer-labs/typechain@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@balancer-labs/typechain/-/typechain-1.0.0.tgz#823eb13b9e166f7b50334c9d70d9ade81344f5c9"
+  integrity sha512-/fWxh4UgmHxtRt5e1anVeF8COo6FBNF28X8bd0/55SIdRDyaW7TMC7K4Jbuy58IcaERmEqi089lABlEgoeiWTQ==
+
 "@balancer-labs/v2-interfaces@0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@balancer-labs/v2-interfaces/-/v2-interfaces-0.2.0.tgz#327c6a6d663c5e07872c59c590bb687e5b2e0f4e"
@@ -582,7 +601,7 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@layerzerolabs/lz-evm-messagelib-v2@^2.3.3":
+"@layerzerolabs/lz-evm-messagelib-v2@2.3.3":
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.3.tgz#e4af0233dce94c76f064793dff364e32f0ba6f86"
   integrity sha512-lDiYLpryEJOKBbmibIx1GRLqUjYBZ0yfzD2g7e2FMaDxbv0sEiINu22VMF3LoER10SDefYS43DSNRI6ns4QKvQ==
@@ -592,12 +611,12 @@
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.3.3.tgz#4182898481781ea08d65135365ea3bc4a52f9a21"
   integrity sha512-LQd9/Vz8YxZrCMBTOiGbmNCei0wH0zKnP8Q5apnOm+EfDk0V9PLHYuaGsyuSRjnyxh524FDOfEJf509XiJeNZw==
 
-"@layerzerolabs/lz-evm-protocol-v2@^2.3.3":
+"@layerzerolabs/lz-evm-protocol-v2@2.3.3":
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.3.tgz#4ec9eacc5e59124f784c2b77a4e023ff262fb4eb"
   integrity sha512-u8RmXvC0AfmYgeNCGcfHLkOB9am5VQTQ+4YrX7AuRUuF6CpUNvJd8aaL30+NIGwZzgfE6+np83hj5rXmwlmlzA==
 
-"@layerzerolabs/lz-evm-v1-0.7@^2.3.3":
+"@layerzerolabs/lz-evm-v1-0.7@2.3.3":
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.3.3.tgz#7fda83f6847a2c99ec3462d405d83cea642d56be"
   integrity sha512-TltdE4+WaOPzZD2x4Y3LPWmJJKQd6j1cnqfPUo2fCLiP+t7nzh6AS+U/0LM02UI/ro/mtYENb3SEVdz+fwUw9A==
