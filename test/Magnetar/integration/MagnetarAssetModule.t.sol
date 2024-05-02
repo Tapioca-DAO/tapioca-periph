@@ -7,7 +7,6 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 contract MagnetarTest is MagnetarTestHelper {
-
     function setUp() public override {
         createCommonSetup();
     }

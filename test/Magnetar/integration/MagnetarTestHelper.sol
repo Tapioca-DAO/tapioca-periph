@@ -4,7 +4,6 @@ pragma solidity 0.8.22;
 // Lz
 import {TestHelper} from "../../LZSetup/TestHelper.sol";
 
-
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol";
@@ -20,10 +19,7 @@ import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
 import {BBBorrow} from "tapioca-bar/markets/bigBang/BBBorrow.sol";
 import {BigBang} from "tapioca-bar/markets/bigBang/BigBang.sol";
 
-import {MagnetarBaseModuleExternal} from "tapioca-periph/Magnetar/modules/MagnetarBaseModuleExternal.sol";
-import {MagnetarAssetXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarAssetXChainModule.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
-import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
@@ -34,7 +30,6 @@ import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 
 import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
-
 
 import {UsdoMarketReceiverModule} from "tapioca-bar/usdo/modules/UsdoMarketReceiverModule.sol";
 import {UsdoOptionReceiverModule} from "tapioca-bar/usdo/modules/UsdoOptionReceiverModule.sol";
@@ -54,7 +49,6 @@ import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
 import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
 import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 import {TOFT} from "tapiocaz/tOFT/TOFT.sol";
-
 
 import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
@@ -106,10 +100,8 @@ struct TestBigBangData {
 
 struct MagnetarSetupData {
     MagnetarAssetModule assetModule;
-    MagnetarAssetXChainModule assetXChainModule;
     MagnetarCollateralModule collateralModule;
     MagnetarMintModule mintModule;
-    MagnetarMintXChainModule mintXChainModule;
     MagnetarOptionModule optionModule;
     MagnetarYieldBoxModule yieldBoxModule;
 }
@@ -136,8 +128,8 @@ contract MagnetarTestHelper is TestHelper {
     uint256 collateralId;
 
     /**
-    * DEPLOY setup addresses
-    */
+     * DEPLOY setup addresses
+     */
     address __endpoint;
     uint256 __hostEid = aEid;
     address __owner = address(this);
@@ -194,38 +186,32 @@ contract MagnetarTestHelper is TestHelper {
         vm.label(address(marketHelper), "MarketHelper");
         vm.label(address(clusterA), "Cluster A");
         vm.label(address(clusterB), "Cluster B");
-
     }
 
     function setBBEthMarket(Penrose penrose, address market) external {
         penrose.setBigBangEthMarket(market);
     }
 
-
     function createMagnetar(address _cluster, address _pearlmit) public returns (Magnetar magnetar) {
         MagnetarSetupData memory setup;
         setup.assetModule = new MagnetarAssetModule();
-        setup.assetXChainModule = new MagnetarAssetXChainModule();
         setup.collateralModule = new MagnetarCollateralModule();
-        address _magnetarBaseModuleExternal = address(new MagnetarBaseModuleExternal());
-        setup.mintModule = new MagnetarMintModule(_magnetarBaseModuleExternal);
-        setup.mintXChainModule = new MagnetarMintXChainModule(_magnetarBaseModuleExternal);
-        setup.optionModule = new MagnetarOptionModule(_magnetarBaseModuleExternal);
+        setup.mintModule = new MagnetarMintModule();
+        setup.optionModule = new MagnetarOptionModule();
         setup.yieldBoxModule = new MagnetarYieldBoxModule();
 
         magnetar = new Magnetar(
             ICluster(_cluster),
             address(this),
             payable(setup.assetModule),
-            payable(setup.assetXChainModule),
             payable(setup.collateralModule),
             payable(setup.mintModule),
-            payable(setup.mintXChainModule),
             payable(setup.optionModule),
             payable(setup.yieldBoxModule),
             IPearlmit(_pearlmit)
         );
     }
+
     function createPenrose(
         address pearlmit,
         address _yieldBox,

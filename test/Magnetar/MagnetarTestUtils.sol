@@ -71,8 +71,8 @@ contract MagnetarTestUtils {
         ICluster _cluster,
         address tapToken_,
         address mainToken_,
-        uint256 tapAssetId,
-        uint256 mainAssetId
+        uint256 tapTokenId_,
+        uint256 mainTokenId_
     ) external returns (Penrose penrose, Singularity mediumRiskMC, BigBang bbMediumRiskMC) {
         penrose = new Penrose(
             _yieldBox,
@@ -80,8 +80,8 @@ contract MagnetarTestUtils {
             IERC20(tapToken_),
             IERC20(mainToken_),
             IPearlmit(pearlmit),
-            tapAssetId,
-            mainAssetId,
+            tapTokenId_,
+            mainTokenId_,
             address(this)
         );
         mediumRiskMC = new Singularity();
@@ -201,4 +201,48 @@ contract MagnetarTestUtils {
             IPenrose(_sgl.penrose), ITapiocaOracle(address(_sgl.oracle)), 0, 75000, 80000, _sgl.leverageExecutor
         );
     }
+
+    // function createSingularity(
+    //     address _yieldBox,
+    //     uint256 _collateralId,
+    //     uint256 _assetId,
+    //     address _collateral,
+    //     address _asset
+    // ) public returns (SingularityMock) {
+    //     return new SingularityMock(_yieldBox, _collateralId, _assetId, _collateral, _asset);
+    // }
+
+    // function createSingularity(YieldBox yb, Penrose penrose, Cluster cluster, address asset, address collateral, uint256 assetId, uint256 collateralId) external returns (Singularity sgl) {
+    //     SGLLiquidation sglLiquidation = new SGLLiquidation();
+    //     SGLCollateral sglCollateral = new SGLCollateral();
+    //     SGLBorrow sglBorrow = new SGLBorrow();
+    //     SGLLeverage sglLeverage = new SGLLeverage();
+
+    //     ZerroXSwapperMockTarget swapperTarget = new ZerroXSwapperMockTarget();
+    //     ZeroXSwapper swapper = new ZeroXSwapper(address(swapperTarget), address(0), ICluster(address(cluster)), address(this));
+    //     SimpleLeverageExecutor leverageExecutor = new SimpleLeverageExecutor(IZeroXSwapper(address(swapper)), ICluster(address(cluster)));
+
+    //     Singularity._InitMemoryData memory memoryData = Singularity._InitMemoryData({
+    //         penrose_: IPenrose(address(penrose)),
+    //         _oracle: ITapiocaOracle(address(0)),
+    //         _exchangeRatePrecision: 1 ether,
+    //         _collateralizationRate: 75_000,
+    //         _liquidationCollateralizationRate: 80_000,
+    //         _leverageExecutor: ILeverageExecutor(address(leverageExecutor))
+    //     });
+
+    //     Singularity._InitMemoryModulesData memory modulesData = Singularity._InitMemoryModulesData({
+    //         _liquidationModule: address(sglLiquidation),
+    //         _borrowModule: address(sglBorrow),
+    //         _collateralModule: address(sglCollateral),
+    //         _leverageModule: address(sglLeverage)
+    //     });
+
+    //     Singularity._InitMemoryTokensData memory tokensData = Singularity._InitMemoryTokensData({
+    //         _asset: IERC20(asset),
+    //         _assetId: assetId,
+    //         _collateral: IERC20(collateral),
+    //         _collateralId: collateralId
+    //     });
+    // }
 }
