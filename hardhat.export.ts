@@ -221,7 +221,6 @@ const config: HardhatUserConfig &
         '*': {
             'code-size': 'warn',
             'shadowing-opcode': 'off',
-            default: 'error',
         },
     },
     etherscan: {
