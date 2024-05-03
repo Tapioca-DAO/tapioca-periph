@@ -280,32 +280,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     }
 
     /**
-     * @dev Allowance check and consumption against the xChain msg sender.
-     *
-     * @param _owner The account to check the allowance against.
-     * @param _srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to check the allowance for.
-     */
-    function _validateAndSpendAllowance(address _owner, address _srcChainSender, uint256 _amount) internal {
-        if (_owner != _srcChainSender) {
-            _spendAllowance(_owner, _srcChainSender, _amount);
-        }
-    }
-
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param _srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address _srcChainSender, uint256 _amount) internal {
-        _validateAndSpendAllowance(_owner, _srcChainSender, _amount);
-        _transfer(_owner, address(this), _amount);
-    }
-
-    /**
      * @notice Sends a permit/approval call to the `tapiocaOmnichainReceiveExtender` contract.
      * @param _msgType The type of the message.
      * @param _data The call data containing info about the message.
