@@ -190,7 +190,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
     }
-    function _validatePermitOperation(address _target, bytes calldata _actionCalldata) private returns (bool selectorValidated) {
+    function _validatePermitOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -256,7 +256,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
     }
-    function _validateOFTOperation(address _target, bytes calldata _actionCalldata) private returns (bool selectorValidated) {
+    function _validateOFTOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -310,7 +310,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateMarketOperation(address _target, bytes calldata _actionCalldata) private returns (bool selectorValidated) {
+    function _validateMarketOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -445,7 +445,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateTapLockOperation(address _target, bytes calldata _actionCalldata) private returns (bool selectorValidated) {
+    function _validateTapLockOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -484,7 +484,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata) private returns (bool selectorValidated) {
+    function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
         _checkWhitelisted(_target);
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
