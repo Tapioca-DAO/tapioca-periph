@@ -25,6 +25,7 @@ abstract contract PearlmitHandler is Ownable {
     // ***************** //
 
     constructor(IPearlmit _pearlmit) {
+        emit PearlmitUpdated(pearlmit, _pearlmit);
         pearlmit = _pearlmit;
     }
 

@@ -13,7 +13,6 @@ import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*

@@ -12,16 +12,15 @@ import {ITapiocaOptionLiquidityProvision} from
 import {
     ExitPositionAndRemoveCollateralData,
     ICommonExternalContracts,
-    IRemoveAndRepay
+    IRemoveAndRepay,
+    LockAndParticipateData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
-import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -40,11 +39,85 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  * @author TapiocaDAO
  * @notice Magnetar options related operations
  */
-contract MagnetarOptionModule is Ownable, MagnetarBaseModule {
+contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
+    /**
+     * @notice helper to perform tOLP.lock(...) and tOB.participate(...)
+     * @param data.user the user to perform the operation for
+     * @param data.singularity the SGL address
+     * @param data.fraction the amount to lock
+     * @param data.lockData the data needed to lock on tOB
+     * @param data.participateData the data needed to participate on tOLP
+     */
+    function lockAndParticipate(LockAndParticipateData memory data) public payable {
+        /**
+         * @dev if `lockData.lock`:
+         *          - transfer `fraction` from data.user to `address(this)
+         *          - deposits `fraction` to YB for `address(this)`
+         *          - performs tOLP.lock
+         */
+        uint256 tOLPTokenId;
+        if (data.lockData.lock) {
+            tOLPTokenId = _lock(data);
+        }
+
+        /**
+         * @dev if `participateData.participate`:
+         *          - verify tOLPTokenId
+         *          - performs tOB.participate
+         *          - transfer `oTAPTokenId` to data.user
+         */
+        if (data.participateData.participate) {
+            _participate(data, tOLPTokenId);
+        }
+    }
+
+    function _lock(LockAndParticipateData memory data) private returns (uint256 tOLPTokenId) {
+        IMarket _singularity = IMarket(data.singularity);
+        IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
+
+        uint256 _fraction = data.lockData.fraction;
+
+        // use requested value
+        if (_fraction == 0) revert Magnetar_ActionParamsMismatch();
+
+        // retrieve and deposit SGLAssetId registered in tOLP
+        (uint256 tOLPSglAssetId,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
+            data.singularity
+        );
+
+        _fraction = _extractTokens(data.user, data.singularity, _fraction);
+        _depositToYb(_yieldBox, data.user, tOLPSglAssetId, _fraction);
+
+        tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
+            data.user, data.singularity, data.lockData.lockDuration, data.lockData.amount
+        );
+    }
+
+    function _participate(LockAndParticipateData memory data, uint256 tOLPTokenId) private {
+        // validate token ids
+        if (tOLPTokenId == 0 && data.participateData.tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+        if (
+            data.participateData.tOLPTokenId != tOLPTokenId && tOLPTokenId != 0 && data.participateData.tOLPTokenId != 0
+        ) {
+            revert Magnetar_tOLPTokenMismatch();
+        }
+
+        if (data.participateData.tOLPTokenId != 0) tOLPTokenId = data.participateData.tOLPTokenId;
+
+        // transfer NFT here
+        bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
+        if (isErr) revert Magnetar_ExtractTokenFail();
+
+        IERC721(data.lockData.target).approve(data.participateData.target, tOLPTokenId);
+        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
+
+        address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
+        IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "");
+    }
 
     /**
      * @notice helper to exit from  tOB, unlock from tOLP, remove from SGL, repay on BB, remove collateral from BB and withdraw

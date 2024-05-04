@@ -451,8 +451,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 assetId,
                 address(this),
                 address(this),
-                0,
-                assetShare
+                tokenAmount_,
+                0
             );
             bytes memory lendData =
                 abi.encodeWithSelector(Singularity.addAsset.selector, address(this), address(this), false, assetShare);
@@ -471,7 +471,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             assertEq(yieldBox.balanceOf(address(this), assetId), 0);
             assertGt(sgl.balanceOf(address(this)), 0);
         }
-
         //add collateral
         {
             bytes memory depositAddCollateralAndBorrowFromMarketData = abi.encodeWithSelector(
@@ -511,7 +510,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             assertEq(colAmount, tokenAmount_);
         }
 
+        
         uint256 userBorrowPartBefore = sgl._userBorrowPart(address(this));
+        deal(address(asset), address(this), repayDepositAmount_);
         // repay
         {
             bytes memory repayData = abi.encodeWithSelector(
@@ -534,7 +535,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 })
             );
 
-            deal(address(asset), address(this), repayDepositAmount_);
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
@@ -552,6 +552,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 userBorrowPart = sgl._userBorrowPart(address(this));
             assertLt(userBorrowPart, userBorrowPartBefore);
         }
+        
     }
 
     function test_withdraw_sanitization() public {
@@ -913,6 +914,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
+        yieldBox.setApprovalForAll(address(pearlmit), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
         //deal
@@ -976,6 +978,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
+        yieldBox.setApprovalForAll(address(pearlmit), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
         //deal

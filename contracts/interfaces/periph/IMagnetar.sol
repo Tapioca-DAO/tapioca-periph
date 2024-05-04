@@ -141,7 +141,6 @@ struct LockAndParticipateData {
     address user;
     address singularity;
     address magnetar;
-    uint256 fraction;
     IOptionsLockData lockData;
     IOptionsParticipateData participateData;
 }

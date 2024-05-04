@@ -2,22 +2,15 @@
 pragma solidity 0.8.22;
 
 // External
-import {RebaseLibrary} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from
-    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {TapiocaOmnichainEngineHelper} from
     "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 /*
@@ -115,14 +108,6 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
      * @dev Decodes revert messages
      */
     function _getRevertMsg(bytes memory _returnData) internal pure {
-        // If the _res length is less than 68, then
-        // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert Magnetar_UnknownReason();
-
-        assembly {
-            // Slice the sighash.
-            _returnData := add(_returnData, 0x04)
-        }
-        revert(abi.decode(_returnData, (string))); // All that remains is the revert string
+        revert(RevertMsgDecoder._getRevertMsg(_returnData));
     }
 }
