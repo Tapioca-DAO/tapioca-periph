@@ -88,55 +88,6 @@ struct MintFromBBAndLendOnSGLData {
     ICommonExternalContracts externalContracts;
 }
 
-/// @dev not used - TO BE REMOVED TODO:
-/// --------------------
-
-struct LendOrLockSendParams {
-    LZSendParam lzParams;
-    uint128 lzSendGas;
-    uint128 lzSendVal;
-    uint128 lzComposeGas;
-    uint128 lzComposeVal;
-    uint16 lzComposeMsgType;
-}
-
-/**
- * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 1
- *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
- *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
- *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
- */
-struct CrossChainMintFromBBAndLendOnSGLData {
-    address user;
-    address bigBang;
-    address magnetar;
-    address marketHelper;
-    IMintData mintData;
-    LendOrLockSendParams lendSendParams;
-}
-
-/**
- * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 2
- *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
- *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
- *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
- */
-struct DepositAndSendForLockingData {
-    address user;
-    address singularity;
-    address magnetar;
-    uint256 assetId; // Singularity receipt token id
-    uint256 lendAmount;
-    IDepositData depositData;
-    LendOrLockSendParams lockAndParticipateSendParams;
-}
-
-/**
- * @dev `crossChainMintFromBBAndLendOnSGL` calldata for step 3
- *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
- *         step 2: IUsdo compose call calls magnetar.depositLendAndSendForLocking (chain B) -->
- *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
- */
 struct LockAndParticipateData {
     address user;
     address singularity;
@@ -144,7 +95,6 @@ struct LockAndParticipateData {
     IOptionsLockData lockData;
     IOptionsParticipateData participateData;
 }
-/// --------------------
 
 struct MagnetarCall {
     uint8 id;
