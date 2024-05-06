@@ -20,7 +20,7 @@ export const deployERC20Mock__task = async (
                         taskArgs.name,
                         taskArgs.name,
                         (1e18).toString(),
-                        18,
+                        taskArgs.decimals,
                         tapiocaMulticallAddr,
                     ],
                 }),
