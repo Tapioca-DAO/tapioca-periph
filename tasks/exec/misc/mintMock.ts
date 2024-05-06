@@ -25,7 +25,8 @@ export const mintMock__task = async (
         const calls: TapiocaMulticall.CallStruct[] = [
             {
                 target: addr,
-                callData: token.interface.encodeFunctionData('freeMint', [
+                callData: token.interface.encodeFunctionData('mintTo', [
+                    (await VM.getMulticall()).address,
                     parsedAmount,
                 ]),
                 allowFailure: false,
