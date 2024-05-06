@@ -11,11 +11,16 @@ import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMo
 const deployScope = scope('deploys', 'Deployment tasks');
 
 TAP_TASK(
-    deployScope.task(
-        'lbp',
-        'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
-        deployLbp__task,
-    ),
+    deployScope
+        .task(
+            'lbp',
+            'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
+            deployLbp__task,
+        )
+        .addFlag(
+            'userTestnet',
+            'Flag to deploy LBP on testnet. Overwrites USDC with FormToken on Arbitrum Sepolia. Meant for user testnet deployment',
+        ),
 );
 
 TAP_TASK(
