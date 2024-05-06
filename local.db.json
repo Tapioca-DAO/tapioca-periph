@@ -1300,40 +1300,40 @@
             "contracts": [
                 {
                     "name": "LBP_AUTHORIZER",
-                    "address": "0xe0dFE9B6258f92963142054145eBb580468CF2B5",
+                    "address": "0x06B778e153C54faa01fF21B751F60959db4d8Af7",
                     "meta": {
                         "args": [
                             "0x4b7964f7bC6edC0CfDB8e15A85214AE24D804101"
                         ],
-                        "salt": "0x0d8e27a29cd35aa8211dcecc88e6d41b62b47bc785a51cf0e967a1fec092b89c",
+                        "salt": "0x5a068fb10c82697f9cb8399629d354871772fbb68ef7a3901429e2ecce45923d",
                         "create2": true
                     }
                 },
                 {
                     "name": "LBP_VAULT",
-                    "address": "0xEAE482F9dcBd279C06C3B1bd5B319f345CE76f53",
+                    "address": "0x17EdbB6e84ae8367D0227D5a5b79eCf24Ac21cA7",
                     "meta": {
                         "args": [
-                            "0xe0dFE9B6258f92963142054145eBb580468CF2B5",
+                            "0x06B778e153C54faa01fF21B751F60959db4d8Af7",
                             "0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39",
                             0,
                             0
                         ],
-                        "salt": "0x6e35c2614bca3f8d89fb269d845ccc9a19db0601af106386e7f115ce669949fb",
+                        "salt": "0x05c979d38f8141bf055bd5f2723d6145a9fc994e86498780f5b29b8c53d86e09",
                         "create2": true
                     }
                 },
                 {
                     "name": "TAP_USDC_LBP",
-                    "address": "0x450b04Ea89Fe3490c7cf7212b1928DcF77BEF987",
+                    "address": "0x7375DCCf76BD77BB3f8b954352E83D858B367127",
                     "meta": {
                         "args": [
-                            "0xEAE482F9dcBd279C06C3B1bd5B319f345CE76f53",
+                            "0x17EdbB6e84ae8367D0227D5a5b79eCf24Ac21cA7",
                             "Tapioca USDC/TAP LBP",
                             "USDC/TAP LBP",
                             [
                                 "0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39",
-                                "0x2C16ca2324659E05A0F280782a321Bd3a8831d33"
+                                "0xE32BFb8A2849E945465784fa998eD13d5fcB29a9"
                             ],
                             [
                                 {
@@ -1354,7 +1354,7 @@
                             "0x4b7964f7bC6edC0CfDB8e15A85214AE24D804101",
                             false
                         ],
-                        "salt": "0xc0bade8c4f6fd68ae1aac70f5a0e698a87501e507c2d89e74efa8942a4b4f33b",
+                        "salt": "0xd65f2c5b9a0be63edf948813c5a958b05e434f01dceec5bec70399a42ceff040",
                         "create2": true
                     }
                 }
