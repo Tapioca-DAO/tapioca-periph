@@ -22,6 +22,66 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "LBP_AUTHORIZER",
+                    "address": "0x35034CE812E1BaC8adc2eF5dCBFe8f3cd451bf24",
+                    "meta": {
+                        "args": [
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x19a633d0b574efb4b7537fae2fea42ee8494d09c4318e0061fbabaef4653127c",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_VAULT",
+                    "address": "0xF8B5e7F8f64be94b97435BD0DFca6B4736EE0952",
+                    "meta": {
+                        "args": [
+                            "0x35034CE812E1BaC8adc2eF5dCBFe8f3cd451bf24",
+                            "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                            0,
+                            0
+                        ],
+                        "salt": "0xe262508c4669d6b670b56d82461c3249796d7ee3bec68e6fcc2c5d463c43a7ce",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_USDC_LBP",
+                    "address": "0xe025E519e3205AEBaA9A320eBd6b073D0C3Ea26B",
+                    "meta": {
+                        "args": [
+                            "0xF8B5e7F8f64be94b97435BD0DFca6B4736EE0952",
+                            "Tapioca USDC/TAP LBP",
+                            "USDC/TAP LBP",
+                            [
+                                "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                                "0xE05121418B03361664411d6bFEC0257D1a0BD494"
+                            ],
+                            [
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x2386f26fc10000"
+                                },
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x0dbd2fc137a30000"
+                                }
+                            ],
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x2386f26fc10000"
+                            },
+                            0,
+                            0,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
+                            false
+                        ],
+                        "salt": "0xab9c8d11fc48e16e3dc689ca9c508921c946b4c445d9a0f611de22828faa231e",
+                        "create2": true
+                    }
+                },
+                {
                     "address": "0xfdC1FCa388203685869f353ED263C6606E685A74",
                     "name": "WETH_YB_EMPTY_STRAT",
                     "meta": {
@@ -1227,6 +1287,74 @@
                             "0x2627DD16098EFA52B92D5c665Ad789faDA12fC9e"
                         ],
                         "salt": "0x0ac36da1df9af815e957628ecfc968951c107910ea35d3d945f17780d7b1cd50",
+                        "create2": true
+                    }
+                }
+            ]
+        }
+    },
+    "testnet-lbp": {
+        "421614": {
+            "name": "arbitrum_sepolia",
+            "lastBlockHeight": 41326249,
+            "contracts": [
+                {
+                    "name": "LBP_AUTHORIZER",
+                    "address": "0x06B778e153C54faa01fF21B751F60959db4d8Af7",
+                    "meta": {
+                        "args": [
+                            "0x4b7964f7bC6edC0CfDB8e15A85214AE24D804101"
+                        ],
+                        "salt": "0x5a068fb10c82697f9cb8399629d354871772fbb68ef7a3901429e2ecce45923d",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_VAULT",
+                    "address": "0x17EdbB6e84ae8367D0227D5a5b79eCf24Ac21cA7",
+                    "meta": {
+                        "args": [
+                            "0x06B778e153C54faa01fF21B751F60959db4d8Af7",
+                            "0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39",
+                            0,
+                            0
+                        ],
+                        "salt": "0x05c979d38f8141bf055bd5f2723d6145a9fc994e86498780f5b29b8c53d86e09",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_USDC_LBP",
+                    "address": "0x7375DCCf76BD77BB3f8b954352E83D858B367127",
+                    "meta": {
+                        "args": [
+                            "0x17EdbB6e84ae8367D0227D5a5b79eCf24Ac21cA7",
+                            "Tapioca USDC/TAP LBP",
+                            "USDC/TAP LBP",
+                            [
+                                "0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39",
+                                "0xE32BFb8A2849E945465784fa998eD13d5fcB29a9"
+                            ],
+                            [
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x2386f26fc10000"
+                                },
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x0dbd2fc137a30000"
+                                }
+                            ],
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x2386f26fc10000"
+                            },
+                            0,
+                            0,
+                            "0x4b7964f7bC6edC0CfDB8e15A85214AE24D804101",
+                            false
+                        ],
+                        "salt": "0xd65f2c5b9a0be63edf948813c5a958b05e434f01dceec5bec70399a42ceff040",
                         "create2": true
                     }
                 }

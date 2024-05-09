@@ -12,11 +12,15 @@ import { buildVault } from 'tasks/deployBuilds/lbp/buildVault';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG, TLbp } from './DEPLOY_CONFIG';
 import { postDeploySetupLbp } from './postDeploy/0-postDeploySetupLbp';
 import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
+import { ethers } from 'ethers';
 
 export const DEPLOY_LBP_CONFIG: TLbp = {
-    LBP_DURATION: 172800, // In seconds, 2 days
-    START_BALANCES: [fp(170_000), fp(5_000_000)], // 170k USDC, 5M LTAP
-    START_WEIGHTS: [fp(0.01), fp(0.99)], // 01% USDC, 99% LTAP
+    LBP_DURATION: 432000, // In seconds, 2 days 172800 on prod. 5 days 432000 on testnet
+    START_BALANCES: [
+        ethers.BigNumber.from(170_000).mul(1e6), // 6 decimals
+        fp(5_000_000), // 18 decimals
+    ], // 170k USDC, 5M LTAP
+    START_WEIGHTS: [fp(0.01), fp(0.99)], // 1% USDC, 99% LTAP
     END_WEIGHTS: [fp(0.8), fp(0.2)], // 80% USDC, 20% LTAP
     SWAP_FEE_PERCENTAGE: fp(0.01), // 1%
     PAUSE_WINDOW_DURATION: 0,
@@ -27,7 +31,7 @@ export const DEPLOY_LBP_CONFIG: TLbp = {
  * @notice Deploy TAP-TOKEN PRE-LBP stack
  */
 export const deployLbp__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs,
+    _taskArgs: TTapiocaDeployTaskArgs & { userTestnet: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -38,11 +42,21 @@ export const deployLbp__task = async (
     );
 };
 
-async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaDeployTask(
+    params: TTapiocaDeployerVmPass<{ userTestnet: boolean }>,
+) {
     const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
         params;
-    const { tag } = taskArgs;
+    const { tag, userTestnet } = taskArgs;
     const owner = tapiocaMulticallAddr;
+
+    // !!! USER TESTNET LBP !!!
+    // We overwrite USDC with this address
+    if (chainInfo.name === 'arbitrum_sepolia' && userTestnet) {
+        // Use a deployed mock contract called FormToken
+        const formTokenAddr = '0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39';
+        DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC = formTokenAddr;
+    }
 
     const { lTap } = deployLbp__getDeployments({ hre, tag });
     const [tokenA_Data, tokenB_Data] = [

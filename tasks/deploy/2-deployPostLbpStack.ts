@@ -30,6 +30,17 @@ import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
+ * Deploy:
+ *      - TAP/WETH Uniswap V3 pool
+ *      - Oracles:
+ *          - Arbitrum:
+ *              - ETH CL, ETH Uni, Dual ETH, GLP, ETH/GLP, GMX, TAP, TapOption, USDC, rETH, wstETH
+ *          - Ethereum:
+ *              - sDAI
+ * Post deploy:
+ *     - Create empty strat for TAP and WETH
+ *
+ *
  */
 export const deployPostLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & { ratioTap: number; ratioWeth: number },
