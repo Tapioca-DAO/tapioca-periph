@@ -130,9 +130,7 @@ enum MagnetarModule {
 
 interface IMagnetar {
     function burst(MagnetarCall[] calldata calls) external payable;
-
     function cluster() external view returns (address);
-
     function helper() external view returns (address);
 }
 
