@@ -1,21 +1,21 @@
+import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
 import { buildMagnetar } from 'tasks/deployBuilds/magnetar/buildMagnetar';
-import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
-import { loadVM } from 'tasks/utils';
-import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildMagnetarAssetModule } from 'tasks/deployBuilds/magnetar/buildMagnetarAssetModule';
 import { buildMagnetarAssetXChainModule } from 'tasks/deployBuilds/magnetar/buildMagnetarAssetXChainModule';
+import { buildMagnetarBaseModuleExternal } from 'tasks/deployBuilds/magnetar/buildMagnetarBaseModuleExternal';
 import { buildMagnetarCollateralModule } from 'tasks/deployBuilds/magnetar/buildMagnetarCollateralModule';
 import { buildMagnetarMintModule } from 'tasks/deployBuilds/magnetar/buildMagnetarMintModule';
 import { buildMagnetarMintXChainModule } from 'tasks/deployBuilds/magnetar/buildMagnetarMintXChainModule';
 import { buildMagnetarOptionModule } from 'tasks/deployBuilds/magnetar/buildMagnetarOptionModule';
 import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxModule';
-import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
+import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
+import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
-import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
-import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildMagnetarBaseModuleExternal } from 'tasks/deployBuilds/magnetar/buildMagnetarBaseModuleExternal';
+import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
@@ -43,7 +43,7 @@ export const deployPreLbpStack__task = async (
                         tapiocaMulticallAddr,
                     ]),
                 )
-
+                .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
                 .add(
                     await buildMagnetarAssetModule(
                         hre,
