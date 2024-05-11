@@ -22,6 +22,15 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "TOE_HELPER",
+                    "address": "0x69087BADf2b16334F42065fDFa39C75Bd08F2C3e",
+                    "meta": {
+                        "args": [],
+                        "salt": "0xca0ba611943e72809e22fc39b5aadd99e9d98cd34ee8cf99121db750acb097d6",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "LBP_AUTHORIZER",
                     "address": "0x35034CE812E1BaC8adc2eF5dCBFe8f3cd451bf24",
                     "meta": {
