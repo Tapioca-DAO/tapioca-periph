@@ -1145,6 +1145,48 @@
             "lastBlockHeight": 9360195,
             "contracts": [
                 {
+                    "address": "0xeC1a6e378565b0568370C205fBF5CF80FE5b3F4f",
+                    "name": "WETH_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x4fB538Ed1a085200bD08F66083B72c0bfEb29112",
+                        "ybAssetId": 18
+                    }
+                },
+                {
+                    "address": "0xd9fCa91bf07e7d33c92d67801F54bBCbD1BD1066",
+                    "name": "TAP_TOKEN_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0xc92962b179277301d9166C7B2a05497e4d06CDDC",
+                        "ybAssetId": 17
+                    }
+                },
+                {
+                    "name": "S_DAI_ORACLE",
+                    "address": "0x18Aa18Ab0fd2d8Fcf0C26e21B944E154a9d4d50A",
+                    "meta": {
+                        "args": [
+                            "0x2dd69149d280B47659Df1648f420AD9a66c1A86f"
+                        ],
+                        "salt": "0xddf63fdefec552e85ea0fe8f60df5e7e4f16a2ac681e3f279b92b4b2be95213a",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "SDAI_USD_CL_DATA_FEED_ADDRESS",
+                    "address": "0x2dd69149d280B47659Df1648f420AD9a66c1A86f",
+                    "meta": {
+                        "decimals": 8,
+                        "rate": "100000000",
+                        "args": [
+                            8,
+                            "100000000",
+                            "SDAI_USD_CL_DATA_FEED_ADDRESS"
+                        ],
+                        "salt": "0xe00b2dde4b9f572c1d560cc1de4ffce4a5cb557eac0ce1929ec48b85b10575d1",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "PEARLMIT",
                     "address": "0xf08F10614e8A6Ee048714Af2ACC2b5064c0935Fb",
                     "meta": {
