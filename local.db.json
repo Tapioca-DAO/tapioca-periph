@@ -1145,6 +1145,21 @@
             "lastBlockHeight": 9360195,
             "contracts": [
                 {
+                    "name": "sDAI",
+                    "address": "0x37359B8bfbFAE28E513EE31a2A94A9Ec60668d90",
+                    "meta": {
+                        "args": [
+                            "sDAI",
+                            "sDAI",
+                            "1000000000000000000",
+                            18,
+                            "0x03ae2c12caF7Dc6A8f53869B3377cc6E13769449"
+                        ],
+                        "salt": "0x99e0929f40f1954a6b23e4c7d4228cc9963da11c7f820bb519892a143cbe1c0b",
+                        "create2": true
+                    }
+                },
+                {
                     "address": "0xeC1a6e378565b0568370C205fBF5CF80FE5b3F4f",
                     "name": "WETH_YB_EMPTY_STRAT",
                     "meta": {
