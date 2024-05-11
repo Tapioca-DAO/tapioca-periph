@@ -97,7 +97,7 @@ async function tapiocaDeployTask(
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         await deployUniPoolAndAddLiquidity(params);
-        const { tapToken, tapWethLp } = await loadContracts__arb(hre, tag);
+        const { tapToken, tapWethLp } = loadContracts__arb(hre, tag);
 
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
             .add(await buildETHUniOracle(hre, owner, isTestnet))
@@ -132,7 +132,11 @@ async function tapiocaDeployTask(
             .add(await buildUSDCOracle(hre, owner, isTestnet))
             .add(await buildRethUsdOracle(hre, owner, isTestnet))
             .add(await buildWstethUsdOracle(hre, owner, isTestnet));
-    } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
+    } else if (
+        chainInfo.name === 'ethereum' ||
+        chainInfo.name === 'sepolia' ||
+        chainInfo.name === 'optimism_sepolia'
+    ) {
         VM.add(await buildSDaiOracle(hre));
     }
 }

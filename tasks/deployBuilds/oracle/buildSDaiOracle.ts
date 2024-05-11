@@ -12,7 +12,8 @@ export const buildSDaiOracle = async (
     const chainID = hre.SDK.eChainId;
     if (
         chainID !== hre.SDK.config.EChainID.MAINNET &&
-        chainID !== hre.SDK.config.EChainID.SEPOLIA
+        chainID !== hre.SDK.config.EChainID.SEPOLIA &&
+        chainID !== hre.SDK.config.EChainID.OPTIMISM_SEPOLIA
     ) {
         throw '[-] sDAI Oracle only available on Ethereum';
     }
