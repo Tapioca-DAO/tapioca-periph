@@ -6,7 +6,6 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const buildSDaiOracle = async (
     hre: HardhatRuntimeEnvironment,
-    owner: string,
 ): Promise<IDeployerVMAdd<SDaiOracle__factory>> => {
     console.log('[+] buildSDaiOracle');
 
@@ -20,7 +19,6 @@ export const buildSDaiOracle = async (
 
     const args: Parameters<SDaiOracle__factory['deploy']> = [
         DEPLOY_CONFIG.POST_LBP[chainID]!.SDAI_USD_CUSTOM_CL_DATA_FEED_ADDRESS, // _sDaiOracle
-        owner, // Admin
     ];
 
     return {
