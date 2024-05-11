@@ -864,14 +864,29 @@
             "lastBlockHeight": 5566586,
             "contracts": [
                 {
+                    "address": "0x7098afAc6E15927c4D86B55756A6A7d8fee9A849",
+                    "name": "WETH_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0xD8a79b479b0c47675E3882A1DAA494b6775CE227",
+                        "ybAssetId": 33
+                    }
+                },
+                {
+                    "address": "0xb90B2914D61A00E09AEFD33B81ffC6153DaE36cd",
+                    "name": "TAP_TOKEN_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x7d3Ca9EC322D11946BDc7745723d6C6B37Deb39F",
+                        "ybAssetId": 32
+                    }
+                },
+                {
                     "name": "S_DAI_ORACLE",
-                    "address": "0x1525AB1D9337B14A87a1a2eEC3186D66367151E8",
+                    "address": "0x15D8D0B2AC63bD1935109AE3A199A0EC76095f2b",
                     "meta": {
                         "args": [
-                            "0xA30D6ad5f45EF99ea63A515F10bAA2C3B2f7720A",
-                            "0x46e0C2D6979034BA8bc82E63186E0723e51c7445"
+                            "0xA30D6ad5f45EF99ea63A515F10bAA2C3B2f7720A"
                         ],
-                        "salt": "0x8e3e875984b02c96f7a0ae396641d9b0426c74231f764e05f3d8c333bc263231",
+                        "salt": "0x0e16b602f5bc92c688e4b5f8c808ca166b162a084490a625cd443a1ea03afb8c",
                         "create2": true
                     }
                 },
