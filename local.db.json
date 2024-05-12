@@ -22,6 +22,22 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "address": "0x771e8e7B2282001F6Ad54b79b5Bd454bfAf73429",
+                    "name": "WETH_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
+                        "ybAssetId": 65
+                    }
+                },
+                {
+                    "address": "0x5b82B9f5403546065535C80F1182e873954E216A",
+                    "name": "TAP_TOKEN_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
+                        "ybAssetId": 64
+                    }
+                },
+                {
                     "name": "TOE_HELPER",
                     "address": "0x69087BADf2b16334F42065fDFa39C75Bd08F2C3e",
                     "meta": {
@@ -88,22 +104,6 @@
                         ],
                         "salt": "0xab9c8d11fc48e16e3dc689ca9c508921c946b4c445d9a0f611de22828faa231e",
                         "create2": true
-                    }
-                },
-                {
-                    "address": "0xfdC1FCa388203685869f353ED263C6606E685A74",
-                    "name": "WETH_YB_EMPTY_STRAT",
-                    "meta": {
-                        "token": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                        "ybAssetId": 33
-                    }
-                },
-                {
-                    "address": "0x78d998Fe0971F9f2f7B752b7b8C9aB4461F2f88d",
-                    "name": "TAP_TOKEN_YB_EMPTY_STRAT",
-                    "meta": {
-                        "token": "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                        "ybAssetId": 32
                     }
                 },
                 {
