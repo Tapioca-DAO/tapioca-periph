@@ -1,6 +1,8 @@
 import { TTapiocaDeployTaskArgs } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import { TapiocaMulticall } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { loadLocalContract } from 'tapioca-sdk';
+import { DEPLOYMENT_NAMES } from 'tasks/deploy/DEPLOY_CONFIG';
 
 export const wrapToft__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
@@ -14,6 +16,16 @@ export const wrapToft__task = async (
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
 
     const token = await hre.ethers.getContractAt('TOFT', addr);
+    const pearlmit = await hre.ethers.getContractAt(
+        'Pearlmit',
+        loadLocalContract(
+            hre,
+            hre.SDK.chainInfo.chainId,
+            DEPLOYMENT_NAMES.PEARLMIT,
+            tag,
+        ).address,
+    );
+
     const wrappedToken = await hre.ethers.getContractAt(
         'ERC20Mock',
         await token.erc20(),
@@ -25,13 +37,25 @@ export const wrapToft__task = async (
         `[+]  $${await token.name()} wrapping ${amount}/${parsedAmount}`,
     );
 
+    const blockTime = await hre.ethers.provider.getBlock('latest');
     const calls: TapiocaMulticall.CallStruct[] = [
         // approve
         {
-            target: addr,
+            target: wrappedToken.address,
             callData: wrappedToken.interface.encodeFunctionData('approve', [
-                addr,
+                pearlmit.address,
                 parsedAmount,
+            ]),
+            allowFailure: false,
+        },
+        {
+            target: pearlmit.address,
+            callData: pearlmit.interface.encodeFunctionData('approve', [
+                wrappedToken.address,
+                0,
+                token.address,
+                parsedAmount,
+                blockTime.timestamp + 60, // 1 minute
             ]),
             allowFailure: false,
         },
