@@ -1515,7 +1515,22 @@
                     "address": "0xABeA9B7FAb25162980eAAe172AA4F9a4f3E3907F",
                     "meta": {
                         "args": [],
-                        "salt": "0x5f3c4cc0913e94292c8df915bc0985044381b0c288974dbbbed66f83a2c62973",
+                        "salt": "0x5f3c4cc0913e94292c8df915bc0985044381b0c288974dbbbed66f83a2c62973"
+                    }
+                },
+                {
+                    "name": "ADB_TAP_OPTION_ORACLE",
+                    "address": "0x26a6Ac43D9Ea0b2d395a3FBf223A5030f6f25c0E",
+                    "meta": {
+                        "args": [
+                            "ADB_TAP_OPTION_ORACLE",
+                            "ADB_TAP_OPTION_ORACLE",
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x98cd67c9caeaddc0"
+                            }
+                        ],
+                        "salt": "0x9fb82f2a085a61461c7244ad6c8e6e6179b8e7d87cf8d7ce253eaac9fb634582",
                         "create2": true
                     }
                 },
