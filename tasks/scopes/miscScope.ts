@@ -1,5 +1,6 @@
 import { scope } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
+import { deployOracleMock__task } from 'tasks/exec/misc/deployOracleMock';
 import { mintMock__task } from 'tasks/exec/misc/mintMock';
 import { pauseAll__task } from 'tasks/exec/misc/pause-all';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
@@ -44,4 +45,15 @@ TAP_TASK(
             'to',
             'The address to mint to. Else caller/multicall',
         ),
+);
+
+TAP_TASK(
+    miscScope
+        .task(
+            'oracleMock',
+            'Deploy OracleMock contract.',
+            deployOracleMock__task,
+        )
+        .addParam('name', 'The name of the oracle.')
+        .addParam('rate', 'Rate rate, in ether (ex: "1.2" for 1.2e18).'),
 );
