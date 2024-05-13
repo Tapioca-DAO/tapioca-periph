@@ -1380,6 +1380,22 @@
             "lastBlockHeight": 41326249,
             "contracts": [
                 {
+                    "name": "USDC_SEER_CL_ORACLE",
+                    "address": "0xC642C18620f6f833c47f930b903D5A1B321a6ec9",
+                    "meta": {
+                        "args": [
+                            "USDC_SEER_CL_ORACLE",
+                            "USDC_SEER_CL_ORACLE",
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x0de0b6b3a7640000"
+                            }
+                        ],
+                        "salt": "0xef1101ca50cce0666a83813106e1a30551961baae6ef83385ca3eec18cc79782",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "PEARLMIT",
                     "address": "0x92D3EC6B1a66544CA8a178cd55622CEfE7ddF65E",
                     "meta": {
