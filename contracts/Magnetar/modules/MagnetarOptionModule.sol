@@ -52,6 +52,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
      * @param data.lockData the data needed to lock on tOB
      * @param data.participateData the data needed to participate on tOLP
      */
+
     function lockAndParticipate(LockAndParticipateData memory data) public payable {
         /**
          * @dev if `lockData.lock`:
@@ -85,9 +86,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         if (_fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
-        (uint256 tOLPSglAssetId,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
-            data.singularity
-        );
+        (uint256 tOLPSglAssetId,,) =
+            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.singularity);
 
         _fraction = _extractTokens(data.user, data.singularity, _fraction);
         _depositToYb(_yieldBox, data.user, tOLPSglAssetId, _fraction);
@@ -168,9 +168,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         if (data.removeAndRepayData.removeAssetFromSGL) {
             ISingularity _singularity = ISingularity(data.externalData.singularity);
             // remove asset from SGL
-            _singularityRemoveAsset(
-                _singularity, data.removeAndRepayData.removeAmount, data.user, data.user
-            );
+            _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.user);
 
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
@@ -227,7 +225,9 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         if (bigBang == address(0) && singularity == address(0)) return;
 
         // YieldBox should be the same for all markets
-        IYieldBox _yieldBox = bigBang != address(0) ? IYieldBox(IMarket(bigBang)._yieldBox()) : IYieldBox(IMarket(singularity)._yieldBox());
+        IYieldBox _yieldBox = bigBang != address(0)
+            ? IYieldBox(IMarket(bigBang)._yieldBox())
+            : IYieldBox(IMarket(singularity)._yieldBox());
 
         if (approve) {
             if (bigBang != address(0)) _setApprovalForYieldBox(bigBang, _yieldBox);

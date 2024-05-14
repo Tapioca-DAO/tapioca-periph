@@ -135,7 +135,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
     }
 
     function _validateDepositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory data)
-        private view
+        private
+        view
     {
         // Check sender
         _checkSender(data.user);

@@ -87,9 +87,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
         return balanceAfter - balanceBefore;
     }
 
-    function _depositToYb(IYieldBox _yieldBox, address _user, uint256 _tokenId, uint256 _amount)
-        internal
-    {
+    function _depositToYb(IYieldBox _yieldBox, address _user, uint256 _tokenId, uint256 _amount) internal {
         (, address assetAddress,,) = _yieldBox.assets(_tokenId);
         assetAddress.safeApprove(address(_yieldBox), _amount);
         _yieldBox.depositAsset(_tokenId, address(this), _user, _amount, 0);
@@ -154,12 +152,10 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
         fraction = _singularity.addAsset(_from, _to, false, lendShare);
     }
 
-    function _singularityRemoveAsset(
-        ISingularity _singularity,
-        uint256 _amount,
-        address _from,
-        address _to
-    ) internal returns (uint256 share) {
+    function _singularityRemoveAsset(ISingularity _singularity, uint256 _amount, address _from, address _to)
+        internal
+        returns (uint256 share)
+    {
         _singularity.accrue();
         uint256 fraction = helper.getFractionForAmount(_singularity, _amount);
         share = _singularity.removeAsset(_from, _to, fraction);

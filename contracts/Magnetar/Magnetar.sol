@@ -15,6 +15,7 @@ import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/inter
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
@@ -150,7 +151,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
                 (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
                 if (!success) {
-                    _getRevertMsg(returnData);
+                    revert(RevertMsgDecoder._getRevertMsg(returnData));
                 }
             } else {
                 // If no valid action was found, revert
@@ -179,7 +180,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
          *      permitAll(address from,..)
          *      revokeAll(address from,..)
          */
-
         bool selectorValidated = _validatePermitOperation(_target, _actionCalldata);
         /// @dev no need to check the owner for the rest; it's using `msg.sender`
         if (selectorValidated) {
@@ -189,11 +189,16 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
     }
-    function _validatePermitOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
+
+    function _validatePermitOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
-        
+
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
@@ -225,15 +230,14 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
+
     function _processOFTOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
-       
         /**
          * @dev Executes the following:
          *      wrap(address from,...)
          *      unwrap(address from,...)
          *      sendPacket(...)
          */
-
         bool selectorValidated = _validateOFTOperation(_target, _actionCalldata);
         if (selectorValidated) {
             bytes4 funcSig = bytes4(_actionCalldata[:4]);
@@ -255,7 +259,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
     }
-    function _validateOFTOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
+
+    function _validateOFTOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -288,7 +297,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionValue The value to send with the call.
      */
     function _processMarketOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
-         /**
+        /**
          * @dev Executes the following:
          *      addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
          *      removeCollateral(address from, address to, uint256 share)
@@ -309,7 +318,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateMarketOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
+
+    function _validateMarketOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -369,7 +383,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
          *      participate(....)
          *      lock(....)
          */
-
         bool selectorValidated = _validateTapLockOperation(_target, _actionCalldata);
 
         if (selectorValidated) {
@@ -444,7 +457,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateTapLockOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
+
+    function _validateTapLockOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
         selectorValidated = false;
 
         _checkWhitelisted(_target);
@@ -466,13 +484,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     function _processTapUnlockOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
         private
     {
-         /**
+        /**
          * @dev Executes the following:
          *      twTap.exitPosition(....)
          *      tOB.exitPosition(....)
          *      tOLP.unlock(....)
          */
-
         bool selectorValidated = _validateTapUnlockOperation(_target, _actionCalldata);
 
         /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
@@ -483,12 +500,18 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
-    function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata) private view returns (bool selectorValidated) {
+
+    function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
         _checkWhitelisted(_target);
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        selectorValidated = funcSig == ITwTap.exitPosition.selector || funcSig == ITapiocaOptionBroker.exitPosition.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector;
+        selectorValidated = funcSig == ITwTap.exitPosition.selector
+            || funcSig == ITapiocaOptionBroker.exitPosition.selector
+            || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector;
     }
 
     /**
@@ -502,7 +525,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
 
         if (!success) {
-            _getRevertMsg(returnData);
+            revert(RevertMsgDecoder._getRevertMsg(returnData));
         }
     }
 }

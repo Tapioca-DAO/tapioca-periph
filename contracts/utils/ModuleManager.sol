@@ -66,6 +66,4 @@ abstract contract ModuleManager {
             revert(RevertMsgDecoder._getRevertMsg(returnData));
         }
     }
-
-   
 }
