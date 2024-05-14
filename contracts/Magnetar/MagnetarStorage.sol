@@ -80,7 +80,7 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
 
         (success, returnData) = module.delegatecall(_data);
         if (!success) {
-            _getRevertMsg(returnData);
+            revert(RevertMsgDecoder._getRevertMsg(returnData));
         }
     }
 
@@ -102,12 +102,5 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
                 revert Magnetar_TargetNotWhitelisted(addy);
             }
         }
-    }
-
-    /**
-     * @dev Decodes revert messages
-     */
-    function _getRevertMsg(bytes memory _returnData) internal pure {
-        revert(RevertMsgDecoder._getRevertMsg(_returnData));
     }
 }
