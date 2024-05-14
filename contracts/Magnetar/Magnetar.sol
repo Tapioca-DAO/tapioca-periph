@@ -28,7 +28,6 @@ import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseMagnetar} from "./BaseMagnetar.sol";
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
