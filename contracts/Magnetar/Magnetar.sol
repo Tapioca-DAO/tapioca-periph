@@ -5,7 +5,6 @@ pragma solidity 0.8.22;
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -16,6 +15,7 @@ import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/inter
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
@@ -29,7 +29,6 @@ import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseMagnetar} from "./BaseMagnetar.sol";
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -60,19 +59,15 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         ICluster _cluster,
         address _owner,
         address payable _assetModule,
-        address payable _assetXChainModule,
         address payable _collateralModule,
         address payable _mintModule,
-        address payable _mintXChainModule,
         address payable _optionModule,
         address payable _yieldBoxModule,
         IPearlmit _pearlmit
     ) BaseMagnetar(_cluster, _pearlmit, _owner) {
         modules[MagnetarModule.AssetModule] = _assetModule;
-        modules[MagnetarModule.AssetXChainModule] = _assetXChainModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;
-        modules[MagnetarModule.MintXChainModule] = _mintXChainModule;
         modules[MagnetarModule.OptionModule] = _optionModule;
         modules[MagnetarModule.YieldBoxModule] = _yieldBoxModule;
     }
@@ -128,12 +123,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == uint8(MagnetarAction.AssetXChainModule)) {
-                _executeModule(MagnetarModule.AssetXChainModule, _action.call);
-                continue; // skip the rest of the loop
-            }
-
-            /// @dev Modules will not return result data.
             if (_action.id == uint8(MagnetarAction.CollateralModule)) {
                 _executeModule(MagnetarModule.CollateralModule, _action.call);
                 continue; // skip the rest of the loop
@@ -142,12 +131,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             /// @dev Modules will not return result data.
             if (_action.id == uint8(MagnetarAction.MintModule)) {
                 _executeModule(MagnetarModule.MintModule, _action.call);
-                continue; // skip the rest of the loop
-            }
-
-            /// @dev Modules will not return result data.
-            if (_action.id == uint8(MagnetarAction.MintXChainModule)) {
-                _executeModule(MagnetarModule.MintXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
@@ -168,7 +151,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 bytes memory callData = abi.encodeWithSelector(IMagnetarModuleExtender.handleAction.selector, _action);
                 (bool success, bytes memory returnData) = address(magnetarModuleExtender).delegatecall(callData);
                 if (!success) {
-                    _getRevertMsg(returnData);
+                    revert(RevertMsgDecoder._getRevertMsg(returnData));
                 }
             } else {
                 // If no valid action was found, revert
@@ -190,18 +173,33 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      */
     function _processPermitOperation(address _target, bytes calldata _actionCalldata) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+        /**
+         * @dev Executes the following:
+         *      permit(address owner...)
+         *      revoke(address owner...)
+         *      permitAll(address from,..)
+         *      revokeAll(address from,..)
+         */
+        bool selectorValidated = _validatePermitOperation(_target, _actionCalldata);
+        /// @dev no need to check the owner for the rest; it's using `msg.sender`
+        if (selectorValidated) {
+            // No need to send value on permit
+            _executeCall(_target, _actionCalldata, 0);
+            return;
+        }
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
+    }
 
-        /// @dev owner address should always be first param.
-        // permit(address owner...)
-        // revoke(address owner...)
-        // permitAll(address from,..)
-        // revokeAll(address from,..)
-        // permit(address from,...)
-        // setApprovalForAll(address from,...)
-        // setApprovalForAsset(address from,...)
+    function _validatePermitOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        selectorValidated = false;
+
+        _checkWhitelisted(_target);
+
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        bool selectorValidated;
         if (
             funcSig == IPermitAll.permitAll.selector || funcSig == IPermitAll.revokeAll.selector
                 || funcSig == IPermit.permit.selector || funcSig == IPermit.revoke.selector
@@ -220,16 +218,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             /// @dev Owner param check. See Warning above.
             _checkSender(batch.owner);
         }
-
-        /// @dev no need to check the owner for the rest; it's using `msg.sender`
-        if (selectorValidated) {
-            // No need to send value on permit
-            _executeCall(_target, _actionCalldata, 0);
-            return;
-        }
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
     }
-
     /**
      * @dev Process a TOFT operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
@@ -241,16 +230,46 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
+
     function _processOFTOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+        /**
+         * @dev Executes the following:
+         *      wrap(address from,...)
+         *      unwrap(address from,...)
+         *      sendPacket(...)
+         */
+        bool selectorValidated = _validateOFTOperation(_target, _actionCalldata);
+        if (selectorValidated) {
+            bytes4 funcSig = bytes4(_actionCalldata[:4]);
+            if (funcSig == ITOFT.unwrap.selector) {
+                (, uint256 _amount) = abi.decode(_actionCalldata[4:36], (address, uint256));
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount);
+                if (isErr) revert Magnetar_PearlmitTransferFailed();
+            }
+            if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
+                (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
+                uint256 amount_ = lzSendParam_.sendParam.amountLD;
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_);
+                if (isErr) revert Magnetar_PearlmitTransferFailed();
+            }
 
-        /// @dev owner address should always be first param.
-        // wrap(address from,...)
-        // unwrap(address from,...)
-        // sendFrom(address from,...)
+            _executeCall(_target, _actionCalldata, _actionValue);
+            return;
+        }
+
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
+    }
+
+    function _validateOFTOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        selectorValidated = false;
+
+        _checkWhitelisted(_target);
+
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        bool selectorValidated;
-
         if (funcSig == ITOFT.wrap.selector) {
             selectorValidated = true;
             /// @dev Owner param check. See Warning above.
@@ -259,34 +278,14 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         if (funcSig == ITOFT.unwrap.selector) {
             selectorValidated = true;
-            (, uint256 _amount) = abi.decode(_actionCalldata[4:68], (address, uint256));
-            // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
-            {
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount);
-                if (isErr) revert Magnetar_PearlmitTransferFailed();
-            }
         }
 
         if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
             selectorValidated = true;
             (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
-            uint256 amount_ = lzSendParam_.sendParam.amountLD;
-
             address owner_ = OFTMsgCodec.bytes32ToAddress(lzSendParam_.sendParam.to);
             _checkSender(owner_);
-
-            // IERC20(_target).safeTransferFrom(msg.sender, address(this), _amount);
-            {
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_);
-                if (isErr) revert Magnetar_PearlmitTransferFailed();
-            }
         }
-
-        if (selectorValidated) {
-            _executeCall(_target, _actionCalldata, _actionValue);
-            return;
-        }
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
     }
 
     /**
@@ -298,12 +297,38 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionValue The value to send with the call.
      */
     function _processMarketOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+        /**
+         * @dev Executes the following:
+         *      addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
+         *      removeCollateral(address from, address to, uint256 share)
+         *      borrow(address from, address to, uint256 amount)
+         *      repay(address from, address to, bool skim, uint256 part)
+         *      buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data)
+         *      sellCollateral(address from, uint256 share, bytes calldata data)
+         *      addAsset(address from, address to, bool skim, uint256 share)
+         *      removeAsset(address from, address to, uint256 fraction)
+         */
 
         /// @dev owner address should always be first param.
-        bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        bool selectorValidated;
+        bool selectorValidated = _validateMarketOperation(_target, _actionCalldata);
 
+        if (selectorValidated) {
+            _executeCall(_target, _actionCalldata, _actionValue);
+            return;
+        }
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+    }
+
+    function _validateMarketOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        selectorValidated = false;
+
+        _checkWhitelisted(_target);
+
+        bytes4 funcSig = bytes4(_actionCalldata[:4]);
         // function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
         // function removeCollateral(address from, address to, uint256 share)
         // function borrow(address from, address to, uint256 amount)
@@ -341,12 +366,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
-
-        if (selectorValidated) {
-            _executeCall(_target, _actionCalldata, _actionValue);
-            return;
-        }
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
 
     /**
@@ -358,82 +377,101 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionValue The value to send with the call.
      */
     function _processTapLockOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
+        /**
+         * @dev Executes the following:
+         *      lock(....)
+         *      participate(....)
+         *      lock(....)
+         */
+        bool selectorValidated = _validateTapLockOperation(_target, _actionCalldata);
 
-        /// @dev owner address should always be first param.
-        /// owner will receive the locked tokens
+        if (selectorValidated) {
+            bytes4 funcSig = bytes4(_actionCalldata[:4]);
+
+            // Token is sent to the owner after execute
+            if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
+                (, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
+                (uint256 assetId,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
+                address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
+
+                {
+                    bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), yieldBox, assetId, amount);
+                    if (isErr) {
+                        revert Magnetar_PearlmitTransferFailed();
+                    }
+                }
+
+                pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp + 1).toUint48());
+                IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), true);
+                _executeCall(_target, _actionCalldata, _actionValue);
+                IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), false);
+
+                return;
+            }
+
+            // Token is sent to msg.sender after execute, need to send back
+            if (funcSig == ITapiocaOptionBroker.participate.selector) {
+                (uint256 tokenId) = abi.decode(_actionCalldata[4:], (uint256));
+                address tOLP = ITapiocaOptionBroker(_target).tOLP();
+
+                {
+                    bool isErr = pearlmit.transferFromERC721(msg.sender, address(this), tOLP, tokenId);
+                    if (isErr) {
+                        revert Magnetar_PearlmitTransferFailed();
+                    }
+                }
+
+                pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp + 1).toUint48());
+                ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), true);
+                (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue);
+                ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), false);
+
+                address oTAP = ITapiocaOptionBroker(_target).oTAP();
+                ITapiocaOptionLiquidityProvision(oTAP).safeTransferFrom(
+                    address(this), msg.sender, abi.decode(tokenIdData, (uint256))
+                );
+
+                return;
+            }
+
+            // Token is sent to the owner after execute
+            if (funcSig == ITwTap.participate.selector) {
+                (, uint256 amount,) = abi.decode(_actionCalldata[4:], (address, uint256, uint256));
+                address tapOFT = ITwTap(_target).tapOFT();
+
+                {
+                    bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), address(tapOFT), amount);
+                    if (isErr) {
+                        revert Magnetar_PearlmitTransferFailed();
+                    }
+                }
+
+                pearlmit.approve(tapOFT, 0, _target, amount.toUint200(), (block.timestamp + 1).toUint48());
+
+                tapOFT.safeApprove(address(pearlmit), type(uint256).max);
+                _executeCall(_target, _actionCalldata, _actionValue);
+                tapOFT.safeApprove(address(pearlmit), 0);
+                return;
+            }
+        }
+
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+    }
+
+    function _validateTapLockOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        selectorValidated = false;
+
+        _checkWhitelisted(_target);
+
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector || funcSig == ITwTap.participate.selector) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
         }
-
-        // Token is sent to the owner after execute
-        if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
-            (, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
-            (uint256 assetId,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
-            address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
-
-            {
-                bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), yieldBox, assetId, amount);
-                if (isErr) {
-                    revert Magnetar_PearlmitTransferFailed();
-                }
-            }
-            pearlmit.approve(yieldBox, assetId, _target, amount, (block.timestamp).toUint48());
-            IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), true);
-            _executeCall(_target, _actionCalldata, _actionValue);
-            IYieldBox(yieldBox).setApprovalForAll(address(pearlmit), false);
-
-            return;
-        }
-
-        // Token is sent to msg.sender after execute, need to send back
-        if (funcSig == ITapiocaOptionBroker.participate.selector) {
-            (uint256 tokenId) = abi.decode(_actionCalldata[4:], (uint256));
-            address tOLP = ITapiocaOptionBroker(_target).tOLP();
-
-            {
-                bool isErr = pearlmit.transferFromERC721(msg.sender, address(this), tOLP, tokenId);
-                if (isErr) {
-                    revert Magnetar_PearlmitTransferFailed();
-                }
-            }
-
-            pearlmit.approve(tOLP, tokenId, _target, 1, (block.timestamp).toUint48());
-            ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), true);
-            (bytes memory tokenIdData) = _executeCall(_target, _actionCalldata, _actionValue);
-            ITapiocaOptionLiquidityProvision(tOLP).setApprovalForAll(address(pearlmit), false);
-
-            ITapiocaOptionLiquidityProvision(tOLP).safeTransferFrom(
-                address(this), msg.sender, abi.decode(tokenIdData, (uint256))
-            );
-
-            return;
-        }
-
-        // Token is sent to the owner after execute
-        if (funcSig == ITwTap.participate.selector) {
-            (, uint256 amount,) = abi.decode(_actionCalldata[4:], (address, uint256, uint256));
-            address tapOFT = ITwTap(_target).tapOFT();
-
-            {
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), address(tapOFT), amount);
-                if (isErr) {
-                    revert Magnetar_PearlmitTransferFailed();
-                }
-            }
-
-            tapOFT.safeApprove(address(pearlmit), type(uint256).max);
-            pearlmit.approve(tapOFT, 0, _target, amount.toUint200(), (block.timestamp).toUint48());
-
-            _executeCall(_target, _actionCalldata, _actionValue);
-
-            tapOFT.safeApprove(address(pearlmit), 0);
-            return;
-        }
-
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
     }
 
     /**
@@ -446,20 +484,34 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     function _processTapUnlockOperation(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
         private
     {
-        if (!cluster.isWhitelisted(0, _target)) revert Magnetar_NotAuthorized(_target, _target);
-
-        bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        /**
+         * @dev Executes the following:
+         *      twTap.exitPosition(....)
+         *      tOB.exitPosition(....)
+         *      tOLP.unlock(....)
+         */
+        bool selectorValidated = _validateTapUnlockOperation(_target, _actionCalldata);
 
         /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
         /// Owner of the token receives the unlocked tokens.
-        if (
-            funcSig == ITwTap.exitPosition.selector || funcSig == ITapiocaOptionBroker.exitPosition.selector
-                || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector
-        ) {
+        if (selectorValidated) {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+    }
+
+    function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        _checkWhitelisted(_target);
+
+        bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        selectorValidated = funcSig == ITwTap.exitPosition.selector
+            || funcSig == ITapiocaOptionBroker.exitPosition.selector
+            || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector;
     }
 
     /**
@@ -473,7 +525,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
 
         if (!success) {
-            _getRevertMsg(returnData);
+            revert(RevertMsgDecoder._getRevertMsg(returnData));
         }
     }
 }

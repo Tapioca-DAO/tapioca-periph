@@ -11,23 +11,17 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
     ExitPositionAndRemoveCollateralData,
-    MagnetarWithdrawData,
     ICommonExternalContracts,
-    IRemoveAndRepay
+    IRemoveAndRepay,
+    LockAndParticipateData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
-import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {MagnetarBaseModuleExternal} from "./MagnetarBaseModuleExternal.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {MagnetarStorage} from "../MagnetarStorage.sol";
+import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
 
@@ -45,21 +39,84 @@ import {MagnetarStorage} from "../MagnetarStorage.sol";
  * @author TapiocaDAO
  * @notice Magnetar options related operations
  */
-contract MagnetarOptionModule is Ownable, MagnetarStorage {
+contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
-    error Magnetar_ActionParamsMismatch();
-    error Magnetar_tOLPTokenMismatch();
-    error Magnetar_MarketCallFailed(bytes call);
-    error Magnetar_ExtractTokenFail();
     error Magnetar_ComposeMsgNotAllowed();
-    error Magnetar_UserMismatch();
+    /**
+     * @notice helper to perform tOLP.lock(...) and tOB.participate(...)
+     * @param data.user the user to perform the operation for
+     * @param data.singularity the SGL address
+     * @param data.fraction the amount to lock
+     * @param data.lockData the data needed to lock on tOB
+     * @param data.participateData the data needed to participate on tOLP
+     */
 
-    address immutable magnetarBaseModuleExternal;
+    function lockAndParticipate(LockAndParticipateData memory data) public payable {
+        /**
+         * @dev if `lockData.lock`:
+         *          - transfer `fraction` from data.user to `address(this)
+         *          - deposits `fraction` to YB for `address(this)`
+         *          - performs tOLP.lock
+         */
+        uint256 tOLPTokenId;
+        if (data.lockData.lock) {
+            tOLPTokenId = _lock(data);
+        }
 
-    constructor(address _magnetarBaseModuleExternal) MagnetarStorage(IPearlmit(address(0))) {
-        magnetarBaseModuleExternal = _magnetarBaseModuleExternal;
+        /**
+         * @dev if `participateData.participate`:
+         *          - verify tOLPTokenId
+         *          - performs tOB.participate
+         *          - transfer `oTAPTokenId` to data.user
+         */
+        if (data.participateData.participate) {
+            _participate(data, tOLPTokenId);
+        }
+    }
+
+    function _lock(LockAndParticipateData memory data) private returns (uint256 tOLPTokenId) {
+        IMarket _singularity = IMarket(data.singularity);
+        IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
+
+        uint256 _fraction = data.lockData.fraction;
+
+        // use requested value
+        if (_fraction == 0) revert Magnetar_ActionParamsMismatch();
+
+        // retrieve and deposit SGLAssetId registered in tOLP
+        (uint256 tOLPSglAssetId,,) =
+            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.singularity);
+
+        _fraction = _extractTokens(data.user, data.singularity, _fraction);
+        _depositToYb(_yieldBox, data.user, tOLPSglAssetId, _fraction);
+
+        tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
+            data.user, data.singularity, data.lockData.lockDuration, data.lockData.amount
+        );
+    }
+
+    function _participate(LockAndParticipateData memory data, uint256 tOLPTokenId) private {
+        // validate token ids
+        if (tOLPTokenId == 0 && data.participateData.tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
+        if (
+            data.participateData.tOLPTokenId != tOLPTokenId && tOLPTokenId != 0 && data.participateData.tOLPTokenId != 0
+        ) {
+            revert Magnetar_tOLPTokenMismatch();
+        }
+
+        if (data.participateData.tOLPTokenId != 0) tOLPTokenId = data.participateData.tOLPTokenId;
+
+        // transfer NFT here
+        bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
+        if (isErr) revert Magnetar_ExtractTokenFail();
+
+        IERC721(data.lockData.target).approve(data.participateData.target, tOLPTokenId);
+        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
+
+        address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
+        IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "");
     }
 
     /**
@@ -75,224 +132,111 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
      *     - BB collateral can be removed by providing `removeAndRepayData.collateralWithdrawData`
      */
     function exitPositionAndRemoveCollateral(ExitPositionAndRemoveCollateralData memory data) public payable {
-        // validate data
+        /**
+         * @dev validate data
+         */
         _validateExitPositionAndRemoveCollateral(data);
 
-        IMarket bigBang_ = IMarket(data.externalData.bigBang);
-        ISingularity singularity_ = ISingularity(data.externalData.singularity);
-        IYieldBox yieldBox_ = data.externalData.singularity != address(0)
-            ? IYieldBox(singularity_._yieldBox())
-            : IYieldBox(bigBang_._yieldBox());
+        /**
+         * @dev YieldBox approvals
+         */
+        _processYieldBoxApprovals(data.externalData.bigBang, data.externalData.singularity, true);
 
-        _executeDelegateCall(
-            magnetarBaseModuleExternal,
-            abi.encodeWithSelector(
-                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(bigBang_), yieldBox_
-            )
-        );
-
-        _executeDelegateCall(
-            magnetarBaseModuleExternal,
-            abi.encodeWithSelector(
-                MagnetarBaseModuleExternal.setApprovalForYieldBox.selector, address(pearlmit), yieldBox_
-            )
-        );
-
-        // if `removeAndRepayData.exitData.exit` the following operations are performed
-        //      - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
-        //      - tOB.exitPosition
-        //      - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
+        /**
+         * @dev if `removeAndRepayData.exitData.exit` the following operations are performed
+         *          - if ownerOfTapTokenId is user, transfers the oTAP token id to this contract
+         *          - tOB.exitPosition
+         *          - if `!removeAndRepayData.unlockData.unlock`, transfer the obtained tokenId to the user
+         */
         uint256 tOLPId = 0;
         if (data.removeAndRepayData.exitData.exit) {
-            address oTapAddress = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).oTAP();
-            (, ITapiocaOption.TapOption memory oTAPPosition) =
-                ITapiocaOption(oTapAddress).attributes(data.removeAndRepayData.exitData.oTAPTokenID);
-
-            tOLPId = oTAPPosition.tOLP;
-
-            address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(data.removeAndRepayData.exitData.oTAPTokenID);
-
-            if (ownerOfTapTokenId != data.user && ownerOfTapTokenId != address(this)) {
-                revert Magnetar_ActionParamsMismatch();
-            }
-            if (ownerOfTapTokenId == data.user) {
-                // IERC721(oTapAddress).safeTransferFrom(
-                //     data.user, address(this), data.removeAndRepayData.exitData.oTAPTokenID, "0x"
-                // );
-                bool isErr = pearlmit.transferFromERC721(
-                    data.user, address(this), oTapAddress, data.removeAndRepayData.exitData.oTAPTokenID
-                );
-                if (isErr) revert Magnetar_ExtractTokenFail();
-            }
-            IERC721(oTapAddress).approve(
-                data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID
-            );
-            ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).exitPosition(
-                data.removeAndRepayData.exitData.oTAPTokenID
-            );
-
-            if (!data.removeAndRepayData.unlockData.unlock) {
-                address tOLPContract = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).tOLP();
-
-                //transfer tOLP to the data.user
-                IERC721(tOLPContract).safeTransferFrom(address(this), data.user, tOLPId, "0x");
-            }
+            tOLPId = _exit(data);
         }
 
-        // performs a tOLP.unlock operation
+        /**
+         * @dev performs a tOLP.unlock operation
+         */
         if (data.removeAndRepayData.unlockData.unlock) {
-            if (data.removeAndRepayData.unlockData.tokenId != 0) {
-                if (tOLPId != 0) {
-                    if (tOLPId != data.removeAndRepayData.unlockData.tokenId) {
-                        revert Magnetar_tOLPTokenMismatch();
-                    }
-                }
-                tOLPId = data.removeAndRepayData.unlockData.tokenId;
-            }
-
-            address ownerOfTOLP = IERC721(data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
-
-            if (ownerOfTOLP != data.user && ownerOfTOLP != address(this)) {
-                revert Magnetar_ActionParamsMismatch();
-            }
-
-            ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
-                tOLPId, data.externalData.singularity, data.user
-            );
+            _unlock(data, tOLPId);
         }
 
-        // if `data.removeAndRepayData.removeAssetFromSGL` performs the follow operations:
-        //      - removeAsset from SGL
-        //      - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
-        uint256 _removeAmount = data.removeAndRepayData.removeAmount;
+        /**
+         * @dev if `data.removeAndRepayData.removeAssetFromSGL` performs the follow operations:
+         *          - removeAsset from SGL
+         *          - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
+         */
         if (data.removeAndRepayData.removeAssetFromSGL) {
-            uint256 _assetId = singularity_._assetId();
-
-            address removeAssetTo = data.removeAndRepayData.assetWithdrawData.withdraw
-                && !data.removeAndRepayData.repayAssetOnBB ? address(this) : data.user;
-
-            // convert share to fraction
-            singularity_.accrue();
-            uint256 fraction = helper.getFractionForAmount(singularity_, _removeAmount);
-
-            uint256 share = singularity_.removeAsset(data.user, removeAssetTo, fraction);
+            ISingularity _singularity = ISingularity(data.externalData.singularity);
+            // remove asset from SGL
+            _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.user);
 
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
-                // assure unwrap is false because asset is not a TOFT
-                if (data.removeAndRepayData.assetWithdrawData.compose) revert Magnetar_ComposeMsgNotAllowed();
-
-                uint256 computedAmount = yieldBox_.toAmount(_assetId, share, false);
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.assetWithdrawData.lzSendParams.sendParam.minAmountLD =
-                    ITOFT(singularity_._asset()).removeDust(computedAmount);
-
-                // already validated above
-                // _withdrawToChain(data.removeAndRepayData.assetWithdrawData);
-                _executeDelegateCall(
-                    magnetarBaseModuleExternal,
-                    abi.encodeWithSelector(
-                        MagnetarBaseModuleExternal.withdrawToChain.selector, data.removeAndRepayData.assetWithdrawData
-                    )
-                );
+                IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
+                uint256 _assetId = _singularity._assetId();
+                uint256 _share = _yieldBox.toShare(_assetId, data.removeAndRepayData.assetWithdrawData.amount, false);
+                _yieldBox.transfer(data.user, address(this), _singularity._assetId(), _share);
+                _withdrawHere(data.removeAndRepayData.assetWithdrawData);
             }
         }
 
-        // performs a BigBang repay operation
+        /**
+         * @dev performs a BigBang repay operation
+         */
         if (!data.removeAndRepayData.assetWithdrawData.withdraw && data.removeAndRepayData.repayAssetOnBB) {
-            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper).repay(
+            _marketRepay(
+                IMarket(data.externalData.bigBang),
+                data.externalData.marketHelper,
+                data.removeAndRepayData.repayAmount,
                 data.user,
-                data.user,
-                false,
-                helper.getBorrowPartForAmount(data.externalData.bigBang, data.removeAndRepayData.repayAmount)
+                data.user
             );
-
-            {
-                uint256 bbAssetId = bigBang_._assetId();
-                pearlmit.approve(
-                    address(yieldBox_),
-                    bbAssetId,
-                    address(bigBang_),
-                    uint200(data.removeAndRepayData.repayAmount),
-                    (block.timestamp).toUint48()
-                ); // TODO check approval
-                (bool[] memory successes, bytes[] memory results) = bigBang_.execute(modules, calls, true);
-                if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
-
-                uint256 repayed = IMarketHelper(data.externalData.marketHelper).repayView(results[0]);
-                // transfer excess amount to the data.user
-                if (repayed < _removeAmount) {
-                    yieldBox_.transfer(
-                        address(this),
-                        data.user,
-                        bbAssetId,
-                        yieldBox_.toShare(bbAssetId, _removeAmount - repayed, false)
-                    );
-                }
-            }
         }
 
-        // performs a BigBang removeCollateral operation
-        // if `data.removeAndRepayData.collateralWithdrawData.withdraw` withdraws by using the `withdrawTo` method
+        /**
+         * @dev performs a BigBang removeCollateral operation and withdrawal if requested
+         */
         if (data.removeAndRepayData.removeCollateralFromBB) {
-            uint256 _collateralId = bigBang_._collateralId();
-            uint256 collateralShare = yieldBox_.toShare(_collateralId, data.removeAndRepayData.collateralAmount, false);
-            address removeCollateralTo =
-                data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : data.user;
+            IMarket _bigBang = IMarket(data.externalData.bigBang);
+            IYieldBox _yieldBox = IYieldBox(_bigBang._yieldBox());
 
-            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.externalData.marketHelper)
-                .removeCollateral(data.user, removeCollateralTo, collateralShare);
-            bigBang_.execute(modules, calls, true);
+            // remove collateral
+            _marketRemoveCollateral(
+                _bigBang,
+                data.externalData.marketHelper,
+                _yieldBox.toShare(_bigBang._collateralId(), data.removeAndRepayData.collateralAmount, false),
+                data.user,
+                data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : data.user
+            );
 
             //withdraw
             if (data.removeAndRepayData.collateralWithdrawData.withdraw) {
-                if (data.removeAndRepayData.collateralWithdrawData.compose) {
-                    // allow only unwrap receiver
-                    (,,, bytes memory tapComposeMsg_,) = TapiocaOmnichainEngineCodec.decodeToeComposeMsg(
-                        data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.composeMsg
-                    );
-
-                    // it should fail at this point if data != SendParamsMsg
-                    SendParamsMsg memory unwrapReceiverData = abi.decode(tapComposeMsg_, (SendParamsMsg));
-                    if (unwrapReceiverData.receiver != data.user) revert Magnetar_UserMismatch();
-                }
-
-                uint256 computedAmount = yieldBox_.toAmount(_collateralId, collateralShare, false);
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.amountLD = computedAmount;
-                data.removeAndRepayData.collateralWithdrawData.lzSendParams.sendParam.minAmountLD =
-                    ITOFT(bigBang_._collateral()).removeDust(computedAmount);
-
-                // _withdrawToChain(data.removeAndRepayData.collateralWithdrawData);
-                _executeDelegateCall(
-                    magnetarBaseModuleExternal,
-                    abi.encodeWithSelector(
-                        MagnetarBaseModuleExternal.withdrawToChain.selector,
-                        data.removeAndRepayData.collateralWithdrawData
-                    )
-                );
+                _withdrawHere(data.removeAndRepayData.collateralWithdrawData);
             }
         }
-        // _revertYieldBoxApproval(address(bigBang_), yieldBox_);
-        _executeDelegateCall(
-            magnetarBaseModuleExternal,
-            abi.encodeWithSelector(
-                MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(bigBang_), yieldBox_
-            )
-        );
 
-        _executeDelegateCall(
-            magnetarBaseModuleExternal,
-            abi.encodeWithSelector(
-                MagnetarBaseModuleExternal.revertYieldBoxApproval.selector, address(pearlmit), yieldBox_
-            )
-        );
+        /**
+         * @dev YieldBox reverts
+         */
+        _processYieldBoxApprovals(data.externalData.bigBang, data.externalData.singularity, false);
     }
 
-    function _executeDelegateCall(address _target, bytes memory _data) internal returns (bytes memory returnData) {
-        bool success = true;
-        (success, returnData) = _target.delegatecall(_data);
-        if (!success) {
-            _getRevertMsg(returnData);
+    function _processYieldBoxApprovals(address bigBang, address singularity, bool approve) private {
+        if (bigBang == address(0) && singularity == address(0)) return;
+
+        // YieldBox should be the same for all markets
+        IYieldBox _yieldBox = bigBang != address(0)
+            ? IYieldBox(IMarket(bigBang)._yieldBox())
+            : IYieldBox(IMarket(singularity)._yieldBox());
+
+        if (approve) {
+            if (bigBang != address(0)) _setApprovalForYieldBox(bigBang, _yieldBox);
+            if (singularity != address(0)) _setApprovalForYieldBox(singularity, _yieldBox);
+            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
+        } else {
+            if (bigBang != address(0)) _revertYieldBoxApproval(bigBang, _yieldBox);
+            if (singularity != address(0)) _revertYieldBoxApproval(singularity, _yieldBox);
+            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
         }
     }
 
@@ -319,5 +263,63 @@ contract MagnetarOptionModule is Ownable, MagnetarStorage {
         if (data.exitData.exit) {
             if (data.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();
         }
+
+        if (data.assetWithdrawData.withdraw) {
+            // assure unwrap is false because asset is not a TOFT
+            if (data.assetWithdrawData.unwrap) revert Magnetar_ComposeMsgNotAllowed();
+        }
+    }
+
+    function _exit(ExitPositionAndRemoveCollateralData memory data) private returns (uint256 tOLPId) {
+        address oTapAddress = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).oTAP();
+        (, ITapiocaOption.TapOption memory oTAPPosition) =
+            ITapiocaOption(oTapAddress).attributes(data.removeAndRepayData.exitData.oTAPTokenID);
+
+        tOLPId = oTAPPosition.tOLP;
+
+        // check ownership
+        address ownerOfTapTokenId = IERC721(oTapAddress).ownerOf(data.removeAndRepayData.exitData.oTAPTokenID);
+        if (ownerOfTapTokenId != data.user && ownerOfTapTokenId != address(this)) {
+            revert Magnetar_ActionParamsMismatch();
+        }
+
+        // if not owner; get the oTAP token
+        if (ownerOfTapTokenId == data.user) {
+            bool isErr = pearlmit.transferFromERC721(
+                data.user, address(this), oTapAddress, data.removeAndRepayData.exitData.oTAPTokenID
+            );
+            if (isErr) revert Magnetar_ExtractTokenFail();
+        }
+
+        // exit position
+        _tOBExit(oTapAddress, data.removeAndRepayData.exitData.target, data.removeAndRepayData.exitData.oTAPTokenID);
+
+        // if not unlock, trasfer tOLP to the user
+        if (!data.removeAndRepayData.unlockData.unlock) {
+            address tOLPContract = ITapiocaOptionBroker(data.removeAndRepayData.exitData.target).tOLP();
+
+            //transfer tOLP to the data.user
+            IERC721(tOLPContract).safeTransferFrom(address(this), data.user, tOLPId, "0x");
+        }
+    }
+
+    function _unlock(ExitPositionAndRemoveCollateralData memory data, uint256 tOLPId) private {
+        if (tOLPId == 0 && data.removeAndRepayData.unlockData.tokenId == 0) revert Magnetar_tOLPTokenMismatch();
+        if (
+            data.removeAndRepayData.unlockData.tokenId != 0 && tOLPId != 0
+                && tOLPId != data.removeAndRepayData.unlockData.tokenId
+        ) {
+            revert Magnetar_tOLPTokenMismatch();
+        }
+
+        if (data.removeAndRepayData.unlockData.tokenId != 0) tOLPId = data.removeAndRepayData.unlockData.tokenId;
+
+        // check ownership
+        address ownerOfTOLP = IERC721(data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
+        if (ownerOfTOLP != data.user && ownerOfTOLP != address(this)) revert Magnetar_ActionParamsMismatch();
+
+        ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
+            tOLPId, data.externalData.singularity, data.user
+        );
     }
 }

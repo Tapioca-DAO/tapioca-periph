@@ -9,11 +9,10 @@ import {
     DepositAddCollateralAndBorrowFromMarketData,
     MagnetarWithdrawData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -35,8 +34,10 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 contract MagnetarCollateralModule is MagnetarBaseModule {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
+    using SafeApprove for address;
 
-    error MagnetarCollateralModule_ComposeMsgNotAllowed();
+    error MagnetarCollateralModule_UnwrapNotAllowed();
+    error Magnetar_WithdrawParamsMismatch();
 
     /**
      * @notice helper for deposit to YieldBox, add collateral to a market, borrow from the same market and withdraw
@@ -52,73 +53,85 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
      * @param data.collateralAmount the collateral amount to add
      * @param data.borrowAmount the borrow amount
      * @param data.deposit true/false flag for the deposit to YieldBox step
-     * @param data.withdrawParams necessary data for the same chain or the cross-chain withdrawal
+     * @param data.withdrawParams necessary data for the same chain withdrawal
      */
     function depositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory data)
         public
         payable
     {
-        // validate data
+        /**
+         * @dev validate data
+         */
         _validateDepositAddCollateralAndBorrowFromMarket(data);
 
-        IMarket market_ = IMarket(data.market);
-        IYieldBox yieldBox_ = IYieldBox(market_._yieldBox());
+        IMarket _market = IMarket(data.market);
+        IYieldBox _yieldBox = IYieldBox(_market._yieldBox());
 
-        uint256 collateralId = market_._collateralId();
-        (, address collateralAddress,,) = yieldBox_.assets(collateralId);
+        /**
+         * @dev YieldBox approvals
+         */
+        _processYieldBoxApprovals(_yieldBox, data.market, true);
 
-        uint256 _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
+        uint256 collateralId = _market._collateralId();
 
-        _setApprovalForYieldBox(address(pearlmit), yieldBox_);
-        _setApprovalForYieldBox(data.market, yieldBox_);
-
-        // deposit to YieldBox
+        /**
+         * @dev deposit to YieldBox
+         */
         if (data.deposit) {
-            // transfers tokens from sender or from the user to this contract
+            (, address collateralAddress,,) = _yieldBox.assets(collateralId);
             data.collateralAmount = _extractTokens(data.user, collateralAddress, data.collateralAmount);
-            _share = yieldBox_.toShare(collateralId, data.collateralAmount, false);
 
-            // deposit to YieldBox
-            IERC20(collateralAddress).approve(address(yieldBox_), 0);
-            IERC20(collateralAddress).approve(address(yieldBox_), data.collateralAmount);
-            yieldBox_.depositAsset(collateralId, address(this), data.user, data.collateralAmount, 0);
+            _depositToYb(_yieldBox, data.user, collateralId, data.collateralAmount);
         }
 
-        // performs .addCollateral on data.market
+        /**
+         * @dev performs .addCollateral on data.market
+         */
         if (data.collateralAmount > 0) {
-            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(data.marketHelper).addCollateral(
-                data.user, data.user, false, data.collateralAmount, _share
-            );
-            pearlmit.approve(
-                address(yieldBox_), collateralId, address(market_), _share.toUint200(), (block.timestamp).toUint48()
-            );
-            market_.execute(modules, calls, true);
+            uint256 _share = _yieldBox.toShare(collateralId, data.collateralAmount, false);
+
+            _pearlmitApprove(address(_yieldBox), collateralId, address(_market), _share);
+            _marketAddCollateral(_market, data.marketHelper, _share, data.user, data.user);
         }
 
-        // performs .borrow on data.market
-        // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
+        /**
+         * @dev performs .borrow on data.market
+         *      if `withdraw` it uses `_withdrawHere` to withdraw assets on the same chain
+         */
         if (data.borrowAmount > 0) {
-            address borrowReceiver = data.withdrawParams.withdraw ? address(this) : data.user;
-
-            (Module[] memory modules, bytes[] memory calls) =
-                IMarketHelper(data.marketHelper).borrow(data.user, borrowReceiver, data.borrowAmount);
-
-            uint256 borrowShare = yieldBox_.toShare(market_._assetId(), data.borrowAmount, false);
-            pearlmit.approve(
-                address(yieldBox_),
-                market_._assetId(),
-                address(market_),
-                borrowShare.toUint200(),
-                (block.timestamp).toUint48()
+            uint256 borrowShare = _yieldBox.toShare(_market._assetId(), data.borrowAmount, false);
+            _pearlmitApprove(address(_yieldBox), _market._assetId(), address(_market), borrowShare);
+            _marketBorrow(
+                _market,
+                data.marketHelper,
+                data.borrowAmount,
+                data.user,
+                data.withdrawParams.withdraw ? address(this) : data.user
             );
-            market_.execute(modules, calls, true);
 
             // data validated in `_validateDepositAddCollateralAndBorrowFromMarket`
-            if (data.withdrawParams.withdraw) _withdrawToChain(data.withdrawParams);
+            if (data.withdrawParams.withdraw) _withdrawHere(data.withdrawParams);
         }
 
-        _revertYieldBoxApproval(address(pearlmit), yieldBox_);
-        _revertYieldBoxApproval(data.market, yieldBox_);
+        /**
+         * @dev YieldBox reverts
+         */
+        _processYieldBoxApprovals(_yieldBox, data.market, false);
+    }
+
+    /// =====================
+    /// Private
+    /// =====================
+    function _processYieldBoxApprovals(IYieldBox _yieldBox, address market, bool approve) private {
+        if (market == address(0)) return;
+
+        if (approve) {
+            _setApprovalForYieldBox(market, _yieldBox);
+            _setApprovalForYieldBox(address(pearlmit), _yieldBox);
+        } else {
+            _revertYieldBoxApproval(market, _yieldBox);
+            _revertYieldBoxApproval(address(pearlmit), _yieldBox);
+        }
     }
 
     function _validateDepositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory data)
@@ -132,7 +145,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _checkExternalData(data);
 
         // Check withdraw data
-        _checkWithdrawData(data.withdrawParams);
+        _checkWithdrawData(data.withdrawParams, data.market);
     }
 
     function _checkExternalData(DepositAddCollateralAndBorrowFromMarketData memory data) private view {
@@ -140,10 +153,12 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _checkWhitelisted(data.marketHelper);
     }
 
-    function _checkWithdrawData(MagnetarWithdrawData memory data) private pure {
+    function _checkWithdrawData(MagnetarWithdrawData memory data, address market) private view {
         if (data.withdraw) {
             // USDO doesn't have unwrap
-            if (data.compose) revert MagnetarCollateralModule_ComposeMsgNotAllowed();
+            if (data.unwrap) revert MagnetarCollateralModule_UnwrapNotAllowed();
+            if (data.assetId != IMarket(market)._assetId()) revert Magnetar_WithdrawParamsMismatch();
+            if (data.amount == 0) revert Magnetar_WithdrawParamsMismatch();
         }
     }
 }

@@ -170,7 +170,6 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
             )
         );
         vm.label(address(bToeOFT), "bToeOFT");
-        console.log("----------------F");
 
         toeTestHelper = new ToeTestHelper();
 
@@ -179,7 +178,6 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
         ofts[0] = address(aToeOFT);
         ofts[1] = address(bToeOFT);
         this.wireOApps(ofts);
-        console.log("----------------G");
     }
 
     /**

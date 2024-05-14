@@ -5,13 +5,6 @@ pragma solidity 0.8.22;
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
-} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {TapiocaOmnichainEngineHelper} from
-    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {YieldBoxDepositData, MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -41,8 +34,8 @@ contract MagnetarYieldBoxModule is MagnetarBaseModule {
         if (funcSig == this.depositAsset.selector) {
             depositAsset(abi.decode(callWithoutSelector, (YieldBoxDepositData)));
         }
-        if (funcSig == this.withdrawToChain.selector) {
-            withdrawToChain(abi.decode(callWithoutSelector, (MagnetarWithdrawData)));
+        if (funcSig == this.withdrawHere.selector) {
+            withdrawHere(abi.decode(callWithoutSelector, (MagnetarWithdrawData)));
         }
     }
 
@@ -54,12 +47,9 @@ contract MagnetarYieldBoxModule is MagnetarBaseModule {
      * @param data The data without the func sig
      */
     function depositAsset(YieldBoxDepositData memory data) public {
-        _checkSender(data.from);
-        if (!cluster.isWhitelisted(0, data.yieldbox)) {
-            // 0 means current chain
-            revert Magnetar_TargetNotWhitelisted(data.yieldbox);
-        }
-        IYieldBox(data.yieldbox).depositAsset(data.assetId, data.from, data.to, data.amount, data.share);
+        validateDepositAsset(data);
+
+        IYieldBox(data.yieldBox).depositAsset(data.assetId, data.from, data.to, data.amount, data.share);
     }
 
     /**
@@ -71,14 +61,28 @@ contract MagnetarYieldBoxModule is MagnetarBaseModule {
      *
      * @param data.yieldBox the YieldBox address
      * @param data.assetId the YieldBox asset id to withdraw
-     * @param data.unwrap if withdrawn asset is a TOFT, it can be unwrapped on destination
-     * @param data.receiver the receiver on the destination chain
-     * @param data.receiver the receiver on the destination chain
-     * @param data.lzSendParams LZv2 send params
-     * @param data.composeGas compose message gas amount
-     * @param data.composeMsg LZv2 compose message
+     * @param data.receiver the assets receiver
+     * @param data.amount the amount to withdraw
+     * @param data.unwrap if withdrawn asset is a TOFT, it can be unwrapped
+     * @param data.withdraw has to be true
      */
-    function withdrawToChain(MagnetarWithdrawData memory data) public payable {
-        _withdrawToChain(data);
+    function withdrawHere(MagnetarWithdrawData memory data) public payable {
+        validateWithdraw(data);
+        _withdrawHere(data);
+    }
+
+    /// =====================
+    /// Private
+    /// =====================
+    function validateDepositAsset(YieldBoxDepositData memory data) private view {
+        _checkSender(data.from);
+        _checkWhitelisted(data.yieldBox);
+    }
+
+    function validateWithdraw(MagnetarWithdrawData memory data) private view {
+        _checkWhitelisted(data.yieldBox);
+
+        if (data.amount == 0) revert Magnetar_ActionParamsMismatch();
+        if (!data.withdraw) revert Magnetar_ActionParamsMismatch();
     }
 }

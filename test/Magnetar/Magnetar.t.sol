@@ -12,10 +12,7 @@ import "forge-std/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
-import {MagnetarBaseModuleExternal} from "tapioca-periph/Magnetar/modules/MagnetarBaseModuleExternal.sol";
-import {MagnetarAssetXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarAssetXChainModule.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
-import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
@@ -150,22 +147,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         pearlmit = new Pearlmit("Test", "1");
 
         MagnetarAssetModule assetModule = new MagnetarAssetModule();
-        MagnetarAssetXChainModule assetXChainModule = new MagnetarAssetXChainModule();
         MagnetarCollateralModule collateralModule = new MagnetarCollateralModule();
-        address _magnetarBaseModuleExternal = address(new MagnetarBaseModuleExternal());
-        MagnetarMintModule mintModule = new MagnetarMintModule(_magnetarBaseModuleExternal);
-        MagnetarMintXChainModule mintXChainModule = new MagnetarMintXChainModule(_magnetarBaseModuleExternal);
-        MagnetarOptionModule optionModule = new MagnetarOptionModule(_magnetarBaseModuleExternal);
+        MagnetarMintModule mintModule = new MagnetarMintModule();
+        MagnetarOptionModule optionModule = new MagnetarOptionModule();
         MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule();
 
         magnetar = new Magnetar(
             ICluster(address(cluster)),
             address(this),
             payable(assetModule),
-            payable(assetXChainModule),
             payable(collateralModule),
             payable(mintModule),
-            payable(mintXChainModule),
             payable(optionModule),
             payable(yieldBoxModule),
             IPearlmit(address(pearlmit))
@@ -212,20 +204,17 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         Penrose penrose;
         Singularity mc;
         {
-            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
-            assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
-
-            ERC20WithoutStrategy tapTokenStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(tapToken));
-            tapTokenId = utils.registerYieldBoxAsset(address(yb), address(tapToken), address(tapTokenStrategy));
+            ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
+            uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
 
             (penrose, mc,) = utils.createPenrose(
                 address(pearlmit),
                 IYieldBox(address(yb)),
                 ICluster(address(cluster)),
-                address(tapToken),
-                address(asset),
-                tapTokenId,
-                assetId
+                address(aERC20),
+                address(aERC20),
+                aERC20Id,
+                aERC20Id
             );
         }
 
@@ -234,6 +223,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             ERC20WithoutStrategy collateralStrategy =
                 utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
             collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
+
+            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
+            assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
 
             sgl = utils.createSingularity(
                 TestSingularityData(
@@ -259,24 +251,26 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         ERC20WithoutStrategy collateralStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
         collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));
 
-        ERC20WithoutStrategy tapTokenStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(tapToken));
-        tapTokenId = utils.registerYieldBoxAsset(address(yb), address(tapToken), address(tapTokenStrategy));
-        
-        ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
-        assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
+        ERC20WithoutStrategy aERC20Strategy = utils.createYieldBoxEmptyStrategy(address(yb), address(aERC20));
+        uint256 aERC20Id = utils.registerYieldBoxAsset(address(yb), address(aERC20), address(aERC20Strategy));
 
         (Penrose penrose,, BigBang bbMediumRiskMC) = utils.createPenrose(
             address(pearlmit),
             IYieldBox(address(yb)),
             ICluster(address(cluster)),
-            address(tapToken),
-            address(asset),
-            tapTokenId,
-            assetId
+            address(aERC20),
+            address(aERC20),
+            aERC20Id,
+            aERC20Id
         );
-        
-        vm.prank(address(utils));
-        penrose.setUsdoToken(address(asset), assetId);
+
+        {
+            ERC20WithoutStrategy assetStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(asset));
+            uint256 assetId = utils.registerYieldBoxAsset(address(yb), address(asset), address(assetStrategy));
+
+            vm.prank(address(utils));
+            penrose.setUsdoToken(address(asset), assetId);
+        }
 
         BigBang bb = utils.createBigBang(
             TestBigBangData(
@@ -375,7 +369,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             yieldBox.setApprovalForAll(address(magnetar), true);
 
             // lend approvals
-            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
             yieldBox.setApprovalForAll(address(pearlmit), true);
             sgl.approve(address(magnetar), type(uint256).max);
         }
@@ -434,16 +428,18 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             yieldBox.setApprovalForAll(address(pearlmit), true);
 
             // lend approvals
-            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
 
             // collateral approvals
-            pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(
+                address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)
+            ); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
 
             // market operations approvals
-            pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-            pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
             sgl.approveBorrow(address(magnetar), type(uint256).max);
         }
@@ -455,8 +451,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 assetId,
                 address(this),
                 address(this),
-                0,
-                assetShare
+                tokenAmount_,
+                0
             );
             bytes memory lendData =
                 abi.encodeWithSelector(Singularity.addAsset.selector, address(this), address(this), false, assetShare);
@@ -475,7 +471,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             assertEq(yieldBox.balanceOf(address(this), assetId), 0);
             assertGt(sgl.balanceOf(address(this)), 0);
         }
-
         //add collateral
         {
             bytes memory depositAddCollateralAndBorrowFromMarketData = abi.encodeWithSelector(
@@ -488,29 +483,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     borrowAmount: borrowAmount_,
                     deposit: true,
                     withdrawParams: MagnetarWithdrawData({
-                        withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        compose: false,
-                        lzSendParams: LZSendParam({
-                            refundAddress: address(this),
-                            fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                            extraOptions: "0x",
-                            sendParam: SendParam({
-                                amountLD: 0,
-                                composeMsg: "0x",
-                                dstEid: 0,
-                                extraOptions: "0x",
-                                minAmountLD: 0,
-                                oftCmd: "0x",
-                                to: bytes32(uint256(uint160(address(0))) << 96)
-                            })
-                        }),
-                        sendGas: 0,
-                        composeGas: 0,
-                        sendVal: 0,
-                        composeVal: 0,
-                        composeMsgType: 0
+                        receiver: address(this),
+                        amount: 0,
+                        withdraw: false,
+                        unwrap: false
                     })
                 })
             );
@@ -532,7 +510,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             assertEq(colAmount, tokenAmount_);
         }
 
+        
         uint256 userBorrowPartBefore = sgl._userBorrowPart(address(this));
+        deal(address(asset), address(this), repayDepositAmount_);
         // repay
         {
             bytes memory repayData = abi.encodeWithSelector(
@@ -545,34 +525,16 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     repayAmount: repayAmount_,
                     collateralAmount: 0,
                     withdrawCollateralParams: MagnetarWithdrawData({
-                        withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        compose: false,
-                        lzSendParams: LZSendParam({
-                            refundAddress: address(this),
-                            fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                            extraOptions: "0x",
-                            sendParam: SendParam({
-                                amountLD: 0,
-                                composeMsg: "0x",
-                                dstEid: 0,
-                                extraOptions: "0x",
-                                minAmountLD: 0,
-                                oftCmd: "0x",
-                                to: bytes32(uint256(uint160(address(0))) << 96)
-                            })
-                        }),
-                        sendGas: 0,
-                        composeGas: 0,
-                        sendVal: 0,
-                        composeVal: 0,
-                        composeMsgType: 0
+                        receiver: address(this),
+                        amount: 0,
+                        withdraw: false,
+                        unwrap: false
                     })
                 })
             );
 
-            deal(address(asset), address(this), repayDepositAmount_);
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
@@ -590,6 +552,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 userBorrowPart = sgl._userBorrowPart(address(this));
             assertLt(userBorrowPart, userBorrowPartBefore);
         }
+        
     }
 
     function test_withdraw_sanitization() public {
@@ -603,14 +566,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 borrowAmount_ = 1e17;
 
-        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
-        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
@@ -673,29 +636,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     borrowAmount: borrowAmount_,
                     deposit: true,
                     withdrawParams: MagnetarWithdrawData({
-                        withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        compose: false,
-                        lzSendParams: LZSendParam({
-                            refundAddress: address(this),
-                            fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                            extraOptions: "0x",
-                            sendParam: SendParam({
-                                amountLD: 0,
-                                composeMsg: "0x",
-                                dstEid: 0,
-                                extraOptions: "0x",
-                                minAmountLD: 0,
-                                oftCmd: "0x",
-                                to: bytes32(uint256(uint160(address(0))) << 96)
-                            })
-                        }),
-                        sendGas: 0,
-                        composeGas: 0,
-                        sendVal: 0,
-                        composeVal: 0,
-                        composeMsgType: 0
+                        receiver: address(this),
+                        amount: 0,
+                        withdraw: false,
+                        unwrap: false
                     })
                 })
             );
@@ -728,41 +674,20 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         }
 
         {
-            address randomAddr = makeAddr("randomAddr");
-            SendParamsMsg memory sendParamMsg =
-                SendParamsMsg({receiver: randomAddr, unwrap: true, amount: borrowAmount_});
-
             MagnetarWithdrawData memory withdrawData = MagnetarWithdrawData({
-                withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: assetId,
-                compose: true,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: borrowAmount_,
-                        composeMsg: abi.encode(sendParamMsg),
-                        dstEid: aEid,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsgType: 0
+                receiver: address(this),
+                amount: borrowAmount_,
+                withdraw: true,
+                unwrap: true
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
                 id: uint8(MagnetarAction.YieldBoxModule),
                 target: address(yieldBox),
                 value: 0,
-                call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
+                call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, withdrawData)
             });
 
             vm.expectRevert(); //fails with Magnetar_UserMismatch
@@ -781,14 +706,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 borrowAmount_ = 1e17;
 
-        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
-        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
 
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
@@ -851,29 +776,12 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                     borrowAmount: borrowAmount_,
                     deposit: true,
                     withdrawParams: MagnetarWithdrawData({
-                        withdraw: false,
                         yieldBox: address(yieldBox),
                         assetId: 0,
-                        compose: false,
-                        lzSendParams: LZSendParam({
-                            refundAddress: address(this),
-                            fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                            extraOptions: "0x",
-                            sendParam: SendParam({
-                                amountLD: 0,
-                                composeMsg: "0x",
-                                dstEid: 0,
-                                extraOptions: "0x",
-                                minAmountLD: 0,
-                                oftCmd: "0x",
-                                to: bytes32(uint256(uint160(address(0))) << 96)
-                            })
-                        }),
-                        sendGas: 0,
-                        composeGas: 0,
-                        sendVal: 0,
-                        composeVal: 0,
-                        composeMsgType: 0
+                        receiver: address(this),
+                        amount: 0,
+                        withdraw: false,
+                        unwrap: false
                     })
                 })
             );
@@ -907,36 +815,19 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         {
             MagnetarWithdrawData memory withdrawData = MagnetarWithdrawData({
-                withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: assetId,
-                compose: false,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: borrowAmount_,
-                        composeMsg: "0x",
-                        dstEid: 0,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsgType: 0
+                receiver: address(this),
+                amount: borrowAmount_,
+                withdraw: true,
+                unwrap: false
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
                 id: uint8(MagnetarAction.YieldBoxModule),
                 target: address(yieldBox),
                 value: 0,
-                call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, withdrawData)
+                call: abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, withdrawData)
             });
 
             magnetar.burst(calls);
@@ -966,9 +857,11 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         {
             MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
 
-            pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             pearlmit.approve(
-                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp)
+                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)
+            ); // Atomic approval
+            pearlmit.approve(
+                address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)
             ); // Atomic approval
             collateral.approve(address(magnetar), type(uint256).max);
             yieldBox.setApprovalForAll(address(pearlmit), true);
@@ -1018,9 +911,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 1e17;
 
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
+        yieldBox.setApprovalForAll(address(pearlmit), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
         //deal
@@ -1081,9 +975,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 1e17;
 
-        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
+        yieldBox.setApprovalForAll(address(pearlmit), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
 
         //deal
@@ -1168,54 +1063,20 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         exitData: IOptionsExitData({exit: false, target: address(0), oTAPTokenID: 0}),
                         unlockData: IOptionsUnlockData({unlock: false, target: address(0), tokenId: 0}),
                         assetWithdrawData: MagnetarWithdrawData({
-                            withdraw: false,
                             yieldBox: address(yieldBox),
                             assetId: 0,
-                            compose: false,
-                            lzSendParams: LZSendParam({
-                                refundAddress: address(this),
-                                fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                                extraOptions: "0x",
-                                sendParam: SendParam({
-                                    amountLD: 0,
-                                    composeMsg: "0x",
-                                    dstEid: 0,
-                                    extraOptions: "0x",
-                                    minAmountLD: 0,
-                                    oftCmd: "0x",
-                                    to: bytes32(uint256(uint160(address(0))) << 96)
-                                })
-                            }),
-                            sendGas: 0,
-                            composeGas: 0,
-                            sendVal: 0,
-                            composeVal: 0,
-                            composeMsgType: 0
+                            receiver: address(this),
+                            amount: 0,
+                            withdraw: false,
+                            unwrap: false
                         }),
                         collateralWithdrawData: MagnetarWithdrawData({
-                            withdraw: false,
                             yieldBox: address(yieldBox),
                             assetId: 0,
-                            compose: false,
-                            lzSendParams: LZSendParam({
-                                refundAddress: address(this),
-                                fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                                extraOptions: "0x",
-                                sendParam: SendParam({
-                                    amountLD: 0,
-                                    composeMsg: "0x",
-                                    dstEid: 0,
-                                    extraOptions: "0x",
-                                    minAmountLD: 0,
-                                    oftCmd: "0x",
-                                    to: bytes32(uint256(uint160(address(0))) << 96)
-                                })
-                            }),
-                            sendGas: 0,
-                            composeGas: 0,
-                            sendVal: 0,
-                            composeVal: 0,
-                            composeMsgType: 0
+                            receiver: address(this),
+                            amount: 0,
+                            withdraw: false,
+                            unwrap: false
                         })
                     })
                 })
@@ -1251,7 +1112,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         // lend approvals
         sgl.approve(address(magnetar), type(uint256).max);
-        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         yieldBox.setApprovalForAll(address(pearlmit), true);
 
         //yb deposit approvals
