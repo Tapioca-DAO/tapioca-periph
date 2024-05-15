@@ -30,6 +30,17 @@ import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
+ * Deploy:
+ *      - TAP/WETH Uniswap V3 pool
+ *      - Oracles:
+ *          - Arbitrum:
+ *              - ETH CL, ETH Uni, Dual ETH, GLP, ETH/GLP, GMX, TAP, TapOption, USDC, rETH, wstETH
+ *          - Ethereum:
+ *              - sDAI
+ * Post deploy:
+ *     - Create empty strat for TAP and WETH
+ *
+ *
  */
 export const deployPostLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & { ratioTap: number; ratioWeth: number },
@@ -51,7 +62,7 @@ async function postDeployTask(
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
 
-    const { tapToken } = await loadContracts(hre, taskArgs.tag);
+    const { tapToken } = loadContracts__generic(hre, taskArgs.tag);
 
     // Used in Bar
     await createEmptyStratYbAsset__task(
@@ -86,7 +97,7 @@ async function tapiocaDeployTask(
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         await deployUniPoolAndAddLiquidity(params);
-        const { tapToken, tapWethLp } = await loadContracts(hre, tag);
+        const { tapToken, tapWethLp } = loadContracts__arb(hre, tag);
 
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
             .add(await buildETHUniOracle(hre, owner, isTestnet))
@@ -121,13 +132,16 @@ async function tapiocaDeployTask(
             .add(await buildUSDCOracle(hre, owner, isTestnet))
             .add(await buildRethUsdOracle(hre, owner, isTestnet))
             .add(await buildWstethUsdOracle(hre, owner, isTestnet));
-    } else if (chainInfo.name === 'ethereum' || chainInfo.name === 'sepolia') {
-        VM.add(await buildSDaiOracle(hre, owner));
+    } else if (
+        chainInfo.name === 'ethereum' ||
+        chainInfo.name === 'sepolia' ||
+        chainInfo.name === 'optimism_sepolia'
+    ) {
+        VM.add(await buildSDaiOracle(hre));
     }
 }
 
-async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
-    // TapToken
+function loadContracts__generic(hre: HardhatRuntimeEnvironment, tag: string) {
     const tapToken = loadGlobalContract(
         hre,
         TAPIOCA_PROJECTS_NAME.TapToken,
@@ -135,6 +149,11 @@ async function loadContracts(hre: HardhatRuntimeEnvironment, tag: string) {
         TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
         tag,
     );
+    return { tapToken };
+}
+
+function loadContracts__arb(hre: HardhatRuntimeEnvironment, tag: string) {
+    const { tapToken } = loadContracts__generic(hre, tag);
 
     const tapWethLp = loadLocalContract(
         hre,

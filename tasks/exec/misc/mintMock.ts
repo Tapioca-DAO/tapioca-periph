@@ -15,7 +15,8 @@ export const mintMock__task = async (
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
 
     const token = await hre.ethers.getContractAt('ERC20Mock', addr);
-    const parsedAmount = hre.ethers.utils.parseUnits(amount, 18);
+    const decimals = await token.decimals();
+    const parsedAmount = hre.ethers.utils.parseUnits(amount, decimals);
 
     console.log(
         `[+] MockERC20 minting ${amount}/${parsedAmount} wei for $${await token.name()} for:`,
@@ -25,7 +26,8 @@ export const mintMock__task = async (
         const calls: TapiocaMulticall.CallStruct[] = [
             {
                 target: addr,
-                callData: token.interface.encodeFunctionData('freeMint', [
+                callData: token.interface.encodeFunctionData('mintTo', [
+                    (await VM.getMulticall()).address,
                     parsedAmount,
                 ]),
                 allowFailure: false,

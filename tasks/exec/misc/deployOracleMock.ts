@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildERC20Mock } from 'tasks/deployBuilds/mock/buildERC20Mock';
+import { buildOracleMock } from 'tasks/deployBuilds/oracle/buildOracleMock';
 
-export const deployERC20Mock__task = async (
+export const deployOracleMock__task = async (
     taskArgs: TTapiocaDeployTaskArgs & {
         name: string;
-        decimals: number;
+        rate: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -14,14 +14,12 @@ export const deployERC20Mock__task = async (
         { hre },
         async ({ VM, tapiocaMulticallAddr }) => {
             VM.add(
-                await buildERC20Mock(hre, {
+                await buildOracleMock(hre, {
                     deploymentName: taskArgs.name,
                     args: [
                         taskArgs.name,
                         taskArgs.name,
-                        (1e18).toString(),
-                        taskArgs.decimals,
-                        tapiocaMulticallAddr,
+                        hre.ethers.utils.parseEther(taskArgs.rate),
                     ],
                 }),
             );
@@ -30,7 +28,9 @@ export const deployERC20Mock__task = async (
             const addr = VM.list().find(
                 (e) => e.name === taskArgs.name,
             )!.address;
-            console.log(`[+] ERC20Mock ${taskArgs.name} deployed at: ${addr}`);
+            console.log(
+                `[+] OracleMock contract with name ${taskArgs.name} deployed at: ${addr} with rate ${taskArgs.rate}`,
+            );
         },
     );
 };
