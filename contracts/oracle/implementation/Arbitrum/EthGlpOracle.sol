@@ -6,23 +6,17 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 
 // Tapioca
 import {AccessControlDefaultAdminRules} from "../../external/AccessControlDefaultAdminRules.sol";
-import {IGmxGlpManager} from "tapioca-periph/interfaces/external/gmx/IGmxGlpManager.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {SequencerCheck} from "../../utils/SequencerCheck.sol";
 
-contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
+contract EthGlpOracle is ITapiocaOracle, AccessControlDefaultAdminRules, ReentrancyGuard {
     ITapiocaOracle public wethUsdOracle;
     ITapiocaOracle public glpUsdOracle;
 
-    constructor(
-        ITapiocaOracle _wethUsdOracle,
-        ITapiocaOracle _glpUsdOracle,
-        address _sequencerUptimeFeed,
-        address _admin
-    ) SequencerCheck(_sequencerUptimeFeed) AccessControlDefaultAdminRules(3 days, _admin) {
+    constructor(ITapiocaOracle _wethUsdOracle, ITapiocaOracle _glpUsdOracle, address _admin)
+        AccessControlDefaultAdminRules(3 days, _admin)
+    {
         wethUsdOracle = _wethUsdOracle;
         glpUsdOracle = _glpUsdOracle;
-        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
@@ -32,8 +26,6 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
     // Get the latest exchange rate
     /// @inheritdoc ITapiocaOracle
     function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
-        _sequencerBeatCheck();
-
         (, uint256 wethUsdPrice) = wethUsdOracle.get("");
         (, uint256 glpUsdPrice) = glpUsdOracle.get("");
 
@@ -63,11 +55,5 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
     /// @inheritdoc ITapiocaOracle
     function symbol(bytes calldata) public pure override returns (string memory) {
         return "ETH/GLP";
-    }
-
-    /// @notice Changes the grace period for the sequencer update
-    /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
-        GRACE_PERIOD_TIME = _gracePeriod;
     }
 }

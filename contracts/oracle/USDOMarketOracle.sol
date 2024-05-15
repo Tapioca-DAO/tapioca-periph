@@ -7,28 +7,20 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 // Tapioca
 import {AccessControlDefaultAdminRules} from "./external/AccessControlDefaultAdminRules.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {SequencerCheck} from "./utils/SequencerCheck.sol";
 
 /**
  * @notice Helps inverse the value of a `ITapiocaOracle` contract.
  * This is used because Tapioca BB/SGL expect a USD/Asset exchange rate. Why usually we have Asset/USD.
  */
-contract UsdoMarketOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdminRules, ReentrancyGuard {
+contract UsdoMarketOracle is ITapiocaOracle, AccessControlDefaultAdminRules, ReentrancyGuard {
     ITapiocaOracle public immutable marketAssetOracle;
-    string public marketName;
 
-    constructor(ITapiocaOracle _oracle, string memory _marketName, address _sequencerUptimeFeed, address _admin)
-        SequencerCheck(_sequencerUptimeFeed)
-        AccessControlDefaultAdminRules(3 days, _admin)
-    {
+    constructor(ITapiocaOracle _oracle, address _admin) AccessControlDefaultAdminRules(3 days, _admin) {
         marketAssetOracle = _oracle;
-        marketName = _marketName;
 
         if (_oracle.decimals() != 18) {
             revert("UsdoMarketOracle: Oracle must have 18 decimals");
         }
-
-        _grantRole(SEQUENCER_ROLE, _admin);
     }
 
     function decimals() external pure returns (uint8) {
@@ -38,8 +30,6 @@ contract UsdoMarketOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaul
     // Get the latest exchange rate
     /// @inheritdoc ITapiocaOracle
     function get(bytes calldata) public override nonReentrant returns (bool success, uint256 rate) {
-        _sequencerBeatCheck();
-
         (, uint256 marketAssetPrice) = marketAssetOracle.get("");
         return (true, inverseValue(marketAssetPrice));
     }
@@ -59,18 +49,12 @@ contract UsdoMarketOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaul
 
     /// @inheritdoc ITapiocaOracle
     function name(bytes calldata) public view override returns (string memory) {
-        return marketName;
+        return string.concat("Inverse ", marketAssetOracle.name(""));
     }
 
     /// @inheritdoc ITapiocaOracle
     function symbol(bytes calldata) public view override returns (string memory) {
-        return marketName;
-    }
-
-    /// @notice Changes the grace period for the sequencer update
-    /// @param _gracePeriod New stale period (in seconds)
-    function changeGracePeriod(uint32 _gracePeriod) external override onlyRole(SEQUENCER_ROLE) {
-        GRACE_PERIOD_TIME = _gracePeriod;
+        return string.concat("Inv", marketAssetOracle.symbol(""));
     }
 
     /**
