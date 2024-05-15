@@ -54,7 +54,7 @@ contract UsdoMarketOracle is ITapiocaOracle, AccessControlDefaultAdminRules, Ree
 
     /// @inheritdoc ITapiocaOracle
     function symbol(bytes calldata) public view override returns (string memory) {
-        return string.concat("Inv", marketAssetOracle.symbol(""));
+        return string.concat("Inv ", marketAssetOracle.symbol(""));
     }
 
     /**

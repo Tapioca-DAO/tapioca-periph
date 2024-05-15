@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-contract OracleMock {
+import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
+
+contract OracleMock is ITapiocaOracle {
     uint256 public rate;
     bool public success;
     string public __name;
@@ -12,6 +14,10 @@ contract OracleMock {
         rate = _rate;
         __name = _name;
         __symbol = _symbol;
+    }
+
+    function decimals() external pure override returns (uint8) {
+        return 18;
     }
 
     function set(uint256 rate_) public {
