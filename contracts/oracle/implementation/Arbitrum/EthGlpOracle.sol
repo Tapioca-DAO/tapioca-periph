@@ -37,7 +37,7 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
         (, uint256 wethUsdPrice) = wethUsdOracle.get("");
         (, uint256 glpUsdPrice) = glpUsdOracle.get("");
 
-        return (true, (wethUsdPrice * 1e30) / glpUsdPrice);
+        return (true, (wethUsdPrice * 1e18) / glpUsdPrice);
     }
 
     // Check the last exchange rate without any state changes
@@ -46,7 +46,7 @@ contract EthGlpOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdm
         (, uint256 wethUsdPrice) = wethUsdOracle.peek("");
         (, uint256 glpUsdPrice) = glpUsdOracle.peek("");
 
-        return (true, (wethUsdPrice * 1e30) / glpUsdPrice);
+        return (true, (wethUsdPrice * 1e18) / glpUsdPrice);
     }
 
     // Check the current spot exchange rate without any state changes
