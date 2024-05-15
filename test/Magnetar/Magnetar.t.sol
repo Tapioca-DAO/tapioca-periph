@@ -510,7 +510,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             assertEq(colAmount, tokenAmount_);
         }
 
-        
         uint256 userBorrowPartBefore = sgl._userBorrowPart(address(this));
         deal(address(asset), address(this), repayDepositAmount_);
         // repay
@@ -535,7 +534,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 })
             );
 
-
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
                 id: uint8(MagnetarAction.AssetModule),
@@ -552,7 +550,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 userBorrowPart = sgl._userBorrowPart(address(this));
             assertLt(userBorrowPart, userBorrowPartBefore);
         }
-        
     }
 
     function test_withdraw_sanitization() public {
@@ -965,6 +962,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     function test_exit_and_remove_collateral() public {
         (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
+        bb.approve(address(magnetar), type(uint256).max);
         utils.setBBEthMarket(penrose, address(bb));
 
         cluster.updateContract(0, address(bb), true);

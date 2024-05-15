@@ -12,6 +12,7 @@ import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol
 import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
 import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
+import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 
@@ -142,6 +143,20 @@ contract MagnetarTestUtils {
 
         {
             Penrose(_sgl.penrose).addSingularity(_mc, address(sgl));
+        }
+
+        {
+            SGLInterestHelper sglInterestHelper = new SGLInterestHelper();
+
+            bytes memory payload = abi.encodeWithSelector(
+                Singularity.setSingularityConfig.selector, sgl.borrowOpeningFee(), 0, 0, 0, 0, 0, 0, address(sglInterestHelper)
+            );
+            address[] memory mc = new address[](1);
+            mc[0] = address(sgl);
+
+            bytes[] memory data = new bytes[](1);
+            data[0] = payload;
+            Penrose(_sgl.penrose).executeMarketFn(mc, data, false);
         }
         return sgl;
     }
