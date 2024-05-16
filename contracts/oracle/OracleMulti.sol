@@ -23,7 +23,6 @@ struct OracleMultiConstructorData {
     uint8 _uniFinalCurrency;
     address[] _circuitChainlink;
     uint8[] _circuitChainIsMultiplied;
-    uint32 _stalePeriod;
     address[] guardians;
     bytes32 _description;
     address _sequencerUptimeFeed;
@@ -71,7 +70,7 @@ contract OracleMulti is OracleAbstract, ModuleChainlinkMulti, ModuleUniswapMulti
             _data.observationLength,
             _data.guardians
         )
-        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data._stalePeriod, _data.guardians)
+        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data.guardians)
         SequencerCheck(_data._sequencerUptimeFeed)
         AccessControlDefaultAdminRules(3 days, _data._admin)
     {

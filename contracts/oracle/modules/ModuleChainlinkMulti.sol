@@ -28,7 +28,6 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
     constructor(
         address[] memory _circuitChainlink,
         uint8[] memory _circuitChainIsMultiplied,
-        uint32 _stalePeriod,
         address[] memory guardians
     ) {
         uint256 circuitLength = _circuitChainlink.length;
@@ -48,7 +47,6 @@ abstract contract ModuleChainlinkMulti is ChainlinkUtils {
             chainlinkDecimals.push(_pool.decimals());
         }
 
-        stalePeriod = _stalePeriod;
         circuitChainIsMultiplied = _circuitChainIsMultiplied;
     }
 

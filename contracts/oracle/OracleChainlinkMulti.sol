@@ -12,7 +12,6 @@ struct OracleChainlinkMultiConstructorData {
     address[] _circuitChainlink;
     uint8[] _circuitChainIsMultiplied;
     uint256 _inBase;
-    uint32 stalePeriod;
     address[] guardians;
     bytes32 _description;
     address _sequencerUptimeFeed;
@@ -38,7 +37,7 @@ contract OracleChainlinkMulti is OracleAbstract, ModuleChainlinkMulti, Sequencer
      * @param _data._admin Address of the admin of the oracle
      */
     constructor(OracleChainlinkMultiConstructorData memory _data)
-        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data.stalePeriod, _data.guardians)
+        ModuleChainlinkMulti(_data._circuitChainlink, _data._circuitChainIsMultiplied, _data.guardians)
         AccessControlDefaultAdminRules(3 days, _data._admin)
         SequencerCheck(_data._sequencerUptimeFeed)
     {

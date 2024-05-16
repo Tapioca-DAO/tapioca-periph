@@ -25,10 +25,8 @@ abstract contract OracleChainlinkMultiEfficient is ChainlinkUtils {
     error ZeroAddress();
 
     /// @notice Constructor of the contract
-    /// @param _stalePeriod Minimum feed update frequency for the oracle to not revert
     /// @param guardians List of guardian addresses
-    constructor(uint32 _stalePeriod, address[] memory guardians) {
-        stalePeriod = _stalePeriod;
+    constructor(address[] memory guardians) {
         if (guardians.length == 0) revert InvalidLength();
         for (uint256 i; i < guardians.length; i++) {
             if (guardians[i] == address(0)) revert ZeroAddress();
