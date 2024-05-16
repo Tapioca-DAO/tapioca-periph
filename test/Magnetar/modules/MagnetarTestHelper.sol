@@ -8,6 +8,7 @@ import {TestHelper} from "../../LZSetup/TestHelper.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
+import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol";
 import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
@@ -41,7 +42,7 @@ import {UsdoReceiver} from "tapioca-bar/usdo/modules/UsdoReceiver.sol";
 import {UsdoSender} from "tapioca-bar/usdo/modules/UsdoSender.sol";
 import {Usdo, BaseUsdo} from "tapioca-bar/usdo/Usdo.sol";
 
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct } from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
@@ -86,13 +87,9 @@ import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/ext
 
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
-import {
-    ERC20PermitStruct
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 
-import {
-    MagnetarWithdrawData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 
 import "forge-std/Test.sol";
 
@@ -134,7 +131,7 @@ contract MagnetarTestHelper is TestHelper {
     MagnetarHelper magnetarHelper;
     OracleMock oracle;
     MarketHelper marketHelper;
-    
+
     YieldBox yieldBox;
     Penrose penrose;
     Singularity sglMC;
@@ -209,17 +206,41 @@ contract MagnetarTestHelper is TestHelper {
         wethId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
         tapId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
 
-        (penrose, sglMC, bbMC) = createPenrose(address(pearlmit), address(yieldBox), address(clusterA), address(tap), address(weth), tapId, wethId, address(this));
-
+        (penrose, sglMC, bbMC) = createPenrose(
+            address(pearlmit),
+            address(yieldBox),
+            address(clusterA),
+            address(tap),
+            address(weth),
+            tapId,
+            wethId,
+            address(this)
+        );
 
         // crete USDO
         TapiocaOmnichainExtExec extExec = new TapiocaOmnichainExtExec();
         assetA = createUsdo(address(yieldBox), address(clusterA), address(extExec), address(pearlmit), aEid);
         assetB = createUsdo(address(yieldBox), address(clusterB), address(extExec), address(pearlmit), bEid);
-        
+
         // create TOFT
-        collateralA = createTOFT(address(yieldBox), address(clusterA), address(collateralErc20), address(extExec), address(pearlmit), aEid, aEid);
-        collateralB = createTOFT(address(yieldBox), address(clusterB), address(collateralErc20), address(extExec), address(pearlmit), bEid, aEid);
+        collateralA = createTOFT(
+            address(yieldBox),
+            address(clusterA),
+            address(collateralErc20),
+            address(extExec),
+            address(pearlmit),
+            aEid,
+            aEid
+        );
+        collateralB = createTOFT(
+            address(yieldBox),
+            address(clusterB),
+            address(collateralErc20),
+            address(extExec),
+            address(pearlmit),
+            bEid,
+            aEid
+        );
 
         ERC20WithoutStrategy assetAStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(assetA));
         ERC20WithoutStrategy assetBStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(assetB));
@@ -229,7 +250,7 @@ contract MagnetarTestHelper is TestHelper {
         collateralAId = registerYieldBoxAsset(address(yieldBox), address(collateralA), address(collateralAStrategy));
         assetBId = registerYieldBoxAsset(address(yieldBox), address(assetB), address(assetBStrategy));
         collateralBId = registerYieldBoxAsset(address(yieldBox), address(collateralB), address(collateralBStrategy));
-        
+
         penrose.setUsdoToken(address(assetA), assetAId);
 
         sgl = createSingularity(
@@ -244,7 +265,7 @@ contract MagnetarTestHelper is TestHelper {
             ),
             address(sglMC)
         );
-        bb = createBigBang( 
+        bb = createBigBang(
             TestBigBangData(
                 address(penrose),
                 address(collateralA),
@@ -258,7 +279,6 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
-
 
         clusterA.updateContract(0, address(magnetarA), true);
         clusterA.updateContract(0, address(magnetarHelper), true);
@@ -310,7 +330,16 @@ contract MagnetarTestHelper is TestHelper {
     // Setup helpers
     //
     // -----------------------
-    function createTOFT(address yieldBox, address cluster, address erc20, address extExec, address pearlmit, uint32 endointId, uint32 hostEid) public returns (TOFT toft) {
+
+    function createTOFT(
+        address yieldBox,
+        address cluster,
+        address erc20,
+        address extExec,
+        address pearlmit,
+        uint32 endointId,
+        uint32 hostEid
+    ) public returns (TOFT toft) {
         TOFTVault toftVault = new TOFTVault(address(erc20));
         TOFTInitStruct memory toftInitStruct = TOFTInitStruct({
             name: "Token TOFT",
@@ -344,13 +373,15 @@ contract MagnetarTestHelper is TestHelper {
                 optionsReceiverModule: address(toftOptionsReceiverModule),
                 genericReceiverModule: address(toftGenericReceiverModule)
             });
-            toft = TOFT(
-                payable(_deployOApp(type(TOFT).creationCode, abi.encode(toftInitStruct, toftModulesInitStruct)))
-            );
+            toft =
+                TOFT(payable(_deployOApp(type(TOFT).creationCode, abi.encode(toftInitStruct, toftModulesInitStruct))));
         }
     }
 
-    function createUsdo(address yieldBox, address cluster, address extExec, address pearlmit, uint32 endointId) public returns (Usdo usdo) {
+    function createUsdo(address yieldBox, address cluster, address extExec, address pearlmit, uint32 endointId)
+        public
+        returns (Usdo usdo)
+    {
         UsdoInitStruct memory usdoInitStruct = UsdoInitStruct({
             endpoint: address(endpoints[endointId]),
             delegate: __owner,
@@ -373,9 +404,7 @@ contract MagnetarTestHelper is TestHelper {
             marketReceiverModule: address(usdoMarketReceiverModule),
             optionReceiverModule: address(usdoOptionsReceiverModule)
         });
-        usdo = Usdo(
-            payable(_deployOApp(type(Usdo).creationCode, abi.encode(usdoInitStruct, usdoModulesInitStruct)))
-        );
+        usdo = Usdo(payable(_deployOApp(type(Usdo).creationCode, abi.encode(usdoInitStruct, usdoModulesInitStruct))));
     }
 
     function createYieldBox(address weth) public returns (YieldBox yb) {
@@ -486,8 +515,23 @@ contract MagnetarTestHelper is TestHelper {
         {
             Penrose(_sgl.penrose).addSingularity(_mc, address(sgl));
         }
+
+        {
+            SGLInterestHelper sglInterestHelper = new SGLInterestHelper();
+
+            bytes memory payload = abi.encodeWithSelector(
+                Singularity.setSingularityConfig.selector, sgl.borrowOpeningFee(), 0, 0, 0, 0, 0, 0, address(sglInterestHelper)
+            );
+            address[] memory mc = new address[](1);
+            mc[0] = address(sgl);
+
+            bytes[] memory data = new bytes[](1);
+            data[0] = payload;
+            Penrose(_sgl.penrose).executeMarketFn(mc, data, false);
+        }
+
         return sgl;
-    }   
+    }
 
     function _getBigBangInitData(TestBigBangData memory _bb)
         private
@@ -560,15 +604,14 @@ contract MagnetarTestHelper is TestHelper {
             unwrap: false
         });
     }
+
     function depositAsset(Usdo _asset, uint256 _assetId, Singularity _sgl, uint256 amount) public {
         deal(address(_asset), address(this), amount);
         _asset.approve(address(yieldBox), type(uint256).max);
         _asset.approve(address(pearlmit), type(uint256).max);
         _setYieldBoxApproval(yieldBox, address(_sgl));
         _setYieldBoxApproval(yieldBox, address(pearlmit));
-        pearlmit.approve(
-            address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp)
-        );
+        pearlmit.approve(address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
 
         uint256 share = yieldBox.toShare(_assetId, amount, false);
         yieldBox.depositAsset(_assetId, address(this), address(this), 0, share);
@@ -583,9 +626,7 @@ contract MagnetarTestHelper is TestHelper {
         _collateral.approve(address(pearlmit), type(uint256).max);
         _setYieldBoxApproval(yieldBox, address(_sgl));
         _setYieldBoxApproval(yieldBox, address(pearlmit));
-        pearlmit.approve(
-            address(yieldBox), _collateralId, address(_sgl), type(uint200).max, uint48(block.timestamp)
-        );
+        pearlmit.approve(address(yieldBox), _collateralId, address(_sgl), type(uint200).max, uint48(block.timestamp));
 
         uint256 share = yieldBox.toShare(_collateralId, amount, false);
         yieldBox.depositAsset(_collateralId, address(this), address(this), 0, share);
@@ -605,9 +646,7 @@ contract MagnetarTestHelper is TestHelper {
     }
 
     function repay(uint256 part, uint256 _assetId, Singularity _sgl) public {
-        pearlmit.approve(
-            address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp)
-        );
+        pearlmit.approve(address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
         (Module[] memory modules, bytes[] memory calls) = marketHelper.repay(address(this), address(this), false, part);
         _sgl.execute(modules, calls, true);
     }
@@ -615,7 +654,8 @@ contract MagnetarTestHelper is TestHelper {
     function _setYieldBoxApproval(YieldBox yb, address target) internal {
         yb.setApprovalForAll(target, true);
     }
-     function _setYieldBoxRevoke(YieldBox yb, address target) internal {
+
+    function _setYieldBoxRevoke(YieldBox yb, address target) internal {
         yb.setApprovalForAll(target, false);
     }
 
@@ -624,12 +664,14 @@ contract MagnetarTestHelper is TestHelper {
     // Approval helpers
     //
     // -----------------------
-    function _createErc20Permit(address _owner, uint256 _pkSigner, address _spender, uint256 _amount,  address _asset) internal returns (ERC20PermitStruct memory permitStruct, uint8 v_, bytes32 r_, bytes32 s_) {
-        permitStruct =  ERC20PermitStruct({owner: _owner, spender: _spender, value: _amount, nonce: 0, deadline: 1 days});
+    function _createErc20Permit(address _owner, uint256 _pkSigner, address _spender, uint256 _amount, address _asset)
+        internal
+        returns (ERC20PermitStruct memory permitStruct, uint8 v_, bytes32 r_, bytes32 s_)
+    {
+        permitStruct = ERC20PermitStruct({owner: _owner, spender: _spender, value: _amount, nonce: 0, deadline: 1 days});
         bytes32 digest_ = ITOFT(_asset).getTypedDataHash(permitStruct);
         (v_, r_, s_) = vm.sign(_pkSigner, digest_);
     }
-
 
     struct Erc20PearlmitBatchPermitInternal {
         address _asset;
@@ -640,8 +682,15 @@ contract MagnetarTestHelper is TestHelper {
         uint256 _amount;
         uint256 _deadline;
     }
-    function _createErc20PearlmitBatchPermit(Erc20PearlmitBatchPermitInternal memory data) internal returns (IPearlmit.PermitBatchTransferFrom memory batchData, bytes32 hashedData) {
-        (IPearlmit.SignatureApproval[] memory signatureApprovals, bytes32[] memory hashApprovals) = _getPearlmitSigApprovals(data._asset, data._id, data._owner, data._pkSigner, data._operator, data._amount, data._deadline);
+
+    function _createErc20PearlmitBatchPermit(Erc20PearlmitBatchPermitInternal memory data)
+        internal
+        returns (IPearlmit.PermitBatchTransferFrom memory batchData, bytes32 hashedData)
+    {
+        (IPearlmit.SignatureApproval[] memory signatureApprovals, bytes32[] memory hashApprovals) =
+        _getPearlmitSigApprovals(
+            data._asset, data._id, data._owner, data._pkSigner, data._operator, data._amount, data._deadline
+        );
 
         bytes memory signedPermit;
         {
@@ -665,27 +714,34 @@ contract MagnetarTestHelper is TestHelper {
 
         hashedData = keccak256("0x");
         batchData = IPearlmit.PermitBatchTransferFrom({
-                approvals: signatureApprovals,
-                owner: data._owner,
-                nonce: 0,
-                sigDeadline: uint48(data._deadline), //deadline
-                signedPermit: signedPermit,
-                executor: data._owner,
-                hashedData: hashedData
-
-            });
-
+            approvals: signatureApprovals,
+            owner: data._owner,
+            nonce: 0,
+            sigDeadline: uint48(data._deadline), //deadline
+            signedPermit: signedPermit,
+            executor: data._owner,
+            hashedData: hashedData
+        });
     }
-    function _getPearlmitSigApprovals(address _asset, uint256 _id, address _owner, uint256 _pkSigner, address _operator, uint256 _amount, uint256 _deadline) private returns(IPearlmit.SignatureApproval[] memory, bytes32[] memory hashApprovals) {
+
+    function _getPearlmitSigApprovals(
+        address _asset,
+        uint256 _id,
+        address _owner,
+        uint256 _pkSigner,
+        address _operator,
+        uint256 _amount,
+        uint256 _deadline
+    ) private returns (IPearlmit.SignatureApproval[] memory, bytes32[] memory hashApprovals) {
         IPearlmit.SignatureApproval[] memory signatureApprovals = new IPearlmit.SignatureApproval[](1);
 
         signatureApprovals[0] = IPearlmit.SignatureApproval({
-                tokenType: uint8(IPearlmit.TokenType.ERC20),
-                token: _asset,
-                id: _id,
-                amount: uint200(_amount),
-                operator: _operator
-            });
+            tokenType: uint8(IPearlmit.TokenType.ERC20),
+            token: _asset,
+            id: _id,
+            amount: uint200(_amount),
+            operator: _operator
+        });
 
         bytes32[] memory hashApprovals = new bytes32[](1);
         hashApprovals[0] = keccak256(
