@@ -99,38 +99,12 @@ contract Pearlmit is PermitC {
      * @dev If past allowances for the token still exist, bypass the permit check.
      */
     function _checkPermitBatchApproval(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) internal {
-        // Check if the batch is already allowed
-        if (!_batchAllowanceCheck(batch)) {
-            bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, masterNonce(batch.owner)));
+        bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, masterNonce(batch.owner)));
 
-            if (batch.hashedData != hashedData) {
-                revert Pearlmit__BadHashedData();
-            }
-            _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+        if (batch.hashedData != hashedData) {
+            revert Pearlmit__BadHashedData();
         }
-    }
-
-    /**
-     * @dev Checks if an approval has been already made and if it is still valid.
-     * This is to counter griefing attacks, where an attacker frontrun the approval.
-     */
-    function _batchAllowanceCheck(IPearlmit.PermitBatchTransferFrom calldata batch)
-        internal
-        view
-        returns (bool isBatchAllowed)
-    {
-        uint256 numPermits = batch.approvals.length;
-        isBatchAllowed = true;
-
-        for (uint256 i = 0; i < numPermits; ++i) {
-            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
-            (uint256 allowedAmount,) =
-                _allowance(batch.owner, approval.operator, approval.token, approval.id, ZERO_BYTES32);
-            if (allowedAmount < approval.amount) {
-                isBatchAllowed = false;
-                break;
-            }
-        }
+        _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
     }
 
     /**
