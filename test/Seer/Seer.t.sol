@@ -270,12 +270,8 @@ contract SeerTest is Test {
             address(this)
         );
 
-        EthGlpOracle ethGlpOracle = new EthGlpOracle(
-            ITapiocaOracle(address(ethOracle)),
-            ITapiocaOracle(address(glpOracle)),
-            address(0xFdB631F5EE196F0ed6FAa767959853A9F217697D),
-            address(this)
-        );
+        EthGlpOracle ethGlpOracle =
+            new EthGlpOracle(ITapiocaOracle(address(ethOracle)), ITapiocaOracle(address(glpOracle)), address(this));
 
         {
             (bool success, uint256 rate) = ethGlpOracle.peek("");

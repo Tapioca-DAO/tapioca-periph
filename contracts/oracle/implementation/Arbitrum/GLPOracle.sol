@@ -23,11 +23,11 @@ contract GLPOracle is ITapiocaOracle, SequencerCheck, AccessControlDefaultAdminR
     }
 
     function decimals() external pure returns (uint8) {
-        return 30;
+        return 18;
     }
 
     function _get() internal view returns (uint256) {
-        return glpManager.getPrice(true);
+        return glpManager.getPrice(true) / 1e12; // GLP is 30 decimals, we need 18
     }
 
     // Get the latest exchange rate
