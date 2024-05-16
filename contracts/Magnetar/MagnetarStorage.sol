@@ -42,11 +42,10 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     uint8 public constant MAGNETAR_ACTION_TAP_LOCK = 3;
     uint8 public constant MAGNETAR_ACTION_TAP_UNLOCK = 4;
     uint8 public constant MAGNETAR_ACTION_OFT = 5;
-    uint8 public constant MAGNETAR_ACTION_ASSET_MODULE = 6;
-    uint8 public constant MAGNETAR_ACTION_COLLATERAL_MODULE = 7;
-    uint8 public constant MAGNETAR_ACTION_MINT_MODULE = 8;
-    uint8 public constant MAGNETAR_ACTION_OPTION_MODULE = 9;
-    uint8 public constant MAGNETAR_ACTION_YIELDBOX_MODULE = 10;
+    uint8 public constant MAGNETAR_ACTION_COLLATERAL_MODULE = 6;
+    uint8 public constant MAGNETAR_ACTION_MINT_MODULE = 7;
+    uint8 public constant MAGNETAR_ACTION_OPTION_MODULE = 8;
+    uint8 public constant MAGNETAR_ACTION_YIELDBOX_MODULE = 9;
 
     error Magnetar_NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error Magnetar_ModuleNotFound(MagnetarModule module); // Module not found

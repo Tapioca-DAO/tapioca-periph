@@ -8,4 +8,8 @@ contract TapOftMock is ERC20{
     function extractTAP(address to, uint256 value) external {
         _mint(to, value);
     }
+
+    function ownerOf(uint256) external view returns (address) {
+        return msg.sender;
+    }
 }

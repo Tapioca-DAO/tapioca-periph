@@ -29,8 +29,6 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
  */
 contract Pearlmit is PermitC {
     error Pearlmit__BadHashedData();
-    error Pearlmit__NotAllowed();
-
     constructor(string memory name, string memory version) PermitC(name, version) {}
 
     /**
@@ -82,11 +80,9 @@ contract Pearlmit is PermitC {
      */
     function clearAllowance(address owner, address token, uint256 id) external {
         (uint256 allowedAmount, uint256 expiration) = _allowance(owner, msg.sender, token, id, ZERO_BYTES32);
-        if (allowedAmount == 0) {
-            revert Pearlmit__NotAllowed();
+        if (allowedAmount > 0) {
+            _clearAllowance(owner, token, msg.sender, id, ZERO_BYTES32);
         }
-
-        _clearAllowance(owner, token, msg.sender, id, ZERO_BYTES32);
     }
 
     /**
