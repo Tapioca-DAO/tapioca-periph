@@ -46,7 +46,7 @@ interface IPearlmit {
         view
         returns (uint256 allowedAmount, uint256 expiration);
 
-    function clearAllowance(address owner, address token, uint256 id, bytes32 orderId) external;
+    function clearAllowance(address owner, address token, uint256 id) external;
 
     function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch, bytes32 hashedData)
         external
