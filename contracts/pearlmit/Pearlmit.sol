@@ -80,7 +80,7 @@ contract Pearlmit is PermitC {
     /**
      * @notice Clear the allowance of an owner if it is called by the approved operator
      */
-    function clearAllowance(address owner, address token, uint256 id, bytes32 orderId) external {
+    function clearAllowance(address owner, address token, uint256 id) external {
         (uint256 allowedAmount, uint256 expiration) = _allowance(owner, msg.sender, token, id, ZERO_BYTES32);
         if (allowedAmount == 0) {
             revert Pearlmit__NotAllowed();
