@@ -111,12 +111,13 @@ enum MagnetarAction {
     TapLock, // 3 TapLock singular operations.
     TapUnlock, // 4 TapLock singular operations.
     OFT, // 5 LZ OFT singular operations.
+    ExerciseOption, // 6 tOB singular operation
     // Complex operations
-    AssetModule, // 6  Usdo Singular operations.
-    CollateralModule, // 7 Collateral Singular related operations.
-    MintModule, // 8 BigBang Singular related operations.
-    OptionModule, // 9 Market Module related operations.
-    YieldBoxModule // 10 YieldBox module related operations.
+    AssetModule, // 7  Usdo Singular operations.
+    CollateralModule, // 8 Collateral Singular related operations.
+    MintModule, // 9 BigBang Singular related operations.
+    OptionModule, // 10 Market Module related operations.
+    YieldBoxModule // 11 YieldBox module related operations.
 
 }
 
