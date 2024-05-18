@@ -477,7 +477,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector || funcSig == ITwTap.participate.selector) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+            selectorValidated = true;
         }
+        if (funcSig == ITapiocaOptionBroker.participate.selector) selectorValidated = true;
     }
 
     /**
