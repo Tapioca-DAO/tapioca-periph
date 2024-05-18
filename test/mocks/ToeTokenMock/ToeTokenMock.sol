@@ -46,14 +46,6 @@ contract ToeTokenMock is BaseTapiocaOmnichainEngine, ModuleManager, ERC20Permit 
         _setModule(uint8(Module.ToeTokenReceiver), _receiverModule);
     }
 
-    function transferFrom(address from, address to, uint256 value)
-        public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
-    {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
-    }
-
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {
         bytes32 permitTypeHash_ =
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
