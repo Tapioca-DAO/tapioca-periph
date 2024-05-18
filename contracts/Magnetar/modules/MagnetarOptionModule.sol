@@ -346,7 +346,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             tOLPId, data.externalData.singularity
         );
 
-        // transfer unlocked position to the user in case owner is `address(this)`
+        // in case owner is `address(this)`
+        //    transfer unlocked position to the user
         if (ownerOfTOLP == address(this)) {
             IYieldBox _yieldBox = IYieldBox(ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).yieldBox());
             _yieldBox.transfer(address(this), data.user, sglAssetId, ybShares);
