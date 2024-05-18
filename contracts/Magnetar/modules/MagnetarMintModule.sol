@@ -11,6 +11,7 @@ import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapioca
 import {MintFromBBAndLendOnSGLData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
@@ -31,6 +32,8 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  * @notice Magnetar BigBang related operations
  */
 contract MagnetarMintModule is MagnetarBaseModule {
+    using SafeCast for uint256;
+
     /// =====================
     /// Public
     /// =====================
@@ -249,7 +252,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
         bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
         if (isErr) revert Magnetar_ExtractTokenFail();
 
-        IERC721(data.lockData.target).approve(data.participateData.target, tOLPTokenId);
+        pearlmit.approve(data.lockData.target, tOLPTokenId, data.participateData.target, 1, (block.timestamp + 1).toUint48());
+        IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
