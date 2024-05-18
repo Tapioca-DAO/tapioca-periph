@@ -63,30 +63,6 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     }
 
     /**
-     * @inheritdoc IERC20
-     * @dev Extended the capabilities to check allowance and transfer on Pearlmit.
-     */
-    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
-        address spender = _msgSender();
-        // If allowance on this contract is not met, check the Pearlmit allowance.
-        if (allowance(from, spender) < value) {
-            bool isApproved = isERC20Approved(from, to, address(this), value);
-            if (!isApproved) revert BaseTapiocaOmnichainEngine_PearlmitNotApproved();
-
-            // Used to let YieldBox transfer tokens without implementing Pearlmit in the YieldBox.
-            // _transfer(from, to, value);
-            bool isErr = pearlmit.transferFromERC20(from, to, address(this), value);
-            if (isErr) revert BaseTapiocaOmnichainEngine_PearlmitFailed();
-        } else {
-            // If allowance on this contract is met, perform a normal transferFrom.
-            _spendAllowance(from, spender, value);
-            _transfer(from, to, value);
-        }
-
-        return true;
-    }
-
-    /**
      * @inheritdoc OAppSender
      * @dev Overwrite to check for < values.
      */
