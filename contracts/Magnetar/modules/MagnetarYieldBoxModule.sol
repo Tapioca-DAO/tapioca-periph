@@ -28,7 +28,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  */
 contract MagnetarYieldBoxModule is MagnetarBaseModule {
     /// @dev Parse a burst call
-    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
     fallback() external payable {
         bytes4 funcSig = bytes4(BytesLib.slice(msg.data, 0, 4));

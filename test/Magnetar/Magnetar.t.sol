@@ -10,7 +10,8 @@ import "forge-std/console.sol";
 
 // External
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
+import {TapiocaOmnichainEngineHelper} from
+    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
@@ -149,12 +150,13 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         cluster = new Cluster(aEid, address(this));
         pearlmit = new Pearlmit("Test", "1");
-
-        MagnetarAssetModule assetModule = new MagnetarAssetModule(IPearlmit(address(pearlmit)));
-        MagnetarCollateralModule collateralModule = new MagnetarCollateralModule(IPearlmit(address(pearlmit)));
-        MagnetarMintModule mintModule = new MagnetarMintModule(IPearlmit(address(pearlmit)));
-        MagnetarOptionModule optionModule = new MagnetarOptionModule(IPearlmit(address(pearlmit)));
-        MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(address(pearlmit)));
+        
+        TapiocaOmnichainEngineHelper toeHelper = new TapiocaOmnichainEngineHelper();
+        MagnetarAssetModule assetModule = new MagnetarAssetModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarCollateralModule collateralModule = new MagnetarCollateralModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarMintModule mintModule = new MagnetarMintModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarOptionModule optionModule = new MagnetarOptionModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(address(pearlmit)), address(toeHelper));
 
         magnetar = new Magnetar(
             ICluster(address(cluster)),
@@ -164,7 +166,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             payable(mintModule),
             payable(optionModule),
             payable(yieldBoxModule),
-            IPearlmit(address(pearlmit))
+            IPearlmit(address(pearlmit)), 
+            address(toeHelper)
         );
 
         utils = new MagnetarTestUtils();

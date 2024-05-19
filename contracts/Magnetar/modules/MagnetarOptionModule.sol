@@ -45,7 +45,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
-    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
     /**
      * @notice helper to perform tOLP.lock(...) and tOB.participate(...)
