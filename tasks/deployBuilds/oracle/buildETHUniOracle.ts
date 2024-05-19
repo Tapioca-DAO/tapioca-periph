@@ -29,7 +29,6 @@ export const buildETHUniOracle = async (
                 DEPLOY_CONFIG.POST_LBP[chainID]!.USDC_USD_CL_DATA_FEED_ADDRESS,
             ], // CL path
             _circuitChainIsMultiplied: [1], // Multiply/divide CL
-            _stalePeriod: isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
             guardians: [owner], // Owner
             _description: hre.ethers.utils.formatBytes32String('ETH/USD'), // Description,
             _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
