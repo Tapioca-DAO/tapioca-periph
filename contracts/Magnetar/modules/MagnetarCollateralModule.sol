@@ -12,6 +12,7 @@ import {
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
@@ -38,6 +39,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
 
     error MagnetarCollateralModule_UnwrapNotAllowed();
     error Magnetar_WithdrawParamsMismatch();
+
+    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
 
     /**
      * @notice helper for deposit to YieldBox, add collateral to a market, borrow from the same market and withdraw

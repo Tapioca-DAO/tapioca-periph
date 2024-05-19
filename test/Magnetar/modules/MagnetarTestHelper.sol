@@ -418,11 +418,11 @@ contract MagnetarTestHelper is TestHelper {
 
     function createMagnetar(address _cluster, address _pearlmit) public returns (Magnetar magnetar) {
         MagnetarSetupData memory setup;
-        setup.assetModule = new MagnetarAssetModule();
-        setup.collateralModule = new MagnetarCollateralModule();
-        setup.mintModule = new MagnetarMintModule();
-        setup.optionModule = new MagnetarOptionModule();
-        setup.yieldBoxModule = new MagnetarYieldBoxModule();
+        setup.assetModule = new MagnetarAssetModule(IPearlmit(_pearlmit));
+        setup.collateralModule = new MagnetarCollateralModule(IPearlmit(_pearlmit));
+        setup.mintModule = new MagnetarMintModule(IPearlmit(_pearlmit));
+        setup.optionModule = new MagnetarOptionModule(IPearlmit(_pearlmit));
+        setup.yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(_pearlmit));
 
         magnetar = new Magnetar(
             ICluster(_cluster),

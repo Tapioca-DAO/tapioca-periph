@@ -7,6 +7,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 // Tapioca
 import {YieldBoxDepositData, MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -27,6 +28,8 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
  */
 contract MagnetarYieldBoxModule is MagnetarBaseModule {
     /// @dev Parse a burst call
+    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+
     fallback() external payable {
         bytes4 funcSig = bytes4(BytesLib.slice(msg.data, 0, 4));
         bytes memory callWithoutSelector = BytesLib.slice(msg.data, 4, msg.data.length - 4);
