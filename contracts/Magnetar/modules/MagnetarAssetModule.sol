@@ -25,7 +25,6 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
    ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
    
 */
-
 /**
  * @title MagnetarAssetModule
  * @author TapiocaDAO
