@@ -10,6 +10,7 @@ import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle';
 import { buildETHCLOracle } from 'tasks/deployBuilds/oracle/buildETHCLOracle';
 import { buildETHUniOracle } from 'tasks/deployBuilds/oracle/buildETHUniOracle';
 import { buildEthGlpPOracle } from 'tasks/deployBuilds/oracle/buildEthGlpOracle';
@@ -23,10 +24,10 @@ import {
 } from 'tasks/deployBuilds/oracle/buildTapOptionOracle';
 import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
+import { buildUsdoMarketOracle } from 'tasks/deployBuilds/oracle/buildUsdoMarketOracle';
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { buildDualETHOracle } from 'tasks/deployBuilds/oracle/buildDualETHOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -64,7 +65,7 @@ async function postDeployTask(
 
     const { tapToken } = loadContracts__generic(hre, taskArgs.tag);
 
-    // Used in Bar
+    // Used in Bar Penrose register
     await createEmptyStratYbAsset__task(
         {
             ...taskArgs,
@@ -131,13 +132,62 @@ async function tapiocaDeployTask(
             )
             .add(await buildUSDCOracle(hre, owner, isTestnet))
             .add(await buildRethUsdOracle(hre, owner, isTestnet))
-            .add(await buildWstethUsdOracle(hre, owner, isTestnet));
+            .add(await buildWstethUsdOracle(hre, owner, isTestnet))
+            .add(
+                await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_RETH_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName:
+                                DEPLOYMENT_NAMES.RETH_USD_SEER_CL_MULTI_ORACLE,
+                        },
+                    ],
+                }),
+            )
+            .add(
+                await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_WSTETH_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName:
+                                DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
+                        },
+                    ],
+                }),
+            )
+            .add(
+                await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_GLP_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName: DEPLOYMENT_NAMES.GLP_ORACLE,
+                        },
+                    ],
+                }),
+            );
     } else if (
         chainInfo.name === 'ethereum' ||
         chainInfo.name === 'sepolia' ||
         chainInfo.name === 'optimism_sepolia'
     ) {
-        VM.add(await buildSDaiOracle(hre));
+        VM.add(await buildSDaiOracle(hre)).add(
+            await buildUsdoMarketOracle(hre, {
+                deploymentName: DEPLOYMENT_NAMES.MARKET_SDAI_ORACLE,
+                args: ['', owner],
+                dependsOn: [
+                    {
+                        argPosition: 0,
+                        deploymentName: DEPLOYMENT_NAMES.S_DAI_ORACLE,
+                    },
+                ],
+            }),
+        );
     }
 }
 
