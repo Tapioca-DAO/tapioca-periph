@@ -22,19 +22,394 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
-                    "address": "0x771e8e7B2282001F6Ad54b79b5Bd454bfAf73429",
+                    "address": "0x3C92b83255d4503215f7F6a1e105813FE87FBEC2",
                     "name": "WETH_YB_EMPTY_STRAT",
                     "meta": {
                         "token": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                        "ybAssetId": 65
+                        "ybAssetId": 90
                     }
                 },
                 {
-                    "address": "0x5b82B9f5403546065535C80F1182e873954E216A",
+                    "address": "0x22180eFc734C426Aa453c24bb9bAdFf6f7053a1D",
                     "name": "TAP_TOKEN_YB_EMPTY_STRAT",
                     "meta": {
                         "token": "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                        "ybAssetId": 64
+                        "ybAssetId": 89
+                    }
+                },
+                {
+                    "name": "ETH_SEER_CL_ORACLE",
+                    "address": "0x207b8b85C806C3bF949e326fe0Adbc7ffC60e33e",
+                    "meta": {
+                        "args": [
+                            "CL ETH/USD",
+                            "ETH/USD",
+                            18,
+                            {
+                                "_poolChainlink": "0x160fC08267b0A2699b2620C9033547518DbC996e",
+                                "_isChainlinkMultiplied": 1,
+                                "_inBase": "1000000000000000000",
+                                "stalePeriod": 4294967295,
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x4554482f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0xc9cea7f2c0e152fbb9bcab5169b8c87da69546f0cf8796ba915116e9d04693d9",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ETH_SEER_UNI_ORACLE",
+                    "address": "0x693f9249f5e056Bd8CA1e45F90B5fCEc56Fd5b6d",
+                    "meta": {
+                        "args": [
+                            "UniV3 ETH/USD",
+                            "ETH/USDC",
+                            18,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
+                                    "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705"
+                                ],
+                                "_circuitUniswap": [
+                                    "0x72BF7Fbea11ea401Ef89D8edD1AECd845c3a544B"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 1,
+                                "observationLength": 1,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0xC23507096A67D62d511CBE9D9f335dbef8F5De27"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x4554482f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0xf3877d142419bd62aed4b6ef06f9b2da005512df9a9da3f2dd74d0279a7ece10",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ETH_SEER_DUAL_ORACLE",
+                    "address": "0xa80064299DE86fa6370495C45c0966D1e653a6aa",
+                    "meta": {
+                        "args": [
+                            "0x207b8b85C806C3bF949e326fe0Adbc7ffC60e33e",
+                            "0x693f9249f5e056Bd8CA1e45F90B5fCEc56Fd5b6d",
+                            "0x0000000000000000000000000000000000000000",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xf3197264cafc1542200cb21224926a9ecb9ae1d3ea6f8d741a5f48c7d12bb221",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "GLP_ORACLE",
+                    "address": "0x9Ca9d44a86f588Ad18E31248278C1A7BF86849BE",
+                    "meta": {
+                        "args": [
+                            "0x9Dd145b3C100498eE3BFF45E53cEB93cDe0075b4",
+                            "0x0000000000000000000000000000000000000000",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x63cc1e3b8ac42d60230a80956e9220608b3d11c9914d18b5ebc2d9ade1ab86b3",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ETH_GLP_ORACLE",
+                    "address": "0x51b84f0a5471df8Dd4401De036467B3BE20280a8",
+                    "meta": {
+                        "args": [
+                            "0x207b8b85C806C3bF949e326fe0Adbc7ffC60e33e",
+                            "0x9Ca9d44a86f588Ad18E31248278C1A7BF86849BE",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x7e161b2abd352696a8d6297f6124d011340aa7333ffef4ebe6b9235b8288c8d7",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "GMX_ORACLE",
+                    "address": "0xc1B32BD14B6F05149b4B5D82180Bd5801d395Be1",
+                    "meta": {
+                        "args": [
+                            "GMX/USD",
+                            "GMX/USD",
+                            18,
+                            {
+                                "_poolChainlink": "0xb09a4dE01be905e7C1f2d0d95eaDe2877110eDbF",
+                                "_isChainlinkMultiplied": 1,
+                                "_inBase": "1000000000000000000",
+                                "stalePeriod": 4294967295,
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x474d582f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0x52e16fbbe5f23c78adedf3a879fa345120934005f9762dce43cc3ef6a1741d01",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_ORACLE",
+                    "address": "0x1b5D0D2972a6c9E61e5B54d5e17D9CE49F048625",
+                    "meta": {
+                        "args": [
+                            "TAP/USD",
+                            "TAP/USD",
+                            18,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
+                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
+                                ],
+                                "_circuitUniswap": [
+                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 3600,
+                                "observationLength": 10,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0x5df73d7f24c412fad0b6014de97e9195567735c265a167ca0f3bd805723b5454",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ADB_TAP_OPTION_ORACLE",
+                    "address": "0xcEc22895eeC7057000002605b59EcdB52C9Bf444",
+                    "meta": {
+                        "args": [
+                            "TAP/USD",
+                            "TAP/USD",
+                            18,
+                            3600,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
+                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
+                                ],
+                                "_circuitUniswap": [
+                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 3600,
+                                "observationLength": 10,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0x8721a973631a700e3ade9b20fac5c0ae976fe366465091fad72b912066147fe8",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TOB_TAP_OPTION_ORACLE",
+                    "address": "0x97313418672141D9e9d2096135BeE60c7a665aC9",
+                    "meta": {
+                        "args": [
+                            "TAP/USD",
+                            "TAP/USD",
+                            18,
+                            14400,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
+                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
+                                ],
+                                "_circuitUniswap": [
+                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 3600,
+                                "observationLength": 10,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0xfd3fc57ea5da400d99d7c4859ef56b16873d562245664aa5b9a3bc3c41991336",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDC_SEER_CL_ORACLE",
+                    "address": "0x51eaa7A4a747C95cf863150441Dd7202b878bCA2",
+                    "meta": {
+                        "args": [
+                            "USDC/USD",
+                            "USDC/USD",
+                            18,
+                            {
+                                "_poolChainlink": "0xC23507096A67D62d511CBE9D9f335dbef8F5De27",
+                                "_isChainlinkMultiplied": 1,
+                                "_inBase": "1000000",
+                                "stalePeriod": 4294967295,
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x555344432f555344000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0x0dd72b2cd19e3f42b520385943c6ede8290e5ecd8e1d135cb98f1aab2673a028",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "RETH_USD_SEER_CL_MULTI_ORACLE",
+                    "address": "0x5a23d07824CA542771F555e717eC3270168775De",
+                    "meta": {
+                        "args": [
+                            "RETH/ETH -> ETH/USD",
+                            "RETH/USD",
+                            18,
+                            {
+                                "_circuitChainlink": [
+                                    "0x4B86Ba35eB0e12a9CF9f5888111845B35470c753",
+                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1,
+                                    1
+                                ],
+                                "_inBase": "1000000000000000000",
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x524554482f455448202d3e204554482f55534400000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0xb12bfb61bee5f53fa7fda59641d8ce248515ce9791a6f56604ea527b81d27b36",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "WSTETH_USD_SEER_CL_MULTI_ORACLE",
+                    "address": "0x43A6D647D39AC58C05fd13032e88B1861401D9Ae",
+                    "meta": {
+                        "args": [
+                            "WSTETH/stETH -> stETH/ETH -> ETH/USD",
+                            "WSTETH/USD",
+                            18,
+                            {
+                                "_circuitChainlink": [
+                                    "0x361A3801ace0e2D1f5becdbb037495E4A3431F31",
+                                    "0x62cb7087432546B446781Af289c61844c05CbfE9",
+                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "_inBase": "1000000000000000000",
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x575354455448202d3e205354455448202d3e2055534400000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0x22eb3eb71e9bb9683f242940f932979a640ed0b28c6ca0bf1bce8b33390141f2",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MARKET_RETH_ORACLE",
+                    "address": "0x826BC150a51a2C71EC9Bb5a7F9601bfb34D5cbBf",
+                    "meta": {
+                        "args": [
+                            "0x5a23d07824CA542771F555e717eC3270168775De",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xbbbab2ba592b5aac5d5201619edd7ae534663b15a98600e011ab1b8f3d3a1151",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MARKET_WSTETH_ORACLE",
+                    "address": "0x173d6DD375ddd9886564DCe47A1ff1559102b6ab",
+                    "meta": {
+                        "args": [
+                            "0x43A6D647D39AC58C05fd13032e88B1861401D9Ae",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xfe3eb7a864c57dd6e1e6bfa9aaa92f616ec612a268650021c40a2d1190c63c67",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MARKET_GLP_ORACLE",
+                    "address": "0xFfA7597776F4f2e741A8061433D6e4b62686821d",
+                    "meta": {
+                        "args": [
+                            "0x9Ca9d44a86f588Ad18E31248278C1A7BF86849BE",
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xe9b0002c882e1a254e7f3f3bb968dc520c68fceb92b710666f2364c7e3a5a0fa",
+                        "create2": true
                     }
                 },
                 {
@@ -103,352 +478,6 @@
                             false
                         ],
                         "salt": "0xab9c8d11fc48e16e3dc689ca9c508921c946b4c445d9a0f611de22828faa231e",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "ETH_SEER_CL_ORACLE",
-                    "address": "0xB02557A903c0F0c8C03AA1F3ad328475B68c6756",
-                    "meta": {
-                        "args": [
-                            "CL ETH/USD",
-                            "ETH/USD",
-                            18,
-                            {
-                                "_poolChainlink": "0x160fC08267b0A2699b2620C9033547518DbC996e",
-                                "_isChainlinkMultiplied": 1,
-                                "_inBase": "1000000000000000000",
-                                "stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x4554482f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0x5948c00c006bff309b398245912ca2bb63ef443e7b4772bfd2d6301d6ebf8aaf",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "ETH_SEER_UNI_ORACLE",
-                    "address": "0x3D84fe73Fc073E8C2ac041eFE55D54C454A42FC2",
-                    "meta": {
-                        "args": [
-                            "UniV3 ETH/USD",
-                            "ETH/USDC",
-                            18,
-                            {
-                                "addressInAndOutUni": [
-                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                                    "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705"
-                                ],
-                                "_circuitUniswap": [
-                                    "0x72BF7Fbea11ea401Ef89D8edD1AECd845c3a544B"
-                                ],
-                                "_circuitUniIsMultiplied": [
-                                    1
-                                ],
-                                "_twapPeriod": 1,
-                                "observationLength": 1,
-                                "_uniFinalCurrency": 1,
-                                "_circuitChainlink": [
-                                    "0xC23507096A67D62d511CBE9D9f335dbef8F5De27"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1
-                                ],
-                                "_stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x4554482f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0xf98e8fb633534c7a7fac4c4f2b61bbfaf83281ef8582766808f38a6e4c68de09",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "ETH_SEER_DUAL_ORACLE",
-                    "address": "0xD9012765895b7AD36EF0817FD71009EA407de1A8",
-                    "meta": {
-                        "args": [
-                            "0xB02557A903c0F0c8C03AA1F3ad328475B68c6756",
-                            "0x3D84fe73Fc073E8C2ac041eFE55D54C454A42FC2",
-                            "0x0000000000000000000000000000000000000000",
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                        ],
-                        "salt": "0x38e51f141f13c85425fca95c86c0926464d7c4b186d37f6cd08a6db8302d3ea6",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "GLP_ORACLE",
-                    "address": "0x828Ae649b8B06da628f304dBD47bb4AD041fb5Fd",
-                    "meta": {
-                        "args": [
-                            "0x9Dd145b3C100498eE3BFF45E53cEB93cDe0075b4",
-                            "0x0000000000000000000000000000000000000000",
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                        ],
-                        "salt": "0xfab12e9c632f15147b308e6b2a12663fb2354b598e295ae8e8a46f4b00a681c9",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "ETH_GLP_ORACLE",
-                    "address": "0x94871aDB4f244511A2DfE72fE7e3B6f6F01e14eb",
-                    "meta": {
-                        "args": [
-                            "0xB02557A903c0F0c8C03AA1F3ad328475B68c6756",
-                            "0x828Ae649b8B06da628f304dBD47bb4AD041fb5Fd",
-                            "0x0000000000000000000000000000000000000000",
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                        ],
-                        "salt": "0x534f101f06c2a007a4783ba7ccfbbf72ce1a6decfd98d309306f262d88de5ed8",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "GMX_ORACLE",
-                    "address": "0x0Fa1DDf226EFb7AF59f70f473f04f7b2edcfe262",
-                    "meta": {
-                        "args": [
-                            "GMX/USD",
-                            "GMX/USD",
-                            18,
-                            {
-                                "_poolChainlink": "0xb09a4dE01be905e7C1f2d0d95eaDe2877110eDbF",
-                                "_isChainlinkMultiplied": 1,
-                                "_inBase": "1000000000000000000",
-                                "stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x474d582f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0x0f9062d429c56a985345287b2070043a7bf9ce630345c00879eeba799ba62ee5",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TAP_ORACLE",
-                    "address": "0xFb7Eff47a34E55d75452bD43f977aF4163A44D40",
-                    "meta": {
-                        "args": [
-                            "TAP/USD",
-                            "TAP/USD",
-                            18,
-                            {
-                                "addressInAndOutUni": [
-                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
-                                ],
-                                "_circuitUniswap": [
-                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
-                                ],
-                                "_circuitUniIsMultiplied": [
-                                    1
-                                ],
-                                "_twapPeriod": 3600,
-                                "observationLength": 10,
-                                "_uniFinalCurrency": 1,
-                                "_circuitChainlink": [
-                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1
-                                ],
-                                "_stalePeriod": 86400,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0xae8f9758239374ffc304a58b17e057e7a79d8c20cf8add5c34e5479b9c3c7a23",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "ADB_TAP_OPTION_ORACLE",
-                    "address": "0x3691Ea9CC8Cd260B4c4cf8dfAB96b3876AF9405D",
-                    "meta": {
-                        "args": [
-                            "TAP/USD",
-                            "TAP/USD",
-                            18,
-                            3600,
-                            {
-                                "addressInAndOutUni": [
-                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
-                                ],
-                                "_circuitUniswap": [
-                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
-                                ],
-                                "_circuitUniIsMultiplied": [
-                                    1
-                                ],
-                                "_twapPeriod": 3600,
-                                "observationLength": 10,
-                                "_uniFinalCurrency": 1,
-                                "_circuitChainlink": [
-                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1
-                                ],
-                                "_stalePeriod": 86400,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0xae232e87b11710f8880a0d657f0945d7d40abc7a69319f1cf8f50ff9231d23af",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOB_TAP_OPTION_ORACLE",
-                    "address": "0x0926eB8EDd2700b0469DEeCE0066F25CA93Ac8e7",
-                    "meta": {
-                        "args": [
-                            "TAP/USD",
-                            "TAP/USD",
-                            18,
-                            14400,
-                            {
-                                "addressInAndOutUni": [
-                                    "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                                    "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
-                                ],
-                                "_circuitUniswap": [
-                                    "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15"
-                                ],
-                                "_circuitUniIsMultiplied": [
-                                    1
-                                ],
-                                "_twapPeriod": 3600,
-                                "observationLength": 10,
-                                "_uniFinalCurrency": 1,
-                                "_circuitChainlink": [
-                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1
-                                ],
-                                "_stalePeriod": 86400,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x5441502f55534400000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0xf409fffab872b972870566a275f7e6154188dd59a19877899d87da5dffbf4a43",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "USDC_SEER_CL_ORACLE",
-                    "address": "0x6E0FeE796bbDdc931F4C7235D05a34d395f3F2cD",
-                    "meta": {
-                        "args": [
-                            "USDC/USD",
-                            "USDC/USD",
-                            18,
-                            {
-                                "_poolChainlink": "0xC23507096A67D62d511CBE9D9f335dbef8F5De27",
-                                "_isChainlinkMultiplied": 1,
-                                "_inBase": "1000000",
-                                "stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x555344432f555344000000000000000000000000000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0x4319fc030e0c551af18a52ee9d66e5dd64751cc1f7ec292d8e8919c959086d44",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "RETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0x48648e1ec04cDB1Fd3e5389c10c1c86C2D11e337",
-                    "meta": {
-                        "args": [
-                            "RETH/ETH -> ETH/USD",
-                            "RETH/USD",
-                            18,
-                            {
-                                "_circuitChainlink": [
-                                    "0x4B86Ba35eB0e12a9CF9f5888111845B35470c753",
-                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1,
-                                    1
-                                ],
-                                "_inBase": "1000000000000000000",
-                                "stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x524554482f455448202d3e204554482f55534400000000000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0x84c94aa040b8390eda1dad4f4eb1c87d251c9e8a3f7207ef22e753d9d467d45e",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "WSTETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0xD8Be41907090c7Ae9E411eb002FFD042b26B7274",
-                    "meta": {
-                        "args": [
-                            "WSTETH/stETH -> stETH/ETH -> ETH/USD",
-                            "WSTETH/USD",
-                            18,
-                            {
-                                "_circuitChainlink": [
-                                    "0x361A3801ace0e2D1f5becdbb037495E4A3431F31",
-                                    "0x62cb7087432546B446781Af289c61844c05CbfE9",
-                                    "0x160fC08267b0A2699b2620C9033547518DbC996e"
-                                ],
-                                "_circuitChainIsMultiplied": [
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "_inBase": "1000000000000000000",
-                                "stalePeriod": 4294967295,
-                                "guardians": [
-                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                                ],
-                                "_description": "0x575354455448202d3e205354455448202d3e2055534400000000000000000000",
-                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
-                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                            }
-                        ],
-                        "salt": "0xd55e3c8e5a2ba98c29c9edc4388d7376715530cdf81abe2dce7fa036d46c470e",
                         "create2": true
                     }
                 },
