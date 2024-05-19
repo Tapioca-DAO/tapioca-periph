@@ -80,7 +80,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         /**
          * @dev deposit to YieldBox
          */
-        if (data.deposit) {
+        if (data.deposit && data.collateralAmount > 0) {
             (, address collateralAddress,,) = _yieldBox.assets(collateralId);
             data.collateralAmount = _extractTokens(data.user, collateralAddress, data.collateralAmount);
 
