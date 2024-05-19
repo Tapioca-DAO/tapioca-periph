@@ -49,9 +49,7 @@ export const deployPostLbpStack__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        {
-            hre,
-        },
+        { hre, bytecodeSizeLimit: 80_000 },
         tapiocaDeployTask,
         postDeployTask,
     );
