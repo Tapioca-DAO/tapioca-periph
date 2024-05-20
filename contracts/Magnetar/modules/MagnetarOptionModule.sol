@@ -179,17 +179,20 @@ contract MagnetarOptionModule is MagnetarBaseModule {
          * @dev if `data.removeAndRepayData.removeAssetFromSGL` performs the follow operations:
          *          - removeAsset from SGL
          *          - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
-         */
+         */ 
         if (data.removeAndRepayData.removeAssetFromSGL) {
             ISingularity _singularity = ISingularity(data.externalData.singularity);
+            IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
+
+            uint256 _share;
+            if (data.removeAndRepayData.assetWithdrawData.amount > 0) { 
+                _share = _yieldBox.toShare(_singularity._assetId(), data.removeAndRepayData.assetWithdrawData.amount, false);
+            }
             // remove asset from SGL
             _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.user);
 
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
-                IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
-                uint256 _assetId = _singularity._assetId();
-                uint256 _share = _yieldBox.toShare(_assetId, data.removeAndRepayData.assetWithdrawData.amount, false);
                 _yieldBox.transfer(data.user, address(this), _singularity._assetId(), _share);
                 _withdrawHere(data.removeAndRepayData.assetWithdrawData);
             }
