@@ -1194,6 +1194,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         ERC20Mock paymentToken = new ERC20Mock();
         TapiocaOptionsBrokerMock tOb = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
 
+
         cluster.updateContract(0, address(tOb), true);
         cluster.updateContract(0, address(tapOft), true);
         cluster.updateContract(0, address(paymentToken), true);

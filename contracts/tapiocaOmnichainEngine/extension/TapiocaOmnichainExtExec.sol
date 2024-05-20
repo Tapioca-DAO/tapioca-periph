@@ -52,6 +52,7 @@ contract TapiocaOmnichainExtExec {
 
         uint256 approvalsLength = approvals.length;
         for (uint256 i = 0; i < approvalsLength;) {
+            _sanitizeTarget(approvals[i].token);
             try IERC20Permit(approvals[i].token).permit(
                 approvals[i].owner,
                 approvals[i].spender,
@@ -77,6 +78,7 @@ contract TapiocaOmnichainExtExec {
 
         uint256 approvalsLength = approvals.length;
         for (uint256 i = 0; i < approvalsLength;) {
+            _sanitizeTarget(approvals[i].token);
             try ERC721Permit(approvals[i].token).permit(
                 approvals[i].spender,
                 approvals[i].tokenId,
@@ -98,6 +100,8 @@ contract TapiocaOmnichainExtExec {
     function pearlmitApproval(address _srcChainSender, bytes memory _data) public {
         (address pearlmit, IPearlmit.PermitBatchTransferFrom memory batchApprovals) =
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
+        
+        _sanitizeTarget(pearlmit);
 
         batchApprovals.owner = _srcChainSender; // overwrite the owner with the src chain sender
         // Redundant security measure, just for the sake of it
