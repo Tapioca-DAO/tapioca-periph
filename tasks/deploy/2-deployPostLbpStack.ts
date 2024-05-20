@@ -209,6 +209,19 @@ async function tapiocaDeployTask(
             )
             .add(
                 await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_TETH_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName:
+                                DEPLOYMENT_NAMES.ETH_SEER_DUAL_ORACLE,
+                        },
+                    ],
+                }),
+            )
+            .add(
+                await buildUsdoMarketOracle(hre, {
                     deploymentName: DEPLOYMENT_NAMES.MARKET_WSTETH_ORACLE,
                     args: ['', owner],
                     dependsOn: [
