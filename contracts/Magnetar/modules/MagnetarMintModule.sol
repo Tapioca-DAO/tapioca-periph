@@ -202,7 +202,6 @@ contract MagnetarMintModule is MagnetarBaseModule {
          *          `data.mintData.collateralDepositData.amount` can be > 0, which assumes that an `.addCollateral` operation is performed
          */
         if (data.mintData.collateralDepositData.amount > 0) {
-            _pearlmitApprove(address(_yieldBox), bbCollateralId, address(_bigBang), _share);
             _marketAddCollateral(_bigBang, data.externalContracts.marketHelper, _share, data.user, data.user);
         }
 
