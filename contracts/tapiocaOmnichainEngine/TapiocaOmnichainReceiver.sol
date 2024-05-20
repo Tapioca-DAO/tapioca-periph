@@ -223,7 +223,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
         _internalRemoteTransferSendPacket(
-            _srcChainSender, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg
+            _srcChainSender, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg, remoteTransferMsg_.owner
         );
 
         emit RemoteTransferReceived(
@@ -243,7 +243,8 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     function _internalRemoteTransferSendPacket(
         address _srcChainSender,
         LZSendParam memory _lzSendParam,
-        bytes memory _composeMsg
+        bytes memory _composeMsg,
+        address _owner
     ) internal returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
         // Burn tokens from this contract
         (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitView(
@@ -257,7 +258,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
         if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) {
             // Send the difference back to the user
-            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
+            _transfer(address(this), _owner, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
 
             // Overwrite the amount to credit with the amount debited
             _lzSendParam.sendParam.amountLD = amountDebitedLD_;
