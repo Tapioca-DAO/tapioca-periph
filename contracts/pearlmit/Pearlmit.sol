@@ -89,12 +89,12 @@ contract Pearlmit is PermitC {
     /**
      * @notice After transfer of all operation should clear the allowance of the operator.
      */
-    function _afterTransferFrom(address token, address owner, address operator, uint256 id, uint256 amount)
+    function _afterTransferFrom(address token, address owner, address to, uint256 id, uint256 amount)
         internal
         override
         returns (bool isError)
     {
-        _clearAllowance(owner, token, operator, id, ZERO_BYTES32);
+        _clearAllowance(owner, token, msg.sender, id, ZERO_BYTES32);
     }
 
     /**
