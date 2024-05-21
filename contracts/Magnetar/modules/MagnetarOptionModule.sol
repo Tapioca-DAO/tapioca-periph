@@ -101,6 +101,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _fraction = _extractTokens(data.user, data.singularity, _fraction);
         _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
 
+
         pearlmit.approve(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount, (block.timestamp + 1).toUint48());
         _yieldBox.setApprovalForAll(address(pearlmit), true);
 
@@ -129,7 +130,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             if (isErr) revert Magnetar_ExtractTokenFail();
         }
 
-        pearlmit.approve(data.lockData.target, tOLPTokenId, data.participateData.target, 1, (block.timestamp + 1).toUint48());
+        pearlmit.approve(data.lockData.target, tOLPTokenId, data.participateData.target, 1, block.timestamp.toUint48());
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
