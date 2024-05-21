@@ -13,6 +13,7 @@ import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
 
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
@@ -92,6 +93,12 @@ export const deployPreLbpStack__task = async (
                     ),
                 )
                 .add(await getMagnetar(hre, tapiocaMulticallAddr))
+                .add(
+                    await buildMagnetarHelper(
+                        hre,
+                        DEPLOYMENT_NAMES.MAGNETAR_HELPER,
+                    ),
+                )
                 .add(
                     (await getZeroXSwapper({
                         hre,
