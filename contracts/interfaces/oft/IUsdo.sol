@@ -87,6 +87,7 @@ struct MarketLendOrRepayMsg {
     address user;
     ILendOrRepayParams lendParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 /**
@@ -96,6 +97,7 @@ struct MarketRemoveAssetMsg {
     address user;
     ICommonExternalContracts externalData;
     IRemoveAndRepay removeAndRepayData;
+    uint256 value;
 }
 
 /**

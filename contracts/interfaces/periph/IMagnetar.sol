@@ -94,6 +94,7 @@ struct LockAndParticipateData {
     address magnetar;
     IOptionsLockData lockData;
     IOptionsParticipateData participateData;
+    uint256 value;
 }
 
 struct MagnetarCall {
