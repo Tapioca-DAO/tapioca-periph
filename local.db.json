@@ -17,6 +17,133 @@
         }
     },
     "tap-token-test": {
+        "43113": {
+            "name": "fuji_avalanche",
+            "lastBlockHeight": 33229094,
+            "contracts": [
+                {
+                    "name": "PEARLMIT",
+                    "address": "0x81D2eE32b93C9E5a367B3cC4f1E20Ee58DE00f61",
+                    "meta": {
+                        "args": [
+                            "Pearlmit",
+                            "1"
+                        ],
+                        "salt": "0xb47a8305aa0982616282b0327e87fe4bb9050db9c196bcf20dacf53eb57d757f",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "CLUSTER",
+                    "address": "0xEB13D8538da4983180198DfA66151AcC74dAa847",
+                    "meta": {
+                        "args": [
+                            "40106",
+                            "0xc4c36140a88e92fa01bf31299da58e51265487d5"
+                        ],
+                        "salt": "0x409b30d693b0a9b7de0a418eed5bf207bc8c2d996b81d1e86d5ff2c5c26118f2",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TOE_HELPER",
+                    "address": "0x2440D2027F5Fbd42B709EC84C5C8e716B8AEC57a",
+                    "meta": {
+                        "args": [],
+                        "salt": "0xffc0cce4c7168a38248bdfe20a752e0d0a485ac844cadc9cc08e518330f86dc4",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_ASSET_MODULE",
+                    "address": "0x82367b12157d9b74d8A27f03D35e90C4a366F20c",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xdca3bb6940d88f3f151b23f5e37f7c83ecc9831338acab5e9ad72e0e6e62be78",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_COLLATERAL_MODULE",
+                    "address": "0xC8e9a07D586152e120d777364A8E842c86dD1c6B",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xa1bd118058424b61ab01852d5599158085d98662019c3c8ac3fc29aaf2d1f2ed",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_MINT_MODULE",
+                    "address": "0x7fC4C0568643663Cf6c299120E5893943ECc5037",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0x74bcca1e4155e7bee7fd47f1083fcdc168ac00a55f6d867004d796e8de419c87",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_OPTION_MODULE",
+                    "address": "0xE5e459021bF067878A14113C8C4cEB15FE6ce642",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xee86641784f5f3f789480f21d8b714e1ecce73333175dc141bef0183de118efb",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_YIELDBOX_MODULE",
+                    "address": "0x8D4496DA5cD35C40184987436f224AC6365607F4",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0x88ee2d844a050bf3601a3dff497ff6122399a4fe78ac4716ac63ccdaa6d8d15f",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR",
+                    "address": "0x138c6126A931D18f852004A57d0b3Df4b288C0a7",
+                    "meta": {
+                        "args": [
+                            "0xEB13D8538da4983180198DfA66151AcC74dAa847",
+                            "0xc4c36140a88e92fa01bf31299da58e51265487d5",
+                            "0x82367b12157d9b74d8A27f03D35e90C4a366F20c",
+                            "0xC8e9a07D586152e120d777364A8E842c86dD1c6B",
+                            "0x7fC4C0568643663Cf6c299120E5893943ECc5037",
+                            "0xE5e459021bF067878A14113C8C4cEB15FE6ce642",
+                            "0x8D4496DA5cD35C40184987436f224AC6365607F4",
+                            "0x81D2eE32b93C9E5a367B3cC4f1E20Ee58DE00f61",
+                            "0x2440D2027F5Fbd42B709EC84C5C8e716B8AEC57a"
+                        ],
+                        "salt": "0x075e964302e460bff014339739a514a4d8fb3898d0e58f8c6672a4c18cc74035",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ZERO_X_SWAPPER",
+                    "address": "0xEfdF5465B94d4d57f0Fc21a07b09E467b3E02C22",
+                    "meta": {
+                        "args": [],
+                        "salt": "0x8783537d1fd2eef16ee8b3ac0ae6eb8bad5c096fc01ebe7335ec2706996968f0",
+                        "create2": true
+                    }
+                }
+            ]
+        },
         "421614": {
             "name": "arbitrum_sepolia",
             "lastBlockHeight": 22113688,
