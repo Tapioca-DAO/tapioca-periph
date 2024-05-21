@@ -58,6 +58,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
      * @param data.participateData the data needed to perform a participate operation on TapiocaOptionsBroker
      * @param data.externalContracts the contracts' addresses used in all the operations performed by the helper
      */
+
     function mintBBLendSGLLockTOLP(MintFromBBAndLendOnSGLData memory data) public payable {
         /**
          * @dev validate data
