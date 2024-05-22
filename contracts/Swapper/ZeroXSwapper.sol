@@ -82,7 +82,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
         if (amountInBefore > amountInAfter) {
             uint256 transferred = amountInBefore - amountInAfter;
             if (transferred < amountIn) {
-                swapData.sellToken.transfer(msg.sender, amountIn - transferred);
+                swapData.sellToken.safeTransfer(msg.sender, amountIn - transferred);
             }
         }
 
