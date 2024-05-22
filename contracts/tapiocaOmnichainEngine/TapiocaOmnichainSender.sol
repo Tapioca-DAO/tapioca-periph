@@ -53,7 +53,6 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
      *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
      *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
      */
-    // TODO parse and enforce composed options here.
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
         payable
