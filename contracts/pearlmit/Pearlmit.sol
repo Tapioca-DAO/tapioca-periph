@@ -29,6 +29,7 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
  */
 contract Pearlmit is PermitC {
     error Pearlmit__BadHashedData();
+
     constructor(string memory name, string memory version) PermitC(name, version) {}
 
     /**
@@ -69,7 +70,7 @@ contract Pearlmit is PermitC {
         uint256 numPermits = batch.approvals.length;
         for (uint256 i = 0; i < numPermits; ++i) {
             IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
-            __storeApproval(
+            _storeApprovalPearlmit(
                 approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
             );
         }
@@ -116,24 +117,6 @@ contract Pearlmit is PermitC {
     ) internal {
         PackedApproval storage allowed = _getPackedApprovalPtr(owner, token, id, ZERO_BYTES32, operator);
         allowed.expiration = expiration == 0 ? uint48(block.timestamp) : expiration;
-        allowed.amount = amount;
-
-        emit Approval({owner: owner, token: token, operator: operator, id: id, amount: amount, expiration: expiration});
-    }
-
-    /**
-     * @dev Identical of PermitC._storeApproval.
-     */
-    function __storeApproval(
-        address token,
-        uint256 id,
-        uint200 amount,
-        uint48 expiration,
-        address owner,
-        address operator
-    ) internal {
-        PackedApproval storage allowed = _getPackedApprovalPtr(owner, token, id, ZERO_BYTES32, operator);
-        allowed.expiration = expiration;
         allowed.amount = amount;
 
         emit Approval({owner: owner, token: token, operator: operator, id: id, amount: amount, expiration: expiration});
