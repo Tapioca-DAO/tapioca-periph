@@ -248,13 +248,13 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             bytes4 funcSig = bytes4(_actionCalldata[:4]);
             if (funcSig == ITOFT.unwrap.selector) {
                 (, uint256 _amount) = abi.decode(_actionCalldata[4:36], (address, uint256));
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount);
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount); //unwrap happens on `msg.sender`
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
             if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
                 (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
                 uint256 amount_ = lzSendParam_.sendParam.amountLD;
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_);
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_); //sendPacket happens on msg.sender
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
 
@@ -395,12 +395,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // Token is sent to the owner after execute
             if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
-                (, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
+                (address from, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
                 (uint256 assetId,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
                 address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
 
                 {
-                    bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), yieldBox, assetId, amount);
+                    bool isErr = pearlmit.transferFromERC1155(from, address(this), yieldBox, assetId, amount);
                     if (isErr) {
                         revert Magnetar_PearlmitTransferFailed();
                     }
@@ -419,7 +419,8 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 (uint256 tokenId) = abi.decode(_actionCalldata[4:], (uint256));
                 address tOLP = ITapiocaOptionBroker(_target).tOLP();
 
-                {
+                {   
+                    // function is executed for `msg.sender`
                     bool isErr = pearlmit.transferFromERC721(msg.sender, address(this), tOLP, tokenId);
                     if (isErr) {
                         revert Magnetar_PearlmitTransferFailed();
@@ -441,11 +442,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // Token is sent to the owner after execute
             if (funcSig == ITwTap.participate.selector) {
-                (, uint256 amount,) = abi.decode(_actionCalldata[4:], (address, uint256, uint256));
+                (address from, uint256 amount,) = abi.decode(_actionCalldata[4:], (address, uint256, uint256));
                 address tapOFT = ITwTap(_target).tapOFT();
 
                 {
-                    bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), address(tapOFT), amount);
+                    bool isErr = pearlmit.transferFromERC20(from, address(this), address(tapOFT), amount);
                     if (isErr) {
                         revert Magnetar_PearlmitTransferFailed();
                     }
@@ -476,7 +477,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector || funcSig == ITwTap.participate.selector) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
+            selectorValidated = true;
         }
+        if (funcSig == ITapiocaOptionBroker.participate.selector) selectorValidated = true;
     }
 
     /**
@@ -546,6 +549,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // transfer `paymentToken` here
             {
+                // executed for `msg.sender`
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, eligibleTapAmount);
                 if (isErr) {
                     revert Magnetar_PearlmitTransferFailed();
