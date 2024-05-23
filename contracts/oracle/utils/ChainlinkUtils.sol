@@ -15,23 +15,30 @@ import {AccessControlDefaultAdminRules} from "../external/AccessControlDefaultAd
 abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
     /// @notice Represent the maximum amount of time (in seconds) between each Chainlink update
     /// before the price feed is considered stale
-    uint32 public stalePeriod = 86400; // Default to 1 day
+    mapping(AggregatorV3Interface => uint32) public stalePeriods;
+    uint32 private constant DEFAULT_STALE_PERIOD = 86400;
 
     // Role for guardians and governors
     bytes32 public constant GUARDIAN_ROLE_CHAINLINK = keccak256("GUARDIAN_ROLE");
 
     error InvalidChainlinkRate();
+    error StalePeriodNotValid();
+    
+    event StalePeriodUpdated(AggregatorV3Interface indexed feed, uint32 indexed val);
 
     /// @notice Reads a Chainlink feed. Perform a sequence upbeat check if L2 chain
     /// @param feed Chainlink feed to query
     /// @return The value obtained with the Chainlink feed queried
     function _readChainlinkBase(AggregatorV3Interface feed, uint256 castedRatio) internal view returns (uint256) {
         if (castedRatio == 0) {
+            uint256 _stalePeriod = stalePeriods[feed];
+            if(_stalePeriod == 0) _stalePeriod = DEFAULT_STALE_PERIOD;
+            
             (, int256 ratio,, uint256 updatedAt,) = feed.latestRoundData();
 
             if (
                 ratio <= feed.aggregator().minAnswer() || ratio >= feed.aggregator().maxAnswer()
-                    || block.timestamp - updatedAt > stalePeriod
+                    || block.timestamp - updatedAt > _stalePeriod
             ) revert InvalidChainlinkRate();
             castedRatio = uint256(ratio);
         }
@@ -67,9 +74,14 @@ abstract contract ChainlinkUtils is AccessControlDefaultAdminRules {
         return (quoteAmount, castedRatio);
     }
 
-    /// @notice Changes the Stale Period
-    /// @param _stalePeriod New stale period (in seconds)
-    function changeStalePeriod(uint32 _stalePeriod) external onlyRole(GUARDIAN_ROLE_CHAINLINK) {
-        stalePeriod = _stalePeriod;
+    /// @notice Updates stale period for feed
+    /// @param _feed the feed key
+    /// @param _stalePeriod the new sale period
+    function updateStalePeriod(AggregatorV3Interface _feed, uint32 _stalePeriod) external  onlyRole(GUARDIAN_ROLE_CHAINLINK) {
+        if (_stalePeriod == 0) revert StalePeriodNotValid();
+
+        stalePeriods[_feed] = _stalePeriod;
+        emit StalePeriodUpdated(_feed, _stalePeriod);
     }
+
 }
