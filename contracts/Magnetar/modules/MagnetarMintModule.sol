@@ -210,7 +210,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
          */
         if (data.mintData.mintAmount > 0) {
             uint256 _assetId = _bigBang._assetId();
-            uint256 _share = _yieldBox.toShare(_assetId, data.mintData.mintAmount, false);
+            _share = _yieldBox.toShare(_assetId, data.mintData.mintAmount, false);
 
             _pearlmitApprove(address(_yieldBox), _assetId, address(_bigBang), _share);
             _marketBorrow(_bigBang, data.externalContracts.marketHelper, data.mintData.mintAmount, data.user, data.user);
