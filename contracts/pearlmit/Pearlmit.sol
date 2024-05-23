@@ -29,6 +29,7 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
  */
 contract Pearlmit is PermitC {
     error Pearlmit__BadHashedData();
+    error Pearlmit__NotAllowed();
 
     constructor(string memory name, string memory version) PermitC(name, version) {}
 
@@ -74,6 +75,54 @@ contract Pearlmit is PermitC {
                 approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
             );
         }
+    }
+
+    /**
+     * @notice Clear the allowance of an owner if it is called by the approved operator
+     */
+    function clearAllowance(address owner, address token, uint256 id) external {
+        (uint256 allowedAmount, uint256 expiration) = _allowance(owner, msg.sender, token, id, ZERO_BYTES32);
+        if (allowedAmount == 0) {
+            revert Pearlmit__NotAllowed();
+        }
+
+        _clearAllowance(owner, token, msg.sender, id, ZERO_BYTES32);
+    }
+
+    /**
+     * @notice After transfer of all operation should clear the allowance of the operator.
+     */
+    function _afterTransferFrom(address token, address owner, address operator, uint256 id, uint256 amount)
+        internal
+        override
+        returns (bool isError)
+    {
+        _clearAllowance(owner, token, operator, id, ZERO_BYTES32);
+    }
+
+    /**
+     * @dev Clear the allowance of an owner to a given operator by setting the amount to 0 and expiring it.
+     */
+    function _clearAllowance(address owner, address token, address operator, uint256 id, bytes32 orderId) internal {
+        _storeApprovalPearlmit(token, id, 0, 0, owner, operator);
+    }
+
+    /**
+     * @dev copy paste of PermitC::_storeApproval().
+     */
+    function _storeApprovalPearlmit(
+        address token,
+        uint256 id,
+        uint200 amount,
+        uint48 expiration,
+        address owner,
+        address operator
+    ) internal {
+        PackedApproval storage allowed = _getPackedApprovalPtr(owner, token, id, ZERO_BYTES32, operator);
+        allowed.expiration = expiration == 0 ? uint48(block.timestamp) : expiration;
+        allowed.amount = amount;
+
+        emit Approval({owner: owner, token: token, operator: operator, id: id, amount: amount, expiration: expiration});
     }
 
     /**
