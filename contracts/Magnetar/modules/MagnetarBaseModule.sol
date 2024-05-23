@@ -74,7 +74,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
     }
 
     function _pearlmitApprove(address _yieldBox, uint256 _tokenId, address _market, uint256 _amount) internal {
-        pearlmit.approve(_yieldBox, _tokenId, _market, _amount.toUint200(), (block.timestamp + 1).toUint48());
+        pearlmit.approve(_yieldBox, _tokenId, _market, _amount.toUint200(), block.timestamp.toUint48());
     }
 
     function _extractTokens(address _from, address _token, uint256 _amount) internal returns (uint256) {
