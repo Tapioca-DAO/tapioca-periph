@@ -105,7 +105,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _yieldBox.setApprovalForAll(address(pearlmit), true);
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-            data.user, data.singularity, data.lockData.lockDuration, data.lockData.amount
+            data.participateData.participate ? address(this) : data.user, data.singularity, data.lockData.lockDuration, data.lockData.amount
         );
 
         _yieldBox.setApprovalForAll(address(pearlmit), false);
@@ -122,9 +122,12 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
         if (data.participateData.tOLPTokenId != 0) tOLPTokenId = data.participateData.tOLPTokenId;
 
-        // transfer NFT here
-        bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
-        if (isErr) revert Magnetar_ExtractTokenFail();
+        // transfer NFT here in case `_lock` wasn't called
+        // otherwise NFT should be already in Magnetar
+        if (!data.lockData.lock) {
+            bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
+            if (isErr) revert Magnetar_ExtractTokenFail();
+        }
 
         pearlmit.approve(data.lockData.target, tOLPTokenId, data.participateData.target, 1, (block.timestamp + 1).toUint48());
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
