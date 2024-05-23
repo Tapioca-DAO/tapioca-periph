@@ -14,6 +14,7 @@ import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwa
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
+import { setupAddClusterAddresses } from './postDeploy/setupAddClusterAddresses';
 
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
@@ -107,6 +108,10 @@ export const deployPreLbpStack__task = async (
                         owner: tapiocaMulticallAddr,
                     })) as IDeployerVMAdd<any>,
                 );
+        },
+        // Post Deploy
+        async (params) => {
+            await setupAddClusterAddresses(params);
         },
     );
 };
