@@ -6,6 +6,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
@@ -118,7 +119,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             if (_action.id == uint8(MagnetarAction.ExerciseOption)) {
                 _processExerciseOption(_action.target, _action.call, _action.value);
-                continue; 
+                continue;
             }
 
             /// @dev Modules will not return result data.
@@ -395,7 +396,8 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // Token is sent to the owner after execute
             if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
-                (address from, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
+                (address from, address sgl,, uint128 amount) =
+                    abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
                 (uint256 assetId,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
                 address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
 
@@ -419,7 +421,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 (uint256 tokenId) = abi.decode(_actionCalldata[4:], (uint256));
                 address tOLP = ITapiocaOptionBroker(_target).tOLP();
 
-                {   
+                {
                     // function is executed for `msg.sender`
                     bool isErr = pearlmit.transferFromERC721(msg.sender, address(this), tOLP, tokenId);
                     if (isErr) {
@@ -529,9 +531,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
      */
-    function _processExerciseOption(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
-        private
-    {
+    function _processExerciseOption(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         /**
          * @dev Executes the following:
          *      tOB.exerciseOption(....)
@@ -541,10 +541,12 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
         /// Owner of the token receives the unlocked tokens.
         if (selectorValidated) {
-            (uint256 _oTAPTokenID, address _paymentToken, uint256 _tapAmount) = abi.decode(_actionCalldata[4:], (uint256, address, uint256));
+            (uint256 _oTAPTokenID, address _paymentToken, uint256 _tapAmount) =
+                abi.decode(_actionCalldata[4:], (uint256, address, uint256));
 
             // compute `paymentToken` amount
-            (uint256 eligibleTapAmount, , uint256 _eligibleTapAmount) = ITapiocaOptionBroker(_target).getOTCDealDetails(_oTAPTokenID, _paymentToken, _tapAmount);
+            (uint256 eligibleTapAmount,, uint256 _eligibleTapAmount) =
+                ITapiocaOptionBroker(_target).getOTCDealDetails(_oTAPTokenID, _paymentToken, _tapAmount);
             address tapToken = ITapiocaOptionBroker(_target).tapOFT();
 
             // transfer `paymentToken` here
@@ -564,11 +566,18 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, _actionValue);
             _paymentToken.safeApprove(address(pearlmit), 0);
 
+            // Clear Pearlmit ERC721 allowance post execution
+            {
+                address oTap = ITapiocaOptionBroker(_target).oTAP();
+                address oTapOwner = IERC721(oTap).ownerOf(_oTAPTokenID);
+                pearlmit.clearAllowance(oTapOwner, oTap, _oTAPTokenID);
+            }
+
             uint256 tapAmountAfter = IERC20(tapToken).balanceOf(address(this));
 
             // @dev we can also use `_eligibleTapAmount` here, but just in case
             IERC20(tapToken).safeTransfer(msg.sender, tapAmountAfter - tapAmountBefore);
-            
+
             return;
         }
         revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
