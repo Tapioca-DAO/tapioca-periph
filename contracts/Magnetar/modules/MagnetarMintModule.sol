@@ -172,8 +172,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
         _checkWhitelisted(data.externalContracts.singularity);
         _checkWhitelisted(data.externalContracts.bigBang);
         _checkWhitelisted(data.externalContracts.marketHelper);
-
-        // Validate data
+        _checkWhitelisted(data.lockData.target);
+        _checkWhitelisted(data.participateData.target);
     }
 
     function _depositAddCollateralAndMintFromBigBang(MintFromBBAndLendOnSGLData memory data) private {
@@ -192,7 +192,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
             data.mintData.collateralDepositData.amount =
                 _extractTokens(data.user, bbCollateralAddress, data.mintData.collateralDepositData.amount);
             _share = _yieldBox.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
-            
+
             _depositToYb(_yieldBox, data.user, bbCollateralId, data.mintData.collateralDepositData.amount);
         }
 
