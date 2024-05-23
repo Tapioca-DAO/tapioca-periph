@@ -7,11 +7,13 @@ import {IPearlmit, PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandle
 
 contract TapiocaOptionsBrokerMock is PearlmitHandler {
     address public tapOFT;
+    address public oTAP;
 
     error TransferFailed();
 
-    constructor(address _tapOft, IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {
+    constructor(address _otap, address _tapOft, IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {
         tapOFT = _tapOft;
+        oTAP = _otap;
     }
     function getOTCDealDetails(uint256, address, uint256)
         external

@@ -17,7 +17,6 @@ import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/Magnetar
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
-import {MagnetarAssetModule} from "tapioca-periph/Magnetar/modules/MagnetarAssetModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
@@ -152,7 +151,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         pearlmit = new Pearlmit("Test", "1");
         
         TapiocaOmnichainEngineHelper toeHelper = new TapiocaOmnichainEngineHelper();
-        MagnetarAssetModule assetModule = new MagnetarAssetModule(IPearlmit(address(pearlmit)), address(toeHelper));
         MagnetarCollateralModule collateralModule = new MagnetarCollateralModule(IPearlmit(address(pearlmit)), address(toeHelper));
         MagnetarMintModule mintModule = new MagnetarMintModule(IPearlmit(address(pearlmit)), address(toeHelper));
         MagnetarOptionModule optionModule = new MagnetarOptionModule(IPearlmit(address(pearlmit)), address(toeHelper));
@@ -161,7 +159,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         magnetar = new Magnetar(
             ICluster(address(cluster)),
             address(this),
-            payable(assetModule),
             payable(collateralModule),
             payable(mintModule),
             payable(optionModule),
@@ -522,7 +519,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         // repay
         {
             bytes memory repayData = abi.encodeWithSelector(
-                MagnetarAssetModule.depositRepayAndRemoveCollateralFromMarket.selector,
+                MagnetarCollateralModule.depositRepayAndRemoveCollateralFromMarket.selector,
                 DepositRepayAndRemoveCollateralFromMarketData({
                     market: address(sgl),
                     marketHelper: address(marketHelper),
@@ -543,7 +540,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
-                id: uint8(MagnetarAction.AssetModule),
+                id: uint8(MagnetarAction.CollateralModule),
                 target: address(yieldBox),
                 value: 0,
                 call: repayData
@@ -1193,8 +1190,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     function test_exercise_option() public {
         TapOftMock tapOft = new TapOftMock();
+        TapOftMock oTAP = new TapOftMock();
         ERC20Mock paymentToken = new ERC20Mock();
-        TapiocaOptionsBrokerMock tOb = new TapiocaOptionsBrokerMock(address(tapOft), IPearlmit(address(pearlmit)));
+        TapiocaOptionsBrokerMock tOb = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
 
         cluster.updateContract(0, address(tOb), true);
         cluster.updateContract(0, address(tapOft), true);

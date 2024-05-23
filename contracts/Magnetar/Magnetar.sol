@@ -59,7 +59,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     constructor(
         ICluster _cluster,
         address _owner,
-        address payable _assetModule,
         address payable _collateralModule,
         address payable _mintModule,
         address payable _optionModule,
@@ -67,7 +66,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         IPearlmit _pearlmit,
         address _toeHelper
     ) BaseMagnetar(_cluster, _pearlmit, _toeHelper, _owner) {
-        modules[MagnetarModule.AssetModule] = _assetModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;
         modules[MagnetarModule.OptionModule] = _optionModule;
@@ -121,12 +119,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             if (_action.id == uint8(MagnetarAction.ExerciseOption)) {
                 _processExerciseOption(_action.target, _action.call, _action.value);
                 continue;
-            }
-
-            /// @dev Modules will not return result data.
-            if (_action.id == uint8(MagnetarAction.AssetModule)) {
-                _executeModule(MagnetarModule.AssetModule, _action.call);
-                continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.

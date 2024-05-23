@@ -28,7 +28,6 @@ import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/Magnetar
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
-import {MagnetarAssetModule} from "tapioca-periph/Magnetar/modules/MagnetarAssetModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
@@ -116,7 +115,6 @@ struct TestBigBangData {
 }
 
 struct MagnetarSetupData {
-    MagnetarAssetModule assetModule;
     MagnetarCollateralModule collateralModule;
     MagnetarMintModule mintModule;
     MagnetarOptionModule optionModule;
@@ -421,7 +419,6 @@ contract MagnetarTestHelper is TestHelper {
         TapiocaOmnichainEngineHelper toeHelper = new TapiocaOmnichainEngineHelper();
 
         MagnetarSetupData memory setup;
-        setup.assetModule = new MagnetarAssetModule(IPearlmit(_pearlmit), address(toeHelper));
         setup.collateralModule = new MagnetarCollateralModule(IPearlmit(_pearlmit), address(toeHelper));
         setup.mintModule = new MagnetarMintModule(IPearlmit(_pearlmit), address(toeHelper));
         setup.optionModule = new MagnetarOptionModule(IPearlmit(_pearlmit), address(toeHelper));
@@ -430,7 +427,6 @@ contract MagnetarTestHelper is TestHelper {
         magnetar = new Magnetar(
             ICluster(_cluster),
             address(this),
-            payable(setup.assetModule),
             payable(setup.collateralModule),
             payable(setup.mintModule),
             payable(setup.optionModule),
