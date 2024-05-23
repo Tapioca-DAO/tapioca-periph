@@ -149,12 +149,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         cluster = new Cluster(aEid, address(this));
         pearlmit = new Pearlmit("Test", "1");
-        
+
         TapiocaOmnichainEngineHelper toeHelper = new TapiocaOmnichainEngineHelper();
-        MagnetarCollateralModule collateralModule = new MagnetarCollateralModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarCollateralModule collateralModule =
+            new MagnetarCollateralModule(IPearlmit(address(pearlmit)), address(toeHelper));
         MagnetarMintModule mintModule = new MagnetarMintModule(IPearlmit(address(pearlmit)), address(toeHelper));
         MagnetarOptionModule optionModule = new MagnetarOptionModule(IPearlmit(address(pearlmit)), address(toeHelper));
-        MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(address(pearlmit)), address(toeHelper));
+        MagnetarYieldBoxModule yieldBoxModule =
+            new MagnetarYieldBoxModule(IPearlmit(address(pearlmit)), address(toeHelper));
 
         magnetar = new Magnetar(
             ICluster(address(cluster)),
@@ -163,7 +165,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             payable(mintModule),
             payable(optionModule),
             payable(yieldBoxModule),
-            IPearlmit(address(pearlmit)), 
+            IPearlmit(address(pearlmit)),
             address(toeHelper)
         );
 
@@ -433,12 +435,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             // lend approvals
             pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-            sgl.approve(address(magnetar), type(uint256).max);  
+            sgl.approve(address(magnetar), type(uint256).max);
 
             // collateral approvals
-            pearlmit.approve(
-                address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)
-            ); // Atomic approval
+            pearlmit.approve(address(yieldBox), collateralId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             sgl.approve(address(magnetar), type(uint256).max);
 
             // market operations approvals
@@ -547,8 +547,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             });
 
             pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-            sgl.approve(address(magnetar), type(uint256).max);  
-
+            sgl.approve(address(magnetar), type(uint256).max);
 
             magnetar.burst(calls);
         }
@@ -862,9 +861,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         {
             MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
 
-            pearlmit.approve(
-                address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)
-            ); // Atomic approval
+            pearlmit.approve(address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
             pearlmit.approve(
                 address(yieldBox), collateralId, address(magnetar), type(uint200).max, uint48(block.timestamp)
             ); // Atomic approval
@@ -1192,8 +1189,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         TapOftMock tapOft = new TapOftMock();
         TapOftMock oTAP = new TapOftMock();
         ERC20Mock paymentToken = new ERC20Mock();
-        TapiocaOptionsBrokerMock tOb = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
-
+        TapiocaOptionsBrokerMock tOb =
+            new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
 
         cluster.updateContract(0, address(tOb), true);
         cluster.updateContract(0, address(tapOft), true);
@@ -1209,7 +1206,9 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             id: uint8(MagnetarAction.ExerciseOption),
             target: address(tOb),
             value: 0,
-            call: abi.encodeWithSelector(TapiocaOptionsBrokerMock.exerciseOption.selector, 0, address(paymentToken), 1 ether)
+            call: abi.encodeWithSelector(
+                TapiocaOptionsBrokerMock.exerciseOption.selector, 0, address(paymentToken), 1 ether
+                )
         });
         magnetar.burst(calls);
 

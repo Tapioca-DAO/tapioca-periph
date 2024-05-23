@@ -85,7 +85,6 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         if (data.deposit && data.collateralAmount > 0) {
             (, address collateralAddress,,) = _yieldBox.assets(collateralId);
             data.collateralAmount = _extractTokens(data.user, collateralAddress, data.collateralAmount);
-            
             _depositToYb(_yieldBox, data.user, collateralId, data.collateralAmount);
         }
 
@@ -122,7 +121,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _processYieldBoxApprovals(_yieldBox, data.market, false);
     }
 
-     /**
+    /**
      * @notice helper for deposit asset to YieldBox, repay on a market, remove collateral and withdraw
      * @dev all steps are optional:
      *         - if `depositAmount` is 0, the deposit to YieldBox step is skipped
@@ -233,7 +232,6 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _checkWithdrawData(data.withdrawParams, data.market);
     }
 
-
     function _checkWithdrawData(MagnetarWithdrawData memory data, address market) private view {
         if (data.withdraw) {
             // USDO doesn't have unwrap
@@ -242,7 +240,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
             if (data.amount == 0) revert Magnetar_WithdrawParamsMismatch();
         }
     }
-    
+
     function _validateDepositRepayAndRemoveCollateralFromMarketData(
         DepositRepayAndRemoveCollateralFromMarketData memory data
     ) private view {
@@ -261,7 +259,10 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _checkWhitelisted(marketHelper);
     }
 
-    function _checkDepositRepayAndRemoveCollateralFromMarketDataWithdrawData(MagnetarWithdrawData memory data, address market) private view {
+    function _checkDepositRepayAndRemoveCollateralFromMarketDataWithdrawData(
+        MagnetarWithdrawData memory data,
+        address market
+    ) private view {
         if (data.withdraw) {
             if (data.assetId != IMarket(market)._collateralId()) revert Magnetar_WithdrawParamsMismatch();
             if (data.amount == 0) revert Magnetar_WithdrawParamsMismatch();

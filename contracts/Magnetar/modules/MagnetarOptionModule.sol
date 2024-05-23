@@ -45,6 +45,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
+
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
     /**
@@ -55,7 +56,6 @@ contract MagnetarOptionModule is MagnetarBaseModule {
      * @param data.lockData the data needed to lock on tOB
      * @param data.participateData the data needed to participate on tOLP
      */
-
     function lockAndParticipate(LockAndParticipateData memory data) public payable {
         /**
          * @dev validate data
@@ -84,7 +84,6 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         }
     }
 
-
     function _lock(LockAndParticipateData memory data) private returns (uint256 tOLPTokenId) {
         IMarket _singularity = IMarket(data.singularity);
         IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
@@ -101,12 +100,16 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _fraction = _extractTokens(data.user, data.singularity, _fraction);
         _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
 
-
-        pearlmit.approve(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount, (block.timestamp + 1).toUint48());
+        pearlmit.approve(
+            address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount, block.timestamp.toUint48()
+        );
         _yieldBox.setApprovalForAll(address(pearlmit), true);
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-            data.participateData.participate ? address(this) : data.user, data.singularity, data.lockData.lockDuration, data.lockData.amount
+            data.participateData.participate ? address(this) : data.user,
+            data.singularity,
+            data.lockData.lockDuration,
+            data.lockData.amount
         );
 
         _yieldBox.setApprovalForAll(address(pearlmit), false);
@@ -183,14 +186,15 @@ contract MagnetarOptionModule is MagnetarBaseModule {
          * @dev if `data.removeAndRepayData.removeAssetFromSGL` performs the follow operations:
          *          - removeAsset from SGL
          *          - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
-         */ 
+         */
         if (data.removeAndRepayData.removeAssetFromSGL) {
             ISingularity _singularity = ISingularity(data.externalData.singularity);
             IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
 
             uint256 _share;
-            if (data.removeAndRepayData.assetWithdrawData.amount > 0) { 
-                _share = _yieldBox.toShare(_singularity._assetId(), data.removeAndRepayData.assetWithdrawData.amount, false);
+            if (data.removeAndRepayData.assetWithdrawData.amount > 0) {
+                _share =
+                    _yieldBox.toShare(_singularity._assetId(), data.removeAndRepayData.assetWithdrawData.amount, false);
             }
             // remove asset from SGL
             _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.user);
@@ -263,10 +267,10 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     }
 
     function _validateLockAndParticipate(LockAndParticipateData memory data) private {
-         // Check sender
+        // Check sender
         _checkSender(data.user);
 
-         // Check provided addresses
+        // Check provided addresses
         _checkWhitelisted(data.singularity);
         _checkWhitelisted(data.magnetar);
         if (data.lockData.lock) {
@@ -355,7 +359,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         address ownerOfTOLP = IERC721(data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
         if (ownerOfTOLP != data.user && ownerOfTOLP != address(this)) revert Magnetar_ActionParamsMismatch();
 
-        (uint128 sglAssetId, uint128 ybShares,,) = ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).lockPositions(tOLPId);
+        (uint128 sglAssetId, uint128 ybShares,,) =
+            ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).lockPositions(tOLPId);
 
         // will be sent to `data.user` or `address(this)`
         ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
@@ -365,7 +370,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         // in case owner is `address(this)`
         //    transfer unlocked position to the user
         if (ownerOfTOLP == address(this)) {
-            IYieldBox _yieldBox = IYieldBox(ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).yieldBox());
+            IYieldBox _yieldBox =
+                IYieldBox(ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).yieldBox());
             _yieldBox.transfer(address(this), data.user, sglAssetId, ybShares);
         }
     }

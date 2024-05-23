@@ -149,7 +149,15 @@ contract MagnetarTestUtils {
             SGLInterestHelper sglInterestHelper = new SGLInterestHelper();
 
             bytes memory payload = abi.encodeWithSelector(
-                Singularity.setSingularityConfig.selector, sgl.borrowOpeningFee(), 0, 0, 0, 0, 0, 0, address(sglInterestHelper)
+                Singularity.setSingularityConfig.selector,
+                sgl.borrowOpeningFee(),
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                address(sglInterestHelper)
             );
             address[] memory mc = new address[](1);
             mc[0] = address(sgl);

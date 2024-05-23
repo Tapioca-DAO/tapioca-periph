@@ -4,7 +4,6 @@ pragma solidity 0.8.22;
 // Tapioca
 import {ICommonData} from "../common/ICommonData.sol";
 
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 

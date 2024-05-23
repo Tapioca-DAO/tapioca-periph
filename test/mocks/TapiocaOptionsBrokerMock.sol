@@ -4,7 +4,6 @@ pragma solidity 0.8.22;
 import {ITap} from "tapioca-periph/interfaces/oft/ITap.sol";
 import {IPearlmit, PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 
-
 contract TapiocaOptionsBrokerMock is PearlmitHandler {
     address public tapOFT;
     address public oTAP;
@@ -15,6 +14,7 @@ contract TapiocaOptionsBrokerMock is PearlmitHandler {
         tapOFT = _tapOft;
         oTAP = _otap;
     }
+
     function getOTCDealDetails(uint256, address, uint256)
         external
         view
@@ -22,10 +22,10 @@ contract TapiocaOptionsBrokerMock is PearlmitHandler {
     {
         return (1 ether, 1 ether, 1 ether);
     }
+
     function exerciseOption(uint256 _oTAPTokenID, address _paymentToken, uint256 _tapAmount) external {
         {
-            bool isErr =
-                pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, 1 ether);
+            bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, 1 ether);
             if (isErr) revert TransferFailed();
         }
 

@@ -84,7 +84,6 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
             }
         }
 
-
         // Check that the amountOut is at least as much as minAmountOut
         amountOut = swapData.buyToken.balanceOf(address(this));
         if (amountOut < minAmountOut) revert MinSwapFailed(amountOut);
