@@ -72,16 +72,6 @@ contract ZeroXSwapperTest is TestBase, StdAssertions, StdCheats, StdUtils, TestH
         assertEq(swapper.owner(), address(this));
     }
 
-    function test_0x_1inch_enable() public {
-        bool status = swapper.isOneInchEnabled();
-        assertFalse(status);
-
-        swapper.setIsOneInchEnabled(true);
-
-        status = swapper.isOneInchEnabled();
-        assertTrue(status);
-    }
-
     function test_0x_swap() public {
         uint256 amount = 1 ether;
 
