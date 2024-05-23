@@ -11,6 +11,7 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
@@ -36,6 +37,8 @@ contract MagnetarAssetModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_WithdrawParamsMismatch();
+
+    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
 
     /// =====================
     /// Public

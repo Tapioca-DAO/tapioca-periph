@@ -21,6 +21,7 @@ import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -44,6 +45,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
+    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+
     /**
      * @notice helper to perform tOLP.lock(...) and tOB.participate(...)
      * @param data.user the user to perform the operation for

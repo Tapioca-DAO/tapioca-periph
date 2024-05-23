@@ -12,6 +12,7 @@ import {MintFromBBAndLendOnSGLData} from "tapioca-periph/interfaces/periph/IMagn
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
@@ -34,6 +35,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 contract MagnetarMintModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
+    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
     /// =====================
     /// Public
     /// =====================

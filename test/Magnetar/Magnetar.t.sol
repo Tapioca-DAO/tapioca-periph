@@ -150,11 +150,11 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         cluster = new Cluster(aEid, address(this));
         pearlmit = new Pearlmit("Test", "1");
 
-        MagnetarAssetModule assetModule = new MagnetarAssetModule();
-        MagnetarCollateralModule collateralModule = new MagnetarCollateralModule();
-        MagnetarMintModule mintModule = new MagnetarMintModule();
-        MagnetarOptionModule optionModule = new MagnetarOptionModule();
-        MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule();
+        MagnetarAssetModule assetModule = new MagnetarAssetModule(IPearlmit(address(pearlmit)));
+        MagnetarCollateralModule collateralModule = new MagnetarCollateralModule(IPearlmit(address(pearlmit)));
+        MagnetarMintModule mintModule = new MagnetarMintModule(IPearlmit(address(pearlmit)));
+        MagnetarOptionModule optionModule = new MagnetarOptionModule(IPearlmit(address(pearlmit)));
+        MagnetarYieldBoxModule yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(address(pearlmit)));
 
         magnetar = new Magnetar(
             ICluster(address(cluster)),
@@ -433,7 +433,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             // lend approvals
             pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
-            sgl.approve(address(magnetar), type(uint256).max);
+            sgl.approve(address(magnetar), type(uint256).max);  
 
             // collateral approvals
             pearlmit.approve(
@@ -545,6 +545,10 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 value: 0,
                 call: repayData
             });
+
+            pearlmit.approve(address(yieldBox), assetId, address(sgl), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+            sgl.approve(address(magnetar), type(uint256).max);  
+
 
             magnetar.burst(calls);
         }
