@@ -74,11 +74,22 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
             revert InvalidProxy(swapData.swapTarget, zeroXProxy);
         }
 
+        uint256 amountInBefore = swapData.sellToken.balanceOf(address(this));
         // Approve the 0x proxy to spend the sell token, and call the swap function
         swapData.sellToken.safeApprove(swapData.swapTarget, amountIn);
         (bool success,) = swapData.swapTarget.call(swapData.swapCallData);
         if (!success) revert SwapFailed();
         swapData.sellToken.safeApprove(swapData.swapTarget, 0);
+        uint256 amountInAfter = swapData.sellToken.balanceOf(address(this));
+
+        // @dev should never be the case otherwise
+        if (amountInBefore > amountInAfter) {
+            uint256 transferred = amountInBefore - amountInAfter;
+            if (transferred < amountIn) {
+                swapData.sellToken.transfer(msg.sender, amountIn - transferred);
+            }
+        }
+
 
         // Check that the amountOut is at least as much as minAmountOut
         amountOut = swapData.buyToken.balanceOf(address(this));
