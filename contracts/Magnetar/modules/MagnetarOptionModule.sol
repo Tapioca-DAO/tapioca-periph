@@ -55,6 +55,11 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
     function lockAndParticipate(LockAndParticipateData memory data) public payable {
         /**
+         * @dev validate data
+         */
+        _validateLockAndParticipate(data);
+
+        /**
          * @dev if `lockData.lock`:
          *          - transfer `fraction` from data.user to `address(this)
          *          - deposits `fraction` to YB for `address(this)`
@@ -75,6 +80,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             _participate(data, tOLPTokenId);
         }
     }
+
 
     function _lock(LockAndParticipateData memory data) private returns (uint256 tOLPTokenId) {
         IMarket _singularity = IMarket(data.singularity);
@@ -237,6 +243,21 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             if (bigBang != address(0)) _revertYieldBoxApproval(bigBang, _yieldBox);
             if (singularity != address(0)) _revertYieldBoxApproval(singularity, _yieldBox);
             _revertYieldBoxApproval(address(pearlmit), _yieldBox);
+        }
+    }
+
+    function _validateLockAndParticipate(LockAndParticipateData memory data) private {
+         // Check sender
+        _checkSender(data.user);
+
+         // Check provided addresses
+        _checkWhitelisted(data.singularity);
+        _checkWhitelisted(data.magnetar);
+        if (data.lockData.lock) {
+            _checkWhitelisted(data.lockData.target);
+        }
+        if (data.participateData.participate) {
+            _checkWhitelisted(data.participateData.target);
         }
     }
 
