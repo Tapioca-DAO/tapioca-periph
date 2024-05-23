@@ -118,7 +118,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
         if (isErr) revert Magnetar_ExtractTokenFail();
 
-        IERC721(data.lockData.target).approve(data.participateData.target, tOLPTokenId);
+        pearlmit.approve(data.lockData.target, tOLPTokenId, data.participateData.target, 1, (block.timestamp + 1).toUint48());
+        IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
