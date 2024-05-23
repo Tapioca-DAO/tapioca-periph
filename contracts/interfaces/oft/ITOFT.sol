@@ -122,6 +122,7 @@ struct MarketRemoveCollateralMsg {
     address user;
     IRemoveParams removeParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 /**
@@ -131,6 +132,7 @@ struct MarketBorrowMsg {
     address user;
     IBorrowParams borrowParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 struct IRemoveParams {
