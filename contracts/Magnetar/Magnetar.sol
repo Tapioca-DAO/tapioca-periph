@@ -222,9 +222,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @dev Process a TOFT operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
      *
-     * @dev !!! WARNING !!! Some functionalities of ITapiocaOmnichainEngine.sendPacket might not work on dst
-     * as the `srcChainSender` on dst will be Magnetar
-     *
      * @param _target The contract address to call.
      * @param _actionCalldata The calldata to send to the target.
      * @param _actionValue The value to send with the call.
@@ -235,7 +232,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
          * @dev Executes the following:
          *      wrap(address from,...)
          *      unwrap(address from,...)
-         *      sendPacket(...)
+         *      sendPacketFrom(...)
          */
         bool selectorValidated = _validateOFTOperation(_target, _actionCalldata);
         if (selectorValidated) {
@@ -245,10 +242,10 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount); //unwrap happens on `msg.sender`
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
-            if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
+            if (funcSig == ITapiocaOmnichainEngine.sendPacketFrom.selector) {
                 (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
                 uint256 amount_ = lzSendParam_.sendParam.amountLD;
-                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_); //sendPacket happens on msg.sender
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_); //sendPacketFrom happens on msg.sender
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
 
@@ -281,9 +278,10 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
             selectorValidated = true;
-            (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
+            (address from_, LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (address,LZSendParam, bytes));
             address owner_ = OFTMsgCodec.bytes32ToAddress(lzSendParam_.sendParam.to);
             _checkSender(owner_);
+            _checkSender(from_);
         }
     }
 
