@@ -40,6 +40,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     error SwapFailed();
     error MinSwapFailed(uint256 amountOut);
     error SenderNotValid(address sender);
+    error TargetNotValid(address target);
 
     constructor(address _zeroXProxy, ICluster _cluster, address _owner) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
@@ -64,6 +65,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
         returns (uint256 amountOut)
     {
         if (!cluster.isWhitelisted(0, msg.sender)) revert SenderNotValid(msg.sender);
+        if (!cluster.isWhitelisted(0, swapData.swapTarget) && swapData.swapTarget != zeroXProxy) revert TargetNotValid(swapData.swapTarget);
 
         // Transfer tokens to this contract
         swapData.sellToken.safeTransferFrom(msg.sender, address(this), amountIn);
