@@ -339,8 +339,18 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         address ownerOfTOLP = IERC721(data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
         if (ownerOfTOLP != data.user && ownerOfTOLP != address(this)) revert Magnetar_ActionParamsMismatch();
 
+        (uint128 sglAssetId, uint128 ybShares,,) = ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).lockPositions(tOLPId);
+
+        // will be sent to `data.user` or `address(this)`
         ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).unlock(
-            tOLPId, data.externalData.singularity, data.user
+            tOLPId, data.externalData.singularity
         );
+
+        // in case owner is `address(this)`
+        //    transfer unlocked position to the user
+        if (ownerOfTOLP == address(this)) {
+            IYieldBox _yieldBox = IYieldBox(ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).yieldBox());
+            _yieldBox.transfer(address(this), data.user, sglAssetId, ybShares);
+        }
     }
 }

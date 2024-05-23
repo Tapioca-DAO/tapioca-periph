@@ -25,7 +25,9 @@ interface ITapiocaOptionLiquidityProvision is IERC721 {
         external
         returns (uint256 tokenId);
 
-    function unlock(uint256 tokenId, address singularity, address to) external returns (uint256 sharesOut);
+    function unlock(uint256 tokenId, address singularity) external returns (uint256 sharesOut);
+
+    function lockPositions(uint256 tokenId) external view returns(uint128 sglAssetID, uint128 ybShares, uint128 lockTime, uint128 lockDuration);
 }
 
 struct IOptionsLockData {
