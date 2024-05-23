@@ -91,6 +91,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
         (, address assetAddress,,) = _yieldBox.assets(_tokenId);
         assetAddress.safeApprove(address(_yieldBox), _amount);
         _yieldBox.depositAsset(_tokenId, address(this), _user, _amount, 0);
+        assetAddress.safeApprove(address(_yieldBox), 0);
     }
 
     function _marketRepay(IMarket _market, address _marketHelper, uint256 _amount, address _from, address _to)
