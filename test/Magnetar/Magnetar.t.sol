@@ -32,7 +32,11 @@ import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
+
+import {TapiocaOptionsBrokerMock} from "../mocks/TapiocaOptionsBrokerMock.sol";
 import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
+import {TapOftMock} from "../mocks/TapOftMock.sol";
+
 import {
     PrepareLzCallData,
     PrepareLzCallReturn,
@@ -1178,5 +1182,32 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             uint256 lentAmount = sgl.balanceOf(address(this));
             assertGt(lentAmount, 0);
         }
+    }
+
+    function test_exercise_option() public {
+        TapOftMock tapOft = new TapOftMock();
+        ERC20Mock paymentToken = new ERC20Mock();
+        TapiocaOptionsBrokerMock tOb = new TapiocaOptionsBrokerMock(address(tapOft), IPearlmit(address(pearlmit)));
+
+        cluster.updateContract(0, address(tOb), true);
+        cluster.updateContract(0, address(tapOft), true);
+        cluster.updateContract(0, address(paymentToken), true);
+
+        deal(address(paymentToken), address(this), 1 ether);
+
+        pearlmit.approve(address(paymentToken), 0, address(magnetar), uint200(1 ether), uint48(block.timestamp));
+        paymentToken.approve(address(pearlmit), 1 ether);
+
+        MagnetarCall[] memory calls = new MagnetarCall[](1);
+        calls[0] = MagnetarCall({
+            id: uint8(MagnetarAction.ExerciseOption),
+            target: address(tOb),
+            value: 0,
+            call: abi.encodeWithSelector(TapiocaOptionsBrokerMock.exerciseOption.selector, 0, address(paymentToken), 1 ether)
+        });
+        magnetar.burst(calls);
+
+        uint256 balanceOfTap = tapOft.balanceOf(address(this));
+        assertEq(balanceOfTap, 1 ether);
     }
 }

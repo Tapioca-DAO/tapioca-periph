@@ -116,6 +116,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 continue; // skip the rest of the loop
             }
 
+            if (_action.id == uint8(MagnetarAction.ExerciseOption)) {
+                _processExerciseOption(_action.target, _action.call, _action.value);
+                continue; 
+            }
+
             /// @dev Modules will not return result data.
             if (_action.id == uint8(MagnetarAction.AssetModule)) {
                 _executeModule(MagnetarModule.AssetModule, _action.call);
@@ -512,6 +517,67 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         selectorValidated = funcSig == ITwTap.exitPosition.selector
             || funcSig == ITapiocaOptionBroker.exitPosition.selector
             || funcSig == ITapiocaOptionLiquidityProvision.unlock.selector;
+    }
+
+    /**
+     * @dev Process a TOB exerciseOption operation, will only execute if the selector is allowed.
+     *
+     * @param _target The contract address to call.
+     * @param _actionCalldata The calldata to send to the target.
+     * @param _actionValue The value to send with the call.
+     */
+    function _processExerciseOption(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
+        private
+    {
+        /**
+         * @dev Executes the following:
+         *      tOB.exerciseOption(....)
+         */
+        bool selectorValidated = _validateExerciseOption(_target, _actionCalldata);
+
+        /// @dev No need to check owner as anyone can unlock twTap/tOB/tOLP positions by design.
+        /// Owner of the token receives the unlocked tokens.
+        if (selectorValidated) {
+            (uint256 _oTAPTokenID, address _paymentToken, uint256 _tapAmount) = abi.decode(_actionCalldata[4:], (uint256, address, uint256));
+
+            // compute `paymentToken` amount
+            (uint256 eligibleTapAmount, , uint256 _eligibleTapAmount) = ITapiocaOptionBroker(_target).getOTCDealDetails(_oTAPTokenID, _paymentToken, _tapAmount);
+            address tapToken = ITapiocaOptionBroker(_target).tapOFT();
+
+            // transfer `paymentToken` here
+            {
+                bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, eligibleTapAmount);
+                if (isErr) {
+                    revert Magnetar_PearlmitTransferFailed();
+                }
+            }
+
+            uint256 tapAmountBefore = IERC20(tapToken).balanceOf(address(this));
+
+            // execute
+            pearlmit.approve(_paymentToken, 0, _target, eligibleTapAmount.toUint200(), block.timestamp.toUint48());
+            _paymentToken.safeApprove(address(pearlmit), eligibleTapAmount);
+            _executeCall(_target, _actionCalldata, _actionValue);
+            _paymentToken.safeApprove(address(pearlmit), 0);
+
+            uint256 tapAmountAfter = IERC20(tapToken).balanceOf(address(this));
+
+            // @dev we can also use `_eligibleTapAmount` here, but just in case
+            IERC20(tapToken).safeTransfer(msg.sender, tapAmountAfter - tapAmountBefore);
+            
+            return;
+        }
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+    }
+
+    function _validateExerciseOption(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        _checkWhitelisted(_target);
+        bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        selectorValidated = funcSig == ITapiocaOptionBroker.exerciseOption.selector;
     }
 
     /**
