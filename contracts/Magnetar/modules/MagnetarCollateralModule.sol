@@ -77,6 +77,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         _processYieldBoxApprovals(_yieldBox, data.market, true);
 
         uint256 collateralId = _market._collateralId();
+        uint256 _share = _yieldBox.toShare(collateralId, data.collateralAmount, false);
 
         /**
          * @dev deposit to YieldBox
@@ -84,7 +85,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
         if (data.deposit && data.collateralAmount > 0) {
             (, address collateralAddress,,) = _yieldBox.assets(collateralId);
             data.collateralAmount = _extractTokens(data.user, collateralAddress, data.collateralAmount);
-
+            
             _depositToYb(_yieldBox, data.user, collateralId, data.collateralAmount);
         }
 
@@ -92,8 +93,6 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
          * @dev performs .addCollateral on data.market
          */
         if (data.collateralAmount > 0) {
-            uint256 _share = _yieldBox.toShare(collateralId, data.collateralAmount, false);
-
             _pearlmitApprove(address(_yieldBox), collateralId, address(_market), _share);
             _marketAddCollateral(_market, data.marketHelper, _share, data.user, data.user);
         }

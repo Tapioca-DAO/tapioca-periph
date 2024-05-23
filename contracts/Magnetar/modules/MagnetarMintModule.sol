@@ -181,6 +181,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
         IYieldBox _yieldBox = IYieldBox(_bigBang._yieldBox());
 
         uint256 bbCollateralId = _bigBang._collateralId();
+        uint256 _share;
+
         /**
          * @dev try deposit to YieldBox
          */
@@ -189,6 +191,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
 
             data.mintData.collateralDepositData.amount =
                 _extractTokens(data.user, bbCollateralAddress, data.mintData.collateralDepositData.amount);
+            _share = _yieldBox.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
+            
             _depositToYb(_yieldBox, data.user, bbCollateralId, data.mintData.collateralDepositData.amount);
         }
 
@@ -198,8 +202,6 @@ contract MagnetarMintModule is MagnetarBaseModule {
          *          `data.mintData.collateralDepositData.amount` can be > 0, which assumes that an `.addCollateral` operation is performed
          */
         if (data.mintData.collateralDepositData.amount > 0) {
-            uint256 _share = _yieldBox.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
-
             _pearlmitApprove(address(_yieldBox), bbCollateralId, address(_bigBang), _share);
             _marketAddCollateral(_bigBang, data.externalContracts.marketHelper, _share, data.user, data.user);
         }
