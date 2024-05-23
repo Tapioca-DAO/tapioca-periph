@@ -36,7 +36,7 @@ contract BaseMagnetar is Ownable, MagnetarStorage {
     event ClusterUpdated(ICluster indexed oldCluster, ICluster indexed newCluster);
     event MagnetarModuleExtenderSet(address old, address newMagnetarModuleExtender);
 
-    constructor(ICluster _cluster, IPearlmit _pearlmit, address _owner) MagnetarStorage(_pearlmit) {
+    constructor(ICluster _cluster, IPearlmit _pearlmit, address _toeHelper, address _owner) MagnetarStorage(_pearlmit, _toeHelper) {
         cluster = _cluster;
         transferOwnership(_owner);
     }

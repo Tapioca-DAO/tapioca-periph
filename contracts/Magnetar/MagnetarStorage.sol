@@ -53,8 +53,8 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     error Magnetar_UnknownReason(); // Revert reason not recognized
     error Magnetar_TargetNotWhitelisted(address addy); // cluster.isWhitelisted(lzChainId, _addr) => false
 
-    constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {
-        toeHelper = new TapiocaOmnichainEngineHelper();
+    constructor(IPearlmit _pearlmit, address _toeHelper) PearlmitHandler(_pearlmit) {
+        toeHelper = TapiocaOmnichainEngineHelper(_toeHelper);
     }
 
     receive() external payable virtual {}

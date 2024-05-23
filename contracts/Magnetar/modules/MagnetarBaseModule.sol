@@ -41,7 +41,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
 
-    constructor(IPearlmit pearlmit) MagnetarStorage(pearlmit) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarStorage(pearlmit, _toeHelper) {}
 
     /// =====================
     /// Internal

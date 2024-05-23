@@ -64,8 +64,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         address payable _mintModule,
         address payable _optionModule,
         address payable _yieldBoxModule,
-        IPearlmit _pearlmit
-    ) BaseMagnetar(_cluster, _pearlmit, _owner) {
+        IPearlmit _pearlmit,
+        address _toeHelper
+    ) BaseMagnetar(_cluster, _pearlmit, _toeHelper, _owner) {
         modules[MagnetarModule.AssetModule] = _assetModule;
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;

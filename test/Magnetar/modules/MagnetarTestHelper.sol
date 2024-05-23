@@ -6,7 +6,8 @@ import {TestHelper} from "../../LZSetup/TestHelper.sol";
 
 // External
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
+import {TapiocaOmnichainEngineHelper} from
+    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
@@ -417,12 +418,14 @@ contract MagnetarTestHelper is TestHelper {
     }
 
     function createMagnetar(address _cluster, address _pearlmit) public returns (Magnetar magnetar) {
+        TapiocaOmnichainEngineHelper toeHelper = new TapiocaOmnichainEngineHelper();
+
         MagnetarSetupData memory setup;
-        setup.assetModule = new MagnetarAssetModule(IPearlmit(_pearlmit));
-        setup.collateralModule = new MagnetarCollateralModule(IPearlmit(_pearlmit));
-        setup.mintModule = new MagnetarMintModule(IPearlmit(_pearlmit));
-        setup.optionModule = new MagnetarOptionModule(IPearlmit(_pearlmit));
-        setup.yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(_pearlmit));
+        setup.assetModule = new MagnetarAssetModule(IPearlmit(_pearlmit), address(toeHelper));
+        setup.collateralModule = new MagnetarCollateralModule(IPearlmit(_pearlmit), address(toeHelper));
+        setup.mintModule = new MagnetarMintModule(IPearlmit(_pearlmit), address(toeHelper));
+        setup.optionModule = new MagnetarOptionModule(IPearlmit(_pearlmit), address(toeHelper));
+        setup.yieldBoxModule = new MagnetarYieldBoxModule(IPearlmit(_pearlmit), address(toeHelper));
 
         magnetar = new Magnetar(
             ICluster(_cluster),
@@ -432,7 +435,8 @@ contract MagnetarTestHelper is TestHelper {
             payable(setup.mintModule),
             payable(setup.optionModule),
             payable(setup.yieldBoxModule),
-            IPearlmit(_pearlmit)
+            IPearlmit(_pearlmit),
+            address(toeHelper)
         );
     }
 

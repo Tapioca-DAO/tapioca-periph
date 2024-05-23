@@ -35,7 +35,7 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 contract MagnetarMintModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
-    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
     /// =====================
     /// Public
     /// =====================

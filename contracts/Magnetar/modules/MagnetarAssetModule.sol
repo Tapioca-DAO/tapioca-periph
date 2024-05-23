@@ -38,7 +38,7 @@ contract MagnetarAssetModule is MagnetarBaseModule {
 
     error Magnetar_WithdrawParamsMismatch();
 
-    constructor(IPearlmit pearlmit) MagnetarBaseModule(pearlmit) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
     /// =====================
     /// Public
