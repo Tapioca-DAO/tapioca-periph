@@ -77,30 +77,6 @@ contract Pearlmit is PermitC {
     }
 
     /**
-     * @notice Permit batch transfer of multiple token types.
-     * @dev Same documentation as permitBatchApprove.
-     */
-    function permitBatchTransferFrom(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData)
-        external
-        returns (bool[] memory errorStatus)
-    {
-        _checkPermitBatchApproval(batch, hashedData);
-        uint256 numPermits = batch.approvals.length;
-        errorStatus = new bool[](numPermits);
-        for (uint256 i = 0; i < numPermits; ++i) {
-            IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
-            if (approval.tokenType == uint8(IPearlmit.TokenType.ERC20)) {
-                errorStatus[i] = _transferFromERC20(approval.token, batch.owner, approval.operator, 0, approval.amount);
-            } else if (approval.tokenType == uint8(IPearlmit.TokenType.ERC721)) {
-                errorStatus[i] = _transferFromERC721(batch.owner, approval.operator, approval.token, approval.id);
-            } else if (approval.tokenType == uint8(IPearlmit.TokenType.ERC1155)) {
-                errorStatus[i] =
-                    _transferFromERC1155(approval.token, batch.owner, approval.operator, approval.id, approval.amount);
-            }
-        }
-    }
-
-    /**
      * @dev Identical of PermitC._storeApproval.
      */
     function __storeApproval(
