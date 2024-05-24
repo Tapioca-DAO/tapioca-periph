@@ -20,7 +20,6 @@ export const buildEthGlpPOracle = async (
     const args: Parameters<EthGlpOracle__factory['deploy']> = [
         hre.ethers.constants.AddressZero, // wethUsdOracle
         hre.ethers.constants.AddressZero, // glpUsdOracle
-        DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER,
         owner, // Owner
     ];
 

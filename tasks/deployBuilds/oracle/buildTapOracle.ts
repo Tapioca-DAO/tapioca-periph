@@ -70,7 +70,6 @@ export const getTapOracleMultiDeployParams = (params: {
             DEPLOY_CONFIG.POST_LBP[chainID]!.WETH_USD_CL_DATA_FEED_ADDRESS,
         ], // CL path
         _circuitChainIsMultiplied: [1], // Multiply/divide CL
-        _stalePeriod: 86400, // CL period before stale, 1 day
         guardians: [owner], // Owner
         _description: hre.ethers.utils.formatBytes32String('TAP/USD'), // Description,
         _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
