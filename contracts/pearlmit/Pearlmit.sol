@@ -88,24 +88,16 @@ contract Pearlmit is PermitC {
      * @notice Clear the allowance of an owner if it is called by the approved operator
      */
     function clearAllowance(address owner, uint256 tokenType, address token, uint256 id) external {
-        (uint256 allowedAmount, uint256 expiration) =
-            _allowance(_transferApprovals, owner, msg.sender, tokenType, token, id, ZERO_BYTES32);
+        (uint256 allowedAmount,) = _allowance(_transferApprovals, owner, msg.sender, tokenType, token, id, ZERO_BYTES32);
         if (allowedAmount > 0) {
-            _clearAllowance(owner, tokenType, token, msg.sender, id, ZERO_BYTES32);
+            _clearAllowance(owner, tokenType, token, msg.sender, id);
         }
     }
 
     /**
      * @dev Clear the allowance of an owner to a given operator by setting the amount to 0 and expiring it.
      */
-    function _clearAllowance(
-        address owner,
-        uint256 tokenType,
-        address token,
-        address operator,
-        uint256 id,
-        bytes32 orderId
-    ) internal {
+    function _clearAllowance(address owner, uint256 tokenType, address token, address operator, uint256 id) internal {
         _storeApproval(tokenType, token, id, 0, 0, owner, operator);
     }
 
