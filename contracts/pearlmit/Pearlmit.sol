@@ -30,7 +30,9 @@ import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 contract Pearlmit is PermitC {
     error Pearlmit__BadHashedData();
 
-    constructor(string memory name, string memory version) PermitC(name, version) {}
+    constructor(string memory name, string memory version, address owner, uint256 nativeValueToCheckPauseState)
+        PermitC(name, version, owner, nativeValueToCheckPauseState)
+    {}
 
     /**
      * @notice Permit batch approve of multiple token types.
@@ -70,8 +72,14 @@ contract Pearlmit is PermitC {
         uint256 numPermits = batch.approvals.length;
         for (uint256 i = 0; i < numPermits; ++i) {
             IPearlmit.SignatureApproval calldata approval = batch.approvals[i];
-            _storeApprovalPearlmit(
-                approval.token, approval.id, approval.amount, batch.sigDeadline, batch.owner, approval.operator
+            _storeApproval(
+                approval.tokenType,
+                approval.token,
+                approval.id,
+                approval.amount,
+                batch.sigDeadline,
+                batch.owner,
+                approval.operator
             );
         }
     }
@@ -79,36 +87,26 @@ contract Pearlmit is PermitC {
     /**
      * @notice Clear the allowance of an owner if it is called by the approved operator
      */
-    function clearAllowance(address owner, address token, uint256 id) external {
-        (uint256 allowedAmount, uint256 expiration) = _allowance(owner, msg.sender, token, id, ZERO_BYTES32);
+    function clearAllowance(address owner, uint256 tokenType, address token, uint256 id) external {
+        (uint256 allowedAmount, uint256 expiration) =
+            _allowance(_transferApprovals, owner, msg.sender, tokenType, token, id, ZERO_BYTES32);
         if (allowedAmount > 0) {
-            _clearAllowance(owner, token, msg.sender, id, ZERO_BYTES32);
+            _clearAllowance(owner, tokenType, token, msg.sender, id, ZERO_BYTES32);
         }
     }
 
     /**
      * @dev Clear the allowance of an owner to a given operator by setting the amount to 0 and expiring it.
      */
-    function _clearAllowance(address owner, address token, address operator, uint256 id, bytes32 orderId) internal {
-        _storeApprovalPearlmit(token, id, 0, 0, owner, operator);
-    }
-
-    /**
-     * @dev copy paste of PermitC::_storeApproval().
-     */
-    function _storeApprovalPearlmit(
-        address token,
-        uint256 id,
-        uint200 amount,
-        uint48 expiration,
+    function _clearAllowance(
         address owner,
-        address operator
+        uint256 tokenType,
+        address token,
+        address operator,
+        uint256 id,
+        bytes32 orderId
     ) internal {
-        PackedApproval storage allowed = _getPackedApprovalPtr(owner, token, id, ZERO_BYTES32, operator);
-        allowed.expiration = expiration == 0 ? uint48(block.timestamp) : expiration;
-        allowed.amount = amount;
-
-        emit Approval({owner: owner, token: token, operator: operator, id: id, amount: amount, expiration: expiration});
+        _storeApproval(tokenType, token, id, 0, 0, owner, operator);
     }
 
     /**
@@ -116,7 +114,7 @@ contract Pearlmit is PermitC {
      * @dev If past allowances for the token still exist, bypass the permit check.
      */
     function _checkPermitBatchApproval(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) internal {
-        bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, masterNonce(batch.owner)));
+        bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, _masterNonces[batch.owner]));
 
         if (batch.hashedData != hashedData) {
             revert Pearlmit__BadHashedData();
