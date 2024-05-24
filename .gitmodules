@@ -22,3 +22,6 @@
 [submodule "gitmodule/tapiocaz"]
 	path = gitmodule/tapiocaz
 	url = https://github.com/Tapioca-DAO/TapiocaZ
+[submodule "gitmodule/permitc"]
+	path = gitmodule/permitc
+	url = https://github.com/Tapioca-DAO/PermitC.git
