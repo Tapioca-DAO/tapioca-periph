@@ -13,15 +13,8 @@ pragma solidity 0.8.22;
 */
 
 interface IPearlmit {
-    enum TokenType {
-        ERC20, // 0
-        ERC721, // 1
-        ERC1155 // 2
-
-    }
-
     struct SignatureApproval {
-        uint8 tokenType; // 0 = ERC20, 1 = ERC721, 2 = ERC1155.
+        uint256 tokenType; // 20 = ERC20, 721 = ERC721, 1155 = ERC1155.
         address token; // Address of the token.
         uint256 id; // ID of the token (0 if ERC20).
         uint200 amount; // Amount of the token (0 if ERC721).
@@ -39,14 +32,15 @@ interface IPearlmit {
         bytes32 hashedData; // Hashed data that comes with the permit execution. See more in Pearlmit.sol.
     }
 
-    function approve(address token, uint256 id, address operator, uint200 amount, uint48 expiration) external;
+    function approve(uint256 tokenType, address token, uint256 id, address operator, uint200 amount, uint48 expiration)
+        external;
 
-    function allowance(address owner, address operator, address token, uint256 id)
+    function allowance(address owner, address operator, uint256 tokenType, address token, uint256 id)
         external
         view
         returns (uint256 allowedAmount, uint256 expiration);
 
-    function clearAllowance(address owner, address token, uint256 id) external;
+    function clearAllowance(address owner, uint256 tokenType, address token, uint256 id) external;
 
     function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch, bytes32 hashedData)
         external
