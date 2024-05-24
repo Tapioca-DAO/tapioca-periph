@@ -182,7 +182,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         IYieldBox _yieldBox = IYieldBox(_bigBang._yieldBox());
 
         uint256 bbCollateralId = _bigBang._collateralId();
-        uint256 _share;
+        uint256 _share = _yieldBox.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
 
         /**
          * @dev try deposit to YieldBox
@@ -192,8 +192,6 @@ contract MagnetarMintModule is MagnetarBaseModule {
 
             data.mintData.collateralDepositData.amount =
                 _extractTokens(data.user, bbCollateralAddress, data.mintData.collateralDepositData.amount);
-            _share = _yieldBox.toShare(bbCollateralId, data.mintData.collateralDepositData.amount, false);
-
             _depositToYb(_yieldBox, data.user, bbCollateralId, data.mintData.collateralDepositData.amount);
         }
 
