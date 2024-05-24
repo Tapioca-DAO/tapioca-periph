@@ -139,7 +139,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) =
-            _buildOFTMsgAndOptions(_sendParam, _extraOptions, _composeMsg, amountToCreditLD);
+            _buildOFTMsgAndOptions(address(0), _sendParam, _extraOptions, _composeMsg, amountToCreditLD);
 
         // @dev Calculates the LayerZero fee for the send() operation.
         return _quote(_sendParam.dstEid, message, options, _payInLzToken);
@@ -150,6 +150,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      * It also contains the `_composeMsg`, which is 1 or more TAP specific messages. See `_buildTapMsgAndOptions()`.
      * The option is an aggregation of the OFT message as well as the TAP messages.
      *
+     * @param _from The sender address. If address(0), msg.sender is used.
      * @param _sendParam: The parameters for the send operation.
      *      - dstEid::uint32: Destination endpoint ID.
      *      - to::bytes32: Recipient address.
@@ -163,6 +164,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      * @return options The combined LZ msgType + `_extraOptions` options.
      */
     function _buildOFTMsgAndOptions(
+        address _from,
         SendParam calldata _sendParam,
         bytes calldata _extraOptions,
         bytes calldata _composeMsg,
@@ -173,7 +175,8 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         // @dev This generated message has the msg.sender encoded into the payload so the remote knows who the caller is.
         // @dev NOTE the returned message will append `msg.sender` only if the message is composed.
         // If it's the case, it'll add the `address(msg.sender)` at the `amountToCredit` offset.
-        (message, hasCompose) = OFTMsgCodec.encode(
+        (message, hasCompose) = encode(
+            _from,
             _sendParam.to,
             _toSD(_amountToCreditLD),
             // @dev Must be include a non empty bytes if you want to compose, EVEN if you don't need it on the remote.
@@ -190,6 +193,23 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
+    }
+
+    /**
+     * @dev copy paste of OFTMsgCodec::encode(). Difference is `_from` is passed as a parameter.
+     * and update the source chain sender.
+     */
+    function encode(address _from, bytes32 _sendTo, uint64 _amountShared, bytes memory _composeMsg)
+        internal
+        view
+        returns (bytes memory _msg, bool hasCompose)
+    {
+        hasCompose = _composeMsg.length > 0;
+        // @dev Remote chains will want to know the composed function caller ie. msg.sender on the src.
+        _from = _from == address(0) ? msg.sender : _from;
+        _msg = hasCompose
+            ? abi.encodePacked(_sendTo, _amountShared, OFTMsgCodec.addressToBytes32(_from), _composeMsg)
+            : abi.encodePacked(_sendTo, _amountShared);
     }
 
     /**

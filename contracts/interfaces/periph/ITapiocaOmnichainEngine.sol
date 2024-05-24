@@ -47,6 +47,11 @@ interface ITapiocaOmnichainEngine {
         payable
         returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt);
 
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        external
+        payable
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt);
+
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) external view returns (bytes32);
 
     function quoteSendPacket(
