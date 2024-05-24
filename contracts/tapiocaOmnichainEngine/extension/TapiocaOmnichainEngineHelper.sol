@@ -326,7 +326,6 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
         options = _toeToken.combineOptions(_dstEid, _msgType, _extraOptions);
     }
 
-    // TODO remove sanitization? If `_sendPacket()` is internal, then the msgType is what we expect it to be.
     /**
      * @dev Sanitizes the message type to match one of the Tapioca supported ones.
      * @param _msgType The message type, custom ones with `MSG_` as a prefix.

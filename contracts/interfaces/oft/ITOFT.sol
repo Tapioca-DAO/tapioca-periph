@@ -100,9 +100,9 @@ struct TOFTModulesInitStruct {
  * @notice Encodes the message for the PT_SEND_PARAMS operation.
  */
 struct SendParamsMsg {
-    address receiver; //TODO: decide if we should use `srcChainSender_`
+    address receiver;
     bool unwrap;
-    uint256 amount; //TODO: use the amount credited by lzReceive directly
+    uint256 amount;
 }
 
 /**

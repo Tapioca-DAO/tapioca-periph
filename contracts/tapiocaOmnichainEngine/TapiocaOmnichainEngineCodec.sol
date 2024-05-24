@@ -125,7 +125,6 @@ library TapiocaOmnichainEngineCodec {
             bytes memory nextMsg_
         )
     {
-        // TODO use bitwise operators?
         msgType_ = BytesLib.toUint16(BytesLib.slice(_msg, 0, 2), 0);
         msgLength_ = BytesLib.toUint16(BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2), 0);
 

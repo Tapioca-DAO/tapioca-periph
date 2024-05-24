@@ -69,8 +69,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * _executor The address of the executor.
      * _extraData Additional data.
      */
-    // TODO check if OApp sender is sanitized?
-    // TODO !!!!!!!!! Perform ld2sd conversion on the compose messages amounts.
     function _lzReceive(
         Origin calldata _origin,
         bytes32 _guid,
@@ -103,7 +101,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         emit OFTReceived(_guid, _origin.srcEid, toAddress, amountReceivedLD);
     }
 
-    // TODO - SANITIZE MSG TYPE
     /**
      * @dev !!! SECOND ENTRYPOINT, CALLER NEEDS TO BE VERIFIED !!!
      *
@@ -205,8 +202,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     {}
 
     /**
-     * // TODO Check if it's safe to send composed messages too.
-     * // TODO Write test for composed messages call. A->B->A-B/C?
      * @dev Transfers tokens AND composed messages from this contract to the recipient on the chain A. Flow of calls is: A->B->A.
      * @dev The user needs to have approved the TapToken contract to spend the TAP.
      *
@@ -235,7 +230,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     }
 
     /**
-     * // TODO review this function.
      *
      * @dev Slightly modified version of the OFT _sendPacket() operation. To accommodate the `srcChainSender` parameter and potential dust.
      * @dev !!! IMPORTANT !!! made ONLY for the `_remoteTransferReceiver()` operation.

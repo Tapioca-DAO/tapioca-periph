@@ -73,7 +73,6 @@ contract TapiocaOmnichainExtExec {
      */
 
     function erc721PermitApproval(bytes memory _data) public {
-        // TODO: encode and decode packed data to save gas
         ERC721PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC721PermitApprovalMsg(_data);
 
         uint256 approvalsLength = approvals.length;
