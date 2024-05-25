@@ -16,11 +16,7 @@ export const deployFinal__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        {
-            hre,
-            bytecodeSizeLimit: 80_000,
-            staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
-        },
+        { hre },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         async () => {},
         postDeployTask,
@@ -30,6 +26,8 @@ export const deployFinal__task = async (
 async function postDeployTask(params: TTapiocaDeployerVmPass<unknown>) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
+
+    console.log('[+] Deploy final task');
 
     const { cluster, magnetar } =
         await deployPostLbpStack__loadContracts__generic(hre, taskArgs.tag);

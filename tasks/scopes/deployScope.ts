@@ -3,6 +3,7 @@ import { TAP_TASK } from 'tapioca-sdk';
 import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
 import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
+import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
@@ -47,6 +48,7 @@ TAP_TASK(
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
         ),
 );
+TAP_TASK(deployScope.task('final', 'Cluster whitelisting', deployFinal__task));
 
 TAP_TASK(
     deployScope
