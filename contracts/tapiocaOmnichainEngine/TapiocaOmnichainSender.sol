@@ -97,7 +97,7 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         // Verify caller is either address(this) or has Cluster TOE role
         if (_from != address(0)) {
             ICluster cluster = getCluster();
-            if (!cluster.hasRole(msg.sender, keccak256("TOE"), address(this))) {
+            if (!cluster.hasRole(msg.sender, keccak256("TOE"))) {
                 revert TapiocaOmnichainSender__ClusterRoleNotApproved();
             }
         }
