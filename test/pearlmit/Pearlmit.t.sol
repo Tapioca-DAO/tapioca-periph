@@ -60,6 +60,7 @@ contract PearlmitTest is PearlmitBaseTest {
                 owner: alice,
                 nonce: nonce,
                 sigDeadline: uint48(sigDeadline),
+                masterNonce: pearlmit.masterNonce(alice),
                 signedPermit: signedPermit,
                 executor: executor,
                 hashedData: hashedData

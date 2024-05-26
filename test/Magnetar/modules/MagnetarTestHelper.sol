@@ -729,6 +729,7 @@ contract MagnetarTestHelper is TestHelper {
             nonce: 0,
             sigDeadline: uint48(data._deadline), //deadline
             signedPermit: signedPermit,
+            masterNonce: pearlmit.masterNonce(data._owner),
             executor: data._owner,
             hashedData: hashedData
         });
