@@ -26,7 +26,8 @@ interface IPearlmit {
         address owner; // Address of the owner of the tokens.
         uint256 nonce; // Nonce of the owner.
         uint48 sigDeadline; // Deadline for the signature.
-        bytes signedPermit; // Signature of the permit.
+        uint256 masterNonce; // Master nonce of the owner.
+        bytes signedPermit; // Signature of the permit. (Not present in the TYPEHASH)
         address executor; // Address of the allowed executor of the permit.
         // In the case of Tapioca, it'll be the `msg.sender` from src chain, checked against `TOE` trusted `srcChainSender`.
         bytes32 hashedData; // Hashed data that comes with the permit execution. See more in Pearlmit.sol.

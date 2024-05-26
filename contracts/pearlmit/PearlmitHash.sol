@@ -20,8 +20,9 @@ library PearlmitHash {
     bytes32 public constant _PERMIT_SIGNATURE_APPROVAL_TYPEHASH =
         keccak256("SignatureApproval(uint256 tokenType,address token,uint256 id,uint200 amount,address operator)");
 
+    // Only `signedPermit` is not present, otherwise should be 1:1 with `IPearlmit.PermitBatchTransferFrom`
     bytes32 public constant _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH = keccak256(
-        "PermitBatchTransferFrom(SignatureApproval[] approvals,uint256 nonce,uint48 sigDeadline,uint256 masterNonce,address executor,bytes32 hashedData)SignatureApproval(uint256 tokenType,address token,uint256 id,uint200 amount,address operator)"
+        "PermitBatchTransferFrom(SignatureApproval[] approvals,address owner,uint256 nonce,uint48 sigDeadline,uint256 masterNonce,address executor,bytes32 hashedData)SignatureApproval(uint256 tokenType,address token,uint256 id,uint200 amount,address operator)"
     );
 
     /**
