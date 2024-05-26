@@ -44,6 +44,7 @@ library PearlmitHash {
             abi.encode(
                 _PERMIT_BATCH_TRANSFER_FROM_TYPEHASH,
                 keccak256(abi.encodePacked(permitHashes)),
+                batch.owner,
                 batch.nonce,
                 batch.sigDeadline,
                 masterNonce,
