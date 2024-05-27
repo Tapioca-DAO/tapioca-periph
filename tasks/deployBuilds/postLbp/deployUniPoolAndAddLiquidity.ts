@@ -7,17 +7,32 @@ import {
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
-import { deployUniV3TapWethPool } from './deployUniV3TapWethPool';
+import { deployUniV3Pool } from './deployUniV3Pool';
 
 export async function deployUniPoolAndAddLiquidity(
-    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
+    params: TTapiocaDeployerVmPass<{
+        tokenA: string;
+        tokenB: string;
+        ratioTokenA: number;
+        ratioTokenB: number;
+        feeAmount: FeeAmount;
+    }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet } = params;
-    const { tag, ratioTap, ratioWeth } = taskArgs;
+    const { tag, tokenA, tokenB, ratioTokenA, ratioTokenB, feeAmount } =
+        taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    const { computedPoolAddress, fee, ratio0, ratio1, token0, token1 } =
-        await deployUniV3TapWethPool(hre, tag, ratioTap, ratioWeth);
+    const { computedPoolAddress, ratio0, ratio1, token0, token1 } =
+        await deployUniV3Pool(
+            hre,
+            tag,
+            tokenA,
+            tokenB,
+            ratioTokenA,
+            ratioTokenB,
+            feeAmount,
+        );
     const token0Erc20 = await hre.ethers.getContractAt('ERC20Mock', token0); // ERC20Mock is used just for the interface
     const token1Erc20 = await hre.ethers.getContractAt('ERC20Mock', token1);
 
@@ -30,7 +45,7 @@ export async function deployUniPoolAndAddLiquidity(
     await (
         await arrakisFactory.deployVault(
             {
-                feeTiers: [fee],
+                feeTiers: [feeAmount],
                 token0,
                 token1,
                 init0: ratio0,
@@ -143,7 +158,7 @@ export async function deployUniPoolAndAddLiquidity(
         const rebalanceParams = await arrakisResolve.standardRebalance(
             [
                 {
-                    range: { lowerTick, upperTick, feeTier: FeeAmount.MEDIUM },
+                    range: { lowerTick, upperTick, feeTier: feeAmount },
                     weight: 10_000, // 100%
                 },
             ],
