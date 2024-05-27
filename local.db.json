@@ -149,6 +149,17 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "TAP_WETH_UNI_V3_POOL",
+                    "address": "0x99D1b76567e97B8913A7198135E1f3D6E31734Fd",
+                    "meta": {
+                        "token0": "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                        "token1": "0xd9bfC7F2a257b71a97bf6677adEe60c4e02be768",
+                        "ratio0": 1,
+                        "ratio1": 1,
+                        "fee": 100
+                    }
+                },
+                {
                     "name": "PEARLMIT",
                     "address": "0x856F906cd68e508848A9FFcE962dDdC5A898CA97",
                     "meta": {
@@ -892,17 +903,6 @@
                         ],
                         "salt": "0x8606e829341423b7993254efdd6e29d1e8af2532be3084a434b2a95ea89bd417",
                         "create2": true
-                    }
-                },
-                {
-                    "name": "TAP_WETH_UNI_V3_POOL",
-                    "address": "0xc6fC0A59ff6772E907257E101aC780CDFbC70f15",
-                    "meta": {
-                        "token0": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                        "token1": "0x54D40d43bD4b185A8E0E462f37d48619b9b07Bf4",
-                        "ratio0": "1",
-                        "ratio1": "7",
-                        "fee": 3000
                     }
                 },
                 {
