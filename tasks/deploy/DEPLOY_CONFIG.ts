@@ -233,9 +233,13 @@ const MISC: TMisc = {
 MISC['31337' as EChainID] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
 
 const CONSTANTS = {
-    UNISWAP_POOL: {
-        RATIO_TAP: '7',
-        RATIO_WETH: '1',
+    UNISWAP_POOL_TAP: {
+        RATIO_TAP: 7,
+        RATIO_WETH: 1,
+    },
+    UNISWAP_POOL_USDO: {
+        RATIO_USDO: 1,
+        RATIO_USDC: 1,
     },
 };
 

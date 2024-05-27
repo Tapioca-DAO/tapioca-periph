@@ -43,15 +43,36 @@ TAP_TASK(
         .addOptionalParam(
             'ratioTap',
             'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL.RATIO_TAP,
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_TAP,
+            types.int,
         )
         .addOptionalParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL.RATIO_WETH,
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_WETH,
+            types.int,
         ),
 );
-TAP_TASK(deployScope.task('final', 'Cluster whitelisting', deployFinal__task));
+TAP_TASK(
+    deployScope
+        .task(
+            'final',
+            'USDO/USDC pool deployment + Cluster whitelisting',
+            deployFinal__task,
+        )
+        .addOptionalParam(
+            'ratioUsdo',
+            'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDO,
+            types.int,
+        )
+        .addOptionalParam(
+            'ratioUsdc',
+            'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDC,
+            types.int,
+        ),
+);
 
 TAP_TASK(
     deployScope
