@@ -47,7 +47,7 @@ contract Pearlmit is PermitC {
      *
      * @param batch PermitBatchTransferFrom struct containing all necessary data for batch transfer.
      * batch.approvals - array of SignatureApproval structs.
-     *      * batch.approvals.tokenType - type of token (0 = ERC20, 1 = ERC721, 2 = ERC1155).
+     *      * batch.approvals.tokenType - type of token (20 = ERC20, 721 = ERC721, 1155 = ERC1155).
      *      * batch.approvals.token - address of the token.
      *      * batch.approvals.id - id of the token (0 if ERC20).
      *      * batch.approvals.amount - amount of the token (0 if ERC721).
