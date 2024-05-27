@@ -92,7 +92,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
         cluster = ICluster(address(new Cluster(1, address(__owner))));
 
         __extExec = address(new TapiocaOmnichainExtExec());

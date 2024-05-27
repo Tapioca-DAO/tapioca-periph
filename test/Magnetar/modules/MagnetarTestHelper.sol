@@ -186,7 +186,7 @@ contract MagnetarTestHelper is TestHelper {
 
         clusterA = new Cluster(aEid, address(this));
         clusterB = new Cluster(bEid, address(this));
-        pearlmit = new Pearlmit("Test", "1");
+        pearlmit = new Pearlmit("Test", "1", address(this), 0);
 
         magnetarA = createMagnetar(address(clusterA), address(pearlmit));
         magnetarB = createMagnetar(address(clusterB), address(pearlmit));
@@ -619,7 +619,7 @@ contract MagnetarTestHelper is TestHelper {
         _asset.approve(address(pearlmit), type(uint256).max);
         _setYieldBoxApproval(yieldBox, address(_sgl));
         _setYieldBoxApproval(yieldBox, address(pearlmit));
-        pearlmit.approve(address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(1155, address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
 
         uint256 share = yieldBox.toShare(_assetId, amount, false);
         yieldBox.depositAsset(_assetId, address(this), address(this), 0, share);
@@ -634,7 +634,9 @@ contract MagnetarTestHelper is TestHelper {
         _collateral.approve(address(pearlmit), type(uint256).max);
         _setYieldBoxApproval(yieldBox, address(_sgl));
         _setYieldBoxApproval(yieldBox, address(pearlmit));
-        pearlmit.approve(address(yieldBox), _collateralId, address(_sgl), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(
+            1155, address(yieldBox), _collateralId, address(_sgl), type(uint200).max, uint48(block.timestamp)
+        );
 
         uint256 share = yieldBox.toShare(_collateralId, amount, false);
         yieldBox.depositAsset(_collateralId, address(this), address(this), 0, share);
@@ -654,7 +656,7 @@ contract MagnetarTestHelper is TestHelper {
     }
 
     function repay(uint256 part, uint256 _assetId, Singularity _sgl) public {
-        pearlmit.approve(address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(1155, address(yieldBox), _assetId, address(_sgl), type(uint200).max, uint48(block.timestamp));
         (Module[] memory modules, bytes[] memory calls) = marketHelper.repay(address(this), address(this), false, part);
         _sgl.execute(modules, calls, true);
     }
@@ -727,6 +729,7 @@ contract MagnetarTestHelper is TestHelper {
             nonce: 0,
             sigDeadline: uint48(data._deadline), //deadline
             signedPermit: signedPermit,
+            masterNonce: pearlmit.masterNonce(data._owner),
             executor: data._owner,
             hashedData: hashedData
         });
@@ -744,7 +747,7 @@ contract MagnetarTestHelper is TestHelper {
         IPearlmit.SignatureApproval[] memory signatureApprovals = new IPearlmit.SignatureApproval[](1);
 
         signatureApprovals[0] = IPearlmit.SignatureApproval({
-            tokenType: uint8(IPearlmit.TokenType.ERC20),
+            tokenType: 20,
             token: _asset,
             id: _id,
             amount: uint200(_amount),

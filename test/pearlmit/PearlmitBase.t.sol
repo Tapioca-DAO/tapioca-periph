@@ -29,7 +29,7 @@ contract PearlmitBaseTest is TestBase, StdAssertions, StdCheats, StdUtils {
     uint256 constant INITIAL_TIMESTAMP = 1703688340;
 
     function setUp() public virtual {
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
 
         (admin, adminKey) = makeAddrAndKey("admin");
         (alice, aliceKey) = makeAddrAndKey("alice");
