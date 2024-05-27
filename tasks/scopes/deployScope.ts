@@ -3,6 +3,8 @@ import { TAP_TASK } from 'tapioca-sdk';
 import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
 import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
+import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
+import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
@@ -38,13 +40,37 @@ TAP_TASK(
             'Deploy oracles. Deploy UniV3TapWeth pool and LP. Called only after tap-token repo `postLbp1` task',
             deployPostLbpStack__task,
         )
-        .addParam(
+        .addOptionalParam(
             'ratioTap',
             'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_TAP,
+            types.int,
         )
-        .addParam(
+        .addOptionalParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_WETH,
+            types.int,
+        ),
+);
+TAP_TASK(
+    deployScope
+        .task(
+            'final',
+            'USDO/USDC pool deployment + Cluster whitelisting',
+            deployFinal__task,
+        )
+        .addOptionalParam(
+            'ratioUsdo',
+            'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDO,
+            types.int,
+        )
+        .addOptionalParam(
+            'ratioUsdc',
+            'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
+            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDC,
+            types.int,
         ),
 );
 

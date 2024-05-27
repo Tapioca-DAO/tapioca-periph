@@ -3,6 +3,7 @@ import { TAP_TASK } from 'tapioca-sdk';
 import { deployOracleMock__task } from 'tasks/exec/misc/deployOracleMock';
 import { mintMock__task } from 'tasks/exec/misc/mintMock';
 import { pauseAll__task } from 'tasks/exec/misc/pause-all';
+import { sandbox__task } from 'tasks/exec/misc/sandbox';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
 import { wrapToft__task } from 'tasks/exec/misc/wrapToft';
 
@@ -30,6 +31,9 @@ TAP_TASK(
             'The address to mint to. Else caller/multicall',
         ),
 );
+
+// Sandbox
+TAP_TASK(miscScope.task('sandbox', 'Sandbox', sandbox__task));
 
 // Testnet
 TAP_TASK(

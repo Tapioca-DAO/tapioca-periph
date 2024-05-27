@@ -1,38 +1,38 @@
-import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
-import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount, computePoolAddress } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { deployUniV3pool__task, loadGlobalContract } from 'tapioca-sdk';
+import { deployUniV3pool__task } from 'tapioca-sdk';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
 /**
- * @notice Deploys TAP/WETH Uniswap V3 Pool.
+ * @notice Deploys a Uniswap V3 Pool.
  * @returns Address of the deployed pool
  */
-export const deployUniV3TapWethPool = async (
+export const deployUniV3Pool = async (
     hre: HardhatRuntimeEnvironment,
     tag: string,
-    ratioTap: number,
-    ratioWeth: number,
+    tokenA: string,
+    tokenB: string,
+    ratioA: number,
+    ratioB: number,
+    feeAmount: FeeAmount,
 ) => {
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
 
     /**
      * Load contracts
      */
-    const { tapToken, weth, uniV3Factory, poolInitializer } =
-        await loadContract(hre, tag);
+    const { uniV3Factory, poolInitializer } = await loadContract(hre, tag);
     const [token0, ratio0, token1, ratio1] =
-        tapToken.address < weth.address
-            ? [tapToken.address, ratioTap, weth.address, ratioWeth]
-            : [weth.address, ratioWeth, tapToken.address, ratioTap];
+        tokenA < tokenB
+            ? [tokenA, ratioA, tokenB, ratioB]
+            : [tokenB, ratioB, tokenA, ratioA];
 
     const computedPoolAddress = computePoolAddress({
         factoryAddress: uniV3Factory.address,
-        tokenA: new Token(hre.network.config.chainId!, tapToken.address, 18),
-        tokenB: new Token(hre.network.config.chainId!, weth.address, 18),
-        fee: FeeAmount.MEDIUM,
+        tokenA: new Token(hre.network.config.chainId!, tokenA, 18),
+        tokenB: new Token(hre.network.config.chainId!, tokenB, 18),
+        fee: feeAmount,
     });
 
     /**
@@ -40,11 +40,7 @@ export const deployUniV3TapWethPool = async (
      */
     if (
         (
-            await uniV3Factory.getPool(
-                tapToken.address,
-                weth.address,
-                FeeAmount.MEDIUM,
-            )
+            await uniV3Factory.getPool(tokenA, tokenB, feeAmount)
         ).toLocaleLowerCase() ===
         hre.ethers.constants.AddressZero.toLocaleLowerCase()
     ) {
@@ -52,7 +48,7 @@ export const deployUniV3TapWethPool = async (
             {
                 factory: uniV3Factory.address,
                 positionManager: poolInitializer.address,
-                feeTier: FeeAmount.MEDIUM,
+                feeTier: feeAmount,
                 token0,
                 token1,
                 ratio0,
@@ -71,10 +67,14 @@ export const deployUniV3TapWethPool = async (
                     token1,
                     ratio0,
                     ratio1,
-                    fee: FeeAmount.MEDIUM,
+                    fee: feeAmount,
                 },
             },
         ]).save();
+    } else {
+        console.log(
+            `[+] Uniswap V3 Pool already deployed at: ${computedPoolAddress}`,
+        );
     }
 
     return {
@@ -83,25 +83,10 @@ export const deployUniV3TapWethPool = async (
         token1,
         ratio0,
         ratio1,
-        fee: FeeAmount.MEDIUM,
     };
 };
 
 async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
-    const weth = await hre.ethers.getContractAt(
-        'ForgeIERC20',
-        DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH,
-    );
-    const tapToken = await hre.ethers.getContractAt(
-        'ForgeIERC20',
-        loadGlobalContract(
-            hre,
-            TAPIOCA_PROJECTS_NAME.TapToken,
-            hre.SDK.eChainId,
-            TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
-            tag,
-        ).address,
-    );
     const uniV3Factory = await hre.ethers.getContractAt(
         'IUniswapV3Factory',
         DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.V3_FACTORY,
@@ -112,8 +97,6 @@ async function loadContract(hre: HardhatRuntimeEnvironment, tag: string) {
     );
 
     return {
-        tapToken,
-        weth,
         uniV3Factory,
         poolInitializer,
     };

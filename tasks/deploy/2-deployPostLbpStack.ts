@@ -1,5 +1,7 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { TapiocaMulticall } from '@typechain/index';
+import { FeeAmount } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
     createEmptyStratYbAsset__task,
@@ -28,7 +30,6 @@ import { buildUsdoMarketOracle } from 'tasks/deployBuilds/oracle/buildUsdoMarket
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { ChainlinkUtils__factory, TapiocaMulticall } from '@typechain/index';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -158,7 +159,26 @@ async function tapiocaDeployTask(
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'arbitrum_sepolia'
     ) {
-        await deployUniPoolAndAddLiquidity(params);
+        const { tapToken } = loadContracts__generic(hre, tag);
+        await deployUniPoolAndAddLiquidity({
+            ...params,
+            taskArgs: {
+                ...taskArgs,
+                tokenA: tapToken.address,
+                tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+                ratioTokenA: taskArgs.ratioTap,
+                ratioTokenB: taskArgs.ratioWeth,
+                feeAmount: FeeAmount.MEDIUM,
+            },
+        });
+    }
+
+    if (
+        chainInfo.name === 'arbitrum' ||
+        chainInfo.name === 'arbitrum_sepolia'
+    ) {
+        // TapWethLp is used in the oracles, so it must be deployed first
+        // Deployment happens above in `deployUniPoolAndAddLiquidity`
         const { tapToken, tapWethLp } = loadContracts__arb(hre, tag);
 
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
@@ -273,6 +293,7 @@ function loadContracts__generic(hre: HardhatRuntimeEnvironment, tag: string) {
         TAP_TOKEN_DEPLOY_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN,
         tag,
     );
+
     return { tapToken };
 }
 
