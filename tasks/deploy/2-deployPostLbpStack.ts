@@ -184,12 +184,16 @@ async function tapiocaDeployTask(
             ...params,
             taskArgs: {
                 ...taskArgs,
+                deploymentName: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
                 tokenA: tapToken.address,
                 tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
                 ratioTokenA: taskArgs.ratioTap,
                 ratioTokenB: taskArgs.ratioWeth,
                 feeAmount: FeeAmount.MEDIUM,
-                mintMock: true,
+                options: {
+                    mintMock: true,
+                    arrakisDepositLiquidity: true,
+                },
             },
         });
     }
