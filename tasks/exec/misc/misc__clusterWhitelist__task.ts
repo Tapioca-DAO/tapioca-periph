@@ -7,11 +7,11 @@ import { DEPLOYMENT_NAMES } from 'tasks/deploy/DEPLOY_CONFIG';
 export const misc__clusterWhitelist__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
         cluster?: string;
-        target: string;
+        targets: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    const { tag, cluster, target } = _taskArgs;
+    const { tag, cluster, targets } = _taskArgs;
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
 
     const clusterContract = await hre.ethers.getContractAt(
@@ -27,18 +27,22 @@ export const misc__clusterWhitelist__task = async (
 
     const calls: TapiocaMulticall.CallStruct[] = [];
 
-    if (await clusterContract.isWhitelisted(0, target)) {
-        console.log(`[+] Whitelisting ${target}`);
-        calls.push({
-            target: clusterContract.address,
-            callData: clusterContract.interface.encodeFunctionData(
-                'updateContract',
-                [0, target, true],
-            ),
-            allowFailure: false,
-        });
-    } else {
-        console.log(`[+] ${target} already whitelisted`);
+    const addresses = targets.split(',');
+
+    for (const target of addresses) {
+        if (!(await clusterContract.isWhitelisted(0, target))) {
+            console.log(`[+] Whitelisting ${target}`);
+            calls.push({
+                target: clusterContract.address,
+                callData: clusterContract.interface.encodeFunctionData(
+                    'updateContract',
+                    [0, target, true],
+                ),
+                allowFailure: false,
+            });
+        } else {
+            console.log(`[+] ${target} already whitelisted`);
+        }
     }
     await VM.executeMulticall(calls);
 };

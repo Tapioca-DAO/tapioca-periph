@@ -40,7 +40,7 @@ TAP_TASK(
             'Cluster whitelist an address',
             misc__clusterWhitelist__task,
         )
-        .addParam('target', 'The address to whitelist')
+        .addParam('targets', 'The address(es) to whitelist. Comma separated.')
         .addOptionalParam(
             'cluster',
             'Address of cluster to use, if not used, will grab deployed Cluster address on chosen tag',
