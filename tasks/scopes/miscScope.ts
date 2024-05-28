@@ -2,6 +2,7 @@ import { scope } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
 import { deployOracleMock__task } from 'tasks/exec/misc/deployOracleMock';
 import { mintMock__task } from 'tasks/exec/misc/mintMock';
+import { misc__clusterWhitelist__task } from 'tasks/exec/misc/misc__clusterWhitelist__task';
 import { pauseAll__task } from 'tasks/exec/misc/pause-all';
 import { sandbox__task } from 'tasks/exec/misc/sandbox';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
@@ -29,6 +30,20 @@ TAP_TASK(
         .addOptionalParam(
             'to',
             'The address to mint to. Else caller/multicall',
+        ),
+);
+
+TAP_TASK(
+    miscScope
+        .task(
+            'whitelist',
+            'Cluster whitelist an address',
+            misc__clusterWhitelist__task,
+        )
+        .addParam('target', 'The address to whitelist')
+        .addOptionalParam(
+            'cluster',
+            'Address of cluster to use, if not used, will grab deployed Cluster address on chosen tag',
         ),
 );
 
