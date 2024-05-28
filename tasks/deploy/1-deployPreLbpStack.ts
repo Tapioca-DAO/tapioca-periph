@@ -45,16 +45,6 @@ export const deployPreLbpStack__task = async (
                 )
                 .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
                 .add(
-                    await buildMagnetarAssetModule(
-                        hre,
-                        DEPLOYMENT_NAMES.MAGNETAR_ASSET_MODULE,
-                        [
-                            hre.ethers.constants.AddressZero, // Pearlmit
-                            hre.ethers.constants.AddressZero, // ToeHelper
-                        ],
-                    ),
-                )
-                .add(
                     await buildMagnetarCollateralModule(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
