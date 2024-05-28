@@ -163,12 +163,26 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
+        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
+        // Z Underlying
+        await addZContract(
+            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.WETH,
+        );
+        await addZContract(
+            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.reth,
+        );
+        await addZContract(
+            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.wstETH,
+        );
+        await addZContract(
+            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sGLP,
+        );
     }
 
     if (
@@ -182,6 +196,9 @@ async function clusterWhitelist(params: {
         );
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
+        await addZContract(
+            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sDAI,
+        );
     }
 }
 
