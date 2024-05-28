@@ -144,6 +144,26 @@ async function postDeployTask(
             }
             await VM.executeMulticall(calls);
         }
+
+        if (
+            chainInfo.name === 'sepolia' ||
+            chainInfo.name === 'optimism_sepolia'
+        ) {
+            const sdaiCL = findContract(DEPLOYMENT_NAMES.S_DAI_ORACLE);
+
+            const calls: TapiocaMulticall.CallStruct[] = [];
+            if (sdaiCL) {
+                calls.push({
+                    target: sdaiCL.address,
+                    callData: chainLinkUtils.interface.encodeFunctionData(
+                        'changeDefaultStalePeriod',
+                        [4294967295],
+                    ),
+                    allowFailure: false,
+                });
+            }
+            await VM.executeMulticall(calls);
+        }
     }
 }
 
