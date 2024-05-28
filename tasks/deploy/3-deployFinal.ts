@@ -5,9 +5,10 @@ import {
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { TapiocaMulticall } from '@typechain/index';
+import { Cluster, TapiocaMulticall } from '@typechain/index';
 import { EChainID, TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
+import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { FeeAmount } from '@uniswap/v3-sdk';
 
@@ -46,6 +47,22 @@ async function postDeployTask(
 
     console.log('[+] final task post deploy');
 
+    await deployUsdoUniPoolAndAddLiquidity(params);
+
+    const calls: TapiocaMulticall.CallStruct[] = [];
+    await clusterWhitelist({ hre, tag, calls });
+
+    await VM.executeMulticall(calls);
+}
+
+async function deployUsdoUniPoolAndAddLiquidity(
+    params: TTapiocaDeployerVmPass<{
+        ratioUsdo: number;
+        ratioUsdc: number;
+    }>,
+) {
+    const { hre, taskArgs, chainInfo } = params;
+    const { tag } = taskArgs;
     if (
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'ethereum' ||
@@ -70,12 +87,6 @@ async function postDeployTask(
             },
         });
     }
-
-    const calls: TapiocaMulticall.CallStruct[] = [];
-
-    await clusterWhitelist({ hre, tag, calls });
-
-    await VM.executeMulticall(calls);
 }
 
 async function clusterWhitelist(params: {
@@ -88,56 +99,58 @@ async function clusterWhitelist(params: {
     const { cluster, magnetar, pearlmit } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
 
-    const addAddressWhitelist = async (name: string, address: string) => {
-        if (await cluster.isWhitelisted(0, address)) return;
-        console.log(`[+] Adding ${name} ${address} to cluster whitelist`);
-        calls.push({
-            target: cluster.address,
-            callData: cluster.interface.encodeFunctionData('updateContract', [
-                0,
-                address,
-                true,
-            ]),
-            allowFailure: false,
+    /**
+     * Non chain specific
+     */
+    await addMagnetarToeRole({
+        hre,
+        cluster,
+        magnetarAddr: magnetar.address,
+        calls,
+    });
+
+    await addAddressWhitelist({
+        name: 'Magnetar',
+        address: magnetar.address,
+        calls,
+        cluster,
+    });
+
+    await addAddressWhitelist({
+        name: 'Pearlmit',
+        address: pearlmit,
+        calls,
+        cluster,
+    });
+
+    /**
+     * Chain specific
+     */
+    const addProjectContract = async (
+        project: TAPIOCA_PROJECTS_NAME,
+        name: string,
+    ) => {
+        await _addProjectContract({
+            hre,
+            project,
+            name,
+            tag,
+            calls,
+            cluster,
         });
     };
-
-    await addAddressWhitelist('Magnetar', magnetar.address);
-    await addAddressWhitelist('Pearlmit', pearlmit);
-
-    // Role setting not working
-    const TOE_ROLE = hre.ethers.utils.keccak256(
-        hre.ethers.utils.solidityPack(['string'], ['TOE']),
-    ); // Role to be able to use TOE.sendPacketFrom()
-
-    if (!(await cluster.hasRole(magnetar.address, TOE_ROLE))) {
-        console.log(`[+] Adding Magnetar ${magnetar.address} to TOE role`);
-        calls.push({
-            target: cluster.address,
-            callData: cluster.interface.encodeFunctionData(
-                'setRoleForContract',
-                [magnetar.address, TOE_ROLE, true],
-            ),
-            allowFailure: false,
-        });
-    }
     const addBarContract = async (name: string) => {
-        await addAddressWhitelist(
-            name,
-            loadGlobalContract(
-                hre,
-                TAPIOCA_PROJECTS_NAME.TapiocaBar,
-                hre.SDK.eChainId,
-                name,
-                tag,
-            ).address,
-        );
+        await addProjectContract(TAPIOCA_PROJECTS_NAME.TapiocaBar, name);
+    };
+    const addZContract = async (name: string) => {
+        await addProjectContract(TAPIOCA_PROJECTS_NAME.TapiocaZ, name);
     };
 
     if (
         hre.SDK.chainInfo.name === 'arbitrum' ||
         hre.SDK.chainInfo.name === 'arbitrum_sepolia'
     ) {
+        // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_MT_ETH_MARKET,
         );
@@ -150,6 +163,12 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
+
+        // Z
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
     }
 
     if (
@@ -157,10 +176,76 @@ async function clusterWhitelist(params: {
         hre.SDK.chainInfo.name === 'sepolia' ||
         hre.SDK.chainInfo.name === 'optimism_sepolia'
     ) {
+        // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
         );
+        // Z
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
     }
+}
+
+async function addMagnetarToeRole(params: {
+    hre: HardhatRuntimeEnvironment;
+    cluster: Cluster;
+    magnetarAddr: string;
+    calls: TapiocaMulticall.CallStruct[];
+}) {
+    const { hre, cluster, magnetarAddr, calls } = params;
+    // Role setting not working
+    const TOE_ROLE = hre.ethers.utils.keccak256(
+        hre.ethers.utils.solidityPack(['string'], ['TOE']),
+    ); // Role to be able to use TOE.sendPacketFrom()
+
+    if (!(await cluster.hasRole(magnetarAddr, TOE_ROLE))) {
+        console.log(`[+] Adding Magnetar ${magnetarAddr} to TOE role`);
+        calls.push({
+            target: cluster.address,
+            callData: cluster.interface.encodeFunctionData(
+                'setRoleForContract',
+                [magnetarAddr, TOE_ROLE, true],
+            ),
+            allowFailure: false,
+        });
+    }
+}
+
+async function addAddressWhitelist(params: {
+    name: string;
+    address: string;
+    cluster: Cluster;
+    calls: TapiocaMulticall.CallStruct[];
+}) {
+    const { name, address, cluster, calls } = params;
+    if (await cluster.isWhitelisted(0, address)) return;
+    console.log(`[+] Adding ${name} ${address} to cluster whitelist`);
+    calls.push({
+        target: cluster.address,
+        callData: cluster.interface.encodeFunctionData('updateContract', [
+            0,
+            address,
+            true,
+        ]),
+        allowFailure: false,
+    });
+}
+
+async function _addProjectContract(params: {
+    hre: HardhatRuntimeEnvironment;
+    project: TAPIOCA_PROJECTS_NAME;
+    name: string;
+    tag: string;
+    calls: TapiocaMulticall.CallStruct[];
+    cluster: Cluster;
+}) {
+    const { hre, name, tag, calls, cluster, project } = params;
+    await addAddressWhitelist({
+        calls,
+        cluster,
+        name,
+        address: loadGlobalContract(hre, project, hre.SDK.eChainId, name, tag)
+            .address,
+    });
 }
 
 async function deployPostLbpStack__loadContracts__generic(

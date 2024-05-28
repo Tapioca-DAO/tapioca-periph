@@ -15,6 +15,7 @@
       "@tap-token/config":["gitmodule/tap-token/tasks/deploy/DEPLOY_CONFIG.ts"],
       "@tapioca-bar/config":["gitmodule/tapioca-bar/tasks/deploy/DEPLOY_CONFIG.ts"],
       "@tap-yieldbox/config":["gitmodule/tap-yieldbox/tasks/deploy/DEPLOY_CONFIG.ts"],
+      "@tapiocaz/config":["gitmodule/tapiocaz/tasks/deploy/DEPLOY_CONFIG.ts"],
     }
   },
   "include": [
