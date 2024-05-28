@@ -169,6 +169,7 @@ async function tapiocaDeployTask(
                 ratioTokenA: taskArgs.ratioTap,
                 ratioTokenB: taskArgs.ratioWeth,
                 feeAmount: FeeAmount.MEDIUM,
+                mintMock: true,
             },
         });
     }

@@ -16,11 +16,19 @@ export async function deployUniPoolAndAddLiquidity(
         ratioTokenA: number;
         ratioTokenB: number;
         feeAmount: FeeAmount;
+        mintMock?: boolean;
     }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet } = params;
-    const { tag, tokenA, tokenB, ratioTokenA, ratioTokenB, feeAmount } =
-        taskArgs;
+    const {
+        tag,
+        tokenA,
+        tokenB,
+        ratioTokenA,
+        ratioTokenB,
+        feeAmount,
+        mintMock,
+    } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
     const { computedPoolAddress, ratio0, ratio1, token0, token1 } =
@@ -78,7 +86,7 @@ export async function deployUniPoolAndAddLiquidity(
     );
 
     // Mint tokens for liquidity if one of them is missing
-    if (isTestnet) {
+    if (isTestnet && mintMock) {
         console.log('[+] TESTNET: Minting tokens for liquidity');
         // await token0.mintTo(owner, (1e18).toString());
         // await token1.mintTo(owner, (1e18).toString());
