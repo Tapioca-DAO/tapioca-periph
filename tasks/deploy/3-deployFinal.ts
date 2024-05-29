@@ -47,9 +47,32 @@ async function postDeployTask(
     const { tag } = taskArgs;
 
     console.log('[+] final task post deploy');
-
     const calls: TapiocaMulticall.CallStruct[] = [];
     await clusterWhitelist({ hre, tag, calls });
+
+    if (isTestnet) {
+        console.log(
+            '[+] [TESTNET] Setting USDO/USDC Oracle stale period to max ',
+        );
+        const usdoUsdcOracle = loadLocalContract(
+            hre,
+            hre.SDK.eChainId,
+            DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_ORACLE,
+            tag,
+        );
+        const chainLinkUtils = await hre.ethers.getContractAt(
+            'ChainlinkUtils',
+            '',
+        );
+        calls.push({
+            target: usdoUsdcOracle.address,
+            callData: chainLinkUtils.interface.encodeFunctionData(
+                'changeDefaultStalePeriod',
+                [4294967295],
+            ),
+            allowFailure: false,
+        });
+    }
 
     await VM.executeMulticall(calls);
 }
@@ -357,7 +380,7 @@ async function deployPostLbpStack__loadContracts__generic(
         hre,
         TAPIOCA_PROJECTS_NAME.YieldBox,
         hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.YieldBox,
+        DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     ).address;
 
