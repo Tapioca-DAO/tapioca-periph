@@ -12,8 +12,9 @@ import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
 import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
-import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
+import { buildYieldBox } from 'tasks/deployBuilds/yieldbox/buildYieldbox';
 
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
@@ -29,6 +30,12 @@ export const deployPreLbpStack__task = async (
             taskArgs,
             isTestnet,
         }) => {
+            const [ybURI, yieldBox] = await buildYieldBox(
+                hre,
+                DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH!,
+            );
+            VM.add(ybURI).add(yieldBox);
+
             VM.add(
                 await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
                     DEPLOYMENT_NAMES.PEARLMIT,
