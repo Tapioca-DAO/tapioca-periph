@@ -494,7 +494,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         receiver: address(this),
                         amount: 0,
                         withdraw: false,
-                        unwrap: false
+                        unwrap: false,
+                        extractFromSender: false
                     })
                 })
             );
@@ -535,7 +536,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         receiver: address(this),
                         amount: 0,
                         withdraw: false,
-                        unwrap: false
+                        unwrap: false,
+                        extractFromSender: false
                     })
                 })
             );
@@ -649,7 +651,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         receiver: address(this),
                         amount: 0,
                         withdraw: false,
-                        unwrap: false
+                        unwrap: false,
+                        extractFromSender: false
                     })
                 })
             );
@@ -688,7 +691,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 receiver: address(this),
                 amount: borrowAmount_,
                 withdraw: true,
-                unwrap: true
+                unwrap: true,
+                extractFromSender: false
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
@@ -791,7 +795,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         receiver: address(this),
                         amount: 0,
                         withdraw: false,
-                        unwrap: false
+                        unwrap: false,
+                        extractFromSender: false
                     })
                 })
             );
@@ -830,7 +835,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 receiver: address(this),
                 amount: borrowAmount_,
                 withdraw: true,
-                unwrap: false
+                unwrap: false,
+                extractFromSender: false
             });
             MagnetarCall[] memory calls = new MagnetarCall[](1);
             calls[0] = MagnetarCall({
@@ -1079,7 +1085,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             receiver: address(this),
                             amount: 0,
                             withdraw: false,
-                            unwrap: false
+                            unwrap: false,
+                            extractFromSender: false
                         }),
                         collateralWithdrawData: MagnetarWithdrawData({
                             yieldBox: address(yieldBox),
@@ -1087,7 +1094,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                             receiver: address(this),
                             amount: 0,
                             withdraw: false,
-                            unwrap: false
+                            unwrap: false,
+                            extractFromSender: false
                         })
                     })
                 })

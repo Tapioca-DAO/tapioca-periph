@@ -26,6 +26,7 @@ struct MagnetarWithdrawData {
     uint256 amount;
     bool unwrap;
     bool withdraw;
+    bool extractFromSender;
 }
 
 /**

@@ -609,7 +609,8 @@ contract MagnetarTestHelper is TestHelper {
             receiver: address(this),
             amount: 1 ether,
             withdraw: false,
-            unwrap: false
+            unwrap: false,
+            extractFromSender: false
         });
     }
 
