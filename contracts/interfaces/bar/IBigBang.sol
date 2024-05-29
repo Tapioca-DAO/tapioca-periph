@@ -34,7 +34,7 @@ interface IBigBang is IMarket {
 
     function getTotalDebt() external view returns (uint256);
 
-    function computeOpenInterestMintable() external returns (uint256);
+    function consumeMintableOpenInterestDebt() external returns (uint256);
 
-    function viewOpenInterest() external view returns (uint256);
+    function openInterestDebt() external view returns (uint256);
 }
