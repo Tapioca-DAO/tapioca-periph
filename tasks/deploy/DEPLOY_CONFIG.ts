@@ -8,7 +8,8 @@ export const DEPLOYMENT_NAMES = {
     LBP_VAULT: 'LBP_VAULT',
     TAP_USDC_LBP: 'TAP_USDC_LBP',
     // External
-    YieldBox: 'YieldBox',
+    YIELDBOX: 'YieldBox',
+    YIELD_BOX_URI_BUILDER: 'YIELD_BOX_URI_BUILDER',
     // Magnetar
     MAGNETAR: 'MAGNETAR',
     MAGNETAR_ASSET_MODULE: 'MAGNETAR_ASSET_MODULE',
