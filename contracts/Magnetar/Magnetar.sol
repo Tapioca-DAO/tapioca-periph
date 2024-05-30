@@ -80,6 +80,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param calls The list of actions to perform
      */
     function burst(MagnetarCall[] calldata calls) external payable {
+        // @dev: make sure the current magnetar is whitelisted
+        _checkWhitelisted(address(this));
+
         uint256 valAccumulator;
 
         uint256 length = calls.length;
@@ -243,7 +246,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
             if (funcSig == ITapiocaOmnichainEngine.sendPacketFrom.selector) {
-                (, LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (address, LZSendParam, bytes));
+                (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
                 uint256 amount_ = lzSendParam_.sendParam.amountLD;
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_); //sendPacketFrom happens on msg.sender
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
@@ -276,7 +279,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             selectorValidated = true;
         }
 
-        if (funcSig == ITapiocaOmnichainEngine.sendPacketFrom.selector) {
+        if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
             selectorValidated = true;
             (address from_, LZSendParam memory lzSendParam_,) =
                 abi.decode(_actionCalldata[4:], (address, LZSendParam, bytes));
