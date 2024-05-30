@@ -234,6 +234,7 @@ async function clusterWhitelist(params: {
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
         await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
+        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
