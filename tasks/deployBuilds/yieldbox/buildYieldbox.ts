@@ -38,7 +38,10 @@ export const buildYieldBox = async (
                 hre.ethers.constants.AddressZero,
             ],
             dependsOn: [
-                { argPosition: 1, deploymentName: 'YieldBoxURIBuilder' },
+                {
+                    argPosition: 1,
+                    deploymentName: DEPLOYMENT_NAMES.YIELD_BOX_URI_BUILDER,
+                },
             ],
         },
     ];

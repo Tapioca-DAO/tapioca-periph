@@ -4,6 +4,7 @@ import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
 import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
+import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
 import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
@@ -72,6 +73,14 @@ TAP_TASK(
             DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDC,
             types.int,
         ),
+);
+
+TAP_TASK(
+    deployScope.task(
+        'magnetar',
+        'Deploys Magnetar only, expects Cluster and Pearlmit to be already deployed',
+        deployMagnetarOnly__task,
+    ),
 );
 
 TAP_TASK(
