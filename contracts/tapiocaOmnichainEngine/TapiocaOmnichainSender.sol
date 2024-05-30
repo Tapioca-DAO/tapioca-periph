@@ -88,7 +88,6 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
     /**
      * @dev Same as `sendPacket`, with the addition of `_from`, the address of the sender.
      * The caller must have the TOE role in the Cluster contract.
-     * @dev The tokens are debited from `_from` and credited to `_from` on dst.
      */
     function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
@@ -111,7 +110,10 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
         (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
-            _from, _lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
         );
 
         // @dev Builds the options and OFT message to quote in the endpoint.
