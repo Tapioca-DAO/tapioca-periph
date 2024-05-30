@@ -243,7 +243,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
             if (funcSig == ITapiocaOmnichainEngine.sendPacketFrom.selector) {
-                (LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (LZSendParam, bytes));
+                (, LZSendParam memory lzSendParam_,) = abi.decode(_actionCalldata[4:], (address, LZSendParam, bytes));
                 uint256 amount_ = lzSendParam_.sendParam.amountLD;
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, amount_); //sendPacketFrom happens on msg.sender
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
@@ -276,7 +276,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             selectorValidated = true;
         }
 
-        if (funcSig == ITapiocaOmnichainEngine.sendPacket.selector) {
+        if (funcSig == ITapiocaOmnichainEngine.sendPacketFrom.selector) {
             selectorValidated = true;
             (address from_, LZSendParam memory lzSendParam_,) =
                 abi.decode(_actionCalldata[4:], (address, LZSendParam, bytes));
