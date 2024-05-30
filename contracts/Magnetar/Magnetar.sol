@@ -80,6 +80,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @param calls The list of actions to perform
      */
     function burst(MagnetarCall[] calldata calls) external payable {
+        // @dev: make sure the current magnetar is whitelisted
+        _checkWhitelisted(address(this));
+
         uint256 valAccumulator;
 
         uint256 length = calls.length;
