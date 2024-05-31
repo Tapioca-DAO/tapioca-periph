@@ -120,7 +120,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
          */
         uint256 tOLPTokenId;
         if (data.lockData.lock) {
-            tOLPTokenId = _lock(data, fraction);
+            tOLPTokenId = _lock(data, fraction, data.participateData.participate);
         }
 
         /**
@@ -130,7 +130,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
          *          - transfer `oTAPTokenId` to data.user
          */
         if (data.participateData.participate) {
-            _participate(data, tOLPTokenId);
+            _participate(data, tOLPTokenId, data.lockData.lock);
         }
 
         /**
@@ -219,7 +219,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction) private returns (uint256 tOLPTokenId) {
+    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction, bool participate) private returns (uint256 tOLPTokenId) {
         IMarket _singularity = IMarket(data.externalContracts.singularity);
         IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
 
@@ -240,11 +240,11 @@ contract MagnetarMintModule is MagnetarBaseModule {
         data.lockData.amount = obtainedShares.toUint128();
         _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-            data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
+            participate ? address(this) : data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
         );
     }
 
-    function _participate(MintFromBBAndLendOnSGLData memory data, uint256 tOLPTokenId) private {
+    function _participate(MintFromBBAndLendOnSGLData memory data, uint256 tOLPTokenId, bool lock) private {
         // validate token ids
         if (tOLPTokenId == 0 && data.participateData.tOLPTokenId == 0) revert Magnetar_ActionParamsMismatch();
         if (
@@ -256,8 +256,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         if (data.participateData.tOLPTokenId != 0) tOLPTokenId = data.participateData.tOLPTokenId;
 
         // transfer NFT here
-        bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
-        if (isErr) revert Magnetar_ExtractTokenFail();
+        if (!lock) {
+            bool isErr = pearlmit.transferFromERC721(data.user, address(this), data.lockData.target, tOLPTokenId);
+            if (isErr) revert Magnetar_ExtractTokenFail();
+        }
 
         pearlmit.approve(
             721, data.lockData.target, tOLPTokenId, data.participateData.target, 1, block.timestamp.toUint48()
