@@ -393,7 +393,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
                 (address from, address sgl,, uint128 amount) =
                     abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
-                (uint256 assetId,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
+                (uint256 assetId,,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
                 address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
 
                 {
