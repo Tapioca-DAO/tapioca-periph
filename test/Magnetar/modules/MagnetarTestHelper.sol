@@ -278,6 +278,9 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
+        
+        assetA.setMinterStatus(address(bb), true);
+        assetA.setBurnerStatus(address(bb), true);
 
         clusterA.updateContract(0, address(magnetarA), true);
         clusterA.updateContract(0, address(magnetarHelper), true);
