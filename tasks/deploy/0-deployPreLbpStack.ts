@@ -38,7 +38,14 @@ export const deployPreLbpStack__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        { hre },
+        {
+            hre,
+            bytecodeSizeLimit: 50_000,
+            staticSimulation: false,
+            overrideOptions: {
+                gasLimit: 10_000_000,
+            },
+        },
         async ({
             VM,
             tapiocaMulticallAddr,

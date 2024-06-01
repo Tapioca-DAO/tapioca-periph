@@ -5,7 +5,7 @@ import {
     DEPLOY_LBP_CONFIG,
     deployLbp__compareAddresses,
     deployLbp__getDeployments,
-} from '../0-deployLbp';
+} from '../1-deployLbp';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { TapiocaMulticall } from '@typechain/index';
 

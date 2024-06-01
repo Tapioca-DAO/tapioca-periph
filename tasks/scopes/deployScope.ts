@@ -1,7 +1,7 @@
 import { scope, types } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
-import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
-import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
+import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
+import { deployLbp__task } from 'tasks/deploy/1-deployLbp';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
 import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
