@@ -8,6 +8,8 @@ import {PearlmitHash} from "../../contracts/pearlmit/PearlmitHash.sol";
 contract PearlmitMock is Pearlmit {
     constructor() Pearlmit("Pearlmit", "1", address(this), 0) {}
 
+    error PermitC__SignatureTransferExceededPermitExpired();
+
     function checkPermitBatchApproval_(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) public {
         bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, _masterNonces[batch.owner]));
 
@@ -15,5 +17,20 @@ contract PearlmitMock is Pearlmit {
             revert Pearlmit__BadHashedData();
         }
         _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+    }
+
+    function checkBatchPermitData_(
+        uint256 nonce,
+        uint256 expiration,
+        address owner,
+        bytes32 digest,
+        bytes calldata signedPermit
+    ) public {
+        if (block.timestamp > expiration) {
+            revert PermitC__SignatureTransferExceededPermitExpired();
+        }
+
+        _verifyPermitSignature(digest, signedPermit, owner);
+        _checkAndInvalidateNonce(owner, nonce);
     }
 }

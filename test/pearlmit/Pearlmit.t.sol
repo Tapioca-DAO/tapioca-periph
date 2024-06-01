@@ -227,6 +227,62 @@ contract PearlmitTest is PearlmitBaseTest {
         pearlmitMock.checkPermitBatchApproval_(batch, hashedData);
     }
 
+    function testRevertCheckBatchPermitData() public usePearlmitMock {
+        address erc20Addr = _deployNew20(alice, 1000);
+        uint256 nonce = 0;
+        uint48 sigDeadline = uint48(block.timestamp);
+        bytes32 hashedData = keccak256("0x");
+        IPearlmit.SignatureApproval[] memory approvals = new IPearlmit.SignatureApproval[](1);
+        approvals[0] = IPearlmit.SignatureApproval({tokenType: 20, token: erc20Addr, id: 0, amount: 100, operator: bob});
+        bytes32[] memory hashApprovals = new bytes32[](1);
+        for (uint256 i = 0; i < 1; ++i) {
+            hashApprovals[i] = keccak256(
+                abi.encode(
+                    PearlmitHash._PERMIT_SIGNATURE_APPROVAL_TYPEHASH,
+                    approvals[i].tokenType,
+                    approvals[i].token,
+                    approvals[i].id,
+                    approvals[i].amount,
+                    approvals[i].operator
+                )
+            );
+        }
+
+        bytes32 digest = ECDSA.toTypedDataHash(
+            pearlmitMock.domainSeparatorV4(),
+            keccak256(
+                abi.encode(
+                    PearlmitHash._PERMIT_BATCH_TRANSFER_FROM_TYPEHASH,
+                    keccak256(abi.encodePacked(hashApprovals)),
+                    alice,
+                    nonce,
+                    sigDeadline,
+                    pearlmitMock.masterNonce(alice),
+                    alice,
+                    hashedData
+                )
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(aliceKey, digest);
+        bytes memory signedPermit = abi.encodePacked(r, s, v);
+
+        IPearlmit.PermitBatchTransferFrom memory batch = IPearlmit.PermitBatchTransferFrom({
+            approvals: approvals,
+            owner: alice,
+            nonce: nonce,
+            sigDeadline: uint48(sigDeadline),
+            masterNonce: pearlmitMock.masterNonce(alice),
+            signedPermit: signedPermit,
+            executor: alice,
+            hashedData: hashedData
+        });
+        vm.startPrank(alice);
+        vm.warp(block.timestamp + 1 days); // Move the block timestamp forward by 1 day
+        vm.expectRevert(0xe3fd7ac3); // Expect a revert with the selector for the custom error PermitC__SignatureTransferExceededPermitExpired
+        
+        pearlmitMock.checkBatchPermitData_(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+    }
+
     modifier usePearlmitMock() {
         pearlmitMock = new PearlmitMock();
         _;
@@ -235,7 +291,7 @@ contract PearlmitTest is PearlmitBaseTest {
     /* tests to write :
 
     1. _checkPermitBatchApproval succes ✅
-    2. _checkPermitBatchApproval expecting revert cause of BadHashedData
+    2. _checkPermitBatchApproval expecting revert cause of BadHashedData ✅
     3. _checkBatchPermitData expecting revert cause it exceededPermitExpired "exced the block.timestamp"
     4. call clearAllowance while having no allowance 
 
