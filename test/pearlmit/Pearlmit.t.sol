@@ -172,7 +172,7 @@ contract PearlmitTest is PearlmitBaseTest {
         uint256 nonce = 0;
         uint48 sigDeadline = uint48(block.timestamp);
         bytes32 hashedData = keccak256("0x");
-        bytes32 falseHashedData = keccak256("0x1")
+        bytes32 falseHashedData = keccak256("0x1");
         IPearlmit.SignatureApproval[] memory approvals = new IPearlmit.SignatureApproval[](1);
         approvals[0] = IPearlmit.SignatureApproval({tokenType: 20, token: erc20Addr, id: 0, amount: 100, operator: bob});
         bytes32[] memory hashApprovals = new bytes32[](1);
@@ -221,14 +221,11 @@ contract PearlmitTest is PearlmitBaseTest {
         });
 
         vm.startPrank(alice);
+        // Expect a revert with the selector for the custom error Pearlmit__BadHashedData
+        vm.expectRevert(0x34c37c4a);
 
         pearlmitMock.checkPermitBatchApproval_(batch, hashedData);
     }
-
-
-
-
-
 
     modifier usePearlmitMock() {
         pearlmitMock = new PearlmitMock();
