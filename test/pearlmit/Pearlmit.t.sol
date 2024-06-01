@@ -43,18 +43,18 @@ contract PearlmitTest is PearlmitBaseTest {
                 IPearlmit.SignatureApproval({tokenType: 20, token: erc20Addr, id: 0, amount: 100, operator: bob});
             bytes32[] memory hashApprovals = new bytes32[](1);
             {
-            for (uint256 i = 0; i < 1; ++i) {
-                hashApprovals[i] = keccak256(
-                    abi.encode(
-                        PearlmitHash._PERMIT_SIGNATURE_APPROVAL_TYPEHASH,
-                        approvals[i].tokenType,
-                        approvals[i].token,
-                        approvals[i].id,
-                        approvals[i].amount,
-                        approvals[i].operator
-                    )
-                );
-            }
+                for (uint256 i = 0; i < 1; ++i) {
+                    hashApprovals[i] = keccak256(
+                        abi.encode(
+                            PearlmitHash._PERMIT_SIGNATURE_APPROVAL_TYPEHASH,
+                            approvals[i].tokenType,
+                            approvals[i].token,
+                            approvals[i].id,
+                            approvals[i].amount,
+                            approvals[i].operator
+                        )
+                    );
+                }
             }
 
             // Create batch digest and sign it
