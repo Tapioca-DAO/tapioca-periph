@@ -279,7 +279,7 @@ contract PearlmitTest is PearlmitBaseTest {
         vm.startPrank(alice);
         vm.warp(block.timestamp + 1 days); // Move the block timestamp forward by 1 day
         vm.expectRevert(0xe3fd7ac3); // Expect a revert with the selector for the custom error PermitC__SignatureTransferExceededPermitExpired
-        
+
         pearlmitMock.checkBatchPermitData_(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
     }
 
@@ -292,7 +292,7 @@ contract PearlmitTest is PearlmitBaseTest {
 
     1. _checkPermitBatchApproval succes ✅
     2. _checkPermitBatchApproval expecting revert cause of BadHashedData ✅
-    3. _checkBatchPermitData expecting revert cause it exceededPermitExpired "exced the block.timestamp"
+    3. _checkBatchPermitData expecting revert cause it exceededPermitExpired "exced the block.timestamp"✅
     4. call clearAllowance while having no allowance 
 
     */
