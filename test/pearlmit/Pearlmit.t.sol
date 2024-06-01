@@ -109,7 +109,7 @@ contract PearlmitTest is PearlmitBaseTest {
         }
     }
 
-    function testRevertCheckPermitBatchApproval() public usePearlmitMock {
+    function testCheckPermitBatchApproval() public usePearlmitMock {
         address erc20Addr = _deployNew20(alice, 1000);
         uint256 nonce = 0;
         uint48 sigDeadline = uint48(block.timestamp);
@@ -166,6 +166,66 @@ contract PearlmitTest is PearlmitBaseTest {
 
         pearlmitMock.checkPermitBatchApproval_(batch, hashedData);
     }
+
+    function testRevertCheckPermitBatchApproval() public usePearlmitMock {
+        address erc20Addr = _deployNew20(alice, 1000);
+        uint256 nonce = 0;
+        uint48 sigDeadline = uint48(block.timestamp);
+        bytes32 hashedData = keccak256("0x");
+        bytes32 falseHashedData = keccak256("0x1")
+        IPearlmit.SignatureApproval[] memory approvals = new IPearlmit.SignatureApproval[](1);
+        approvals[0] = IPearlmit.SignatureApproval({tokenType: 20, token: erc20Addr, id: 0, amount: 100, operator: bob});
+        bytes32[] memory hashApprovals = new bytes32[](1);
+        for (uint256 i = 0; i < 1; ++i) {
+            hashApprovals[i] = keccak256(
+                abi.encode(
+                    PearlmitHash._PERMIT_SIGNATURE_APPROVAL_TYPEHASH,
+                    approvals[i].tokenType,
+                    approvals[i].token,
+                    approvals[i].id,
+                    approvals[i].amount,
+                    approvals[i].operator
+                )
+            );
+        }
+
+        bytes32 digest = ECDSA.toTypedDataHash(
+            pearlmitMock.domainSeparatorV4(),
+            keccak256(
+                abi.encode(
+                    PearlmitHash._PERMIT_BATCH_TRANSFER_FROM_TYPEHASH,
+                    keccak256(abi.encodePacked(hashApprovals)),
+                    alice,
+                    nonce,
+                    sigDeadline,
+                    pearlmitMock.masterNonce(alice),
+                    alice,
+                    hashedData
+                )
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(aliceKey, digest);
+        bytes memory signedPermit = abi.encodePacked(r, s, v);
+
+        console.logBytes32(digest);
+        console.logBytes(signedPermit);
+        IPearlmit.PermitBatchTransferFrom memory batch = IPearlmit.PermitBatchTransferFrom({
+            approvals: approvals,
+            owner: alice,
+            nonce: nonce,
+            sigDeadline: uint48(sigDeadline),
+            masterNonce: pearlmitMock.masterNonce(alice),
+            signedPermit: signedPermit,
+            executor: alice,
+            hashedData: falseHashedData
+        });
+
+        vm.startPrank(alice);
+
+        pearlmitMock.checkPermitBatchApproval_(batch, hashedData);
+    }
+
+
 
 
 
