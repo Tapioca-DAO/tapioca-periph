@@ -16,6 +16,22 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
 import { buildYieldBox } from 'tasks/deployBuilds/yieldbox/buildYieldbox';
 
+/**
+ * @notice First thing to deploy
+ *
+ * Deploys:
+ * - Pearlmit
+ * - Cluster
+ * - ToeHelper
+ * - MagnetarCollateralModule
+ * - MagnetarMintModule
+ * - MagnetarOptionModule
+ * - MagnetarYieldBoxModule
+ * - Magnetar
+ * - MagnetarHelper
+ * - ZeroXSwapper
+ *
+ */
 export const deployPreLbpStack__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,

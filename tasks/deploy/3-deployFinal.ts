@@ -14,11 +14,21 @@ import { FeeAmount } from '@uniswap/v3-sdk';
 import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
 
 /**
- * Arbitrum/Ethereum USDO/USDC pool
- * Cluster whitelist
- * Magnetar and Pearlmit whitelist
- * Bar contract whitelist
- * TOE role setting
+ * @notice Called after tapioca-bar postLbp2
+ *
+ * Deploys: Arb + Eth
+ * - Arbitrum + Ethereum USDO/USDC pool
+ * - USDO/USDC Oracle
+ *
+ * Post Deploy Setup: Arb + Eth
+ * - Cluster Toe role setting (Magnetar)
+ * - Cluster whitelist
+ *      - Periph: (Magnetar, Pearlmit, Yieldbox)
+ *      - Bar: (BB_MT_ETH_MARKET, BB_T_RETH_MARKET, BB_T_WST_ETH_MARKET, SGL_S_GLP_MARKET, MARKET_HELPER, USDO)
+ *      - Bar: (SGL_S_DAI_MARKET)
+ *      - Z: (tsGLP, mtETH, tRETH, tWSTETH, T_SGL_SDAI_MARKET, tsDAI)
+ *      - Z Underlying: (WETH, rETH, wstETH, sGLP, sDAI)
+ *
  */
 export const deployFinal__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
@@ -378,9 +388,8 @@ async function deployPostLbpStack__loadContracts__generic(
         DEPLOYMENT_NAMES.PEARLMIT,
         tag,
     ).address;
-    const yieldbox = loadGlobalContract(
+    const yieldbox = loadLocalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.YieldBox,
         hre.SDK.eChainId,
         DEPLOYMENT_NAMES.YIELDBOX,
         tag,

@@ -42,6 +42,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
  *              - sDAI
  * Post deploy:
  *     - Create empty strat for TAP and WETH
+ *     -  Set Seer staleness on testnet
  *
  *
  */
@@ -100,10 +101,7 @@ async function postDeployTask(
             '',
         );
 
-        if (
-            chainInfo.name === 'arbitrum' ||
-            chainInfo.name === 'arbitrum_sepolia'
-        ) {
+        if (chainInfo.name === 'arbitrum_sepolia') {
             const ethSeerCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_CL_ORACLE);
             const ethUniCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_UNI_ORACLE);
             const tap = findContract(DEPLOYMENT_NAMES.TAP_ORACLE);

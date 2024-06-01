@@ -28,7 +28,17 @@ export const DEPLOY_LBP_CONFIG: TLbp = {
 };
 
 /**
- * @notice Deploy TAP-TOKEN PRE-LBP stack
+ * @notice Called after `deployPreLbpStack__task` & tap-token `deployPreLbpStack__task`
+ *
+ * Deploys:
+ * - LBP Authorizer
+ * - LBP Vault
+ * - LBP LiquidityBootstrappingPool
+ *
+ * Post Deploy Setup:
+ * - Set joining pool on vault
+ * - Set swap enabled on LBP
+ * - Set update weights gradually
  */
 export const deployLbp__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & { userTestnet: boolean },
