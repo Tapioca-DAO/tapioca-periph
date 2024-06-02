@@ -232,6 +232,18 @@ const MISC: TMisc = {
         ARRAKIS_FACTORY: '', // Empty means not needed/intended for this chain
         ARRAKIS_RESOLVER: '', // Empty means not needed/intended for this chain
     },
+    [EChainID.FUJI_AVALANCHE]: {
+        CL_SEQUENCER: '0x0000000000000000000000000000000000000000',
+        WETH_USDC_UNIV3_LP: '0x',
+        WETH: '0x4404EF158716dfad1c2BEffE9c7c8Fa261684544',
+        USDC: '0x9CFCd2b64D9D187974207761C03fc9E2491d703c',
+        ZERO_X_PROXY: '0x',
+        NONFUNGIBLE_POSITION_MANAGER: '',
+        V3_FACTORY: '0x3FE25Ce24b671346714b3feDec310c173153AAb5',
+        V3_SWAP_ROUTER: '0x40C1BBF8CE9920FE1Be9c70b6b573eAb7145e67d',
+        ARRAKIS_FACTORY: '0x54dfF8d101E41E44C2344CdF348eaDeFdE19D327',
+        ARRAKIS_RESOLVER: '0xd8323a46d651D8653914FEcc2407412d876ff651',
+    },
 };
 MISC['31337' as EChainID] = MISC[EChainID.ARBITRUM]; // Copy from Arbitrum
 
