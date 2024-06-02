@@ -33,14 +33,14 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
- * Deploy:
+ * Deploy: Arb,Eth
  *      - TAP/WETH Uniswap V3 pool
  *      - Oracles:
  *          - Arbitrum:
  *              - ETH CL, ETH Uni, Dual ETH, GLP, ETH/GLP, GMX, TAP, TapOption, USDC, rETH, wstETH
  *          - Ethereum:
  *              - sDAI
- * Post deploy:
+ * Post deploy: Arb,Eth
  *     - Create empty strat for TAP and WETH
  *     -  Set Seer staleness on testnet
  *
@@ -54,7 +54,7 @@ export const deployPostLbpStack__task = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 80_000,
+            bytecodeSizeLimit: 70_000,
             staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
         },
         tapiocaDeployTask,
@@ -148,15 +148,20 @@ async function postDeployTask(
 async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        chainInfo,
+        taskArgs,
+        isTestnet,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         const { tapToken } = loadContracts__generic(hre, tag);
         await deployUniPoolAndAddLiquidity({
             ...params,
@@ -169,17 +174,14 @@ async function tapiocaDeployTask(
                 ratioTokenB: taskArgs.ratioWeth,
                 feeAmount: FeeAmount.MEDIUM,
                 options: {
-                    mintMock: true,
+                    mintMock: !!isTestnet,
                     arrakisDepositLiquidity: true,
                 },
             },
         });
     }
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         // TapWethLp is used in the oracles, so it must be deployed first
         // Deployment happens above in `deployUniPoolAndAddLiquidity`
         const { tapToken, tapWethLp } = loadContracts__arb(hre, tag);
@@ -268,11 +270,7 @@ async function tapiocaDeployTask(
                     ],
                 }),
             );
-    } else if (
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
+    } else if (isSideChain) {
         VM.add(await buildSDaiOracle(hre)).add(
             await buildUsdoMarketOracle(hre, {
                 deploymentName: DEPLOYMENT_NAMES.MARKET_SDAI_ORACLE,

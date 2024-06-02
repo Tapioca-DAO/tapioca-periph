@@ -10,13 +10,6 @@ export const buildSDaiOracle = async (
     console.log('[+] buildSDaiOracle');
 
     const chainID = hre.SDK.eChainId;
-    if (
-        chainID !== hre.SDK.config.EChainID.MAINNET &&
-        chainID !== hre.SDK.config.EChainID.SEPOLIA &&
-        chainID !== hre.SDK.config.EChainID.OPTIMISM_SEPOLIA
-    ) {
-        throw '[-] sDAI Oracle only available on Ethereum';
-    }
 
     const args: Parameters<SDaiOracle__factory['deploy']> = [
         DEPLOY_CONFIG.POST_LBP[chainID]!.SDAI_USD_CUSTOM_CL_DATA_FEED_ADDRESS, // _sDaiOracle

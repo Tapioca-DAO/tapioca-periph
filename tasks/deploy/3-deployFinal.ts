@@ -130,7 +130,7 @@ async function deployUsdoUniPoolAndAddLiquidity(
         ratioUsdc: number;
     }>,
 ) {
-    const { hre, taskArgs, chainInfo } = params;
+    const { hre, taskArgs, chainInfo, isTestnet } = params;
     const { tag } = taskArgs;
     if (
         chainInfo.name === 'arbitrum' ||
@@ -155,6 +155,7 @@ async function deployUsdoUniPoolAndAddLiquidity(
                 ratioTokenB: taskArgs.ratioUsdc,
                 feeAmount: FeeAmount.LOWEST,
                 options: {
+                    mintMock: isTestnet,
                     arrakisDepositLiquidity: true,
                 },
             },
