@@ -20,9 +20,13 @@ TAP_TASK(
             'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
             deployLbp__task,
         )
-        .addFlag(
-            'userTestnet',
-            'Flag to deploy LBP on testnet. Overwrites USDC with FormToken on Arbitrum Sepolia. Meant for user testnet deployment',
+        .addParam(
+            'ltapAmount',
+            'The amount of LTAP to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'usdcAmount',
+            'The amount of USDC to be deposited in the LBP. In ether.',
         ),
 );
 

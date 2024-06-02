@@ -41,7 +41,10 @@ export const DEPLOY_LBP_CONFIG: TLbp = {
  * - Set update weights gradually
  */
 export const deployLbp__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & { userTestnet: boolean },
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        ltapAmount: string;
+        usdcAmount: string;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -53,20 +56,27 @@ export const deployLbp__task = async (
 };
 
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ userTestnet: boolean }>,
+    params: TTapiocaDeployerVmPass<{
+        ltapAmount: string;
+        usdcAmount: string;
+    }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
-        params;
-    const { tag, userTestnet } = taskArgs;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        chainInfo,
+        taskArgs,
+        isTestnet,
+        isHostChain,
+    } = params;
+    const { tag, ltapAmount, usdcAmount } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    // !!! USER TESTNET LBP !!!
-    // We overwrite USDC with this address
-    if (chainInfo.name === 'arbitrum_sepolia' && userTestnet) {
-        // Use a deployed mock contract called FormToken
-        const formTokenAddr = '0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39';
-        DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC = formTokenAddr;
-    }
+    DEPLOY_LBP_CONFIG.START_BALANCES = [
+        ethers.BigNumber.from(usdcAmount).mul(1e6), // 6 decimals
+        fp(ltapAmount), // 18 decimals
+    ];
 
     const { lTap } = deployLbp__getDeployments({ hre, tag });
     const [tokenA_Data, tokenB_Data] = [
@@ -82,10 +92,11 @@ async function tapiocaDeployTask(
     const tokens = [tokenA_Data.token, tokenB_Data.token];
     const startWeights = [tokenA_Data.startWeight, tokenB_Data.startWeight];
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
+        console.log('[+] Deploying LBP with USDC and LTAP with values:');
+        console.log(`    - USDC: ${Number(usdcAmount).toLocaleString()}`);
+        console.log(`    - LTAP: ${Number(ltapAmount).toLocaleString()}`);
+
         VM.add(
             await buildAuthorizer(hre, DEPLOYMENT_NAMES.LBP_AUTHORIZER, {
                 admin: owner,
