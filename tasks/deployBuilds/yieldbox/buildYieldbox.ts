@@ -1,3 +1,4 @@
+import { IDependentOn } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import {
     YieldBoxURIBuilder__factory,
     YieldBox__factory,
@@ -11,6 +12,8 @@ import { DEPLOYMENT_NAMES } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildYieldBox = async (
     hre: HardhatRuntimeEnvironment,
     weth: string,
+    dependsOnPearlmit: IDependentOn,
+    owner: string,
 ): Promise<
     [
         IDeployerVMAdd<YieldBoxURIBuilder__factory>,
@@ -34,14 +37,16 @@ export const buildYieldBox = async (
             deploymentName: DEPLOYMENT_NAMES.YIELDBOX,
             args: [
                 weth,
-                // YieldBoxURIBuilder, to be replaced by VM
-                hre.ethers.constants.AddressZero,
+                '', // YieldBoxURIBuilder, to be replaced by VM
+                '', // Pearlmit, to be replaced by VM
+                owner,
             ],
             dependsOn: [
                 {
                     argPosition: 1,
                     deploymentName: DEPLOYMENT_NAMES.YIELD_BOX_URI_BUILDER,
                 },
+                dependsOnPearlmit,
             ],
         },
     ];

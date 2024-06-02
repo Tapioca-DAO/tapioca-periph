@@ -53,12 +53,6 @@ export const deployPreLbpStack__task = async (
             taskArgs,
             isTestnet,
         }) => {
-            const [ybURI, yieldBox] = await buildYieldBox(
-                hre,
-                DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH!,
-            );
-            VM.add(ybURI).add(yieldBox);
-
             VM.add(
                 await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
                     DEPLOYMENT_NAMES.PEARLMIT,
@@ -66,13 +60,25 @@ export const deployPreLbpStack__task = async (
                     tapiocaMulticallAddr,
                     0,
                 ]),
+            );
+
+            const [ybURI, yieldBox] = await buildYieldBox(
+                hre,
+                DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH!,
+                {
+                    argPosition: 2,
+                    deploymentName: DEPLOYMENT_NAMES.PEARLMIT,
+                },
+                tapiocaMulticallAddr,
+            );
+            VM.add(ybURI).add(yieldBox);
+
+            VM.add(
+                await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
+                    chainInfo.lzChainId,
+                    tapiocaMulticallAddr,
+                ]),
             )
-                .add(
-                    await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
-                        chainInfo.lzChainId,
-                        tapiocaMulticallAddr,
-                    ]),
-                )
                 .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
                 .add(
                     await buildMagnetarCollateralModule(
