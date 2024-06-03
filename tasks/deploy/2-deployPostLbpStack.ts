@@ -47,7 +47,12 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
  *
  */
 export const deployPostLbpStack__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & { ratioTap: number; ratioWeth: number },
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        ratioTap: number;
+        ratioWeth: number;
+        amountTap: string;
+        amountWeth: string;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -63,10 +68,23 @@ export const deployPostLbpStack__task = async (
 };
 
 async function postDeployTask(
-    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
+    params: TTapiocaDeployerVmPass<{
+        ratioTap: number;
+        ratioWeth: number;
+        amountTap: string;
+        amountWeth: string;
+    }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        taskArgs,
+        chainInfo,
+        isTestnet,
+        isHostChain,
+        isSideChain,
+    } = params;
 
     const { tapToken } = loadContracts__generic(hre, taskArgs.tag);
 
@@ -101,7 +119,7 @@ async function postDeployTask(
             '',
         );
 
-        if (chainInfo.name === 'arbitrum_sepolia') {
+        if (isHostChain) {
             const ethSeerCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_CL_ORACLE);
             const ethUniCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_UNI_ORACLE);
             const tap = findContract(DEPLOYMENT_NAMES.TAP_ORACLE);
@@ -146,7 +164,12 @@ async function postDeployTask(
 }
 
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
+    params: TTapiocaDeployerVmPass<{
+        ratioTap: number;
+        ratioWeth: number;
+        amountTap: string;
+        amountWeth: string;
+    }>,
 ) {
     const {
         hre,
@@ -172,6 +195,8 @@ async function tapiocaDeployTask(
                 tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
                 ratioTokenA: taskArgs.ratioTap,
                 ratioTokenB: taskArgs.ratioWeth,
+                amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountTap),
+                amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountWeth),
                 feeAmount: FeeAmount.MEDIUM,
                 options: {
                     mintMock: !!isTestnet,

@@ -1,5 +1,6 @@
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount, computePoolAddress } from '@uniswap/v3-sdk';
+import { BigNumberish } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { deployUniV3pool__task } from 'tapioca-sdk';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
@@ -16,6 +17,8 @@ export const deployUniV3Pool = async (
     tokenB: string,
     ratioA: number,
     ratioB: number,
+    amountA: BigNumberish,
+    amountB: BigNumberish,
     feeAmount: FeeAmount,
 ) => {
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
@@ -24,10 +27,10 @@ export const deployUniV3Pool = async (
      * Load contracts
      */
     const { uniV3Factory, poolInitializer } = await loadContract(hre, tag);
-    const [token0, ratio0, token1, ratio1] =
+    const [token0, ratio0, amount0, token1, ratio1, amount1] =
         tokenA < tokenB
-            ? [tokenA, ratioA, tokenB, ratioB]
-            : [tokenB, ratioB, tokenA, ratioA];
+            ? [tokenA, ratioA, amountA, tokenB, ratioB, amountB]
+            : [tokenB, ratioB, amountB, tokenA, ratioA, amountA];
 
     const computedPoolAddress = computePoolAddress({
         factoryAddress: uniV3Factory.address,
@@ -84,6 +87,8 @@ export const deployUniV3Pool = async (
         token1,
         ratio0,
         ratio1,
+        amount0,
+        amount1,
     };
 };
 

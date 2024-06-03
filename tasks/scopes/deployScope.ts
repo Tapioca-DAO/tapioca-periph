@@ -45,17 +45,21 @@ TAP_TASK(
             'Deploy oracles. Deploy UniV3TapWeth pool and LP. Called only after tap-token repo `postLbp1` task',
             deployPostLbpStack__task,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioTap',
             'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_TAP,
-            types.int,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_WETH,
-            types.int,
+        )
+        .addParam(
+            'amountTap',
+            'The amount of TAP to be deposited in the pool. In ether.',
+        )
+        .addParam(
+            'amountWeth',
+            'The amount of WETH to be deposited in the pool. In ether.',
         ),
 );
 TAP_TASK(
