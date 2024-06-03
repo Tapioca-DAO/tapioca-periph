@@ -738,6 +738,21 @@
             "lastBlockHeight": 33229094,
             "contracts": [
                 {
+                    "name": "sDAIMock",
+                    "address": "0xed18DBCb2810E4178c23668794198C81B0668b23",
+                    "meta": {
+                        "args": [
+                            "sDAIMock",
+                            "sDAIMock",
+                            "1000000000000000000",
+                            18,
+                            "0xc4c36140a88e92fa01bf31299da58e51265487d5"
+                        ],
+                        "salt": "0x61a2fa914ed9c4529896f28da14b220086729f17a7bdc437b0754a90fa8f4f59",
+                        "create2": true
+                    }
+                },
+                {
                     "address": "0x098dB89cA3335EC8207958CDe680D52A36302e8B",
                     "name": "WETH_YB_EMPTY_STRAT",
                     "meta": {
@@ -979,6 +994,36 @@
             "name": "arbitrum_sepolia",
             "lastBlockHeight": 22113688,
             "contracts": [
+                {
+                    "name": "cltestmock",
+                    "address": "0x500Eb9494F449dF951c48D23bCdEb06C75614876",
+                    "meta": {
+                        "decimals": 8,
+                        "rate": "22222",
+                        "args": [
+                            8,
+                            "22222",
+                            "cltestmock"
+                        ],
+                        "salt": "0xbfc98cf829840923025087f96a3175f878f39a9b8921b1deecf96d03207658df",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "testmock",
+                    "address": "0x8Db8893cA7A966d116fFF0AA42AE989Dc6fefd9F",
+                    "meta": {
+                        "args": [
+                            "testmock",
+                            "testmock",
+                            "1000000000000000000",
+                            18,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xb84dc1e088ce550b445038535e2c65dd386b5298dd8b1521e95895d463e2c687",
+                        "create2": true
+                    }
+                },
                 {
                     "address": "0xBAf75aAa91528201A735629a9e89Cb206e9d47EB",
                     "name": "WETH_YB_EMPTY_STRAT",
