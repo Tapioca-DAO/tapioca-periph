@@ -65,6 +65,31 @@ export async function postDeploySetupLbp(
     console.log('[+] Initializing LBP');
 
     const calls: TapiocaMulticall.CallStruct[] = [];
+
+    if (isTestnet) {
+        console.log(
+            '[+] Minting Mock USDC for LBP',
+            hre.ethers.utils.formatUnits(
+                DEPLOY_LBP_CONFIG.START_BALANCES[0],
+                6,
+            ),
+        );
+
+        const mockToken = await hre.ethers.getContractAt(
+            'ERC20Mock',
+            DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
+        );
+
+        calls.push({
+            target: mockToken.address,
+            callData: mockToken.interface.encodeFunctionData('mintTo', [
+                tapiocaMulticallAddr,
+                DEPLOY_LBP_CONFIG.START_BALANCES[0],
+            ]),
+            allowFailure: false,
+        });
+    }
+
     console.log('\t[+] Add Approving token A');
     calls.push({
         target: tokenA.address,
