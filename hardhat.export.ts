@@ -99,16 +99,6 @@ const config: HardhatUserConfig &
             },
         ],
         overrides: {
-            'yieldbox/YieldBox.sol': {
-                version: '0.8.22',
-                settings: {
-                    evmVersion: 'paris', // Latest before Shanghai
-                    optimizer: {
-                        enabled: true,
-                        runs: 1500,
-                    },
-                },
-            },
             'contracts/Magnetar/modules/MagnetarAssetModule.sol': {
                 version: '0.8.22',
                 settings: {
