@@ -12,7 +12,7 @@ import { DEPLOYMENT_NAMES } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildYieldBox = async (
     hre: HardhatRuntimeEnvironment,
     weth: string,
-    dependsOnPearlmit: IDependentOn,
+    pearlmit: string,
     owner: string,
 ): Promise<
     [
@@ -38,7 +38,7 @@ export const buildYieldBox = async (
             args: [
                 weth,
                 '', // YieldBoxURIBuilder, to be replaced by VM
-                '', // Pearlmit, to be replaced by VM
+                pearlmit,
                 owner,
             ],
             dependsOn: [
@@ -46,7 +46,6 @@ export const buildYieldBox = async (
                     argPosition: 1,
                     deploymentName: DEPLOYMENT_NAMES.YIELD_BOX_URI_BUILDER,
                 },
-                dependsOnPearlmit,
             ],
         },
     ];
