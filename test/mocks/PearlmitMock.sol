@@ -11,26 +11,20 @@ contract PearlmitMock is Pearlmit {
     error PermitC__SignatureTransferExceededPermitExpired();
 
     function checkPermitBatchApproval_(IPearlmit.PermitBatchTransferFrom calldata batch, bytes32 hashedData) public {
-        bytes32 digest = _hashTypedDataV4(PearlmitHash.hashBatchTransferFrom(batch, _masterNonces[batch.owner]));
-
-        if (batch.hashedData != hashedData) {
-            revert Pearlmit__BadHashedData();
-        }
-        _checkBatchPermitData(batch.nonce, batch.sigDeadline, batch.owner, digest, batch.signedPermit);
+        _checkPermitBatchApproval(batch, hashedData);
     }
 
     function checkBatchPermitData_(
         uint256 nonce,
         uint256 expiration,
-        address owner,
+        address _owner,
         bytes32 digest,
         bytes calldata signedPermit
     ) public {
-        if (block.timestamp > expiration) {
-            revert PermitC__SignatureTransferExceededPermitExpired();
-        }
+        _checkBatchPermitData(nonce, expiration, _owner, digest, signedPermit);
+    }
 
-        _verifyPermitSignature(digest, signedPermit, owner);
-        _checkAndInvalidateNonce(owner, nonce);
+    function clearAllowance_(address _owner, uint256 tokenType, address token, address operator, uint256 id) public {
+        _clearAllowance(_owner, tokenType, token, operator, id);
     }
 }
