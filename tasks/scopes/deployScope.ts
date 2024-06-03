@@ -69,17 +69,21 @@ TAP_TASK(
             'USDO/USDC pool deployment + Cluster whitelisting',
             deployFinal__task,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioUsdo',
             'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDO,
-            types.int,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioUsdc',
             'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDC,
-            types.int,
+        )
+        .addParam(
+            'amountUsdo',
+            'The amount of USDO to be deposited in the pool. In ether.',
+        )
+        .addParam(
+            'amountUsdc',
+            'The amount of USDC to be deposited in the pool. In ether.',
         ),
 );
 
