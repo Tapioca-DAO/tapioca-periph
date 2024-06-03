@@ -738,6 +738,72 @@
             "lastBlockHeight": 33229094,
             "contracts": [
                 {
+                    "name": "USDO_USDC_UNI_V3_ORACLE",
+                    "address": "0xAA5eE1C563F0dbF11150fEb3B27524F0126B34F7",
+                    "meta": {
+                        "args": [
+                            "UniV3 USDO/USC",
+                            "USDO/USDC",
+                            18,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x5AfCE7955b532C3e31873A5B1A248ccFD6a29201",
+                                    "0x9CFCd2b64D9D187974207761C03fc9E2491d703c"
+                                ],
+                                "_circuitUniswap": [
+                                    "0x19d16B3cDcd13E61CC44E662F466421D4aAB40d3"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 1,
+                                "observationLength": 1,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0x2b0e5441a715eDeaC19677fe29B7322a481A8286"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xc4c36140a88e92fa01bf31299da58e51265487d5"
+                                ],
+                                "_description": "0x5553444f2f555344430000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xc4c36140a88e92fa01bf31299da58e51265487d5"
+                            }
+                        ],
+                        "salt": "0x076f11bdecc859f1025e5be4feb0dcbeb4e52884128d3a307ea81501681f9a96",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDC_USD_CL_DATA_FEED_ADDRESS",
+                    "address": "0x2b0e5441a715eDeaC19677fe29B7322a481A8286",
+                    "meta": {
+                        "decimals": 8,
+                        "rate": "100000000",
+                        "args": [
+                            8,
+                            "100000000",
+                            "USDC_USD_CL_DATA_FEED_ADDRESS"
+                        ],
+                        "salt": "0x59ae395c913f9335bbd146deb51453d15eb9582a094721e4fe819ce5610f41a0",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDO_USDC_UNI_V3_POOL",
+                    "address": "0x19d16B3cDcd13E61CC44E662F466421D4aAB40d3",
+                    "meta": {
+                        "token0": "0x5AfCE7955b532C3e31873A5B1A248ccFD6a29201",
+                        "token1": "0x9CFCd2b64D9D187974207761C03fc9E2491d703c",
+                        "ratio0": "1",
+                        "ratio1": "1",
+                        "fee": 100
+                    }
+                },
+                {
                     "name": "sDAIMock",
                     "address": "0xed18DBCb2810E4178c23668794198C81B0668b23",
                     "meta": {
@@ -994,6 +1060,57 @@
             "name": "arbitrum_sepolia",
             "lastBlockHeight": 22113688,
             "contracts": [
+                {
+                    "name": "USDO_USDC_UNI_V3_ORACLE",
+                    "address": "0x3866b0c2E3Ece2b91a3A30fAbD74490F4cA76688",
+                    "meta": {
+                        "args": [
+                            "UniV3 USDO/USC",
+                            "USDO/USDC",
+                            18,
+                            {
+                                "addressInAndOutUni": [
+                                    "0x905EeDBc5e584E11B68f60E1deB50Efa08aD3e9F",
+                                    "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705"
+                                ],
+                                "_circuitUniswap": [
+                                    "0x2FcB03c285B69FFD655dfb71b1a550275E6BE0AE"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 1,
+                                "observationLength": 1,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0xC23507096A67D62d511CBE9D9f335dbef8F5De27"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                                ],
+                                "_description": "0x5553444f2f555344430000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0x0000000000000000000000000000000000000000",
+                                "_admin": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                            }
+                        ],
+                        "salt": "0xbcdecf72d8a4c3607489c3dcfacf05e6436aa9db07fb2f834a6210e42055497d",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDO_USDC_UNI_V3_POOL",
+                    "address": "0x2FcB03c285B69FFD655dfb71b1a550275E6BE0AE",
+                    "meta": {
+                        "token0": "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                        "token1": "0x905EeDBc5e584E11B68f60E1deB50Efa08aD3e9F",
+                        "ratio0": "1",
+                        "ratio1": "1",
+                        "fee": 100
+                    }
+                },
                 {
                     "name": "cltestmock",
                     "address": "0x500Eb9494F449dF951c48D23bCdEb06C75614876",
