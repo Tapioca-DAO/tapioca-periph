@@ -13,4 +13,8 @@ contract TapOftMock is ERC20 {
     function ownerOf(uint256) external view returns (address) {
         return msg.sender;
     }
+
+    function mint(address to, uint256 tokenId) external {
+        _mint(to, tokenId);
+    }
 }
