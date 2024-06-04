@@ -16,6 +16,7 @@ import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/inter
 import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -64,12 +65,15 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         address payable _optionModule,
         address payable _yieldBoxModule,
         IPearlmit _pearlmit,
-        address _toeHelper
+        address _toeHelper,
+        IMagnetarHelper _magnetarHelper
     ) BaseMagnetar(_cluster, _pearlmit, _toeHelper, _owner) {
         modules[MagnetarModule.CollateralModule] = _collateralModule;
         modules[MagnetarModule.MintModule] = _mintModule;
         modules[MagnetarModule.OptionModule] = _optionModule;
         modules[MagnetarModule.YieldBoxModule] = _yieldBoxModule;
+
+        helper = _magnetarHelper;
     }
 
     /// =====================
@@ -544,7 +548,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             abi.decode(_actionCalldata[4:], (uint256, address, uint256));
 
         // compute `paymentToken` amount
-        (,uint256 _paymentTokenAmount,) =
+        (, uint256 _paymentTokenAmount,) =
             ITapiocaOptionBroker(_target).getOTCDealDetails(_oTAPTokenID, _paymentToken, _tapAmount);
         address tapToken = ITapiocaOptionBroker(_target).tapOFT();
 
