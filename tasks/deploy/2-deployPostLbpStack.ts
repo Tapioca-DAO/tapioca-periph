@@ -41,8 +41,11 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
  *          - Ethereum:
  *              - sDAI
  * Post deploy: Arb,Eth
- *     - Create empty strat for TAP and WETH
- *     -  Set Seer staleness on testnet
+ * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (UniV3 pool creation)
+ * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (YB deposit)
+ *     - Create empty YB strat for TAP and WETH and register them in YB
+ *     - Deposit YB assets in YB (TODO)
+ *     - Set Seer staleness on testnet
  *
  *
  */
@@ -59,7 +62,6 @@ export const deployPostLbpStack__task = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 70_000,
             staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
         },
         tapiocaDeployTask,

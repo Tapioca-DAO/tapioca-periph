@@ -21,6 +21,7 @@ import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOrac
  * - USDO/USDC Oracle
  *
  * Post Deploy Setup: Arb + Eth
+ * !!! Requires USDO and USDC tokens to be in the TapiocaMulticall
  * - Cluster Toe role setting (Magnetar)
  * - Cluster whitelist
  *      - Periph: (Magnetar, Pearlmit, Yieldbox)

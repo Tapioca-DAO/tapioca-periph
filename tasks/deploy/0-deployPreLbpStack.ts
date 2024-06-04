@@ -42,7 +42,6 @@ export const deployPreLbpStack__task = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 60_000,
         },
         tapiocaDeployTask,
         async () => {
