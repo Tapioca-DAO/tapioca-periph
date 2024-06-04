@@ -5,6 +5,10 @@ import {PearlmitHandler} from "../../contracts/pearlmit/PearlmitHandler.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {PearlmitHash} from "../../contracts/pearlmit/PearlmitHash.sol";
 
+/**
+ * @title PearlmitHandlerMock
+ * @dev A mock contract for testing internal PearlmitHandler functions for ERC20 and ERC721 approvals.
+ */
 contract PearlmitHandlerMock is PearlmitHandler {
     constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {}
 
