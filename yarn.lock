@@ -5491,10 +5491,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.8.14:
-  version "1.8.14"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.14.tgz#6a2e4e852de51679133fa35bdbd498602215673b"
-  integrity sha512-zj57xlZCbIL+tpo9iH6/VFowdPVJAHomKf0o/X1TZ04WC5zAVRxrX2GfLOSQUNqCH+nNaawnsGE/FM92UE314Q==
+tapioca-sdk@^1.8.15:
+  version "1.8.15"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.15.tgz#f98e929cac17725184c343c93c598dddee6d9bdf"
+  integrity sha512-V7WqeoA02yNw0godl/h+GeEy1ji+Gv/JgtM9amxzSNzg1Q2RKkX6iaRVAizGajaC+EfwarpY3tKvIfqoA/QP9w==
   dependencies:
     "@uniswap/v3-core" "^1.0.1"
     "@uniswap/v3-periphery" "^1.4.3"
