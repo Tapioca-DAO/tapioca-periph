@@ -4,6 +4,10 @@ pragma solidity 0.8.22;
 import {Pearlmit} from "../../contracts/pearlmit/Pearlmit.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {PearlmitHash} from "../../contracts/pearlmit/PearlmitHash.sol";
+/**
+ * @title PearlmitMock
+ * @dev A mock contract for testing internal Pearlmit functions.
+ */
 
 contract PearlmitMock is Pearlmit {
     constructor() Pearlmit("Pearlmit", "1", address(this), 0) {}
