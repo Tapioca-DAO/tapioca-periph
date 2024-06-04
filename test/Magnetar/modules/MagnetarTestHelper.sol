@@ -32,6 +32,7 @@ import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintMo
 import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 
@@ -278,7 +279,7 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
-        
+
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);
 
@@ -435,7 +436,8 @@ contract MagnetarTestHelper is TestHelper {
             payable(setup.optionModule),
             payable(setup.yieldBoxModule),
             IPearlmit(_pearlmit),
-            address(toeHelper)
+            address(toeHelper),
+            IMagnetarHelper(address(new MagnetarHelper()))
         );
     }
 
