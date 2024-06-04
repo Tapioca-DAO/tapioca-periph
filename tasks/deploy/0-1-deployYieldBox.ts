@@ -19,11 +19,6 @@ export const deployPreLbpYieldbox = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 50_000,
-            staticSimulation: false,
-            overrideOptions: {
-                gasLimit: 10_000_000,
-            },
         },
         async ({
             VM,
