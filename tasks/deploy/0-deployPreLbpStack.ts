@@ -120,15 +120,27 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             ),
         )
         .add(await getMagnetar(hre, tapiocaMulticallAddr))
-        .add(await buildMagnetarHelper(hre, DEPLOYMENT_NAMES.MAGNETAR_HELPER))
-        .add(
-            (await getZeroXSwapper({
+        .add(await buildMagnetarHelper(hre, DEPLOYMENT_NAMES.MAGNETAR_HELPER));
+
+    if (isTestnet) {
+        VM.add(
+            await buildZeroXSwapperMock(
                 hre,
-                tag: taskArgs.tag,
-                isTestnet,
-                owner: tapiocaMulticallAddr,
-            })) as IDeployerVMAdd<any>,
+                [
+                    '', // Cluster
+                    owner,
+                ],
+                [
+                    {
+                        argPosition: 0,
+                        deploymentName: DEPLOYMENT_NAMES.CLUSTER,
+                    },
+                ],
+            ),
         );
+    } else {
+        VM.add(await buildZeroXSwapper(hre, tag, owner));
+    }
 }
 
 async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
@@ -185,10 +197,4 @@ async function getZeroXSwapper(data: {
     isTestnet: boolean;
 }) {
     const { hre, tag, owner, isTestnet } = data;
-
-    if (isTestnet) {
-        return await buildZeroXSwapperMock(hre);
-    } else {
-        return await buildZeroXSwapper(hre, tag, owner);
-    }
 }
