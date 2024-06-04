@@ -118,8 +118,8 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
                 ],
             ),
         )
-        .add(await getMagnetar(hre, tapiocaMulticallAddr))
-        .add(await buildMagnetarHelper(hre, DEPLOYMENT_NAMES.MAGNETAR_HELPER));
+        .add(await buildMagnetarHelper(hre, DEPLOYMENT_NAMES.MAGNETAR_HELPER))
+        .add(await getMagnetar(hre, tapiocaMulticallAddr));
 
     if (isTestnet) {
         VM.add(
@@ -147,14 +147,15 @@ async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
         hre,
         DEPLOYMENT_NAMES.MAGNETAR,
         [
-            hre.ethers.constants.AddressZero, // Cluster
+            '', // Cluster
             owner, // Owner
-            hre.ethers.constants.AddressZero, // CollateralModule
-            hre.ethers.constants.AddressZero, // MintModule
-            hre.ethers.constants.AddressZero, // optionModule
-            hre.ethers.constants.AddressZero, // YieldBoxModule
-            hre.ethers.constants.AddressZero, // Pearlmit
-            hre.ethers.constants.AddressZero, // ToeHelper
+            '', // CollateralModule
+            '', // MintModule
+            '', // optionModule
+            '', // YieldBoxModule
+            '', // Pearlmit
+            '', // ToeHelper
+            '', // MagnetarHelper
         ],
         [
             {
@@ -184,6 +185,10 @@ async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
             {
                 argPosition: 7,
                 deploymentName: DEPLOYMENT_NAMES.TOE_HELPER,
+            },
+            {
+                argPosition: 8,
+                deploymentName: DEPLOYMENT_NAMES.MAGNETAR_HELPER,
             },
         ],
     );
