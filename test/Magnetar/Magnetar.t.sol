@@ -212,7 +212,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         // SimpleLeverageExecutor leverageExecutor = new SimpleLeverageExecutor(IZeroXSwapper(address(swapper)), ICluster(address(cluster)));
 
         YieldBoxURIBuilder ybUri = new YieldBoxURIBuilder();
-        YieldBox yb = new YieldBox(IWrappedNative(address(aERC20)), ybUri);
+        YieldBox yb = new YieldBox(IWrappedNative(address(aERC20)), ybUri, pearlmit, address(this));
 
         Penrose penrose;
         Singularity mc;
@@ -259,7 +259,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     function _setupBb(address _oracle) private returns (BigBang, Penrose, YieldBox) {
         YieldBoxURIBuilder ybUri = new YieldBoxURIBuilder();
-        YieldBox yb = new YieldBox(IWrappedNative(address(aERC20)), ybUri);
+        YieldBox yb = new YieldBox(IWrappedNative(address(aERC20)), ybUri, pearlmit, address(this));
 
         ERC20WithoutStrategy collateralStrategy = utils.createYieldBoxEmptyStrategy(address(yb), address(collateral));
         collateralId = utils.registerYieldBoxAsset(address(yb), address(collateral), address(collateralStrategy));

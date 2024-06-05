@@ -198,7 +198,7 @@ contract MagnetarTestHelper is TestHelper {
         magnetarA.setHelper(address(magnetarHelper));
         magnetarB.setHelper(address(magnetarHelper));
 
-        yieldBox = createYieldBox(address(weth));
+        yieldBox = createYieldBox(address(weth), pearlmit);
 
         ERC20WithoutStrategy wethStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(weth));
         ERC20WithoutStrategy tapStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(tap));
@@ -409,9 +409,9 @@ contract MagnetarTestHelper is TestHelper {
         usdo = Usdo(payable(_deployOApp(type(Usdo).creationCode, abi.encode(usdoInitStruct, usdoModulesInitStruct))));
     }
 
-    function createYieldBox(address weth) public returns (YieldBox yb) {
+    function createYieldBox(address weth, Pearlmit pearlmit) public returns (YieldBox yb) {
         YieldBoxURIBuilder ybUri = new YieldBoxURIBuilder();
-        yb = new YieldBox(IWrappedNative(weth), ybUri);
+        yb = new YieldBox(IWrappedNative(weth), ybUri, pearlmit, address(this));
     }
 
     function setBBEthMarket(Penrose penrose, address market) external {
