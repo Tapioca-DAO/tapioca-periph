@@ -165,7 +165,6 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
          * @dev performs a repay operation for the specified market
          */
         if (data.repayAmount > 0) {
-            _market.accrue();
             _marketRepay(_market, data.marketHelper, data.repayAmount, data.user, data.user);
         }
 
