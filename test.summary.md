@@ -10,7 +10,7 @@
 - **NOTE** The permission's provider cannot clear the allowance. 
 
 ## 3. `_checkPermitBatchApproval` : Internal function
-- **Scenario 1 :** Works well, tested through the function `permitBatchApprove`. ✅ 
+- **Scenario 1 :** The permit is approved, tested through the function `permitBatchApprove`. ✅ 
 - **Scenario 2 :** Reverts due to wrong hashed data. ✅
 
 ## 4. `_checkBatchPermitData` : Internal function
