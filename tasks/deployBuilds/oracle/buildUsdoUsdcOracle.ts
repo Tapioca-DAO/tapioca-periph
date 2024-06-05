@@ -3,24 +3,25 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 
-export const buildETHUniOracle = async (
-    hre: HardhatRuntimeEnvironment,
-    owner: string,
-    isTestnet: boolean,
-): Promise<IDeployerVMAdd<Seer__factory>> => {
-    console.log('[+] buildETHUniOracle');
+export const buildUsdoUsdcOracle = async (params: {
+    hre: HardhatRuntimeEnvironment;
+    owner: string;
+    usdoAddy: string;
+    usdoUsdcLpAddy: string;
+    isTestnet: boolean;
+}): Promise<IDeployerVMAdd<Seer__factory>> => {
+    console.log('[+] buildUsdoUsdcOracle');
+
+    const { hre, owner, usdoAddy, usdoUsdcLpAddy, isTestnet } = params;
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<Seer__factory['deploy']> = [
-        'UniV3 ETH/USD', // Name
-        'ETH/USD', // Symbol
+        'UniV3 USDO/USC', // Name
+        'USDO/USDC', // Symbol
         18, // Decimals
         {
-            addressInAndOutUni: [
-                DEPLOY_CONFIG.MISC[chainID]!.WETH,
-                DEPLOY_CONFIG.MISC[chainID]!.USDC,
-            ],
-            _circuitUniswap: [DEPLOY_CONFIG.MISC[chainID]!.WETH_USDC_UNIV3_LP], // LP ETH/USDC
+            addressInAndOutUni: [usdoAddy, DEPLOY_CONFIG.MISC[chainID]!.USDC],
+            _circuitUniswap: [usdoUsdcLpAddy], // LP ETH/USDC
             _circuitUniIsMultiplied: [1], // Multiply/divide Uni
             _twapPeriod: isTestnet ? 1 : 3600, // TWAP, 1hr
             observationLength: isTestnet ? 1 : 10, // Observation length that each Uni pool should have
@@ -30,7 +31,7 @@ export const buildETHUniOracle = async (
             ], // CL path
             _circuitChainIsMultiplied: [1], // Multiply/divide CL
             guardians: [owner], // Owner
-            _description: hre.ethers.utils.formatBytes32String('ETH/USD'), // Description,
+            _description: hre.ethers.utils.formatBytes32String('USDO/USDC'), // Description,
             _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
             _admin: owner, // Owner
         },
@@ -38,7 +39,7 @@ export const buildETHUniOracle = async (
 
     return {
         contract: await hre.ethers.getContractFactory('Seer'),
-        deploymentName: DEPLOYMENT_NAMES.ETH_SEER_UNI_ORACLE,
+        deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_ORACLE,
         args,
     };
 };

@@ -35,7 +35,7 @@ import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/ext
 import {BaseToeMsgType} from "tapioca-periph/tapiocaOmnichainEngine/BaseToeMsgType.sol";
 
 // Tapioca Tests
-import {ToeTestHelper} from "./ToeTestHelper.sol";
+import {ToeTestHelper} from "../LZSetup/ToeTestHelper.sol";
 import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
 import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";

@@ -11,6 +11,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 export const deployUniV3Pool = async (
     hre: HardhatRuntimeEnvironment,
     tag: string,
+    deploymentName: string,
     tokenA: string,
     tokenB: string,
     ratioA: number,
@@ -60,7 +61,7 @@ export const deployUniV3Pool = async (
 
         await VM.load([
             {
-                name: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
+                name: deploymentName,
                 address: computedPoolAddress,
                 meta: {
                     token0,

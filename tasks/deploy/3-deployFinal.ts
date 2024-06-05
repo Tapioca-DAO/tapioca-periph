@@ -11,6 +11,7 @@ import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
 import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { FeeAmount } from '@uniswap/v3-sdk';
+import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
 
 /**
  * Arbitrum/Ethereum USDO/USDC pool
@@ -30,7 +31,7 @@ export const deployFinal__task = async (
         _taskArgs,
         { hre },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        async () => {},
+        deployTask,
         postDeployTask,
     );
 };
@@ -46,13 +47,71 @@ async function postDeployTask(
     const { tag } = taskArgs;
 
     console.log('[+] final task post deploy');
-
-    await deployUsdoUniPoolAndAddLiquidity(params);
-
     const calls: TapiocaMulticall.CallStruct[] = [];
     await clusterWhitelist({ hre, tag, calls });
 
+    if (isTestnet) {
+        console.log(
+            '[+] [TESTNET] Setting USDO/USDC Oracle stale period to max ',
+        );
+        const usdoUsdcOracle = loadLocalContract(
+            hre,
+            hre.SDK.eChainId,
+            DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_ORACLE,
+            tag,
+        );
+        const chainLinkUtils = await hre.ethers.getContractAt(
+            'ChainlinkUtils',
+            '',
+        );
+        calls.push({
+            target: usdoUsdcOracle.address,
+            callData: chainLinkUtils.interface.encodeFunctionData(
+                'changeDefaultStalePeriod',
+                [4294967295],
+            ),
+            allowFailure: false,
+        });
+    }
+
     await VM.executeMulticall(calls);
+}
+
+async function deployTask(
+    params: TTapiocaDeployerVmPass<{
+        ratioUsdo: number;
+        ratioUsdc: number;
+    }>,
+) {
+    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
+        params;
+    const { tag } = taskArgs;
+
+    console.log('[+] final deploy');
+
+    await deployUsdoUniPoolAndAddLiquidity(params);
+
+    // Add USDO oracle deployment
+    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
+        hre,
+        tag,
+    );
+    const usdoUsdcLpAddy = loadLocalContract(
+        hre,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
+        tag,
+    ).address;
+
+    VM.add(
+        await buildUsdoUsdcOracle({
+            hre,
+            isTestnet,
+            owner: tapiocaMulticallAddr,
+            usdoAddy: usdo,
+            usdoUsdcLpAddy,
+        }),
+    );
 }
 
 async function deployUsdoUniPoolAndAddLiquidity(
@@ -79,11 +138,15 @@ async function deployUsdoUniPoolAndAddLiquidity(
             ...params,
             taskArgs: {
                 ...taskArgs,
+                deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
                 tokenA: usdo,
                 tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
                 ratioTokenA: taskArgs.ratioUsdo,
                 ratioTokenB: taskArgs.ratioUsdc,
                 feeAmount: FeeAmount.LOWEST,
+                options: {
+                    arrakisDepositLiquidity: true,
+                },
             },
         });
     }
@@ -96,7 +159,7 @@ async function clusterWhitelist(params: {
 }) {
     const { hre, tag, calls } = params;
 
-    const { cluster, magnetar, pearlmit } =
+    const { cluster, magnetar, pearlmit, yieldbox } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
 
     /**
@@ -119,6 +182,13 @@ async function clusterWhitelist(params: {
     await addAddressWhitelist({
         name: 'Pearlmit',
         address: pearlmit,
+        calls,
+        cluster,
+    });
+
+    await addAddressWhitelist({
+        name: 'YieldBox',
+        address: yieldbox,
         calls,
         cluster,
     });
@@ -164,6 +234,7 @@ async function clusterWhitelist(params: {
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
         await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
+        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
@@ -171,18 +242,35 @@ async function clusterWhitelist(params: {
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
         // Z Underlying
-        await addZContract(
-            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.WETH,
-        );
-        await addZContract(
-            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.reth,
-        );
-        await addZContract(
-            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.wstETH,
-        );
-        await addZContract(
-            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sGLP,
-        );
+        await addAddressWhitelist({
+            name: 'WETH',
+            address:
+                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.WETH,
+            calls,
+            cluster,
+        });
+        await addAddressWhitelist({
+            name: 'rETH',
+            address:
+                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.reth,
+            calls,
+            cluster,
+        });
+        await addAddressWhitelist({
+            name: 'wstETH',
+            address:
+                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!
+                    .wstETH,
+            calls,
+            cluster,
+        });
+        await addAddressWhitelist({
+            name: 'sGLP',
+            address:
+                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sGLP,
+            calls,
+            cluster,
+        });
     }
 
     if (
@@ -196,9 +284,13 @@ async function clusterWhitelist(params: {
         );
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
-        await addZContract(
-            TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sDAI,
-        );
+        await addAddressWhitelist({
+            name: 'sDAI',
+            address:
+                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sDAI,
+            calls,
+            cluster,
+        });
     }
 }
 
@@ -285,8 +377,15 @@ async function deployPostLbpStack__loadContracts__generic(
         DEPLOYMENT_NAMES.PEARLMIT,
         tag,
     ).address;
+    const yieldbox = loadGlobalContract(
+        hre,
+        TAPIOCA_PROJECTS_NAME.YieldBox,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.YIELDBOX,
+        tag,
+    ).address;
 
-    return { cluster, magnetar, pearlmit };
+    return { cluster, magnetar, pearlmit, yieldbox };
 }
 
 async function deployPostLbpStack__loadContracts__arbitrum(

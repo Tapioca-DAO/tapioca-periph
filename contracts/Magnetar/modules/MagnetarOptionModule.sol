@@ -270,7 +270,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         }
     }
 
-    function _validateLockAndParticipate(LockAndParticipateData memory data) private {
+    function _validateLockAndParticipate(LockAndParticipateData memory data) private view {
         // Check sender
         _checkSender(data.user);
 

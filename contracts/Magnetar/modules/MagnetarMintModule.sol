@@ -232,7 +232,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         );
 
         fraction = _extractTokens(data.user, data.externalContracts.singularity, fraction);
-        _depositToYb(_yieldBox, data.user, tOLPSglAssetId, fraction);
+        _depositToYb(_yieldBox, address(this), tOLPSglAssetId, fraction);
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
             data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount

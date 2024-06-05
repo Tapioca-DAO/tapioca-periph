@@ -59,6 +59,8 @@ interface IMarket {
 
     function _yieldBox() external view returns (address payable);
 
+    function _exchangeRatePrecision() external view returns (uint256);
+
     function computeClosingFactor(uint256 borrowPart, uint256 collateralPartInAsset, uint256 ratesPrecision)
         external
         view
@@ -66,6 +68,8 @@ interface IMarket {
 
     function refreshPenroseFees() external returns (uint256 feeShares);
 
+    function updateExchangeRate() external;
+    
     function accrue() external;
 
     function owner() external view returns (address);
