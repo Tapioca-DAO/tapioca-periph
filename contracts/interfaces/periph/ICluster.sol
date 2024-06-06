@@ -22,4 +22,6 @@ interface ICluster {
     function lzChainId() external view returns (uint32);
 
     function hasRole(address _contract, bytes32 _role) external view returns (bool);
+
+    function setRoleForContract(address _contract, bytes32 _role, bool _hasRole) external;
 }

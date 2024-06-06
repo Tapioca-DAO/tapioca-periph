@@ -51,7 +51,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
     using SafeApprove for address;
-
+    
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(uint8 action, bytes actionCalldata); // Burst did not find what to execute
     error Magnetar_PearlmitTransferFailed(); // Transfer failed in pearlmit
@@ -83,7 +83,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @notice Batch multiple calls together
      * @param calls The list of actions to perform
      */
-    function burst(MagnetarCall[] calldata calls) external payable {
+    function burst(MagnetarCall[] calldata calls) external whenNotPaused payable {
         // @dev: make sure the current magnetar is whitelisted
         _checkWhitelisted(address(this));
 

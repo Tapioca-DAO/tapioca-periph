@@ -94,7 +94,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
                 address(this), // Updated from default `toAddress`
                 _guid,
                 0, /* the index of the composed message*/
-                _message.composeMsg()
+                _message
             );
         }
 
@@ -133,7 +133,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // Decode LZ compose message.
         (address srcChainSender_, bytes memory oftComposeMsg_) =
-            TapiocaOmnichainEngineCodec.decodeLzComposeMsg(_message);
+            TapiocaOmnichainEngineCodec.decodeLzComposeMsg(_message.composeMsg());
         // Execute the composed message.
         _lzCompose(srcChainSender_, _guid, oftComposeMsg_);
     }

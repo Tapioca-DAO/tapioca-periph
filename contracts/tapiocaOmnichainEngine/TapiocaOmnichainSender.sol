@@ -59,7 +59,12 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory message,
+            bytes memory options
+        )
     {
         // @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
@@ -72,7 +77,7 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         );
 
         // @dev Builds the options and OFT message to quote in the endpoint.
-        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
+        (message, options) = _buildOFTMsgAndOptions(
             msg.sender, _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
         );
 
@@ -92,7 +97,12 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
     function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory message,
+            bytes memory options
+        )
     {
         if (_from == address(0)) {
             revert BaseTapiocaOmnichainEngine__ZeroAddress();
@@ -117,7 +127,7 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         );
 
         // @dev Builds the options and OFT message to quote in the endpoint.
-        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
+        (message, options) = _buildOFTMsgAndOptions(
             _from, _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
         );
 
