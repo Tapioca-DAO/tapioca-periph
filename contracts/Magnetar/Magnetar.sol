@@ -395,13 +395,13 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // Token is sent to the owner after execute
             if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
-                (address from, address sgl,, uint128 amount) =
+                (, address sgl,, uint128 amount) =
                     abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
                 (uint256 assetId,,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
                 address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
 
                 {
-                    bool isErr = pearlmit.transferFromERC1155(from, address(this), yieldBox, assetId, amount);
+                    bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), yieldBox, assetId, amount);
                     if (isErr) {
                         revert Magnetar_PearlmitTransferFailed();
                     }
