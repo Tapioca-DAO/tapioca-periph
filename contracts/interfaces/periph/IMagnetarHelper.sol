@@ -25,5 +25,5 @@ interface IMagnetarHelper {
         view
         returns (uint256 part);
 
-    function getFractionForAmount(ISingularity singularity, uint256 amount) external view returns (uint256 fraction);
+    function getFractionForAmount(ISingularity singularity, uint256 amount, bool roundUp) external view returns (uint256 fraction);
 }

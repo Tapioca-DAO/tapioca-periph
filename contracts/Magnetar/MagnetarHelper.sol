@@ -134,18 +134,20 @@ contract MagnetarHelper {
         IMarket market,
         uint256 borrowPart,
         uint256 collateralizationRatePrecision,
-        uint256 exchangeRatePrecision
+        uint256 exchangeRatePrecision,
+        bool roundAmounUp,
+        bool roundSharesUp
     ) external view returns (uint256 collateralShares) {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
         IYieldBox yieldBox = IYieldBox(market._yieldBox());
-        uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, false);
+        uint256 borrowAmount = _totalBorrowed.toElastic(borrowPart, roundAmounUp);
 
         uint256 val = (borrowAmount * collateralizationRatePrecision * market._exchangeRate())
             / (market._collateralizationRate() * exchangeRatePrecision);
-        return yieldBox.toShare(market._collateralId(), val, false);
+        return yieldBox.toShare(market._collateralId(), val, roundSharesUp);
     }
 
     /**
@@ -213,16 +215,17 @@ contract MagnetarHelper {
      *       `fraction` can be `singularity.accrueInfo.feeFraction` or `singularity.balanceOf`.
      * @param singularity the singularity address.
      * @param amount The amount.
+     * @param roundUp true/false for rounding up shares.
      * @return fraction The fraction.
      */
-    function getFractionForAmount(ISingularity singularity, uint256 amount) external view returns (uint256 fraction) {
+    function getFractionForAmount(ISingularity singularity, uint256 amount, bool roundUp) external view returns (uint256 fraction) {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity.totalAsset();
         (uint128 totalBorrowElastic,) = singularity._totalBorrow();
         uint256 assetId = singularity._assetId();
 
         IYieldBox yieldBox = IYieldBox(singularity._yieldBox());
 
-        uint256 share = yieldBox.toShare(assetId, amount, false);
+        uint256 share = yieldBox.toShare(assetId, amount, roundUp);
         uint256 allShare = totalAssetShare + yieldBox.toShare(assetId, totalBorrowElastic, false);
 
         fraction = allShare == 0 ? share : (share * totalAssetBase) / allShare;
