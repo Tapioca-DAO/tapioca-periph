@@ -3,6 +3,8 @@ import { createEmptyStratYbAsset__task, loadLocalContract } from 'tapioca-sdk';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { deployPostLbpStack__task__loadContracts__generic } from '../2-deployPostLbpStack';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { BigNumberish } from 'ethers';
 
 export async function deployPostLbpStack__postDeploy(
     params: TTapiocaDeployerVmPass<{
@@ -32,6 +34,7 @@ async function pushCallsCreateTapAndWethYbAssetsAndDeposit(
     calls: TapiocaMulticall.CallStruct[],
 ) {
     const { hre, tapiocaMulticallAddr, taskArgs, chainInfo } = params;
+    const { tag } = taskArgs;
 
     const { tapToken } = deployPostLbpStack__task__loadContracts__generic(
         hre,
@@ -66,85 +69,25 @@ async function pushCallsCreateTapAndWethYbAssetsAndDeposit(
         hre,
     );
     {
-        const tapAssetStrat = loadLocalContract(
+        // Tap deposit
+        approveAndDepositAssetYB(
             hre,
-            chainInfo.chainId,
+            yieldbox.address,
+            tapToken.address,
             DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
-            taskArgs.tag,
+            tapiocaMulticallAddr,
+            calls,
+            tag,
         );
-        const wethAssetStrat = loadLocalContract(
+        // Weth deposit
+        approveAndDepositAssetYB(
             hre,
-            chainInfo.chainId,
-            DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
-            taskArgs.tag,
-        );
-
-        const tapAsset = await yieldbox.ids(
-            1,
-            tapToken.address,
-            tapAssetStrat.address,
-            0,
-        );
-        const wethAsset = await yieldbox.ids(
-            1,
+            yieldbox.address,
             DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-            wethAssetStrat.address,
-            0,
-        );
-
-        const tapTokenContract = await hre.ethers.getContractAt(
-            'ERC20',
-            tapToken.address,
-        );
-        const amount = hre.ethers.utils.parseEther('1');
-
-        calls.push(
-            {
-                target: tapToken.address,
-                callData: tapTokenContract.interface.encodeFunctionData(
-                    'approve',
-                    [yieldbox.address, amount],
-                ),
-                allowFailure: false,
-            },
-            {
-                target: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-                callData: tapTokenContract.interface.encodeFunctionData(
-                    'approve',
-                    [yieldbox.address, amount],
-                ),
-                allowFailure: false,
-            },
-
-            {
-                target: yieldbox.address,
-                callData: yieldbox.interface.encodeFunctionData(
-                    'depositAsset',
-                    [
-                        tapAsset,
-                        tapiocaMulticallAddr,
-                        tapiocaMulticallAddr,
-                        amount,
-                        0,
-                    ],
-                ),
-                allowFailure: false,
-            },
-
-            {
-                target: yieldbox.address,
-                callData: yieldbox.interface.encodeFunctionData(
-                    'depositAsset',
-                    [
-                        wethAsset,
-                        tapiocaMulticallAddr,
-                        tapiocaMulticallAddr,
-                        amount,
-                        0,
-                    ],
-                ),
-                allowFailure: false,
-            },
+            DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+            tapiocaMulticallAddr,
+            calls,
+            tag,
         );
     }
 }
@@ -213,4 +156,48 @@ async function pushCallsTestnetUpdateStaleness(
             }
         }
     }
+}
+
+export async function approveAndDepositAssetYB(
+    hre: HardhatRuntimeEnvironment,
+    yieldbox: string,
+    token: string,
+    stratName: string,
+    tapiocaMulticallAddr: string,
+    calls: TapiocaMulticall.CallStruct[],
+    tag: string,
+) {
+    const yieldboxContract = await hre.ethers.getContractAt(
+        'YieldBox',
+        yieldbox,
+    );
+    const strat = loadLocalContract(
+        hre,
+        hre.SDK.chainInfo.chainId,
+        stratName,
+        tag,
+    ).address;
+
+    const tokenContract = await hre.ethers.getContractAt('ERC20', token);
+    const asset = await yieldboxContract.ids(1, token, strat, 0);
+    const amount = hre.ethers.utils.parseEther('1');
+
+    calls.push(
+        {
+            target: token,
+            callData: tokenContract.interface.encodeFunctionData('approve', [
+                yieldbox,
+                amount,
+            ]),
+            allowFailure: false,
+        },
+        {
+            target: yieldbox,
+            callData: yieldboxContract.interface.encodeFunctionData(
+                'depositAsset',
+                [asset, tapiocaMulticallAddr, tapiocaMulticallAddr, amount, 0],
+            ),
+            allowFailure: false,
+        },
+    );
 }
