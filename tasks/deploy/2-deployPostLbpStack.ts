@@ -39,10 +39,9 @@ import { deployPostLbpStack__postDeploy } from './postDeploy/2-postDeploySetup';
  * Post deploy: Arb,Eth
  * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (UniV3 pool creation)
  * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (YB deposit) (1e18 for each)
- *     - Create empty YB strat for TAP and WETH and register them in YB (TODO)
- *     - Deposit YB assets in YB (TODO)
+ *     - Create empty YB strat for TAP and WETH and register them in YB
+ *     - Deposit YB assets in YB
  *     - Set Seer staleness on testnet
- *
  *
  */
 export const deployPostLbpStack__task = async (
