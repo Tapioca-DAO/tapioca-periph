@@ -1,5 +1,5 @@
 import { WeightedPoolEncoder } from '@balancer-labs/balancer-js';
-import { checkExists } from 'tapioca-sdk';
+import { checkExists, loadLocalContract } from 'tapioca-sdk';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import {
     DEPLOY_LBP_CONFIG,
@@ -48,20 +48,20 @@ export async function postDeploySetupLbp1(
 
     const vault = await hre.ethers.getContractAt(
         'Vault',
-        checkExists(
+        loadLocalContract(
             hre,
-            VM.list().find((dep) => dep.name === DEPLOYMENT_NAMES.LBP_VAULT),
+            chainInfo.chainId,
             DEPLOYMENT_NAMES.LBP_VAULT,
-            'This',
+            tag,
         ).address,
     );
     const lbp = await hre.ethers.getContractAt(
         'LiquidityBootstrappingPool',
-        checkExists(
+        loadLocalContract(
             hre,
-            VM.list().find((dep) => dep.name === DEPLOYMENT_NAMES.TAP_USDC_LBP),
+            chainInfo.chainId,
             DEPLOYMENT_NAMES.TAP_USDC_LBP,
-            'This',
+            tag,
         ).address,
     );
 
@@ -137,7 +137,7 @@ export async function postDeploySetupLbp1(
         allowFailure: false,
     });
 
-    const endTime = startTimestamp + DEPLOY_LBP_CONFIG.LBP_DURATION;
+    const endTime = Number(startTimestamp) + DEPLOY_LBP_CONFIG.LBP_DURATION;
     console.log('\t[+] Add update weights gradually');
     calls.push({
         target: lbp.address,

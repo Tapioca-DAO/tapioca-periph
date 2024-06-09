@@ -15,7 +15,7 @@ export async function postDeploySetupLbp2(
         loadLocalContract(
             hre,
             hre.SDK.chainInfo.chainId,
-            DEPLOYMENT_NAMES.LBP_VAULT,
+            DEPLOYMENT_NAMES.TAP_USDC_LBP,
             tag,
         ).address,
     );
