@@ -13,6 +13,7 @@ import { buildLiquidityBootstrappingPool } from 'tasks/deployBuilds/lbp/buildLiq
 import { buildVault } from 'tasks/deployBuilds/lbp/buildVault';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG, TLbp } from './DEPLOY_CONFIG';
 import { postDeploySetupLbp1 } from './postDeploy/0-postDeploySetupLbp1';
+import { buildBalancerQueries } from 'tasks/deployBuilds/lbp/buildBalancerQueries';
 
 export const DEPLOY_LBP_CONFIG: TLbp = {
     LBP_DURATION: 432000, // In seconds, 2 days 172800 on prod. 5 days 432000 on testnet
@@ -114,6 +115,7 @@ async function tapiocaDeployTask(
                     usdc: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC!,
                 }),
             )
+            .add(await buildBalancerQueries(hre))
             .add(
                 await buildLiquidityBootstrappingPool(
                     hre,
