@@ -5,17 +5,28 @@ import {
     DEPLOY_LBP_CONFIG,
     deployLbp__compareAddresses,
     deployLbp__getDeployments,
-} from '../1-deployLbp';
+} from '../1-1-deployLbp';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { TapiocaMulticall } from '@typechain/index';
+import { ethers } from 'ethers';
+import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
 
-export async function postDeploySetupLbp(
-    params: TTapiocaDeployerVmPass<object>,
+export async function postDeploySetupLbp1(
+    params: TTapiocaDeployerVmPass<{
+        ltapAmount: string;
+        usdcAmount: string;
+        startTimestamp: string;
+    }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
-    const { tag } = taskArgs;
+    const { tag, ltapAmount, usdcAmount, startTimestamp } = taskArgs;
     const owner = tapiocaMulticallAddr;
+
+    DEPLOY_LBP_CONFIG.START_BALANCES = [
+        ethers.BigNumber.from(usdcAmount).mul(1e6), // 6 decimals
+        fp(ltapAmount), // 18 decimals
+    ];
 
     const { lTap } = deployLbp__getDeployments({ hre, tag });
 
@@ -125,20 +136,13 @@ export async function postDeploySetupLbp(
         ]),
         allowFailure: false,
     });
-    console.log('\t[+] Add set swap enabled on LBP');
-    calls.push({
-        target: lbp.address,
-        callData: lbp.interface.encodeFunctionData('setSwapEnabled', [true]),
-        allowFailure: false,
-    });
 
-    const now = Math.floor(Date.now() / 1000);
-    const endTime = now + DEPLOY_LBP_CONFIG.LBP_DURATION;
+    const endTime = startTimestamp + DEPLOY_LBP_CONFIG.LBP_DURATION;
     console.log('\t[+] Add update weights gradually');
     calls.push({
         target: lbp.address,
         callData: lbp.interface.encodeFunctionData('updateWeightsGradually', [
-            now,
+            startTimestamp,
             endTime,
             endWeights,
         ]),

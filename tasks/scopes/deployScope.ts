@@ -1,11 +1,11 @@
 import { scope, types } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
 import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
-import { deployLbp__task } from 'tasks/deploy/1-deployLbp';
+import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
+import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
 import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
-import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
@@ -18,7 +18,7 @@ TAP_TASK(
         .task(
             'lbp',
             'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
-            deployLbp__task,
+            deployLbp__1__task,
         )
         .addParam(
             'ltapAmount',
@@ -27,8 +27,14 @@ TAP_TASK(
         .addParam(
             'usdcAmount',
             'The amount of USDC to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'startTimestamp',
+            'The timestamp when the LBP starts. Unix epoch timestamp.',
         ),
 );
+
+TAP_TASK(deployScope.task('lbpSetup', 'Enable swaps', deployLbp__2__task));
 
 TAP_TASK(
     deployScope.task(

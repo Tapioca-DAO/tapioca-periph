@@ -1,18 +1,18 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract } from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
 import { buildAuthorizer } from 'tasks/deployBuilds/lbp/buildAuthorizer';
 import { buildLiquidityBootstrappingPool } from 'tasks/deployBuilds/lbp/buildLiquidityBootstrappingPool';
 import { buildVault } from 'tasks/deployBuilds/lbp/buildVault';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG, TLbp } from './DEPLOY_CONFIG';
-import { postDeploySetupLbp } from './postDeploy/0-postDeploySetupLbp';
-import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
-import { ethers } from 'ethers';
+import { postDeploySetupLbp1 } from './postDeploy/0-postDeploySetupLbp1';
 
 export const DEPLOY_LBP_CONFIG: TLbp = {
     LBP_DURATION: 432000, // In seconds, 2 days 172800 on prod. 5 days 432000 on testnet
@@ -40,10 +40,11 @@ export const DEPLOY_LBP_CONFIG: TLbp = {
  * - Set swap enabled on LBP
  * - Set update weights gradually
  */
-export const deployLbp__task = async (
+export const deployLbp__1__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
         ltapAmount: string;
         usdcAmount: string;
+        startTimestamp: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -51,7 +52,7 @@ export const deployLbp__task = async (
         _taskArgs,
         { hre, staticSimulation: false },
         tapiocaDeployTask,
-        postDeploySetupLbp,
+        postDeploySetupLbp1,
     );
 };
 
@@ -59,6 +60,7 @@ async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{
         ltapAmount: string;
         usdcAmount: string;
+        startTimestamp: string;
     }>,
 ) {
     const {
