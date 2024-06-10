@@ -16,7 +16,7 @@ import { postDeploySetupLbp1 } from './postDeploy/0-postDeploySetupLbp1';
 import { buildBalancerQueries } from 'tasks/deployBuilds/lbp/buildBalancerQueries';
 
 export const DEPLOY_LBP_CONFIG: TLbp = {
-    LBP_DURATION: 432000, // In seconds, 2 days 172800 on prod. 5 days 432000 on testnet
+    LBP_DURATION: 172800, // 2 days
     START_BALANCES: [
         ethers.BigNumber.from(170_000).mul(1e6), // 6 decimals
         fp(5_000_000), // 18 decimals
