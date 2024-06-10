@@ -732,6 +732,85 @@
             ]
         }
     },
+    "lbp-prod-test": {
+        "42161": {
+            "name": "arbitrum",
+            "lastBlockHeight": 220141576,
+            "contracts": [
+                {
+                    "name": "LBP_AUTHORIZER",
+                    "address": "0x5d9D7424c104348A89f197c81835Cf4ba1a3adDC",
+                    "meta": {
+                        "args": [
+                            "0x4364aef7C6f644bb0e719784F1A35100beAee6Db"
+                        ],
+                        "salt": "0x444d3db3c80d0fb9b398bca384ff3f3850088d06616f95e9399a662fb9557b18",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_VAULT",
+                    "address": "0xda6700Ac83111aB3DC2DdD04C322b7EEFea621B2",
+                    "meta": {
+                        "args": [
+                            "0x5d9D7424c104348A89f197c81835Cf4ba1a3adDC",
+                            "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+                            0,
+                            0
+                        ],
+                        "salt": "0x9c678c7c3f505904b672adb728899657a832ae3be7354bde03e8ad366152b004",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_BALANCER_QUERIES",
+                    "address": "0x079C796CE837269BF33418135f8864c9394Bd340",
+                    "meta": {
+                        "args": [
+                            "0xda6700Ac83111aB3DC2DdD04C322b7EEFea621B2"
+                        ],
+                        "salt": "0x27636720f83436e7d61865b98c48b157f3e28238fa3129ea1c41bcf31db7b560",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_USDC_LBP",
+                    "address": "0xd22C86FF717F11FFA1A65d0F67ec095e7CA8FEC8",
+                    "meta": {
+                        "args": [
+                            "0xda6700Ac83111aB3DC2DdD04C322b7EEFea621B2",
+                            "Tapioca USDC/TAP LBP",
+                            "USDC/TAP LBP",
+                            [
+                                "0x1Dc08530604304FD610a2651a96dD1fa317453e6",
+                                "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+                            ],
+                            [
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x0dbd2fc137a30000"
+                                },
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x2386f26fc10000"
+                                }
+                            ],
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x2386f26fc10000"
+                            },
+                            0,
+                            0,
+                            "0x4364aef7C6f644bb0e719784F1A35100beAee6Db",
+                            false
+                        ],
+                        "salt": "0xf5574774804a27cf8212a088ad20d55ea18beb3844e41c96afe1f1272a8d316b",
+                        "create2": true
+                    }
+                }
+            ]
+        }
+    },
     "tap-token-test": {
         "43113": {
             "name": "fuji_avalanche",
@@ -1061,6 +1140,92 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "testmock",
+                    "address": "0x8a41BD31a251Be5739c5C8A65Bf88001Eba3de3A",
+                    "meta": {
+                        "args": [
+                            "testmock",
+                            "testmock",
+                            "1000000000000000000",
+                            18,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0xad99c7202e35814e304103eb5ce44dfbf1596ed905d43723c053d0e8aca07420",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_AUTHORIZER",
+                    "address": "0x9E661F383275072AA2B10c9B2bb595d929045ad6",
+                    "meta": {
+                        "args": [
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
+                        ],
+                        "salt": "0x76ce5fc51638045fbd7c9d5e0325bc5c30bf0643baacb0b8d6595cb6294d79d2",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_VAULT",
+                    "address": "0x4f759cE990D998a7601297Fe016337f603906262",
+                    "meta": {
+                        "args": [
+                            "0x9E661F383275072AA2B10c9B2bb595d929045ad6",
+                            "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
+                            0,
+                            0
+                        ],
+                        "salt": "0xa1f37458a21136d21aa58036d146e5e25e60b7cfad76307d37363e8c3ac1e9b0",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_BALANCER_QUERIES",
+                    "address": "0xF326084bD60D6cA53a7c797dC651a932f3353872",
+                    "meta": {
+                        "args": [
+                            "0x4f759cE990D998a7601297Fe016337f603906262"
+                        ],
+                        "salt": "0x8218c3e412d6ca579f6c4ba6f6e257b89797245eff8769a93785c7f20e911534",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_USDC_LBP",
+                    "address": "0xA81f404801880309D9c47132388A48A683241C06",
+                    "meta": {
+                        "args": [
+                            "0x4f759cE990D998a7601297Fe016337f603906262",
+                            "Tapioca USDC/TAP LBP",
+                            "USDC/TAP LBP",
+                            [
+                                "0x1A7fA2C3CDFb730Ef01588eAa845F38EB1ef240e",
+                                "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705"
+                            ],
+                            [
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x0dbd2fc137a30000"
+                                },
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x2386f26fc10000"
+                                }
+                            ],
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x2386f26fc10000"
+                            },
+                            0,
+                            0,
+                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
+                            false
+                        ],
+                        "salt": "0x7df51ec4f0a8bd84032809a2de0696fae17015586bab1099b3f636fa2e8b8e6a",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "MAGNETAR_COLLATERAL_MODULE",
                     "address": "0xa0BcC4a8b1cacD96281Ec2b5281811a9D3c1FeE6",
                     "meta": {
@@ -1199,21 +1364,6 @@
                             "cltestmock"
                         ],
                         "salt": "0xbfc98cf829840923025087f96a3175f878f39a9b8921b1deecf96d03207658df",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "testmock",
-                    "address": "0x8Db8893cA7A966d116fFF0AA42AE989Dc6fefd9F",
-                    "meta": {
-                        "args": [
-                            "testmock",
-                            "testmock",
-                            "1000000000000000000",
-                            18,
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                        ],
-                        "salt": "0xb84dc1e088ce550b445038535e2c65dd386b5298dd8b1521e95895d463e2c687",
                         "create2": true
                     }
                 },
@@ -1629,66 +1779,6 @@
                         "ratio0": 1,
                         "ratio1": 7,
                         "fee": 3000
-                    }
-                },
-                {
-                    "name": "LBP_AUTHORIZER",
-                    "address": "0x085A3B1E96D20085e3960d9737c23aC98F57Ca32",
-                    "meta": {
-                        "args": [
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88"
-                        ],
-                        "salt": "0xda4615535fca5f02faca5df6bb69aa886844eb458996ab561c33a9266764718b",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "LBP_VAULT",
-                    "address": "0x06821d732fBb26a8dDC534aDa6D7b228beAB5f50",
-                    "meta": {
-                        "args": [
-                            "0x085A3B1E96D20085e3960d9737c23aC98F57Ca32",
-                            "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
-                            0,
-                            0
-                        ],
-                        "salt": "0xdd576100c730bfd2ffd35fc304c389c3e66d2e84e889b62a7a5389b620e29142",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TAP_USDC_LBP",
-                    "address": "0x5Cf6d3bEC6a4c3E9Fc44be9864D691f432201f15",
-                    "meta": {
-                        "args": [
-                            "0x06821d732fBb26a8dDC534aDa6D7b228beAB5f50",
-                            "Tapioca USDC/TAP LBP",
-                            "USDC/TAP LBP",
-                            [
-                                "0x6D6a13AbE7935b2cf6d67e49bc17F5035362C705",
-                                "0xaA6a0439266F07691667D40A5f64b0a5Df026431"
-                            ],
-                            [
-                                {
-                                    "type": "BigNumber",
-                                    "hex": "0x2386f26fc10000"
-                                },
-                                {
-                                    "type": "BigNumber",
-                                    "hex": "0x0dbd2fc137a30000"
-                                }
-                            ],
-                            {
-                                "type": "BigNumber",
-                                "hex": "0x2386f26fc10000"
-                            },
-                            0,
-                            0,
-                            "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
-                            false
-                        ],
-                        "salt": "0xf26122179c5c6ba4e7400b2005043217369fb4ce3721e7b285e44021a4e29723",
-                        "create2": true
                     }
                 },
                 {
