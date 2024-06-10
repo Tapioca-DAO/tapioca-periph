@@ -732,6 +732,85 @@
             ]
         }
     },
+    "lbp-prod-deployment": {
+        "42161": {
+            "name": "arbitrum",
+            "lastBlockHeight": 220505928,
+            "contracts": [
+                {
+                    "name": "LBP_AUTHORIZER",
+                    "address": "0xF043f34cacD17475CF1D1c0A3c19f2A5b05f2168",
+                    "meta": {
+                        "args": [
+                            "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                        ],
+                        "salt": "0x4bec55c2f20235d64e1703e843e9bc1abda8b99e867113134397bfb2933b351a",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_VAULT",
+                    "address": "0x34d9ecdade9a3c0529C791e6F5300A8C01F87411",
+                    "meta": {
+                        "args": [
+                            "0xF043f34cacD17475CF1D1c0A3c19f2A5b05f2168",
+                            "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+                            0,
+                            0
+                        ],
+                        "salt": "0x9e28f3612db784faa81135b0411ac4599e28161da1146ca8450eff4cb9509bc3",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "LBP_BALANCER_QUERIES",
+                    "address": "0x0C2888a224895EBA5Cd0f72ac0Fd23BBEC8539dC",
+                    "meta": {
+                        "args": [
+                            "0x34d9ecdade9a3c0529C791e6F5300A8C01F87411"
+                        ],
+                        "salt": "0xb1025965ff9c9234611c6e4f17c4a64f3a97a8ef0fdf4cb90d3b2b965588b916",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "TAP_USDC_LBP",
+                    "address": "0x7634aF22a94A458C469449E6579Ee5130a7cB532",
+                    "meta": {
+                        "args": [
+                            "0x34d9ecdade9a3c0529C791e6F5300A8C01F87411",
+                            "Tapioca USDC/TAP LBP",
+                            "USDC/TAP LBP",
+                            [
+                                "0x00BeBF0fA54D8e67914Be964a7FA20130822a88d",
+                                "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+                            ],
+                            [
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x0dbd2fc137a30000"
+                                },
+                                {
+                                    "type": "BigNumber",
+                                    "hex": "0x2386f26fc10000"
+                                }
+                            ],
+                            {
+                                "type": "BigNumber",
+                                "hex": "0x2386f26fc10000"
+                            },
+                            0,
+                            0,
+                            "0x302E912826211b72222cDbaa684426Dc61F7fDED",
+                            false
+                        ],
+                        "salt": "0xdc70d4ccbfecf9ff6eec44f0bce57f11945591a426223baaa65176cc15df737c",
+                        "create2": true
+                    }
+                }
+            ]
+        }
+    },
     "lbp-prod-test": {
         "42161": {
             "name": "arbitrum",
