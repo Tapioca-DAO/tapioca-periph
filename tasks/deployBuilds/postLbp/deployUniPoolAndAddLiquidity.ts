@@ -8,10 +8,12 @@ import {
 import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
 import { deployUniV3Pool } from './deployUniV3Pool';
+import { saveBuildLocally } from '@tapioca-sdk/api/db';
 
 export async function deployUniPoolAndAddLiquidity(
     params: TTapiocaDeployerVmPass<{
         deploymentName: string;
+        arrakisDeploymentName: string;
         tokenA: string;
         tokenB: string;
         ratioTokenA: number;
@@ -29,6 +31,7 @@ export async function deployUniPoolAndAddLiquidity(
     const {
         tag,
         deploymentName,
+        arrakisDeploymentName,
         tokenA,
         tokenB,
         ratioTokenA,
@@ -96,6 +99,23 @@ export async function deployUniPoolAndAddLiquidity(
     );
     console.log(
         `[+] Arrakis vault [${await arrakisVault.name()}] deployed at: [${vaultAddr}]`,
+    );
+    saveBuildLocally(
+        {
+            chainId: hre.SDK.eChainId,
+            chainIdName: hre.SDK.chainInfo.name,
+            contracts: [
+                {
+                    address: vaultAddr,
+                    name: arrakisDeploymentName,
+                    meta: {
+                        vaultNum: numVaults.toNumber() - 1,
+                    },
+                },
+            ],
+            lastBlockHeight: await hre.ethers.provider.getBlockNumber(),
+        },
+        tag,
     );
 
     console.log('[+] Deposit liquidity in pool');

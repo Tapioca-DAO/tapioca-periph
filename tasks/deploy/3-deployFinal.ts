@@ -160,6 +160,7 @@ async function deployUsdoUniPoolAndAddLiquidity(
         taskArgs: {
             ...taskArgs,
             deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
+            arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_USDO_USDC_VAULT,
             tokenA: usdo,
             tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
             ratioTokenA: taskArgs.ratioUsdo,

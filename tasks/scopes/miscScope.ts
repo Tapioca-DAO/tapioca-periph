@@ -1,5 +1,6 @@
 import { scope } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
+import { arrakisWithdraw__task } from 'tasks/exec/misc/arrakisWithdraw';
 import { deployOracleMock__task } from 'tasks/exec/misc/deployOracleMock';
 import { mintMock__task } from 'tasks/exec/misc/mintMock';
 import { misc__clusterWhitelist__task } from 'tasks/exec/misc/misc__clusterWhitelist__task';
@@ -45,6 +46,17 @@ TAP_TASK(
             'cluster',
             'Address of cluster to use, if not used, will grab deployed Cluster address on chosen tag',
         ),
+);
+
+TAP_TASK(
+    miscScope
+        .task(
+            'arrakisWithdraw',
+            'Withdraw from Arrakis Vault',
+            arrakisWithdraw__task,
+        )
+        .addParam('vault', 'The address of the Arrakis Vault')
+        .addParam('percentage', 'The percentage to withdraw in BPS(0-10000)'),
 );
 
 // Sandbox
