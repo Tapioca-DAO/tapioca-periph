@@ -2,6 +2,7 @@
 import fs from 'fs';
 import '@nomiclabs/hardhat-ethers';
 import '@nomicfoundation/hardhat-verify';
+import '@typechain/hardhat';
 
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
