@@ -175,8 +175,8 @@ export async function deployUniPoolAndAddLiquidity(
         {
             const amountsForLiquidity = await arrakisResolve.getMintAmounts(
                 arrakisVault.address,
-                await token0Erc20.balanceOf(owner),
-                await token1Erc20.balanceOf(owner),
+                amountTokenA,
+                amountTokenB,
             );
 
             await arrakisMint({
