@@ -5,6 +5,7 @@ import { deployPostLbpStack__task__loadContracts__generic } from '../2-deployPos
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { BigNumberish } from 'ethers';
+import { ERC20 } from '@typechain/@openzeppelin/contracts/token/ERC20';
 
 export async function deployPostLbpStack__postDeploy(
     params: TTapiocaDeployerVmPass<{
@@ -49,46 +50,99 @@ async function pushCallsCreateTapAndWethYbAssetsAndDeposit(
             taskArgs.tag,
         ).address,
     );
+    const tapTokenEmptyStrat = loadLocalContract(
+        hre,
+        chainInfo.chainId,
+        DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+        taskArgs.tag,
+    );
+    const wethEmptyStrat = loadLocalContract(
+        hre,
+        chainInfo.chainId,
+        DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+        taskArgs.tag,
+    );
+
+    const tapAssetId = await yieldbox.ids(
+        1,
+        tapToken.address,
+        tapTokenEmptyStrat.address,
+        0,
+    );
+    const wethAssetId = await yieldbox.ids(
+        1,
+        DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+        wethEmptyStrat.address,
+        0,
+    );
 
     // Used in Bar Penrose register
-    await createEmptyStratYbAsset__task(
-        {
-            ...taskArgs,
-            token: tapToken.address,
-            deploymentName: DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
-        },
-        hre,
-    );
-
-    await createEmptyStratYbAsset__task(
-        {
-            ...taskArgs,
-            token: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-            deploymentName: DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
-        },
-        hre,
-    );
     {
-        // Tap deposit
-        approveAndDepositAssetYB(
-            hre,
-            yieldbox.address,
-            tapToken.address,
-            DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+        if (tapAssetId.eq(0)) {
+            await createEmptyStratYbAsset__task(
+                {
+                    ...taskArgs,
+                    token: tapToken.address,
+                    deploymentName: DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+                },
+                hre,
+            );
+        }
+
+        if (wethAssetId.eq(0)) {
+            await createEmptyStratYbAsset__task(
+                {
+                    ...taskArgs,
+                    token: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+                    deploymentName: DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+                },
+                hre,
+            );
+        }
+    }
+
+    {
+        const tapYbBalance = await yieldbox.balanceOf(
             tapiocaMulticallAddr,
-            calls,
-            tag,
+            tapAssetId,
         );
+        const wethYbBalance = await yieldbox.balanceOf(
+            tapiocaMulticallAddr,
+            wethAssetId,
+        );
+
+        if (tapYbBalance.eq(0)) {
+            const toDeposit = hre.ethers.utils.parseEther('1');
+            console.log('[+] Init deposit', toDeposit, 'WETH in YB');
+
+            // Tap deposit
+            approveAndDepositAssetYB(
+                hre,
+                yieldbox.address,
+                tapToken.address,
+                DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+                toDeposit,
+                tapiocaMulticallAddr,
+                calls,
+                tag,
+            );
+        }
+
         // Weth deposit
-        approveAndDepositAssetYB(
-            hre,
-            yieldbox.address,
-            DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-            DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
-            tapiocaMulticallAddr,
-            calls,
-            tag,
-        );
+        if (wethYbBalance.eq(0)) {
+            const toDeposit = hre.ethers.utils.parseEther('0.0001');
+            console.log('[+] Init deposit', toDeposit, 'WETH in YB');
+            approveAndDepositAssetYB(
+                hre,
+                yieldbox.address,
+                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+                DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+                toDeposit,
+                tapiocaMulticallAddr,
+                calls,
+                tag,
+            );
+        }
     }
 }
 
@@ -163,6 +217,7 @@ export async function approveAndDepositAssetYB(
     yieldbox: string,
     token: string,
     stratName: string,
+    amount: BigNumberish,
     tapiocaMulticallAddr: string,
     calls: TapiocaMulticall.CallStruct[],
     tag: string,
@@ -178,9 +233,11 @@ export async function approveAndDepositAssetYB(
         tag,
     ).address;
 
-    const tokenContract = await hre.ethers.getContractAt('ERC20', token);
+    const tokenContract = (await hre.ethers.getContractAt(
+        '@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20',
+        token,
+    )) as ERC20;
     const asset = await yieldboxContract.ids(1, token, strat, 0);
-    const amount = hre.ethers.utils.parseEther('1');
 
     calls.push(
         {
