@@ -10,8 +10,6 @@ export const buildUsdoUsdcOracle = async (params: {
     usdoUsdcLpAddy: string;
     isTestnet: boolean;
 }): Promise<IDeployerVMAdd<Seer__factory>> => {
-    console.log('[+] buildUsdoUsdcOracle');
-
     const { hre, owner, usdoAddy, usdoUsdcLpAddy, isTestnet } = params;
     const chainID = hre.SDK.eChainId;
 

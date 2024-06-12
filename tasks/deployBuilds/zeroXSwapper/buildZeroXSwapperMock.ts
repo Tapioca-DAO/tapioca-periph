@@ -9,7 +9,6 @@ export const buildZeroXSwapperMock = async (
     args: Parameters<ZeroXSwapperMock__factory['deploy']>,
     dependsOn: IDependentOn[],
 ): Promise<IDeployerVMAdd<ZeroXSwapperMock__factory>> => {
-    console.log('\t[+] Building ZeroXSwapperMock...');
     return {
         contract: new ZeroXSwapperMock__factory(
             hre.ethers.provider.getSigner(),

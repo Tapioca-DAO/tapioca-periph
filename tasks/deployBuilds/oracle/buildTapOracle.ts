@@ -10,8 +10,6 @@ export const buildTapOracle = async (
     tapWethLpPair: string,
     owner: string,
 ): Promise<IDeployerVMAdd<Seer__factory>> => {
-    console.log('[+] buildTAPOracle');
-
     const chainID = hre.SDK.eChainId;
     if (
         chainID !== hre.SDK.config.EChainID.ARBITRUM &&

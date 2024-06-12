@@ -8,7 +8,6 @@ export const buildUSDCOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
-    console.log('[+] buildUSDCOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<SeerCLSolo__factory['deploy']> = [

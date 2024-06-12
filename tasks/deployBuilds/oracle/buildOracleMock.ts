@@ -9,8 +9,6 @@ export const buildOracleMock = async (
         args: Parameters<OracleMock__factory['deploy']>;
     },
 ): Promise<IDeployerVMAdd<OracleMock__factory>> => {
-    console.log('[+] buildOracleMock');
-
     return {
         contract: new OracleMock__factory().connect(
             hre.ethers.provider.getSigner(),

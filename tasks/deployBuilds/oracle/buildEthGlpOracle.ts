@@ -7,8 +7,6 @@ export const buildEthGlpPOracle = async (
     hre: HardhatRuntimeEnvironment,
     owner: string,
 ): Promise<IDeployerVMAdd<EthGlpOracle__factory>> => {
-    console.log('[+] buildEthGlpOracle');
-
     const chainID = hre.SDK.eChainId;
     if (
         chainID !== hre.SDK.config.EChainID.ARBITRUM &&

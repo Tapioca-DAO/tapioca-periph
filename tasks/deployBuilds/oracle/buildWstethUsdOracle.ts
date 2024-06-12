@@ -8,7 +8,6 @@ export const buildWstethUsdOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLMulti__factory>> => {
-    console.log('[+] buildWstETH/UsdOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<SeerCLMulti__factory['deploy']> = [

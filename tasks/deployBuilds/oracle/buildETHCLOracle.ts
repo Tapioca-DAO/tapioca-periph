@@ -8,7 +8,6 @@ export const buildETHCLOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
-    console.log('[+] buildETHCLOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<SeerCLSolo__factory['deploy']> = [

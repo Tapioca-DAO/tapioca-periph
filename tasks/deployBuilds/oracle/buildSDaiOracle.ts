@@ -7,8 +7,6 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 export const buildSDaiOracle = async (
     hre: HardhatRuntimeEnvironment,
 ): Promise<IDeployerVMAdd<SDaiOracle__factory>> => {
-    console.log('[+] buildSDaiOracle');
-
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<SDaiOracle__factory['deploy']> = [
