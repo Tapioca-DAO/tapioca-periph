@@ -17,6 +17,7 @@ import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwa
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { deployPreLbpYieldbox } from './0-1-deployYieldBox';
+import { buildPauserManager } from 'tasks/deployBuilds/buildPauserManager';
 
 /**
  * @notice First thing to deploy
@@ -78,6 +79,22 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             ]),
         )
         .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
+        .add(
+            await buildPauserManager(
+                hre,
+                DEPLOYMENT_NAMES.PAUSER_MANAGER,
+                [
+                    '', // Cluster
+                    owner,
+                ],
+                [
+                    {
+                        argPosition: 0,
+                        deploymentName: DEPLOYMENT_NAMES.CLUSTER,
+                    },
+                ],
+            ),
+        )
         .add(
             await buildMagnetarCollateralModule(
                 hre,
