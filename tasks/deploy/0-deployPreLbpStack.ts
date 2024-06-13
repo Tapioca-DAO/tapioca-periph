@@ -82,7 +82,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         .add(
             await buildPauserManager(
                 hre,
-                DEPLOYMENT_NAMES.PAUSER_MANAGER,
+                DEPLOYMENT_NAMES.PAUSER,
                 [
                     '', // Cluster
                     owner,

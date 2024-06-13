@@ -185,16 +185,24 @@ async function clusterWhitelist(params: {
 }) {
     const { hre, tag, calls, isHostChain, isSideChain } = params;
 
-    const { cluster, magnetar, pearlmit, yieldbox } =
+    const { cluster, magnetar, pearlmit, yieldbox, pauser } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
 
     /**
      * Non chain specific
      */
-    await addMagnetarToeRole({
+    await addRoleForContract({
         hre,
         cluster,
-        magnetarAddr: magnetar.address,
+        target: magnetar.address,
+        role: 'TOE',
+        calls,
+    });
+    await addRoleForContract({
+        hre,
+        cluster,
+        target: pauser,
+        role: 'PAUSER',
         calls,
     });
 
@@ -315,25 +323,26 @@ async function clusterWhitelist(params: {
     }
 }
 
-async function addMagnetarToeRole(params: {
+async function addRoleForContract(params: {
     hre: HardhatRuntimeEnvironment;
     cluster: Cluster;
-    magnetarAddr: string;
+    target: string;
+    role: string;
     calls: TapiocaMulticall.CallStruct[];
 }) {
-    const { hre, cluster, magnetarAddr, calls } = params;
+    const { hre, cluster, target, calls, role } = params;
     // Role setting not working
-    const TOE_ROLE = hre.ethers.utils.keccak256(
-        hre.ethers.utils.solidityPack(['string'], ['TOE']),
-    ); // Role to be able to use TOE.sendPacketFrom()
+    const ROLE = hre.ethers.utils.keccak256(
+        hre.ethers.utils.solidityPack(['string'], [role]),
+    );
 
-    if (!(await cluster.hasRole(magnetarAddr, TOE_ROLE))) {
-        console.log(`[+] Adding Magnetar ${magnetarAddr} to TOE role`);
+    if (!(await cluster.hasRole(target, ROLE))) {
+        console.log(`[+] Adding ${target} to ${role} role`);
         calls.push({
             target: cluster.address,
             callData: cluster.interface.encodeFunctionData(
                 'setRoleForContract',
-                [magnetarAddr, TOE_ROLE, true],
+                [target, ROLE, true],
             ),
             allowFailure: false,
         });
@@ -404,8 +413,14 @@ async function deployPostLbpStack__loadContracts__generic(
         DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     ).address;
+    const pauser = loadLocalContract(
+        hre,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.PAUSER,
+        tag,
+    ).address;
 
-    return { cluster, magnetar, pearlmit, yieldbox };
+    return { cluster, magnetar, pearlmit, yieldbox, pauser };
 }
 
 async function deployPostLbpStack__loadContracts__arbitrum(
