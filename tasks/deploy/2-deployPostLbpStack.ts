@@ -102,7 +102,7 @@ async function tapiocaDeployTask(
                 ratioTokenB: taskArgs.ratioWeth,
                 amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountTap),
                 amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountWeth),
-                feeAmount: FeeAmount.MEDIUM,
+                feeAmount: FeeAmount.HIGH,
                 options: {
                     mintMock: !!isTestnet,
                     arrakisDepositLiquidity: true,
