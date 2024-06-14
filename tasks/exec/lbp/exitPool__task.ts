@@ -9,7 +9,9 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { BalancerSDK } from '@balancer-labs/sdk';
 
 export const exitPool__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs,
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        multisigAddress: string;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -21,10 +23,12 @@ export const exitPool__task = async (
     );
 };
 
-export async function setup(params: TTapiocaDeployerVmPass<object>) {
+export async function setup(
+    params: TTapiocaDeployerVmPass<{ multisigAddress: string }>,
+) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
-    const { tag } = taskArgs;
+    const { tag, multisigAddress } = taskArgs;
 
     console.log('[+] Exiting LBP');
 
@@ -68,23 +72,16 @@ export async function setup(params: TTapiocaDeployerVmPass<object>) {
 
     const slippage = 1;
     const ltapAmountWithdraw = ltapVaultBalance.sub(
-        ltapVaultBalance.div(100).mul(slippage),
+        ltapVaultBalance.div(1000).mul(slippage),
     );
     const usdcAmountWithdraw = usdcVaultBalance.sub(
-        usdcVaultBalance.div(100).mul(slippage),
+        usdcVaultBalance.div(1000).mul(slippage),
     );
 
     console.log('[+] LTAP amount to withdraw:', ltapAmountWithdraw.toString());
     console.log('[+] USDC amount to withdraw:', usdcAmountWithdraw.toString());
 
     calls.push(
-        {
-            target: lbp.address,
-            callData: lbp.interface.encodeFunctionData('setSwapEnabled', [
-                false,
-            ]),
-            allowFailure: false,
-        },
         {
             target: lbp.address,
             callData: lbp.interface.encodeFunctionData('approve', [
@@ -98,7 +95,7 @@ export async function setup(params: TTapiocaDeployerVmPass<object>) {
             callData: vault.interface.encodeFunctionData('exitPool', [
                 await lbp.getPoolId(),
                 tapiocaMulticallAddr,
-                tapiocaMulticallAddr,
+                multisigAddress,
                 {
                     assets: [lTap.address, usdc],
                     minAmountsOut: [ltapAmountWithdraw, usdcAmountWithdraw],
@@ -113,5 +110,6 @@ export async function setup(params: TTapiocaDeployerVmPass<object>) {
         },
     );
 
-    await VM.executeMulticall(calls);
+    const multicall = await VM.getMulticall();
+    await multicall.multicall(calls);
 }
