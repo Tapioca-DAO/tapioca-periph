@@ -36,10 +36,15 @@ contract Pauser is Ownable {
         RemoveAsset
     }
     
+    enum SpecialStrategyType {
+        Deposit,
+        Withdraw
+    }
 
     enum PausableContractType {
         Singularity, // it does not contain `updatePauseAll` like BB or Origins
         NonSingularityMarket, // it includes `updatePauseAll`
+        SpecialStrategy, // it has `setPause(bool, uint256)
         Generic // method is called `setPause`
     }
     struct PausableContract {
@@ -90,17 +95,21 @@ contract Pauser is Ownable {
     // ************************** //
     // *** PUBLIC FUNCTIONS ***** //
     // ************************** //
+    function toggleEmergencyPauseForType(bool _pause, PausableContractType _type) onlyAllowed external {
+        uint256 len = pausableAddresses.length;
+        for (uint256 i; i < len; i++) {
+            PausableContract memory _pausable = pausableAddresses[i];
+            if(_pausable._contractType == _type) {
+                _togglePauseHelper(_pausable, _pause);
+            }
+        }
+    }
+
     function toggleEmergencyPause(bool _pause) onlyAllowed external {
         uint256 len = pausableAddresses.length;
         for (uint256 i; i < len; i++) {
             PausableContract memory _pausable = pausableAddresses[i];
-            if (_pausable._contractType == PausableContractType.Singularity) {
-                _toggleSingularityPause(IMarket(_pausable._contract), _pause);
-            } else if (_pausable._contractType == PausableContractType.NonSingularityMarket) {
-                _toggleNonSingularityMarketPause(IMarket(_pausable._contract), _pause);
-            } else if (_pausable._contractType == PausableContractType.Generic) {
-                _toggleGenericPause(IPausable(_pausable._contract), _pause);
-            }
+            _togglePauseHelper(_pausable, _pause);
         }
         emit EmergencyTogglePause(_pause);
     }
@@ -113,20 +122,25 @@ contract Pauser is Ownable {
         if (!registeredContracts[address(_pausable)]) revert Pauser_NotValid();
         uint256 _index = _findIndex(address(_pausable));
         PausableContract memory _pausable = pausableAddresses[_index];
-        if (_pausable._contractType == PausableContractType.Singularity) {
-            _toggleSingularityPause(IMarket(_pausable._contract), _pause);
-        } else if (_pausable._contractType == PausableContractType.NonSingularityMarket) {
-            _toggleNonSingularityMarketPause(IMarket(_pausable._contract), _pause);
-        } else if (_pausable._contractType == PausableContractType.Generic) {
-            _toggleGenericPause(IPausable(_pausable._contract), _pause);
-        }
-        (_pausable, _pause);
+        _togglePauseHelper(_pausable,  _pause);
     }
 
 
     // *************************** //
     // *** PRIVATE FUNCTIONS ***** //
     // *************************** //
+    function _togglePauseHelper(PausableContract memory _pausable, bool _pause) private {
+        if (_pausable._contractType == PausableContractType.Singularity) {
+            _toggleSingularityPause(IMarket(_pausable._contract), _pause);
+        } else if (_pausable._contractType == PausableContractType.NonSingularityMarket) {
+            _toggleNonSingularityMarketPause(IMarket(_pausable._contract), _pause);
+        } else if (_pausable._contractType == PausableContractType.SpecialStrategy) {
+            _toggleSpecialStrategy(IPausable(_pausable._contract), _pause);
+        } else if (_pausable._contractType == PausableContractType.Generic) {
+            _toggleGenericPause(IPausable(_pausable._contract), _pause);
+        }
+    }
+
     function _toggleSingularityPause(IMarket _singularity, bool _pause) private {
         if (!cluster.isWhitelisted(0, address(this))) revert Pauser_NotWhitelisted(address(this));
         if (!cluster.isWhitelisted(0, address(_singularity))) revert Pauser_NotWhitelisted(address(_singularity));
@@ -155,6 +169,15 @@ contract Pauser is Ownable {
         if (!cluster.isWhitelisted(0, address(_pausable))) revert Pauser_NotWhitelisted(address(_pausable));
 
         _pausable.setPause(_pause);
+        emit PauseToggledFor(address(_pausable), _pause);
+    }
+
+    function _toggleSpecialStrategy(IPausable _pausable, bool _pause) private {
+        if (!cluster.isWhitelisted(0, address(this))) revert Pauser_NotWhitelisted(address(this));
+        if (!cluster.isWhitelisted(0, address(_pausable))) revert Pauser_NotWhitelisted(address(_pausable));
+
+        _pausable.setPause(_pause, uint256(SpecialStrategyType.Deposit));
+        _pausable.setPause(_pause, uint256(SpecialStrategyType.Withdraw));
         emit PauseToggledFor(address(_pausable), _pause);
     }
 
