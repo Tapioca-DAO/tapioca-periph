@@ -85,31 +85,31 @@ async function tapiocaDeployTask(
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    if (isHostChain) {
-        const { tapToken } = deployPostLbpStack__task__loadContracts__generic(
-            hre,
-            tag,
-        );
-        await deployUniPoolAndAddLiquidity({
-            ...params,
-            taskArgs: {
-                ...taskArgs,
-                deploymentName: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
-                arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_TAP_WETH_VAULT,
-                tokenA: tapToken.address,
-                tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-                ratioTokenA: taskArgs.ratioTap,
-                ratioTokenB: taskArgs.ratioWeth,
-                amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountTap),
-                amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountWeth),
-                feeAmount: FeeAmount.HIGH,
-                options: {
-                    mintMock: !!isTestnet,
-                    arrakisDepositLiquidity: true,
-                },
-            },
-        });
-    }
+    // if (isHostChain) {
+    //     const { tapToken } = deployPostLbpStack__task__loadContracts__generic(
+    //         hre,
+    //         tag,
+    //     );
+    //     await deployUniPoolAndAddLiquidity({
+    //         ...params,
+    //         taskArgs: {
+    //             ...taskArgs,
+    //             deploymentName: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
+    //             arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_TAP_WETH_VAULT,
+    //             tokenA: tapToken.address,
+    //             tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+    //             ratioTokenA: taskArgs.ratioTap,
+    //             ratioTokenB: taskArgs.ratioWeth,
+    //             amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountTap),
+    //             amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountWeth),
+    //             feeAmount: FeeAmount.HIGH,
+    //             options: {
+    //                 mintMock: !!isTestnet,
+    //                 arrakisDepositLiquidity: true,
+    //             },
+    //         },
+    //     });
+    // }
 
     if (isHostChain) {
         // TapWethLp is used in the oracles, so it must be deployed first

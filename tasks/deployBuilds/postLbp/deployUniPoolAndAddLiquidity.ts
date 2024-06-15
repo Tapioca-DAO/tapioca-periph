@@ -175,10 +175,21 @@ export async function deployUniPoolAndAddLiquidity(
         {
             const amountsForLiquidity = await arrakisResolve.getMintAmounts(
                 arrakisVault.address,
-                amountTokenA,
-                amountTokenB,
+                amount0,
+                amount1,
             );
+            console.log('amountTokenA', amount0);
+            console.log('amountTokenB', amount1);
+            console.log('amountsForLiquidity');
+            console.log(amountsForLiquidity);
 
+            const slot0 = await uniPool.slot0();
+            const tickSpacing = await uniPool.tickSpacing();
+            const lowerTick =
+                slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
+            const upperTick =
+                slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
+            console.log(lowerTick, upperTick);
             await arrakisMint({
                 amount0: amountsForLiquidity.amount0,
                 amount1: amountsForLiquidity.amount1,
@@ -208,10 +219,15 @@ export async function deployUniPoolAndAddLiquidity(
                 slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
             const upperTick =
                 slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
+            console.log(lowerTick, upperTick);
             const rebalanceParams = await arrakisResolve.standardRebalance(
                 [
                     {
-                        range: { lowerTick, upperTick, feeTier: feeAmount },
+                        range: {
+                            lowerTick: -887200,
+                            upperTick: 887200,
+                            feeTier: feeAmount,
+                        },
                         weight: 10_000, // 100%
                     },
                 ],

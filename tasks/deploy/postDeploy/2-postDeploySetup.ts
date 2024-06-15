@@ -4,7 +4,7 @@ import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/Deployer
 import { deployPostLbpStack__task__loadContracts__generic } from '../2-deployPostLbpStack';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import { ERC20 } from '@typechain/@openzeppelin/contracts/token/ERC20';
 
 export async function deployPostLbpStack__postDeploy(
@@ -50,31 +50,37 @@ async function pushCallsCreateTapAndWethYbAssetsAndDeposit(
             taskArgs.tag,
         ).address,
     );
-    const tapTokenEmptyStrat = loadLocalContract(
-        hre,
-        chainInfo.chainId,
-        DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
-        taskArgs.tag,
-    );
-    const wethEmptyStrat = loadLocalContract(
-        hre,
-        chainInfo.chainId,
-        DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
-        taskArgs.tag,
-    );
 
-    const tapAssetId = await yieldbox.ids(
-        1,
-        tapToken.address,
-        tapTokenEmptyStrat.address,
-        0,
-    );
-    const wethAssetId = await yieldbox.ids(
-        1,
-        DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-        wethEmptyStrat.address,
-        0,
-    );
+    let tapAssetId: BigNumber = hre.ethers.BigNumber.from(0);
+    let wethAssetId: BigNumber = hre.ethers.BigNumber.from(0);
+
+    try {
+        const tapTokenEmptyStrat = loadLocalContract(
+            hre,
+            chainInfo.chainId,
+            DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
+            taskArgs.tag,
+        );
+        const wethEmptyStrat = loadLocalContract(
+            hre,
+            chainInfo.chainId,
+            DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
+            taskArgs.tag,
+        );
+
+        tapAssetId = await yieldbox.ids(
+            1,
+            tapToken.address,
+            tapTokenEmptyStrat.address,
+            0,
+        );
+        wethAssetId = await yieldbox.ids(
+            1,
+            DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
+            wethEmptyStrat.address,
+            0,
+        );
+    } catch (e) {}
 
     // Used in Bar Penrose register
     {
