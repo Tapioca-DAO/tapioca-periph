@@ -1,30 +1,24 @@
-import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
+import { buildPauserManager } from 'tasks/deployBuilds/buildPauserManager';
 import { buildMagnetar } from 'tasks/deployBuilds/magnetar/buildMagnetar';
 import { buildMagnetarCollateralModule } from 'tasks/deployBuilds/magnetar/buildMagnetarCollateralModule';
 import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
 import { buildMagnetarMintModule } from 'tasks/deployBuilds/magnetar/buildMagnetarMintModule';
 import { buildMagnetarOptionModule } from 'tasks/deployBuilds/magnetar/buildMagnetarOptionModule';
 import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxModule';
-import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
 import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
-import { deployPreLbpYieldbox } from './0-1-deployYieldBox';
-import { buildPauserManager } from 'tasks/deployBuilds/buildPauserManager';
 
 /**
  * @notice First thing to deploy
  *
  * Deploys:
- * - Pearlmit
- * - Cluster
  * - ToeHelper
  * - MagnetarCollateralModule
  * - MagnetarMintModule
@@ -45,9 +39,6 @@ export const deployPreLbpStack__task = async (
             hre,
         },
         tapiocaDeployTask,
-        async () => {
-            await deployPreLbpYieldbox(_taskArgs, hre);
-        },
     );
 };
 
@@ -64,21 +55,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    VM.add(
-        await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
-            DEPLOYMENT_NAMES.PEARLMIT,
-            '1',
-            tapiocaMulticallAddr,
-            0,
-        ]),
-    )
-        .add(
-            await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
-                chainInfo.lzChainId,
-                tapiocaMulticallAddr,
-            ]),
-        )
-        .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
+    VM.add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
         .add(
             await buildPauserManager(
                 hre,

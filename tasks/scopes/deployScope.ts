@@ -1,5 +1,6 @@
 import { scope, types } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
+import { deployAirdrop__task } from 'tasks/deploy/0-1-deployAirdrop';
 import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
 import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
 import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
@@ -35,6 +36,14 @@ TAP_TASK(
 );
 
 TAP_TASK(deployScope.task('lbpSetup', 'Enable swaps', deployLbp__2__task));
+
+TAP_TASK(
+    deployScope.task(
+        'airdrop',
+        'Deploys Yieldbox, Cluster, Pearlmit',
+        deployAirdrop__task,
+    ),
+);
 
 TAP_TASK(
     deployScope.task(
