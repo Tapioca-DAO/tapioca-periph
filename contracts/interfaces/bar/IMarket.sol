@@ -61,6 +61,8 @@ interface IMarket {
 
     function _exchangeRatePrecision() external view returns (uint256);
 
+    function _minBorrowAmount() external view returns (uint256);
+
     function computeClosingFactor(uint256 borrowPart, uint256 collateralPartInAsset, uint256 ratesPrecision)
         external
         view
