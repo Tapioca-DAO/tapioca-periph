@@ -151,6 +151,10 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
         _withdrawParams.extractFromSender = true;
         bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
 
+        pearlmit.approve(1155, address(yieldBox), assetAId, address(magnetarA), type(uint200).max, uint48(block.timestamp));
+        yieldBox.setApprovalForAll(address(pearlmit), true);
+        // assetA.approve(address(pearlmit), type(uint256).max);
+
         MagnetarCall[] memory calls = new MagnetarCall[](2);
         calls[0] = MagnetarCall({
             id: uint8(MagnetarAction.YieldBoxModule),
