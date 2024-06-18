@@ -9,6 +9,7 @@ import { Cluster, TapiocaMulticall } from '@typechain/index';
 import { EChainID, TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
 import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
+import * as TAP_TOKEN_CONFIG from '@tap-token/config';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
@@ -163,14 +164,15 @@ async function deployUsdoUniPoolAndAddLiquidity(
             arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_USDO_USDC_VAULT,
             tokenA: usdo,
             tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
+            tokenToInitArrakisShares: usdo,
             ratioTokenA: taskArgs.ratioUsdo,
             ratioTokenB: taskArgs.ratioUsdc,
-            amountTokenA: taskArgs.amountUsdo,
-            amountTokenB: taskArgs.amountUsdc,
+            amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountUsdo),
+            amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountUsdc),
             feeAmount: FeeAmount.LOWEST,
             options: {
-                mintMock: isTestnet,
-                arrakisDepositLiquidity: true,
+                mintMock: !!isTestnet,
+                arrakisDepositLiquidity: false,
             },
         },
     });
@@ -249,8 +251,23 @@ async function clusterWhitelist(params: {
     const addZContract = async (name: string) => {
         await addProjectContract(TAPIOCA_PROJECTS_NAME.TapiocaZ, name);
     };
+    const addTapContract = async (name: string) => {
+        await addProjectContract(TAPIOCA_PROJECTS_NAME.TapToken, name);
+    };
 
     if (isHostChain) {
+        // Tap
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN);
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.OTAP);
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TWTAP);
+        await addTapContract(
+            TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAPIOCA_OPTION_BROKER,
+        );
+        await addTapContract(
+            TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES
+                .TAPIOCA_OPTION_LIQUIDITY_PROVISION,
+        );
+
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_MT_ETH_MARKET,
@@ -307,6 +324,9 @@ async function clusterWhitelist(params: {
     }
 
     if (isSideChain) {
+        // Tap
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN);
+
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
