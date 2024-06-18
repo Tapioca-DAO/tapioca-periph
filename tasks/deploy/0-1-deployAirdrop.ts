@@ -20,9 +20,7 @@ export const deployAirdrop__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        {
-            hre,
-        },
+        { hre },
         async ({
             VM,
             tapiocaMulticallAddr,
@@ -32,31 +30,23 @@ export const deployAirdrop__task = async (
         }) => {
             const { tag } = taskArgs;
 
-            // VM.add(
-            //     await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
-            //         DEPLOYMENT_NAMES.PEARLMIT,
-            //         '1',
-            //         tapiocaMulticallAddr,
-            //         0,
-            //     ]),
-            // ).add(
-            //     await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
-            //         chainInfo.lzChainId,
-            //         tapiocaMulticallAddr,
-            //     ]),
-            // );
-
-            const pearlmit = loadLocalContract(
-                hre,
-                hre.SDK.chainInfo.chainId,
-                DEPLOYMENT_NAMES.PEARLMIT,
-                tag,
+            VM.add(
+                await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
+                    DEPLOYMENT_NAMES.PEARLMIT,
+                    '1',
+                    tapiocaMulticallAddr,
+                    0,
+                ]),
+            ).add(
+                await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
+                    chainInfo.lzChainId,
+                    tapiocaMulticallAddr,
+                ]),
             );
 
             const [ybURI, yieldBox] = await buildYieldBox(
                 hre,
                 DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH!,
-                pearlmit.address,
                 tapiocaMulticallAddr,
             );
 
