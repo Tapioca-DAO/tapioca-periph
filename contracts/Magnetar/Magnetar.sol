@@ -17,6 +17,7 @@ import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/pe
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
+import {IERC721Permit} from "tapioca-periph/interfaces/common/IERC721Permit.sol";
 import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -223,6 +224,16 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             /// @dev Owner param check. See Warning above.
             _checkSender(batch.owner);
+        }
+
+        if (funcSig == IERC721Permit.permit.selector) {
+            // check if `spender` is whitelisted 
+            _checkWhitelisted(abi.decode(_actionCalldata[4:36], (address)));
+
+            // check if sender is owner of `tokenId`
+            uint256 tokenId = abi.decode(_actionCalldata[36:68], (uint256));
+
+            selectorValidated = IERC721(_target).ownerOf(tokenId) == msg.sender;
         }
     }
     /**
