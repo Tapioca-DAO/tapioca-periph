@@ -65,10 +65,11 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
         clusterA.updateContract(0, address(tOB), true);
     }
 
-    function createLockAndParticipateData(address user, address singularity, address magnetar) private returns (LockAndParticipateData memory data) {
+    function createLockAndParticipateData(address user, address singularity, address magnetar, address yieldBox) private returns (LockAndParticipateData memory data) {
         return LockAndParticipateData({
             user: user,
-            singularity: singularity,
+            tSglToken: singularity,
+            yieldBox: yieldBox,
             magnetar: magnetar,
             lockData: IOptionsLockData({
                 lock: false,
@@ -225,7 +226,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         // lock and participate
         LockAndParticipateData memory _paramsLock = createLockAndParticipateData(
-            address(this), address(sgl), address(magnetarA)
+            address(this), address(sgl), address(magnetarA), address(yieldBox)
         );
         _paramsLock.lockData.lock = true;
         _paramsLock.lockData.target = address(tOLPMock);
@@ -528,7 +529,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         // test market
         LockAndParticipateData memory _params = createLockAndParticipateData(
-            address(this), randomAddr, address(magnetarA)
+            address(this), randomAddr, address(magnetarA), address(yieldBox)
         );
         bytes memory lockAndParticipateData =
             abi.encodeWithSelector(MagnetarOptionModule.lockAndParticipate.selector, _params);
@@ -542,7 +543,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
         vm.expectRevert();
         magnetarA.burst{value: 0}(calls);
 
-        _params.singularity = address(sgl);
+        _params.tSglToken = address(sgl);
         _params.magnetar = randomAddr;
         lockAndParticipateData =
             abi.encodeWithSelector(MagnetarOptionModule.lockAndParticipate.selector, _params);
@@ -561,7 +562,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         // test market
         LockAndParticipateData memory _params = createLockAndParticipateData(
-            address(this), address(sgl), address(magnetarA)
+            address(this), address(sgl), address(magnetarA), address(yieldBox)
         );
         _params.lockData.lock = true;
         bytes memory lockAndParticipateData =
@@ -584,7 +585,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         // test market
         LockAndParticipateData memory _paramsLock = createLockAndParticipateData(
-            address(this), address(sgl), address(magnetarA)
+            address(this), address(sgl), address(magnetarA), address(yieldBox)
         );
         _paramsLock.lockData.lock = true;
         _paramsLock.lockData.target = address(tOLPMock);
@@ -622,7 +623,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         // test market
         LockAndParticipateData memory _paramsLock = createLockAndParticipateData(
-            address(this), address(sgl), address(magnetarA)
+            address(this), address(sgl), address(magnetarA), address(yieldBox)
         );
         _paramsLock.lockData.lock = true;
         _paramsLock.lockData.target = address(tOLPMock);
