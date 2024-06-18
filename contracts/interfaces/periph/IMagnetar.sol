@@ -91,7 +91,8 @@ struct MintFromBBAndLendOnSGLData {
 
 struct LockAndParticipateData {
     address user;
-    address singularity;
+    address tSglToken;
+    address yieldBox;
     address magnetar;
     IOptionsLockData lockData;
     IOptionsParticipateData participateData;

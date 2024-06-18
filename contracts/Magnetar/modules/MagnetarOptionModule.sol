@@ -85,9 +85,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     }
 
     function _lock(LockAndParticipateData memory data) private returns (uint256 tOLPTokenId) {
-        IMarket _singularity = IMarket(data.singularity);
-        IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
-
+        IYieldBox _yieldBox = IYieldBox(data.yieldBox);
         uint256 _fraction = data.lockData.fraction;
 
         // use requested value
@@ -95,9 +93,9 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
         // retrieve and deposit SGLAssetId registered in tOLP
         (uint256 tOLPSglAssetId,,,) =
-            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.singularity);
+            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.tSglToken);
 
-        _fraction = _extractTokens(data.user, data.singularity, _fraction);
+        _fraction = _extractTokens(data.user, data.tSglToken, _fraction);
         _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
 
         _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
@@ -105,7 +103,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
             data.participateData.participate ? address(this) : data.user,
-            data.singularity,
+            data.tSglToken,
             data.lockData.lockDuration,
             data.lockData.amount
         );
@@ -187,11 +185,16 @@ contract MagnetarOptionModule is MagnetarBaseModule {
          *          - removeAsset from SGL
          *          - if `data.removeAndRepayData.assetWithdrawData.withdraw` withdraws by using the `withdrawTo` operation
          */
-        if (data.removeAndRepayData.removeAssetFromSGL) {   
+        if (data.removeAndRepayData.removeAssetFromSGL) {
             ISingularity _singularity = ISingularity(data.externalData.singularity);
-            
+
             // remove asset from SGL
-            _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.removeAndRepayData.assetWithdrawData.withdraw ? address(this) : data.user);
+            _singularityRemoveAsset(
+                _singularity,
+                data.removeAndRepayData.removeAmount,
+                data.user,
+                data.removeAndRepayData.assetWithdrawData.withdraw ? address(this) : data.user
+            );
 
             //withdraw
             if (data.removeAndRepayData.assetWithdrawData.withdraw) {
@@ -264,7 +267,8 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _checkSender(data.user);
 
         // Check provided addresses
-        _checkWhitelisted(data.singularity);
+        _checkWhitelisted(data.yieldBox);
+        _checkWhitelisted(data.tSglToken);
         _checkWhitelisted(data.magnetar);
         if (data.lockData.lock) {
             _checkWhitelisted(data.lockData.target);
