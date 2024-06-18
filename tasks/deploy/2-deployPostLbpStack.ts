@@ -96,6 +96,7 @@ async function tapiocaDeployTask(
     //             ...taskArgs,
     //             deploymentName: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
     //             arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_TAP_WETH_VAULT,
+    //             tokenToInitArrakisShares: tapToken.address,
     //             tokenA: tapToken.address,
     //             tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
     //             ratioTokenA: taskArgs.ratioTap,
