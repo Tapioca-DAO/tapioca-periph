@@ -63,6 +63,11 @@ interface IMarket {
 
     function _minBorrowAmount() external view returns (uint256);
 
+    function _minCollateralAmount() external view returns (uint256);
+
+    function _minLendAmount () external view returns (uint256); //available on SGL only
+
+
     function computeClosingFactor(uint256 borrowPart, uint256 collateralPartInAsset, uint256 ratesPrecision)
         external
         view
