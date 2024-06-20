@@ -13,13 +13,14 @@ import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxMo
 import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
-import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { loadLocalContract } from 'tapioca-sdk';
 
 /**
  * @notice First thing to deploy
  *
  * Deploys:
+ * - Pauser
  * - ToeHelper
  * - MagnetarCollateralModule
  * - MagnetarMintModule
@@ -114,7 +115,13 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             ]),
         );
     } else {
-        VM.add(await buildZeroXSwapper(hre, tag, owner));
+        VM.add(
+            await buildZeroXSwapper(hre, [
+                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.ZERO_X_PROXY!, // ZeroXProxy
+                cluster.address, // Cluster
+                owner,
+            ]),
+        );
     }
 }
 

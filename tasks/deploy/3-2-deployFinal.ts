@@ -1,25 +1,18 @@
+import * as TAP_TOKEN_CONFIG from '@tap-token/config';
+import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
+import { Cluster, TapiocaMulticall } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { Cluster, TapiocaMulticall } from '@typechain/index';
-import { EChainID, TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
-import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
-import * as TAP_TOKEN_CONFIG from '@tap-token/config';
-import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
-import { FeeAmount } from '@uniswap/v3-sdk';
-import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
+import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 
 /**
- * @notice Called after tapioca-bar postLbp2
- *
- * Deploys: Arb + Eth
- * - Arbitrum + Ethereum USDO/USDC pool
- * - USDO/USDC Oracle
+ * @notice Called after tap-token final
  *
  * Post Deploy Setup: Arb + Eth
  * !!! Requires USDO and USDC tokens to be in the TapiocaMulticall
@@ -32,32 +25,20 @@ import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOrac
  *      - Z Underlying: (WETH, rETH, wstETH, sGLP, sDAI)
  *
  */
-export const deployFinal__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & {
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    },
+export const deployFinal2__task = async (
+    _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
         { hre },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        deployTask,
+        async () => {},
         postDeployTask,
     );
 };
 
-async function postDeployTask(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
+async function postDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const {
         hre,
         VM,
@@ -99,83 +80,6 @@ async function postDeployTask(
     }
 
     await VM.executeMulticall(calls);
-}
-
-async function deployTask(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
-        params;
-    const { tag } = taskArgs;
-
-    console.log('[+] final deploy');
-
-    await deployUsdoUniPoolAndAddLiquidity(params);
-
-    // Add USDO oracle deployment
-    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
-        hre,
-        tag,
-    );
-    const usdoUsdcLpAddy = loadLocalContract(
-        hre,
-        hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-        tag,
-    ).address;
-
-    VM.add(
-        await buildUsdoUsdcOracle({
-            hre,
-            isTestnet,
-            owner: tapiocaMulticallAddr,
-            usdoAddy: usdo,
-            usdoUsdcLpAddy,
-        }),
-    );
-}
-
-async function deployUsdoUniPoolAndAddLiquidity(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
-    const { hre, taskArgs, chainInfo, isTestnet, isHostChain, isSideChain } =
-        params;
-    const { tag } = taskArgs;
-    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
-        hre,
-        tag,
-    );
-    console.log('[+] Deploying Arbitrum USDO/USDC pool');
-    await deployUniPoolAndAddLiquidity({
-        ...params,
-        taskArgs: {
-            ...taskArgs,
-            deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-            arrakisDeploymentName: DEPLOYMENT_NAMES.ARRAKIS_USDO_USDC_VAULT,
-            tokenA: usdo,
-            tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
-            tokenToInitArrakisShares: usdo,
-            ratioTokenA: taskArgs.ratioUsdo,
-            ratioTokenB: taskArgs.ratioUsdc,
-            amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountUsdo),
-            amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountUsdc),
-            feeAmount: FeeAmount.LOWEST,
-            options: {
-                mintMock: !!isTestnet,
-                arrakisDepositLiquidity: false,
-            },
-        },
-    });
 }
 
 async function clusterWhitelist(params: {

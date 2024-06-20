@@ -5,7 +5,7 @@ import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
 import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
 import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
-import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
+import { deployFinal2__task } from 'tasks/deploy/3-2-deployFinal';
 import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
@@ -79,11 +79,7 @@ TAP_TASK(
 );
 TAP_TASK(
     deployScope
-        .task(
-            'final',
-            'USDO/USDC pool deployment + Cluster whitelisting',
-            deployFinal__task,
-        )
+        .task('final1', 'USDO/USDC pool deployment ', deployFinal2__task)
         .addParam(
             'ratioUsdo',
             'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
@@ -100,6 +96,9 @@ TAP_TASK(
             'amountUsdc',
             'The amount of USDC to be deposited in the pool. In ether.',
         ),
+);
+TAP_TASK(
+    deployScope.task('final2', 'Cluster whitelisting', deployFinal2__task),
 );
 
 TAP_TASK(
