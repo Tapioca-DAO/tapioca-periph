@@ -60,6 +60,8 @@ contract MagnetarHelper {
         address yieldBoxAssetStrategyAddress;
         uint256 yieldBoxAssetTokenId;
         uint256 collateralizationRate;
+        uint256 liquidationCollateralizationRate;
+        uint256 maxLiquidatorReward;
     }
 
     struct SingularityInfo {
@@ -218,7 +220,11 @@ contract MagnetarHelper {
      * @param roundUp true/false for rounding up shares.
      * @return fraction The fraction.
      */
-    function getFractionForAmount(ISingularity singularity, uint256 amount, bool roundUp) external view returns (uint256 fraction) {
+    function getFractionForAmount(ISingularity singularity, uint256 amount, bool roundUp)
+        external
+        view
+        returns (uint256 fraction)
+    {
         (uint128 totalAssetShare, uint128 totalAssetBase) = singularity.totalAsset();
         (uint128 totalBorrowElastic,) = singularity._totalBorrow();
         uint256 assetId = singularity._assetId();
@@ -321,6 +327,8 @@ contract MagnetarHelper {
         info.assetId = market._assetId();
         info.collateralId = market._collateralId();
         info.collateralizationRate = market._collateralizationRate();
+        info.liquidationCollateralizationRate = market._liquidationCollateralizationRate();
+        info.maxLiquidatorReward = market._maxLiquidatorReward();
 
         IYieldBox yieldBox = IYieldBox(market._yieldBox());
 
