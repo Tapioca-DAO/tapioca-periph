@@ -9,13 +9,12 @@ import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 
 /**
  * @notice Called after tap-token final
  *
  * Post Deploy Setup: Arb + Eth
- * !!! Requires USDO and USDC tokens to be in the TapiocaMulticall
  * - Cluster Toe role setting (Magnetar)
  * - Cluster whitelist
  *      - Periph: (Magnetar, Pearlmit, Yieldbox)
@@ -159,7 +158,17 @@ async function clusterWhitelist(params: {
         await addProjectContract(TAPIOCA_PROJECTS_NAME.TapToken, name);
     };
 
+    await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
+    await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
+
     if (isHostChain) {
+        await addAddressWhitelist({
+            name: 'USDC',
+            address: DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.USDC,
+            calls,
+            cluster,
+        });
+
         // Tap
         await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN);
         await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.OTAP);
@@ -185,16 +194,15 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
-        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
-        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
+        // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
+
         // Z Underlying
         await addAddressWhitelist({
             name: 'WETH',
@@ -237,6 +245,7 @@ async function clusterWhitelist(params: {
         );
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
+
         await addAddressWhitelist({
             name: 'sDAI',
             address:

@@ -18,7 +18,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
  * - Arbitrum + Ethereum USDO/USDC pool
  * - USDO/USDC Oracle
  */
-export const deployFinal__task = async (
+export const deployFinal1__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
         ratioUsdo: number;
         ratioUsdc: number;
@@ -29,7 +29,9 @@ export const deployFinal__task = async (
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
-        { hre },
+        {
+            hre,
+        },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         deployTask,
     );

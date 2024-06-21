@@ -63,7 +63,7 @@ export const getTapOracleMultiDeployParams = (params: {
         _circuitUniIsMultiplied: [1], // Multiply/divide Uni
         _twapPeriod: 3600, // TWAP, 1hr
         observationLength: 10, // Observation length that each Uni pool should have
-        _uniFinalCurrency: 1, // Whether we need to use the last Chainlink oracle to convert to another
+        _uniFinalCurrency: 0, // Whether we need to use the last Chainlink oracle to convert to another
         _circuitChainlink: [
             DEPLOY_CONFIG.POST_LBP[chainID]!.WETH_USD_CL_DATA_FEED_ADDRESS,
         ], // CL path
