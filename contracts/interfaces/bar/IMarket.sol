@@ -65,6 +65,7 @@ interface IMarket {
 
     function _minCollateralAmount() external view returns (uint256);
 
+    function _minLiquidatorReward() external view returns (uint256);
     function _maxLiquidatorReward() external view returns (uint256);
 
     function computeClosingFactor(uint256 borrowPart, uint256 collateralPartInAsset, uint256 ratesPrecision)

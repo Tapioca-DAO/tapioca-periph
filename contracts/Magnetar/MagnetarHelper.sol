@@ -61,7 +61,9 @@ contract MagnetarHelper {
         uint256 yieldBoxAssetTokenId;
         uint256 collateralizationRate;
         uint256 liquidationCollateralizationRate;
+        uint256 minLiquidatorReward;
         uint256 maxLiquidatorReward;
+        uint256 liquidationBonusAmount;
         uint256 minBorrowAmount;
         uint256 minCollateralAmount;
     }
@@ -332,7 +334,9 @@ contract MagnetarHelper {
         info.collateralId = market._collateralId();
         info.collateralizationRate = market._collateralizationRate();
         info.liquidationCollateralizationRate = market._liquidationCollateralizationRate();
+        info.minLiquidatorReward = market._minLiquidatorReward();
         info.maxLiquidatorReward = market._maxLiquidatorReward();
+        info.liquidationBonusAmount = market._liquidationBonusAmount();
         info.minBorrowAmount = market._minBorrowAmount();
         info.minCollateralAmount = market._minCollateralAmount();
 
