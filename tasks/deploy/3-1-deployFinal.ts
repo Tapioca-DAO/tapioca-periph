@@ -20,10 +20,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
  */
 export const deployFinal1__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
+        usdoPoolAddr: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -31,6 +28,9 @@ export const deployFinal1__task = async (
         _taskArgs,
         {
             hre,
+            overrideOptions: {
+                gasLimit: 8000000,
+            },
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         deployTask,
@@ -39,10 +39,7 @@ export const deployFinal1__task = async (
 
 async function deployTask(
     params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
+        usdoPoolAddr: string;
     }>,
 ) {
     const {
@@ -59,7 +56,7 @@ async function deployTask(
     console.log('[+] final deploy');
 
     if (isHostChain) {
-        await deployUsdoUniPoolAndAddLiquidity(params);
+        // await deployUsdoUniPoolAndAddLiquidity(params);
     }
 
     // Add USDO oracle deployment
@@ -67,12 +64,6 @@ async function deployTask(
         hre,
         tag,
     );
-    const usdoUsdcLpAddy = loadLocalContract(
-        hre,
-        hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-        tag,
-    ).address;
 
     VM.add(
         await buildUsdoUsdcOracle({
@@ -80,7 +71,7 @@ async function deployTask(
             isTestnet,
             owner: tapiocaMulticallAddr,
             usdoAddy: usdo,
-            usdoUsdcLpAddy,
+            usdoUsdcLpAddy: taskArgs.usdoPoolAddr,
         }),
     );
 }

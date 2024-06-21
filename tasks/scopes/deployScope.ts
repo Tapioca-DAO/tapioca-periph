@@ -82,20 +82,8 @@ TAP_TASK(
     deployScope
         .task('final1', 'USDO/USDC pool deployment ', deployFinal1__task)
         .addParam(
-            'ratioUsdo',
+            'usdoPoolAddr',
             'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
-        )
-        .addParam(
-            'ratioUsdc',
-            'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
-        )
-        .addParam(
-            'amountUsdo',
-            'The amount of USDO to be deposited in the pool. In ether.',
-        )
-        .addParam(
-            'amountUsdc',
-            'The amount of USDC to be deposited in the pool. In ether.',
         ),
 );
 TAP_TASK(

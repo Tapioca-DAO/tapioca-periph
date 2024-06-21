@@ -58,6 +58,9 @@ export const deployPostLbpStack__task = async (
         {
             hre,
             staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
+            overrideOptions: {
+                gasLimit: 10_000_000,
+            },
         },
         tapiocaDeployTask,
         deployPostLbpStack__postDeploy,
