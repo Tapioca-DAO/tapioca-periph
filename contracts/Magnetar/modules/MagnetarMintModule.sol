@@ -219,7 +219,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction, bool participate) private returns (uint256 tOLPTokenId) {
+    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction, bool participate)
+        private
+        returns (uint256 tOLPTokenId)
+    {
         IMarket _singularity = IMarket(data.externalContracts.singularity);
         IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
 
@@ -230,17 +233,19 @@ contract MagnetarMintModule is MagnetarBaseModule {
         if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
-        (uint256 tOLPSglAssetId,,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
-            data.externalContracts.singularity
-        );
+        (uint256 tOLPSglAssetId,,,) =
+            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.lockData.tAsset);
 
-        fraction = _extractTokens(data.user, data.externalContracts.singularity, fraction);
+        fraction = _extractTokens(data.user, data.lockData.tAsset, fraction);
         (, uint256 obtainedShares) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, fraction);
 
         data.lockData.amount = obtainedShares.toUint128();
         _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-            participate ? address(this) : data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
+            participate ? address(this) : data.user,
+            data.lockData.tAsset,
+            data.lockData.lockDuration,
+            data.lockData.amount
         );
     }
 
