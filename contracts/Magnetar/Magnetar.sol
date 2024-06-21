@@ -608,7 +608,6 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         selectorValidated = funcSig == ITapiocaOptionBroker.exerciseOption.selector;
     }
 
-    
     /**
      * @dev Process a weth wrap, will only execute if the selector is allowed.
      *
@@ -618,7 +617,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      */
     function _processWethWrap(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         {
-            bool selectorValidated = _validateWethWrap(_actionCalldata);
+            bool selectorValidated = _validateWethWrap(_target, _actionCalldata);
             if (!selectorValidated) {
                 revert Magnetar_ActionNotValid(uint8(MagnetarAction.WethWrap), _actionCalldata);
             }
@@ -628,11 +627,13 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         IWeth9(_target).deposit{value: _actionValue}();
         IERC20(_target).safeTransfer(msg.sender, _actionValue);
     }
-    function _validateWethWrap(bytes calldata _actionCalldata)
+
+    function _validateWethWrap(address _target, bytes calldata _actionCalldata)
         private
         view
         returns (bool selectorValidated)
     {
+        _checkWhitelisted(_target);
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         selectorValidated = funcSig == IWeth9.deposit.selector;
     }
