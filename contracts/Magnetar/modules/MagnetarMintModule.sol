@@ -179,6 +179,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         _checkWhitelisted(data.externalContracts.bigBang);
         _checkWhitelisted(data.externalContracts.marketHelper);
         _checkWhitelisted(data.lockData.target);
+        _checkWhitelisted(data.lockData.tAsset);
         _checkWhitelisted(data.participateData.target);
     }
 
