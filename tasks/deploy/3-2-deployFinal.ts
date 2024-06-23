@@ -1,3 +1,8 @@
+import * as TAP_TOKEN_CONFIG from '@tap-token/config';
+import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
+import { Cluster, TapiocaMulticall } from '@typechain/index';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
 import {
@@ -5,23 +10,11 @@ import {
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { Cluster, TapiocaMulticall } from '@typechain/index';
-import { EChainID, TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
-import * as TAPIOCA_Z_CONFIG from '@tapiocaz/config';
-import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
-import { FeeAmount } from '@uniswap/v3-sdk';
-import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
 
 /**
- * @notice Called after tapioca-bar postLbp2
- *
- * Deploys: Arb + Eth
- * - Arbitrum + Ethereum USDO/USDC pool
- * - USDO/USDC Oracle
+ * @notice Called after tap-token final
  *
  * Post Deploy Setup: Arb + Eth
- * !!! Requires USDO and USDC tokens to be in the TapiocaMulticall
  * - Cluster Toe role setting (Magnetar)
  * - Cluster whitelist
  *      - Periph: (Magnetar, Pearlmit, Yieldbox)
@@ -31,32 +24,20 @@ import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOrac
  *      - Z Underlying: (WETH, rETH, wstETH, sGLP, sDAI)
  *
  */
-export const deployFinal__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & {
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    },
+export const deployFinal2__task = async (
+    _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
         { hre },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        deployTask,
+        async () => {},
         postDeployTask,
     );
 };
 
-async function postDeployTask(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
+async function postDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const {
         hre,
         VM,
@@ -100,81 +81,6 @@ async function postDeployTask(
     await VM.executeMulticall(calls);
 }
 
-async function deployTask(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
-        params;
-    const { tag } = taskArgs;
-
-    console.log('[+] final deploy');
-
-    await deployUsdoUniPoolAndAddLiquidity(params);
-
-    // Add USDO oracle deployment
-    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
-        hre,
-        tag,
-    );
-    const usdoUsdcLpAddy = loadLocalContract(
-        hre,
-        hre.SDK.eChainId,
-        DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-        tag,
-    ).address;
-
-    VM.add(
-        await buildUsdoUsdcOracle({
-            hre,
-            isTestnet,
-            owner: tapiocaMulticallAddr,
-            usdoAddy: usdo,
-            usdoUsdcLpAddy,
-        }),
-    );
-}
-
-async function deployUsdoUniPoolAndAddLiquidity(
-    params: TTapiocaDeployerVmPass<{
-        ratioUsdo: number;
-        ratioUsdc: number;
-        amountUsdo: string;
-        amountUsdc: string;
-    }>,
-) {
-    const { hre, taskArgs, chainInfo, isTestnet, isHostChain, isSideChain } =
-        params;
-    const { tag } = taskArgs;
-    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
-        hre,
-        tag,
-    );
-    console.log('[+] Deploying Arbitrum USDO/USDC pool');
-    await deployUniPoolAndAddLiquidity({
-        ...params,
-        taskArgs: {
-            ...taskArgs,
-            deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-            tokenA: usdo,
-            tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
-            ratioTokenA: taskArgs.ratioUsdo,
-            ratioTokenB: taskArgs.ratioUsdc,
-            amountTokenA: taskArgs.amountUsdo,
-            amountTokenB: taskArgs.amountUsdc,
-            feeAmount: FeeAmount.LOWEST,
-            options: {
-                mintMock: isTestnet,
-                arrakisDepositLiquidity: true,
-            },
-        },
-    });
-}
-
 async function clusterWhitelist(params: {
     hre: HardhatRuntimeEnvironment;
     tag: string;
@@ -184,16 +90,24 @@ async function clusterWhitelist(params: {
 }) {
     const { hre, tag, calls, isHostChain, isSideChain } = params;
 
-    const { cluster, magnetar, pearlmit, yieldbox } =
+    const { cluster, magnetar, pearlmit, yieldbox, pauser } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
 
     /**
      * Non chain specific
      */
-    await addMagnetarToeRole({
+    await addRoleForContract({
         hre,
         cluster,
-        magnetarAddr: magnetar.address,
+        target: magnetar.address,
+        role: 'TOE',
+        calls,
+    });
+    await addRoleForContract({
+        hre,
+        cluster,
+        target: pauser,
+        role: 'PAUSER',
         calls,
     });
 
@@ -240,8 +154,33 @@ async function clusterWhitelist(params: {
     const addZContract = async (name: string) => {
         await addProjectContract(TAPIOCA_PROJECTS_NAME.TapiocaZ, name);
     };
+    const addTapContract = async (name: string) => {
+        await addProjectContract(TAPIOCA_PROJECTS_NAME.TapToken, name);
+    };
+
+    await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
+    await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
 
     if (isHostChain) {
+        await addAddressWhitelist({
+            name: 'USDC',
+            address: DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.USDC,
+            calls,
+            cluster,
+        });
+
+        // Tap
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN);
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.OTAP);
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TWTAP);
+        await addTapContract(
+            TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAPIOCA_OPTION_BROKER,
+        );
+        await addTapContract(
+            TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES
+                .TAPIOCA_OPTION_LIQUIDITY_PROVISION,
+        );
+
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_MT_ETH_MARKET,
@@ -255,16 +194,21 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
-        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
-        await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
+        await addBarContract(
+            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_GLP_LEVERAGE_EXECUTOR,
+        );
+        await addBarContract(
+            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SIMPLE_LEVERAGE_EXECUTOR,
+        );
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
+        // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
+
         // Z Underlying
         await addAddressWhitelist({
             name: 'WETH',
@@ -298,12 +242,16 @@ async function clusterWhitelist(params: {
     }
 
     if (isSideChain) {
+        // Tap
+        await addTapContract(TAP_TOKEN_CONFIG.DEPLOYMENT_NAMES.TAP_TOKEN);
+
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
         );
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
+
         await addAddressWhitelist({
             name: 'sDAI',
             address:
@@ -314,25 +262,26 @@ async function clusterWhitelist(params: {
     }
 }
 
-async function addMagnetarToeRole(params: {
+async function addRoleForContract(params: {
     hre: HardhatRuntimeEnvironment;
     cluster: Cluster;
-    magnetarAddr: string;
+    target: string;
+    role: string;
     calls: TapiocaMulticall.CallStruct[];
 }) {
-    const { hre, cluster, magnetarAddr, calls } = params;
+    const { hre, cluster, target, calls, role } = params;
     // Role setting not working
-    const TOE_ROLE = hre.ethers.utils.keccak256(
-        hre.ethers.utils.solidityPack(['string'], ['TOE']),
-    ); // Role to be able to use TOE.sendPacketFrom()
+    const ROLE = hre.ethers.utils.keccak256(
+        hre.ethers.utils.solidityPack(['string'], [role]),
+    );
 
-    if (!(await cluster.hasRole(magnetarAddr, TOE_ROLE))) {
-        console.log(`[+] Adding Magnetar ${magnetarAddr} to TOE role`);
+    if (!(await cluster.hasRole(target, ROLE))) {
+        console.log(`[+] Adding ${target} to ${role} role`);
         calls.push({
             target: cluster.address,
             callData: cluster.interface.encodeFunctionData(
                 'setRoleForContract',
-                [magnetarAddr, TOE_ROLE, true],
+                [target, ROLE, true],
             ),
             allowFailure: false,
         });
@@ -403,8 +352,14 @@ async function deployPostLbpStack__loadContracts__generic(
         DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     ).address;
+    const pauser = loadLocalContract(
+        hre,
+        hre.SDK.eChainId,
+        DEPLOYMENT_NAMES.PAUSER,
+        tag,
+    ).address;
 
-    return { cluster, magnetar, pearlmit, yieldbox };
+    return { cluster, magnetar, pearlmit, yieldbox, pauser };
 }
 
 async function deployPostLbpStack__loadContracts__arbitrum(

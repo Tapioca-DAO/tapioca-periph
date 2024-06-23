@@ -1,5 +1,5 @@
 import { ERC20Mock, IArrakisV2Vault, TapiocaMulticall } from '@typechain/index';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { FeeAmount, encodeSqrtRatioX96 } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 import {
     DeployerVM,
@@ -8,10 +8,15 @@ import {
 import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { uniPoolInfo__task } from 'tasks/exec/misc/uniPoolInfo';
 import { deployUniV3Pool } from './deployUniV3Pool';
+import { saveBuildLocally } from '@tapioca-sdk/api/db';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { arrakis } from '@typechain/contracts/interfaces/external';
 
 export async function deployUniPoolAndAddLiquidity(
     params: TTapiocaDeployerVmPass<{
+        tokenToInitArrakisShares: string;
         deploymentName: string;
+        arrakisDeploymentName: string;
         tokenA: string;
         tokenB: string;
         ratioTokenA: number;
@@ -28,7 +33,9 @@ export async function deployUniPoolAndAddLiquidity(
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet } = params;
     const {
         tag,
+        tokenToInitArrakisShares,
         deploymentName,
+        arrakisDeploymentName,
         tokenA,
         tokenB,
         ratioTokenA,
@@ -75,8 +82,16 @@ export async function deployUniPoolAndAddLiquidity(
                 feeTiers: [feeAmount],
                 token0,
                 token1,
-                init0: ratio0,
-                init1: ratio1,
+                init0:
+                    token0.toLowerCase() ==
+                    tokenToInitArrakisShares.toLowerCase()
+                        ? hre.ethers.utils.parseEther('1')
+                        : 0,
+                init1:
+                    token1.toLowerCase() ==
+                    tokenToInitArrakisShares.toLowerCase()
+                        ? hre.ethers.utils.parseEther('1')
+                        : 0,
                 manager: owner,
                 routers: [DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.V3_SWAP_ROUTER],
                 owner,
@@ -96,6 +111,23 @@ export async function deployUniPoolAndAddLiquidity(
     );
     console.log(
         `[+] Arrakis vault [${await arrakisVault.name()}] deployed at: [${vaultAddr}]`,
+    );
+    saveBuildLocally(
+        {
+            chainId: hre.SDK.eChainId,
+            chainIdName: hre.SDK.chainInfo.name,
+            contracts: [
+                {
+                    address: vaultAddr,
+                    name: arrakisDeploymentName,
+                    meta: {
+                        vaultNum: numVaults.toNumber() - 1,
+                    },
+                },
+            ],
+            lastBlockHeight: await hre.ethers.provider.getBlockNumber(),
+        },
+        tag,
     );
 
     console.log('[+] Deposit liquidity in pool');
@@ -151,115 +183,138 @@ export async function deployUniPoolAndAddLiquidity(
     );
 
     // Mint Arrakis liquidity
+    console.log(options?.arrakisDepositLiquidity);
     if (options?.arrakisDepositLiquidity) {
-        {
-            const amountsForLiquidity = await arrakisResolve.getMintAmounts(
-                arrakisVault.address,
-                await token0Erc20.balanceOf(owner),
-                await token1Erc20.balanceOf(owner),
-            );
+        const slot0 = await uniPool.slot0();
+        const tickSpacing = await uniPool.tickSpacing();
+        const lowerTick = slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
+        const upperTick =
+            slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
 
-            await arrakisMint({
-                amount0: amountsForLiquidity.amount0,
-                amount1: amountsForLiquidity.amount1,
-                mintAmount: amountsForLiquidity.mintAmount,
-                to: owner,
-                arrakisVault,
-                token0: token0Erc20,
-                token1: token1Erc20,
-                VM,
-            });
+        await restrictMintAndArrakisMint({
+            hre,
+            amount0: amount0,
+            amount1: amount1,
+            to: owner,
+            arrakisVault,
+            token0: token0Erc20,
+            token1: token1Erc20,
+            tokenToInitArrakisShares,
+            VM,
+        });
 
-            console.log(
-                '[+] Arrakis shares:',
-                await arrakisVault.balanceOf(owner),
-            );
-            console.log('[+] Total supply:', await arrakisVault.totalSupply());
-            console.log(
-                '[+] Liquidity deposited in pool:',
-                amountsForLiquidity.mintAmount.toString(),
-            );
-        }
+        console.log('[+] Arrakis shares:', await arrakisVault.balanceOf(owner));
+        console.log('[+] Total supply:', await arrakisVault.totalSupply());
 
-        {
-            const slot0 = await uniPool.slot0();
-            const tickSpacing = await uniPool.tickSpacing();
-            const lowerTick =
-                slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
-            const upperTick =
-                slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
-            const rebalanceParams = await arrakisResolve.standardRebalance(
-                [
-                    {
-                        range: { lowerTick, upperTick, feeTier: feeAmount },
-                        weight: 10_000, // 100%
-                    },
-                ],
-                arrakisVault.address,
-            );
-            // await arrakisVault.rebalance(rebalanceParams);
-            await VM.executeMulticall([
+        // const slot0 = await uniPool.slot0();
+        // const tickSpacing = await uniPool.tickSpacing();
+        // const lowerTick =
+        //     slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
+        // const upperTick =
+        //     slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
+        // console.log(lowerTick, upperTick);
+
+        const rebalanceParams = await arrakisResolve.standardRebalance(
+            [
                 {
-                    target: arrakisVault.address,
-                    callData: arrakisVault.interface.encodeFunctionData(
-                        'rebalance',
-                        [rebalanceParams],
-                    ),
-                    allowFailure: false,
+                    range: {
+                        lowerTick: -887200,
+                        upperTick: 887200,
+                        feeTier: feeAmount,
+                    },
+                    weight: 10_000, // 100%
                 },
-            ]);
-        }
+            ],
+            arrakisVault.address,
+        );
+        // await arrakisVault.rebalance(rebalanceParams);
+        await VM.executeMulticall([
+            {
+                target: arrakisVault.address,
+                callData: arrakisVault.interface.encodeFunctionData(
+                    'rebalance',
+                    [rebalanceParams],
+                ),
+                allowFailure: false,
+            },
+        ]);
     }
 
     console.log('[+] UniV3 pool liquidity:', await uniPool.liquidity());
 }
 
-async function arrakisMint(params: {
+async function restrictMintAndArrakisMint(params: {
+    hre: HardhatRuntimeEnvironment;
+    tokenToInitArrakisShares: string;
     token0: ERC20Mock;
     token1: ERC20Mock;
     arrakisVault: IArrakisV2Vault;
     amount0: BigNumberish;
     amount1: BigNumberish;
-    mintAmount: BigNumberish;
     to: string;
     VM: DeployerVM;
 }) {
     const {
+        hre,
+        tokenToInitArrakisShares,
         token0,
         token1,
         arrakisVault,
         amount0,
         amount1,
-        mintAmount,
         to: owner,
         VM,
     } = params;
+
+    const initShares = hre.ethers.utils.parseEther('1');
+    console.log('[+] Minting Arrakis shares:', initShares.toString());
 
     // await token0.approve(arrakisVault.address, amountsForLiquidity.amount0);
     // await token1.approve(arrakisVault.address, amountsForLiquidity.amount1);
     // await arrakisVault.mint(amountsForLiquidity.mintAmount, owner);
     await VM.executeMulticall([
         {
-            target: token0.address,
-            callData: token0.interface.encodeFunctionData('approve', [
-                arrakisVault.address,
-                amount0,
-            ]),
+            target: arrakisVault.address,
+            callData: arrakisVault.interface.encodeFunctionData(
+                'setRestrictedMint',
+                [owner],
+            ),
             allowFailure: false,
         },
         {
-            target: token1.address,
+            target: tokenToInitArrakisShares,
             callData: token1.interface.encodeFunctionData('approve', [
                 arrakisVault.address,
-                amount1,
+                initShares,
             ]),
             allowFailure: false,
         },
         {
             target: arrakisVault.address,
             callData: arrakisVault.interface.encodeFunctionData('mint', [
-                mintAmount,
-                owner,
+                initShares,
+                arrakisVault.address,
+            ]),
+            allowFailure: false,
+        },
+        {
+            target: token0.address,
+            callData: token0.interface.encodeFunctionData('transfer', [
+                arrakisVault.address,
+                tokenToInitArrakisShares.toLowerCase() ==
+                token0.address.toLowerCase()
+                    ? hre.ethers.BigNumber.from(amount0).sub(initShares)
+                    : amount0,
+            ]),
+            allowFailure: false,
+        },
+        {
+            target: token1.address,
+            callData: token1.interface.encodeFunctionData('transfer', [
+                arrakisVault.address,
+                token1.address.toLowerCase()
+                    ? hre.ethers.BigNumber.from(amount1).sub(initShares)
+                    : amount1,
             ]),
             allowFailure: false,
         },

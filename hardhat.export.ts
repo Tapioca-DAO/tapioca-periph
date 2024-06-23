@@ -1,29 +1,21 @@
 // Plugins
-import fs from 'fs';
 import '@nomiclabs/hardhat-ethers';
 import '@nomicfoundation/hardhat-verify';
+import '@typechain/hardhat';
 
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
 import '@primitivefi/hardhat-dodoc';
-import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import { HardhatUserConfig } from 'hardhat/config';
-import {
-    HardhatNetworkUserConfig,
-    HttpNetworkConfig,
-    HttpNetworkUserConfig,
-    NetworksUserConfig,
-} from 'hardhat/types';
+import { HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types';
 import 'hardhat-ignore-warnings';
 
 // Utils
-import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
-
-import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -61,22 +53,8 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-const forkNetwork = process.env.NETWORK as TNetwork;
-const forkChainInfo = supportedChains[forkNetwork];
-const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
-    ? {
-          chainId: forkChainInfo.chainId,
-          forking: {
-              url: forkChainInfo.url,
-              ...(process.env.FROM_BLOCK
-                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
-                  : {}),
-          },
-      }
-    : {};
-
 const config: HardhatUserConfig &
-    HardhatNetworkUserConfig & { dodoc?: any; typechain?: any } = {
+    HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriph },
     solidity: {
         compilers: [
@@ -205,17 +183,10 @@ const config: HardhatUserConfig &
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
-            mining: { auto: true },
-            hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
-                mnemonic:
-                    'test test test test test test test test test test test junk',
-                count: 10,
-                accountsBalance: '1000000000000000000000',
+                count: 5,
             },
-            tags: ['local'],
-            ...forkInfo,
         },
         ...supportedChains,
     },
@@ -227,6 +198,7 @@ const config: HardhatUserConfig &
     },
     etherscan: {
         apiKey: {
+            arbitrumOne: process.env.SCAN_API_KEY ?? '',
             sepolia: process.env.SCAN_API_KEY ?? '',
             arbitrumSepolia: process.env.SCAN_API_KEY ?? '',
             optimismSepolia: process.env.SCAN_API_KEY ?? '',

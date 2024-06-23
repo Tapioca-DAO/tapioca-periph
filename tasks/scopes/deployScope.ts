@@ -1,10 +1,12 @@
 import { scope, types } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
+import { deployAirdrop__task } from 'tasks/deploy/0-1-deployAirdrop';
 import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
 import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
 import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
-import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
+import { deployFinal1__task } from 'tasks/deploy/3-1-deployFinal';
+import { deployFinal2__task } from 'tasks/deploy/3-2-deployFinal';
 import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
@@ -35,6 +37,14 @@ TAP_TASK(
 );
 
 TAP_TASK(deployScope.task('lbpSetup', 'Enable swaps', deployLbp__2__task));
+
+TAP_TASK(
+    deployScope.task(
+        'airdrop',
+        'Deploys Yieldbox, Cluster, Pearlmit',
+        deployAirdrop__task,
+    ),
+);
 
 TAP_TASK(
     deployScope.task(
@@ -70,27 +80,14 @@ TAP_TASK(
 );
 TAP_TASK(
     deployScope
-        .task(
-            'final',
-            'USDO/USDC pool deployment + Cluster whitelisting',
-            deployFinal__task,
-        )
+        .task('final1', 'USDO/USDC pool deployment ', deployFinal1__task)
         .addParam(
-            'ratioUsdo',
+            'usdoPoolAddr',
             'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
-        )
-        .addParam(
-            'ratioUsdc',
-            'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
-        )
-        .addParam(
-            'amountUsdo',
-            'The amount of USDO to be deposited in the pool. In ether.',
-        )
-        .addParam(
-            'amountUsdc',
-            'The amount of USDC to be deposited in the pool. In ether.',
         ),
+);
+TAP_TASK(
+    deployScope.task('final2', 'Cluster whitelisting', deployFinal2__task),
 );
 
 TAP_TASK(

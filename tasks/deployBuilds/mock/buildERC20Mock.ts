@@ -9,8 +9,6 @@ export const buildERC20Mock = async (
         args: Parameters<ERC20Mock__factory['deploy']>;
     },
 ): Promise<IDeployerVMAdd<ERC20Mock__factory>> => {
-    console.log('[+] buildERC20Mock');
-
     return {
         contract: new ERC20Mock__factory().connect(
             hre.ethers.provider.getSigner(),

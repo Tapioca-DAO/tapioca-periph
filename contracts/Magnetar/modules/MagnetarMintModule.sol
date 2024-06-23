@@ -10,6 +10,7 @@ import {ITapiocaOptionLiquidityProvision} from
     "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MintFromBBAndLendOnSGLData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -39,6 +40,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
 
     error MagnetarMintModule_LockTransferFailed();
     error MagnetarMintModule_ParticipateTransferFailed();
+    error Magnetar__minDiscountOutMismatch(uint128 expected, uint128 received);
 
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
     /// =====================
@@ -286,7 +288,13 @@ contract MagnetarMintModule is MagnetarBaseModule {
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
+        // Check for the discount slippage
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
+        (, ITapiocaOption.TapOption memory oTapAttributes) = ITapiocaOption(oTapAddress).attributes(oTAPTokenId);
+        if (oTapAttributes.discount < data.lockData.minDiscountOut.toUint128()) {
+            revert Magnetar__minDiscountOutMismatch(uint128(data.lockData.minDiscountOut), oTapAttributes.discount);
+        }
+
         IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId);
     }
 }

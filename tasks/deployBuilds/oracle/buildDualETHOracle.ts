@@ -7,7 +7,6 @@ export const buildDualETHOracle = async (
     hre: HardhatRuntimeEnvironment,
     owner: string,
 ): Promise<IDeployerVMAdd<DualETHOracle__factory>> => {
-    console.log('[+] buildDualETHOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<DualETHOracle__factory['deploy']> = [

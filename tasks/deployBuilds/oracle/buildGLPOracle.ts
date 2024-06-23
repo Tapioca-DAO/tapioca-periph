@@ -7,8 +7,6 @@ export const buildGLPOracle = async (
     hre: HardhatRuntimeEnvironment,
     owner: string,
 ): Promise<IDeployerVMAdd<GLPOracle__factory>> => {
-    console.log('[+] buildGLPOracle');
-
     const chainID = hre.SDK.eChainId;
     if (
         chainID !== hre.SDK.config.EChainID.ARBITRUM &&

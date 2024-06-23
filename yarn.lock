@@ -5633,11 +5633,12 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.8.22:
-  version "1.8.22"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.22.tgz#d40e17ffb9c96d0180e0653e1c4ce39046ac9edf"
-  integrity sha512-jbDwVvOs1pRusb32U3c/XUYgcHHFerVr6ixAH+XS3FXFfGaK8OvnrIYr9264LjlRRwNFDTg57mnjdx8K0Hl2TQ==
+tapioca-sdk@^1.8.28:
+  version "1.8.28"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.28.tgz#87b1f0894fae6563c07433ffa21953afbf4916d4"
+  integrity sha512-3tuDqrP4hSU1EmfZxGFGzBPd8PgmA4nS9L2Fc9+wT3IDdnMpVGRCQ8bZ+1MTb0O3zp29CFnXQNfjAueiOgwXEA==
   dependencies:
+    "@nomicfoundation/hardhat-verify" "^2.0.8"
     "@uniswap/v3-core" "^1.0.1"
     "@uniswap/v3-periphery" "^1.4.3"
     "@uniswap/v3-sdk" "^3.11.0"

@@ -40,6 +40,7 @@ struct IOptionsLockData {
     uint128 lockDuration;
     uint128 amount; // @dev: in case of a previous `YB` deposit, this amount is replaced by the obtained shares
     uint256 fraction;
+    uint256 minDiscountOut;
 }
 
 struct IOptionsUnlockData {

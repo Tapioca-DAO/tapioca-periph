@@ -8,8 +8,6 @@ export const buildGMXOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLSolo__factory>> => {
-    console.log('[+] buildGMXOracle');
-
     const chainID = hre.SDK.eChainId;
     if (
         chainID !== hre.SDK.config.EChainID.ARBITRUM &&

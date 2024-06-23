@@ -9,8 +9,6 @@ export const buildGLPManagerMock = async (
         args: Parameters<GLPManagerMock__factory['deploy']>;
     },
 ): Promise<IDeployerVMAdd<GLPManagerMock__factory>> => {
-    console.log('[+] buildGLPManagerMock');
-
     return {
         contract: await hre.ethers.getContractFactory('GLPManagerMock'),
         deploymentName: params.deploymentName,

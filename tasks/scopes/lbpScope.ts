@@ -14,9 +14,11 @@ TAP_TASK(
 );
 
 TAP_TASK(
-    lbpScope.task(
-        'exitPool',
-        'Exit and retrieve liquidity from the pool',
-        exitPool__task,
-    ),
+    lbpScope
+        .task(
+            'exitPool',
+            'Exit and retrieve liquidity from the pool',
+            exitPool__task,
+        )
+        .addParam('multisigAddress', 'The address of the multisig wallet'),
 );

@@ -11,8 +11,6 @@ export const buildUsdoMarketOracle = async (
         dependsOn: IDependentOn[];
     },
 ): Promise<IDeployerVMAdd<UsdoMarketOracle__factory>> => {
-    console.log(`[+] Building ${params.deploymentName}`);
-
     return {
         contract: new UsdoMarketOracle__factory().connect(
             hre.ethers.provider.getSigner(),

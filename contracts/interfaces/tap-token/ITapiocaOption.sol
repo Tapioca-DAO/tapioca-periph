@@ -14,6 +14,7 @@ pragma solidity 0.8.22;
 
 interface ITapiocaOption {
     struct TapOption {
+        uint128 entry; // time when the option position was created
         uint128 expiry; // timestamp, as once one wise man said, the sun will go dark before this overflows
         uint128 discount; // discount in basis points
         uint256 tOLP; // tOLP token ID

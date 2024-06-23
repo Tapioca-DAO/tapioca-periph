@@ -8,7 +8,6 @@ export const buildETHUniOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<Seer__factory>> => {
-    console.log('[+] buildETHUniOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<Seer__factory['deploy']> = [

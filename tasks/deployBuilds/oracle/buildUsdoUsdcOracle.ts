@@ -10,14 +10,12 @@ export const buildUsdoUsdcOracle = async (params: {
     usdoUsdcLpAddy: string;
     isTestnet: boolean;
 }): Promise<IDeployerVMAdd<Seer__factory>> => {
-    console.log('[+] buildUsdoUsdcOracle');
-
     const { hre, owner, usdoAddy, usdoUsdcLpAddy, isTestnet } = params;
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<Seer__factory['deploy']> = [
-        'UniV3 USDO/USC', // Name
-        'USDO/USDC', // Symbol
+        'USDO->USDC->USD', // Name
+        'USDO/USD', // Symbol
         18, // Decimals
         {
             addressInAndOutUni: [usdoAddy, DEPLOY_CONFIG.MISC[chainID]!.USDC],
@@ -31,7 +29,8 @@ export const buildUsdoUsdcOracle = async (params: {
             ], // CL path
             _circuitChainIsMultiplied: [1], // Multiply/divide CL
             guardians: [owner], // Owner
-            _description: hre.ethers.utils.formatBytes32String('USDO/USDC'), // Description,
+            _description:
+                hre.ethers.utils.formatBytes32String('USDO->USDC->USD'), // Description,
             _sequencerUptimeFeed: DEPLOY_CONFIG.MISC[chainID]!.CL_SEQUENCER, // CL Sequencer
             _admin: owner, // Owner
         },
