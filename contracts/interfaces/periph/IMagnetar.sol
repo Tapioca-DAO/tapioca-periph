@@ -115,10 +115,10 @@ enum MagnetarAction {
     OFT, // 5 LZ OFT singular operations.
     ExerciseOption, // 6 tOB singular operation
     // Complex operations
-    CollateralModule, // 6 Collateral Singular related operations.
-    MintModule, // 7 BigBang Singular related operations.
-    OptionModule, // 8 Market Module related operations.
-    YieldBoxModule // 9 YieldBox module related operations.
+    CollateralModule, // 7 Collateral Singular related operations.
+    MintModule, // 8 BigBang Singular related operations.
+    OptionModule, // 9 Market Module related operations.
+    YieldBoxModule // 10 YieldBox module related operations.
 
 }
 

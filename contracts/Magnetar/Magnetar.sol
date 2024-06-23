@@ -256,7 +256,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             return;
         }
 
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Wrap), _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.OFT), _actionCalldata);
     }
 
     function _validateOFTOperation(address _target, bytes calldata _actionCalldata)
