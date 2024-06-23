@@ -13,43 +13,42 @@ export const sandbox__task = async (
     const signer = (await hre.ethers.getSigners())[0];
 
     const cluster = await hre.ethers.getContractAt(
-        'Cluster',
-        loadLocalContract(hre, hre.SDK.eChainId, DEPLOYMENT_NAMES.CLUSTER, tag)
-            .address,
+        'Seer',
+        '0x346383F0cfb28CDB9de798cf76D50D59F1AffaeF',
     );
+    console.log(await cluster.peek('0x'));
 
-    const ROLE = hre.ethers.utils.keccak256(
-        hre.ethers.utils.solidityPack(['string'], ['NEW_EPOCH']),
-    );
-
-    await VM.executeMulticall([
-        {
-            target: cluster.address,
-            callData: cluster.interface.encodeFunctionData('updateContract', [
-                0,
-                '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1',
-                true,
-            ]),
-            allowFailure: false,
-        },
-        {
-            target: cluster.address,
-            callData: cluster.interface.encodeFunctionData(
-                'setRoleForContract',
-                ['0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1', ROLE, true],
-            ),
-            allowFailure: false,
-        },
-    ]);
+    // const ROLE = hre.ethers.utils.keccak256(
+    //     hre.ethers.utils.solidityPack(['string'], ['TOE']),
+    // );
 
     // await VM.executeMulticall([
     //     {
-    //         target: usdo.address,
+    //         target: cluster.address,
+    //         callData: cluster.interface.encodeFunctionData('updateContract', [
+    //             0,
+    //             '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1',
+    //             false,
+    //         ]),
     //         allowFailure: false,
-    //         callData: usdo.interface.encodeFunctionData(
-    //             'changeDefaultStalePeriod',
-    //             [3000],
+    //     },
+    //     {
+    //         target: cluster.address,
+    //         callData: cluster.interface.encodeFunctionData(
+    //             'setRoleForContract',
+    //             ['0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1', ROLE, false],
     //         ),
+    //         allowFailure: false,
+    //     },
+    // ]);
+
+    // await VM.executeMulticall([
+    //     {
+    //         target: cluster.address,
+    //         allowFailure: false,
+    //         callData: cluster.interface.encodeFunctionData('changeTwapPeriod', [
+    //             30,
+    //         ]),
     //     },
     // ]);
     // console.log(await usdo.get('0x', { gasLimit: 1_000_000 }));
