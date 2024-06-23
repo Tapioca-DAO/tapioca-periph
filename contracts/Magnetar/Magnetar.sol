@@ -544,14 +544,14 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             abi.decode(_actionCalldata[4:], (uint256, address, uint256));
 
         // compute `paymentToken` amount
-        (uint256 eligibleTapAmount,, uint256 _eligibleTapAmount) =
+        (,uint256 _paymentTokenAmount,) =
             ITapiocaOptionBroker(_target).getOTCDealDetails(_oTAPTokenID, _paymentToken, _tapAmount);
         address tapToken = ITapiocaOptionBroker(_target).tapOFT();
 
         // transfer `paymentToken` here
         {
             // executed for `msg.sender`
-            bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, eligibleTapAmount);
+            bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _paymentToken, _paymentTokenAmount);
             if (isErr) {
                 revert Magnetar_PearlmitTransferFailed();
             }
@@ -560,8 +560,8 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         uint256 tapAmountBefore = IERC20(tapToken).balanceOf(address(this));
 
         // execute
-        pearlmit.approve(20, _paymentToken, 0, _target, eligibleTapAmount.toUint200(), block.timestamp.toUint48());
-        _paymentToken.safeApprove(address(pearlmit), eligibleTapAmount);
+        pearlmit.approve(20, _paymentToken, 0, _target, _paymentTokenAmount.toUint200(), block.timestamp.toUint48());
+        _paymentToken.safeApprove(address(pearlmit), _paymentTokenAmount);
         _executeCall(_target, _actionCalldata, _actionValue);
         _paymentToken.safeApprove(address(pearlmit), 0);
 
