@@ -37,7 +37,7 @@ struct IOptionsLockData {
     bool lock;
     address target;
     uint128 lockDuration;
-    uint128 amount;
+    uint128 amount; // @dev: in case of a previous `YB` deposit, this amount is replaced by the obtained shares
     uint256 fraction;
 }
 

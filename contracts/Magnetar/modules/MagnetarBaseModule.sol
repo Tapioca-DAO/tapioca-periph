@@ -99,10 +99,10 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
         return balanceAfter - balanceBefore;
     }
 
-    function _depositToYb(IYieldBox _yieldBox, address _user, uint256 _tokenId, uint256 _amount) internal {
+    function _depositToYb(IYieldBox _yieldBox, address _user, uint256 _tokenId, uint256 _amount) internal returns (uint256 amountOut, uint256 shareOut) {
         (, address assetAddress,,) = _yieldBox.assets(_tokenId);
         assetAddress.safeApprove(address(_yieldBox), _amount);
-        _yieldBox.depositAsset(_tokenId, address(this), _user, _amount, 0);
+        (amountOut, shareOut) = _yieldBox.depositAsset(_tokenId, address(this), _user, _amount, 0);
         assetAddress.safeApprove(address(_yieldBox), 0);
     }
 

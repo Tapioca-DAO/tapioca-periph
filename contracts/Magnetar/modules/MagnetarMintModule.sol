@@ -35,6 +35,9 @@ import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 contract MagnetarMintModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
+    error MagnetarMintModule_LockTransferFailed();
+    error MagnetarMintModule_ParticipateTransferFailed();
+
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
     /// =====================
     /// Public
@@ -232,8 +235,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         );
 
         fraction = _extractTokens(data.user, data.externalContracts.singularity, fraction);
-        _depositToYb(_yieldBox, address(this), tOLPSglAssetId, fraction);
+        (, uint256 obtainedShares) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, fraction);
 
+        data.lockData.amount = obtainedShares.toUint128();
+        _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
             data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
         );
@@ -261,6 +266,6 @@ contract MagnetarMintModule is MagnetarBaseModule {
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
-        IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "");
+        IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId);
     }
 }
