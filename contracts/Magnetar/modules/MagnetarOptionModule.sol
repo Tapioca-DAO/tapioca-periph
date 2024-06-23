@@ -272,6 +272,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _checkWhitelisted(data.magnetar);
         if (data.lockData.lock) {
             _checkWhitelisted(data.lockData.target);
+            _checkWhitelisted(data.lockData.tAsset);
         }
         if (data.participateData.participate) {
             _checkWhitelisted(data.participateData.target);
