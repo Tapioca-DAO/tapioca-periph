@@ -583,7 +583,7 @@ library TapiocaOmnichainEngineCodec {
      * @return composeSender_ The address of the compose sender. (dst OApp).
      * @return oftComposeMsg_ The TapOFT composed message, which is the actual message.
      */
-    function decodeLzComposeMsg(bytes calldata _msg)
+    function decodeLzComposeMsg(bytes memory _msg)
         internal
         pure
         returns (address composeSender_, bytes memory oftComposeMsg_)
