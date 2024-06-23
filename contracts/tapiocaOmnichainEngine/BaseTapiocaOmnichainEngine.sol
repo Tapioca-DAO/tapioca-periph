@@ -202,7 +202,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      */
     function encode(address _from, bytes32 _sendTo, uint64 _amountShared, bytes memory _composeMsg)
         internal
-        view
+        pure
         returns (bytes memory _msg, bool hasCompose)
     {
         hasCompose = _composeMsg.length > 0;
