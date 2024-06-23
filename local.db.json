@@ -738,42 +738,132 @@
             "lastBlockHeight": 220505928,
             "contracts": [
                 {
-                    "address": "0x1FB4570F3548f98E3C05D5d7f41c302dda7704fF",
-                    "name": "ARRAKIS_TAP_WETH_VAULT",
+                    "name": "MAGNETAR_COLLATERAL_MODULE",
+                    "address": "0x16CD5F586B0Fb05FBFaa5cE453Ee895d0a044B9F",
                     "meta": {
-                        "vaultNum": 37
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xb6f2ece52663ec1946967e6a2b2c742b51703db2bdd38d1034b76f7fd98954d9",
+                        "create2": true
                     }
                 },
                 {
-                    "name": "TAP_WETH_UNI_V3_POOL",
-                    "address": "0x5918AcA9ae924e6EaAA3d293Bb92BDEc9Ab79338",
+                    "name": "MAGNETAR_MINT_MODULE",
+                    "address": "0x1a228c83B5A43c7D20C52c10fbC09FD4e7F2D5F2",
                     "meta": {
-                        "token0": "0x2C650dAb03A59332e2E0C0C4A7F726913e5028C1",
-                        "token1": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-                        "ratio0": "5741093174641887",
-                        "ratio1": "10000000000000000000",
-                        "fee": 10000
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0x41576b9afd3fbaf3be6daa0ba5111216f0aec43e119bae071e8979a4a2d7bbca",
+                        "create2": true
                     }
                 },
                 {
-                    "address": "0xB1f5515b17294302E7fA366871a14fd6c266E2bB",
+                    "name": "MAGNETAR_OPTION_MODULE",
+                    "address": "0x7a2F009e3D51e7d2aC0DCF12CBB6c81537aaCD5a",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xdc132f62b649977c00fbdd17e452d08c9f198c3d6d5d502b7d2c2ad31f3c5528",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_YIELDBOX_MODULE",
+                    "address": "0x0991c385e9Cb7239cF288F55B4790135fE5E1496",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xc9d7bf4c644d83c0863154e807006f54a7b4ee19ac23e19cf707b9faba4c5c65",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_HELPER",
+                    "address": "0x45Eac2418F11d208e0C54a00Cee73b3D17c963b3",
+                    "meta": {
+                        "args": [],
+                        "salt": "0x78355cb4567e1ac9279b35a73ec9957df262287a2aca5edd5942d0823b20034f",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR",
+                    "address": "0x9B9Ba582098FEe48ECDdB2bC922B1C0390C71bc7",
+                    "meta": {
+                        "args": [
+                            "0xe6d4944556a8c6605269528353C3cc35eEFf1313",
+                            "0x302E912826211b72222cDbaa684426Dc61F7fDED",
+                            "0x16CD5F586B0Fb05FBFaa5cE453Ee895d0a044B9F",
+                            "0x1a228c83B5A43c7D20C52c10fbC09FD4e7F2D5F2",
+                            "0x7a2F009e3D51e7d2aC0DCF12CBB6c81537aaCD5a",
+                            "0x0991c385e9Cb7239cF288F55B4790135fE5E1496",
+                            "0x6668DE259da9EC896f51383f6CA3BD0beEd10EF9",
+                            "0x4C31C2B141E59FeD602fF2474e76e520C363ff7e",
+                            "0x45Eac2418F11d208e0C54a00Cee73b3D17c963b3"
+                        ],
+                        "salt": "0x48048e55a77ec63c7363733e9e95120f50264921eb2b02b10aefc05325ed1bf4",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDO_USDC_UNI_V3_ORACLE",
+                    "address": "0x8F0b09A0577dA6b342Ebd54294F9a69De265f8A7",
+                    "meta": {
+                        "args": [
+                            "USDO->USDC->USD",
+                            "USDO/USD",
+                            18,
+                            {
+                                "addressInAndOutUni": [
+                                    "0xEB99062643cA5Ab880c077288345E0B14B297432",
+                                    "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+                                ],
+                                "_circuitUniswap": [
+                                    "0xae198f5B206f195f7FFD158718341a1f3905cFf9"
+                                ],
+                                "_circuitUniIsMultiplied": [
+                                    1
+                                ],
+                                "_twapPeriod": 3600,
+                                "observationLength": 10,
+                                "_uniFinalCurrency": 1,
+                                "_circuitChainlink": [
+                                    "0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3"
+                                ],
+                                "_circuitChainIsMultiplied": [
+                                    1
+                                ],
+                                "guardians": [
+                                    "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                                ],
+                                "_description": "0x5553444f2d3e555344432d3e5553440000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
+                                "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                            }
+                        ],
+                        "salt": "0x745e68c6a78be4fb28097ded31324163f9506af375b8cc30e070057d57189645",
+                        "create2": true
+                    }
+                },
+                {
+                    "address": "0x1ce2fD14BE41ccDD5ac022CB1e1480556108c6D1",
                     "name": "TAP_TOKEN_YB_EMPTY_STRAT",
                     "meta": {
                         "token": "0x2C650dAb03A59332e2E0C0C4A7F726913e5028C1",
-                        "ybAssetId": 1
-                    }
-                },
-                {
-                    "address": "0xC82c3f0d8bC1fD2f0e17986f423f01D0E402b785",
-                    "name": "WETH_YB_EMPTY_STRAT",
-                    "meta": {
-                        "token": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-                        "ybAssetId": 2
+                        "ybAssetId": 3
                     }
                 },
                 {
                     "name": "ETH_SEER_CL_ORACLE",
-                    "address": "0x40444362d2869bEcBEcA60e1AcA7AA89825eF3E7",
+                    "address": "0xfd6D7093AE1592a18DeB30D9602D4513F07423AF",
                     "meta": {
                         "args": [
                             "CL ETH/USD",
@@ -792,13 +882,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x5ebbbbd01f634a6836961180d8c39891e105cf5715d3ea19e74e6f361cad914d",
+                        "salt": "0xf1b8e296cc2c2e7bc8d5823c99ea34a93c463f1aa4291a208461474ca9739b92",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_SEER_UNI_ORACLE",
-                    "address": "0x1aD22a0483D517ac2cd1a74BC8264e53B68ed828",
+                    "address": "0x74220fCD2A6BC285e6e3aa694a11E6a987919434",
                     "meta": {
                         "args": [
                             "UniV3 ETH/USD",
@@ -810,7 +900,7 @@
                                     "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                                 ],
                                 "_circuitUniswap": [
-                                    "0xC31E54c7a869B9FcBEcc14363CF510d1c41fa443"
+                                    "0xC6962004f452bE9203591991D15f6b388e09E8D0"
                                 ],
                                 "_circuitUniIsMultiplied": [
                                     1
@@ -832,53 +922,53 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x8f66f72590ade14d1786b631fd24cf13a956d1be5c5ed4470b93f7cde0aecaa5",
+                        "salt": "0x8c1e615faaf6a81f90e5e63cb423ab8316a54e8380081d764219ca607314b2b1",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_SEER_DUAL_ORACLE",
-                    "address": "0xC8ba6fb03C850e8436f4F18e369805DE24c0c13d",
+                    "address": "0xd34A59A0023aC4556502899AFE0a7852f9DAD3fC",
                     "meta": {
                         "args": [
-                            "0x40444362d2869bEcBEcA60e1AcA7AA89825eF3E7",
-                            "0x1aD22a0483D517ac2cd1a74BC8264e53B68ed828",
+                            "0xfd6D7093AE1592a18DeB30D9602D4513F07423AF",
+                            "0x74220fCD2A6BC285e6e3aa694a11E6a987919434",
                             "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0x35dcca76e960ba4262e5149f99beedc5e554120919199edbf2c1ccf6499d682a",
+                        "salt": "0x38f5598711feb5ab5576eb14091582711bd4b9cd47e20020487aa60c8cfd8c4b",
                         "create2": true
                     }
                 },
                 {
                     "name": "GLP_ORACLE",
-                    "address": "0xaF0C2280E9ba8C00B82169c4E538DBa518d633d9",
+                    "address": "0x01f7D8a2085695CCE15e175a04521e87863672eD",
                     "meta": {
                         "args": [
                             "0x3963FfC9dff443c2A94f21b129D429891E32ec18",
                             "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0x75ca54069187094b5b1ca2cddb5f4769c13573cb8d58770330469010025af7ab",
+                        "salt": "0xbadff021d7fac07abfc0689e279ca93565a854fed96f1f5016a5f84d5f22caa7",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_GLP_ORACLE",
-                    "address": "0x15e1673292EE36E93995157168B14B0f5dABb5C0",
+                    "address": "0x346383F0cfb28CDB9de798cf76D50D59F1AffaeF",
                     "meta": {
                         "args": [
-                            "0x40444362d2869bEcBEcA60e1AcA7AA89825eF3E7",
-                            "0xaF0C2280E9ba8C00B82169c4E538DBa518d633d9",
+                            "0xfd6D7093AE1592a18DeB30D9602D4513F07423AF",
+                            "0x01f7D8a2085695CCE15e175a04521e87863672eD",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0xe43a63b42efd8b4dbd0bb06c8c9cc0258134f3cb28466b7f94f9f538dd3b4555",
+                        "salt": "0xeee0b5e39dab1af27ebd2361b0c5596b4de729f4a9bbc1ea5414bd15e1aff6e9",
                         "create2": true
                     }
                 },
                 {
                     "name": "GMX_ORACLE",
-                    "address": "0x66c63F995C5267DcBBef944D54661dc6a2c72fd9",
+                    "address": "0xC23D76Da3Ef3c8C077Edd6A3cc99921a4958b4BF",
                     "meta": {
                         "args": [
                             "GMX/USD",
@@ -897,13 +987,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x7c46751b7bc02b5a529d6cb6d7143baf8ae427232f9d1da2c2e37836c6fa4e53",
+                        "salt": "0x18a0a1d29db0c1145b9d5f53a78be3e438d35d8da2ae7202d6c088453df869ab",
                         "create2": true
                     }
                 },
                 {
                     "name": "TAP_ORACLE",
-                    "address": "0xbFb67F8455e919F5C0E546A647b39a5e0D13c997",
+                    "address": "0x67b03e38D129D4edeAB2D8f3B6B58D6c2ea4C4C8",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -937,13 +1027,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x42c40efb69c3e54ab045a7c0d52a5473baaeb6e58f11e630ef78939831acfb6a",
+                        "salt": "0xcbf84f454ef566add8b69c85f8c41d68d8053762d2320866a9deb5be923d00de",
                         "create2": true
                     }
                 },
                 {
                     "name": "ADB_TAP_OPTION_ORACLE",
-                    "address": "0x9a5f9823A2CbEb3E562335Fe23CCb74E0F51BE07",
+                    "address": "0x800202888d8490edF8D62E8BC1744DCDc17814d0",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -978,13 +1068,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x06fb5cd11671a62d46bedc94d73cf66f212d2fc916ac1ebbe442b285d97c4b02",
+                        "salt": "0xaec9dc56f6c04ef0e0330d06de71f7c8d6d97a11c44e2e5a1a08db4746c24a5b",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOB_TAP_OPTION_ORACLE",
-                    "address": "0x711CeE2B9a2ae3E7d1d46839b3C79Dc2fE3234b2",
+                    "address": "0x1aC1232623faEAF85A0E7C11daafCD335A67a0AE",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -1019,13 +1109,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x956510550037ad01369e1bd41aa3f38a0b4e5ea63862d204d8637feec33991df",
+                        "salt": "0x4a65634ac6344e800fe8c5ac4dfc2bcb42fcf4cd8a4f57cfaec57eb20d4d4241",
                         "create2": true
                     }
                 },
                 {
                     "name": "USDC_SEER_CL_ORACLE",
-                    "address": "0xC06D795a7d48572e8469b2c90b3f5Ec83529739E",
+                    "address": "0x5130d0daf42c9994d6746a7d246FbB3194D31d5F",
                     "meta": {
                         "args": [
                             "USDC/USD",
@@ -1044,13 +1134,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0xe9c069fe8a6efcf89f25a83ed4a2e8448929afb85ea8ce6d05b7bf3e4cdc0e19",
+                        "salt": "0x0047285e177dccd8d108b934dc75f583422b82c6d38f8a169441682d38d760bb",
                         "create2": true
                     }
                 },
                 {
                     "name": "RETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0xF293b561DBdB87F0685A7ffa9958Ae9F402e2b44",
+                    "address": "0x5535Fb1BaF5811da0Fd83a533f2b8074AE38376f",
                     "meta": {
                         "args": [
                             "RETH/ETH -> ETH/USD",
@@ -1074,13 +1164,13 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x8248f30d4f1cb4d976e0b5ac82e8f162e70ff5a5cd4b4fc521988bbf42e529ef",
+                        "salt": "0x3cf7c522cfc56adbd0b9f56417a1c0f49a122aed9407187024f4c030d5e70b72",
                         "create2": true
                     }
                 },
                 {
                     "name": "WSTETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0x6854E373c0543cB3E2D309f700B453B96396Ce81",
+                    "address": "0xe6D2669850DfCAd143c7B645b829CD84e107d8e4",
                     "meta": {
                         "args": [
                             "WSTETH/stETH -> stETH/ETH -> ETH/USD",
@@ -1106,56 +1196,116 @@
                                 "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                             }
                         ],
-                        "salt": "0x76a50ede6926873355445b1e84e140ea9715af0778c62e784662f68a1ff6e581",
+                        "salt": "0x0b6d5133409057e57064fa4197720fbab152ed22deb689184543f09e1d2ad87e",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_RETH_ORACLE",
-                    "address": "0x55c96ABE5C42C7c8fcA0A263d59a0DC60306B7E0",
+                    "address": "0xcD10D65D986c51745cE3545F629B9E045443Bb18",
                     "meta": {
                         "args": [
-                            "0xF293b561DBdB87F0685A7ffa9958Ae9F402e2b44",
+                            "0x5535Fb1BaF5811da0Fd83a533f2b8074AE38376f",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0x3ad0f111e0c0a2fb0f4ad0655037043f8aad10122a7e1b673537067f0b34cdf9",
+                        "salt": "0xa41943eafadec1db0ec21bfef72304b5e57f4a6e7c29fa95c9be23885c29d1ab",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_TETH_ORACLE",
-                    "address": "0xAFA5783396FA75d6C7FCc075f03b7251E7C6d708",
+                    "address": "0x0Ec98e3bf28e4A92785701D1E8CE1983743D7c2D",
                     "meta": {
                         "args": [
-                            "0xC8ba6fb03C850e8436f4F18e369805DE24c0c13d",
+                            "0xd34A59A0023aC4556502899AFE0a7852f9DAD3fC",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0x605c7a0d4adf7315d856f5df8a9c64797c28a982121e79a88238c83ac0160eb4",
+                        "salt": "0x1548af57f1f54db1a210c659b5b5eefcc1ee0a6ea0b3e2abd6e0b286c1240400",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_WSTETH_ORACLE",
-                    "address": "0x7D0997aB3106DF51FB509476862D990067a284b5",
+                    "address": "0xcE743483d649902e68Ce0e840f4019Ce0833EF67",
                     "meta": {
                         "args": [
-                            "0x6854E373c0543cB3E2D309f700B453B96396Ce81",
+                            "0xe6D2669850DfCAd143c7B645b829CD84e107d8e4",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0x751321d5010e19cd91f8c836d21eaed57dad53ccdd15d6703ed26f56aa8bbcf5",
+                        "salt": "0xc574ede188b4a77ea17fc84332ff265cba7388e762ecee6c0fd2295ec5330d3b",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_GLP_ORACLE",
-                    "address": "0x35f3C21dc10c32f06b79a1eF8E94E849E68c763d",
+                    "address": "0xa6A80dCD0149904bD18E1e724B9e572b607c2668",
                     "meta": {
                         "args": [
-                            "0xaF0C2280E9ba8C00B82169c4E538DBa518d633d9",
+                            "0x01f7D8a2085695CCE15e175a04521e87863672eD",
                             "0x302E912826211b72222cDbaa684426Dc61F7fDED"
                         ],
-                        "salt": "0xdd6ae8206546cf0360d6bb2813fa67e829d48c6c00b58b7086a6e5fd562391cd",
+                        "salt": "0xe4a3209aa46ac803ea39b243a3a63311b6dd228fb8561a34133a1d95ea73db5f",
                         "create2": true
+                    }
+                },
+                {
+                    "name": "TOE_HELPER",
+                    "address": "0x4C31C2B141E59FeD602fF2474e76e520C363ff7e",
+                    "meta": {
+                        "args": [],
+                        "salt": "0xffe93e692d1d207e1aa1d8062774aabfeb0ff4ae196b599d9ca2937c191596fd",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "PAUSER",
+                    "address": "0x0CAbd7c1ce6F3Ae64EFFbC5351F63024551E6D9b",
+                    "meta": {
+                        "args": [
+                            "0xe6d4944556a8c6605269528353C3cc35eEFf1313",
+                            "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                        ],
+                        "salt": "0xb257e29952f63be580a30f149af59aeac54f416eeb4b141167f2c39c295121cf",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "ZERO_X_SWAPPER",
+                    "address": "0x206bA8e4fDfb971aded63e8C621E04E69dd3eB81",
+                    "meta": {
+                        "args": [
+                            "0xdef1c0ded9bec7f1a1670819833240f027b25eff",
+                            "0xe6d4944556a8c6605269528353C3cc35eEFf1313",
+                            "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                        ],
+                        "salt": "0xe6f4888a7e15a32e488ff17d21319f43db27ea1443057150dbf2150a55175455",
+                        "create2": true
+                    }
+                },
+                {
+                    "address": "0x1FB4570F3548f98E3C05D5d7f41c302dda7704fF",
+                    "name": "ARRAKIS_TAP_WETH_VAULT",
+                    "meta": {
+                        "vaultNum": 37
+                    }
+                },
+                {
+                    "name": "TAP_WETH_UNI_V3_POOL",
+                    "address": "0x5918AcA9ae924e6EaAA3d293Bb92BDEc9Ab79338",
+                    "meta": {
+                        "token0": "0x2C650dAb03A59332e2E0C0C4A7F726913e5028C1",
+                        "token1": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+                        "ratio0": "5741093174641887",
+                        "ratio1": "10000000000000000000",
+                        "fee": 10000
+                    }
+                },
+                {
+                    "address": "0xC82c3f0d8bC1fD2f0e17986f423f01D0E402b785",
+                    "name": "WETH_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+                        "ybAssetId": 2
                     }
                 },
                 {
@@ -2200,7 +2350,7 @@
             "contracts": [
                 {
                     "name": "USDO_USDC_UNI_V3_ORACLE",
-                    "address": "0x54fb6DDfB3158D7231e053cf0650f8AE2D8e2Cd2",
+                    "address": "0xaAC67D6e3374a2F60aF412bA66E5c3831f36F308",
                     "meta": {
                         "args": [
                             "USDO->USDC->USD",
@@ -2208,18 +2358,18 @@
                             18,
                             {
                                 "addressInAndOutUni": [
-                                    "0x90bd62D2317914Fa178b37FeBA22d1640DED8BCA",
+                                    "0x910cFEAF36010DE3D8b95B330D815beF3a7bD2E8",
                                     "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                                 ],
                                 "_circuitUniswap": [
-                                    "0x5f3a16D98f71a07d2107ec1F4127E6fF01c326Da"
+                                    "0x933504859A80Fc6Ae457771AE543DDc04c7eAae2"
                                 ],
                                 "_circuitUniIsMultiplied": [
                                     1
                                 ],
                                 "_twapPeriod": 3600,
                                 "observationLength": 10,
-                                "_uniFinalCurrency": 0,
+                                "_uniFinalCurrency": 1,
                                 "_circuitChainlink": [
                                     "0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3"
                                 ],
@@ -2234,47 +2384,21 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x2cffdcb6e6f3feb355cf2b5985a60fe338d5684915502363152c50137943a53f",
+                        "salt": "0xdceed12e8c9717524bade84082bb6b1c0480c07b64209cc45bf91380b5bc3062",
                         "create2": true
                     }
                 },
                 {
-                    "address": "0x3435b3f58d72FB84E0fF31D019db1b62C2B9F233",
-                    "name": "ARRAKIS_USDO_USDC_VAULT",
-                    "meta": {
-                        "vaultNum": 43
-                    }
-                },
-                {
-                    "name": "USDO_USDC_UNI_V3_POOL",
-                    "address": "0x5f3a16D98f71a07d2107ec1F4127E6fF01c326Da",
-                    "meta": {
-                        "token0": "0x90bd62D2317914Fa178b37FeBA22d1640DED8BCA",
-                        "token1": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-                        "ratio0": "1",
-                        "ratio1": "1",
-                        "fee": 100
-                    }
-                },
-                {
-                    "address": "0xEe2546Eac39e7dCEF10e698B1004921BA8Ff328C",
-                    "name": "WETH_YB_EMPTY_STRAT",
-                    "meta": {
-                        "token": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-                        "ybAssetId": 2
-                    }
-                },
-                {
-                    "address": "0x704b7D065a12b789749896842Ca41D727Fdaf54e",
+                    "address": "0x4f8d767b7a54F27D38F1C960d05F239417CbaD79",
                     "name": "TAP_TOKEN_YB_EMPTY_STRAT",
                     "meta": {
-                        "token": "0xF98F1366E49af6859eF46a3994729bA8A41dfB5B",
-                        "ybAssetId": 1
+                        "token": "0xd40E33DdAe9241a27F1da39E927c10F1363d824d",
+                        "ybAssetId": 60
                     }
                 },
                 {
                     "name": "ETH_SEER_CL_ORACLE",
-                    "address": "0x4CB3C23d7B553d0a32F790A58C4c590C63ca35b5",
+                    "address": "0xfF3cb71774640A95107A6b126394775561e15400",
                     "meta": {
                         "args": [
                             "CL ETH/USD",
@@ -2293,13 +2417,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x32dabee201d4f085cd2882c2c55b0b1a558ae5001161c72c738d29ef16b57109",
+                        "salt": "0xcf030e1fa6887b70ce6a4677f8db07eeac265f49e95739a7570d6598c6895ac6",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_SEER_UNI_ORACLE",
-                    "address": "0x08713643cEb3B267F73925eD24Ad5C2813a15922",
+                    "address": "0x59ed71D45312826EaE0c82587DAc5fC2ff42F7D0",
                     "meta": {
                         "args": [
                             "UniV3 ETH/USD",
@@ -2333,53 +2457,53 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x4c748d4a7fc74b38c2a913b3195540ec75710b35c3a5e667778b6f37cde8121e",
+                        "salt": "0xcf04d47d33a17dc8e6ba695bcaf69864f2c985f089756cd8fd782461c87134dd",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_SEER_DUAL_ORACLE",
-                    "address": "0x8B01F7499d66129BEe41CD9770C6578b15585cde",
+                    "address": "0x5215ca212797723cABdE9a9d73607A11E9155F3c",
                     "meta": {
                         "args": [
-                            "0x4CB3C23d7B553d0a32F790A58C4c590C63ca35b5",
-                            "0x08713643cEb3B267F73925eD24Ad5C2813a15922",
+                            "0xfF3cb71774640A95107A6b126394775561e15400",
+                            "0x59ed71D45312826EaE0c82587DAc5fC2ff42F7D0",
                             "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0xa115ae957f1966933d08a122cc2867dab4bf6c2f8676529c1c40a2b5e04672d3",
+                        "salt": "0xc3c7bdc2bf1068504d2f7b02c6fcc9ac028bb026419be2ec104cea06c8ad3167",
                         "create2": true
                     }
                 },
                 {
                     "name": "GLP_ORACLE",
-                    "address": "0x7a59e73Fb8cFe72f0A0244CC41C13270d019A8Ec",
+                    "address": "0xA4d821388c8b5CEF81F0622c71c987DCF4DE46BD",
                     "meta": {
                         "args": [
                             "0x3963FfC9dff443c2A94f21b129D429891E32ec18",
                             "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0xd30f50c5657c1662c9160daf3fdca0990953f021da51474d175ec0ba30188bf8",
+                        "salt": "0xf7ad5b3858b0ba2cc17da277a126d606a4e1af0aed6935fe5f493165cb948be1",
                         "create2": true
                     }
                 },
                 {
                     "name": "ETH_GLP_ORACLE",
-                    "address": "0xA952CD27dc4E75853c9Fd9711De59Cb73de94505",
+                    "address": "0x1FEb3B3795E006381B5f801A292E93871553d10d",
                     "meta": {
                         "args": [
-                            "0x4CB3C23d7B553d0a32F790A58C4c590C63ca35b5",
-                            "0x7a59e73Fb8cFe72f0A0244CC41C13270d019A8Ec",
+                            "0xfF3cb71774640A95107A6b126394775561e15400",
+                            "0xA4d821388c8b5CEF81F0622c71c987DCF4DE46BD",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0x54694d4f885d46e09427fb3ab0ba5bec0532f6707ee11c2d049644a297c90bed",
+                        "salt": "0xe0145bd88bc0f31f8b6faf3c08f39c10b658694d69448e8a4bd03de4d5f8d870",
                         "create2": true
                     }
                 },
                 {
                     "name": "GMX_ORACLE",
-                    "address": "0xDaA95D04AcF156FeF29535c57ec186A36c3B9581",
+                    "address": "0x3f22f223486072128F42f6D1f02BA641EFff7B0E",
                     "meta": {
                         "args": [
                             "GMX/USD",
@@ -2398,13 +2522,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x50b6530ccbd22e386a9c150cc7b42952cd97e2eec58bf5dc5606634cd46cd0d8",
+                        "salt": "0x004077b7d3da08281e4971c4e8f3569ee986cfd5dfa8c35bb489593ffcf3d882",
                         "create2": true
                     }
                 },
                 {
                     "name": "TAP_ORACLE",
-                    "address": "0xc38515c804B330c634Cf637C0a9a752C665CdD6E",
+                    "address": "0x08662796213f410f05d19dcE3bB7f26538ed46cd",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -2412,11 +2536,11 @@
                             18,
                             {
                                 "addressInAndOutUni": [
-                                    "0xF98F1366E49af6859eF46a3994729bA8A41dfB5B",
+                                    "0xd40E33DdAe9241a27F1da39E927c10F1363d824d",
                                     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                                 ],
                                 "_circuitUniswap": [
-                                    "0xA651046Af88Aa2ca3F07b3b39d5ee3fD1eeabEeE"
+                                    "0xc7E4414A349fF98430Fe86EBfe40C044675373eF"
                                 ],
                                 "_circuitUniIsMultiplied": [
                                     1
@@ -2438,13 +2562,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x6b90305ad393e527adb78a9ed72f3bffec65f91d4bf4214e13eb3f7979eb84ba",
+                        "salt": "0x6289c53c39c538cc89036e591600b42ce6ee80145767d691cccfe21e54bed4e2",
                         "create2": true
                     }
                 },
                 {
                     "name": "ADB_TAP_OPTION_ORACLE",
-                    "address": "0x866d847B5CF0eEd7017d3929C56d8409fD464A71",
+                    "address": "0x75F9994Ae109d812e2464530d90d994431BFB0e6",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -2453,11 +2577,11 @@
                             3600,
                             {
                                 "addressInAndOutUni": [
-                                    "0xF98F1366E49af6859eF46a3994729bA8A41dfB5B",
+                                    "0xd40E33DdAe9241a27F1da39E927c10F1363d824d",
                                     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                                 ],
                                 "_circuitUniswap": [
-                                    "0xA651046Af88Aa2ca3F07b3b39d5ee3fD1eeabEeE"
+                                    "0xc7E4414A349fF98430Fe86EBfe40C044675373eF"
                                 ],
                                 "_circuitUniIsMultiplied": [
                                     1
@@ -2479,13 +2603,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0xbbad262ded31b1954c30c691490744577887a7d6807040cf3422dad454c68221",
+                        "salt": "0xf6e5f16b4353a28cc577acc31860d093a61c3fe2681c9607c6bf22a03d060fae",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOB_TAP_OPTION_ORACLE",
-                    "address": "0x6AeC4fbA7cece15cB43a8C495EBa70352572549b",
+                    "address": "0xD9Dc4F01D5bf1219F1325662ed84f1b1868a845C",
                     "meta": {
                         "args": [
                             "TAP/USD",
@@ -2494,11 +2618,11 @@
                             14400,
                             {
                                 "addressInAndOutUni": [
-                                    "0xF98F1366E49af6859eF46a3994729bA8A41dfB5B",
+                                    "0xd40E33DdAe9241a27F1da39E927c10F1363d824d",
                                     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                                 ],
                                 "_circuitUniswap": [
-                                    "0xA651046Af88Aa2ca3F07b3b39d5ee3fD1eeabEeE"
+                                    "0xc7E4414A349fF98430Fe86EBfe40C044675373eF"
                                 ],
                                 "_circuitUniIsMultiplied": [
                                     1
@@ -2520,13 +2644,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0xfb6943170c4612da7d14ba453fb80ec825c39ce943f160b30b34890fe57a5987",
+                        "salt": "0x4029cce613e878ce07389f23470f657f21190718cb92d55104655000b69a7241",
                         "create2": true
                     }
                 },
                 {
                     "name": "USDC_SEER_CL_ORACLE",
-                    "address": "0x12896919f2aAacd7f5aA6f1f6be47f7d7139Ca88",
+                    "address": "0x272Dbd5295a2B444e1E5Bf602C2672D883A6351E",
                     "meta": {
                         "args": [
                             "USDC/USD",
@@ -2545,13 +2669,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0xcdfec19e8a3f5125d89f9dfeeec984b19fdc3f3613be865dae01bb4ccf10172d",
+                        "salt": "0x813f07a68dcbb01bb0c4e262d395fc769efc186420fe2ee0d8db3c690031fc52",
                         "create2": true
                     }
                 },
                 {
                     "name": "RETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0x003D6c5992F665a6414FE67df1f2B61ecE335958",
+                    "address": "0x5D7ba1141b69B75d291b97Ba3007e229d2980126",
                     "meta": {
                         "args": [
                             "RETH/ETH -> ETH/USD",
@@ -2575,13 +2699,13 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0xeb4027382fe811ac5b7fbb75936cf20aa4ba3a566e60c4e765b6f467815b650c",
+                        "salt": "0x6ce7157c75898d32d60881c4e662f906de64e1f38d4c50f5bd5cb79fc7e3e486",
                         "create2": true
                     }
                 },
                 {
                     "name": "WSTETH_USD_SEER_CL_MULTI_ORACLE",
-                    "address": "0x07c1Ab5EBA604576EC1A79FF498453BeF1C92ED9",
+                    "address": "0x79a8b799F12093b15D6554E14Ea1B3Be23D56306",
                     "meta": {
                         "args": [
                             "WSTETH/stETH -> stETH/ETH -> ETH/USD",
@@ -2607,74 +2731,176 @@
                                 "_admin": "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                             }
                         ],
-                        "salt": "0x3c952feb5333670b36fd5e6744b13fe9a4310c5d5bd9e73542fc2ce6d46f6e08",
+                        "salt": "0xce52abd2074a90230eb57ad01c5641c6fec351b802993300b4c4908c922679da",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_RETH_ORACLE",
-                    "address": "0x77E9168651ddA0f0d0d495110e274388182CEcf9",
+                    "address": "0x51F11F862F0477d66994350df70A293fD7EBCd36",
                     "meta": {
                         "args": [
-                            "0x003D6c5992F665a6414FE67df1f2B61ecE335958",
+                            "0x5D7ba1141b69B75d291b97Ba3007e229d2980126",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0xf307aec2b0b6bd724212b1fdf9b20210703ef63f0ba9713d0bdd7ad163ee2af0",
+                        "salt": "0xb14bc832997e3cf7da3b81d3c05be6fa3a61bded3fd1811a28a71ffb791744c0",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_TETH_ORACLE",
-                    "address": "0x02d23c04b7cF730D88AC17C597A095b5104AFC13",
+                    "address": "0x9DF83C3cb0E26618803259C129730ab59E1E9490",
                     "meta": {
                         "args": [
-                            "0x8B01F7499d66129BEe41CD9770C6578b15585cde",
+                            "0x5215ca212797723cABdE9a9d73607A11E9155F3c",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0xdf746c55ca1470ff19fa167597688efa510d3f748f370f186c45a9dd1f8b1de2",
+                        "salt": "0x806094eb871222e7fe6252f61e0b7e92f133f0d4e91285969c8e2026b6124338",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_WSTETH_ORACLE",
-                    "address": "0xf0576218c483b76739CB83E60082eA9b079D9f18",
+                    "address": "0x6Bb5CF5Cc9c14e889feF58d1DD05686cfdAaCB6d",
                     "meta": {
                         "args": [
-                            "0x07c1Ab5EBA604576EC1A79FF498453BeF1C92ED9",
+                            "0x79a8b799F12093b15D6554E14Ea1B3Be23D56306",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0xa7b85a5a49f637516f4b4f417c09dff1a1590bbb8a6add67a2984fdfafcd2fb0",
+                        "salt": "0xc015cc20f0d56d73500a6204533e60704e5c8bf082cb8a5d3c5b74547e2dc424",
                         "create2": true
                     }
                 },
                 {
                     "name": "MARKET_GLP_ORACLE",
-                    "address": "0xf5E618A18D1bd5F0bD11eAE735f41604558F48f8",
+                    "address": "0xE8500128Cb6167fEE6e8F3d0d6ea6398C9d3cF0C",
                     "meta": {
                         "args": [
-                            "0x7a59e73Fb8cFe72f0A0244CC41C13270d019A8Ec",
+                            "0xA4d821388c8b5CEF81F0622c71c987DCF4DE46BD",
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
-                        "salt": "0x870f5970ef5a4bffe9c02467250028af4bf423c1ab91345dd21648d13c002ef1",
+                        "salt": "0x75603ee75a491b8a0940347496af283d9d80785cfcf0293e86f46db43ebe0c3b",
                         "create2": true
                     }
                 },
                 {
-                    "address": "0x4E10fE282c17c816B634838ECdB76b27312ff4C8",
+                    "address": "0x6954f662cf2610dc6d22Fab76740a0B613F1c7A5",
                     "name": "ARRAKIS_TAP_WETH_VAULT",
                     "meta": {
-                        "vaultNum": 42
+                        "vaultNum": 56
                     }
                 },
                 {
                     "name": "TAP_WETH_UNI_V3_POOL",
-                    "address": "0xA651046Af88Aa2ca3F07b3b39d5ee3fD1eeabEeE",
+                    "address": "0xc7E4414A349fF98430Fe86EBfe40C044675373eF",
                     "meta": {
                         "token0": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-                        "token1": "0xF98F1366E49af6859eF46a3994729bA8A41dfB5B",
+                        "token1": "0xd40E33DdAe9241a27F1da39E927c10F1363d824d",
                         "ratio0": "10000000000000000000",
                         "ratio1": "5741093174641887",
                         "fee": 10000
+                    }
+                },
+                {
+                    "name": "MAGNETAR_COLLATERAL_MODULE",
+                    "address": "0x923aD13A234551c94bA654DDB1D080621Caba9c2",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0x333dac6d2f934e5fc021751792ad047eba552f2f68b35ba8cfbf42341a84b123",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_MINT_MODULE",
+                    "address": "0x928375ee05C351C1BC4af873350bEA1255379138",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0x517dee87ef8015da8c098df6716143e3c821efa4c11e7fedad2641871d645f81",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_OPTION_MODULE",
+                    "address": "0x032Ed49A7Da6887a58469EF52f8E4c42F0B6FcAe",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xf14c8988bef13599eab54fa17d47d6c0a66ad25f63e1d1e38df0b0142641e629",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_YIELDBOX_MODULE",
+                    "address": "0x4b5e06218121969530d44b63286850677B83652F",
+                    "meta": {
+                        "args": [
+                            "0x0000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000"
+                        ],
+                        "salt": "0xd6294f526794c20e55f3b1c746ecfb58e31672cc775fd8066454a3f3725a8fae",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR_HELPER",
+                    "address": "0xe93739fb7810F1BC57C627157DB24777aAF7638e",
+                    "meta": {
+                        "args": [],
+                        "salt": "0xe492a2fc954b3147b0d7686bb1875cb8408d98552180f8c7d92199ba49069666",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "MAGNETAR",
+                    "address": "0x788f82fF4B1A1BBE40172C7633129F9200Db9bBA",
+                    "meta": {
+                        "args": [
+                            "0x5DB88DDd9BbB88d0df2109926044Ce0779eAD1dE",
+                            "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C",
+                            "0x923aD13A234551c94bA654DDB1D080621Caba9c2",
+                            "0x928375ee05C351C1BC4af873350bEA1255379138",
+                            "0x032Ed49A7Da6887a58469EF52f8E4c42F0B6FcAe",
+                            "0x4b5e06218121969530d44b63286850677B83652F",
+                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
+                            "0xA1E0c14aB05109aB01e4aED9C8A72e4dFd27b3cB",
+                            "0xe93739fb7810F1BC57C627157DB24777aAF7638e"
+                        ],
+                        "salt": "0x988b10c76e511c16fa878b1c9b4011c0be40625a6008ab3bbd4cb48e472ca104",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "USDO_USDC_UNI_V3_POOL",
+                    "address": "0x0B4805b577DC05346C621FD154c6B302787Fe636",
+                    "meta": {
+                        "token0": "0xB7eF5266cD0f30EfB528714c4373Ac4d0003Ea74",
+                        "token1": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+                        "ratio0": "1",
+                        "ratio1": "1",
+                        "fee": 100
+                    }
+                },
+                {
+                    "address": "0x7D02c26E91970b428781f01f4ceD8a1730470b26",
+                    "name": "ARRAKIS_USDO_USDC_VAULT",
+                    "meta": {
+                        "vaultNum": 50
+                    }
+                },
+                {
+                    "address": "0xEe2546Eac39e7dCEF10e698B1004921BA8Ff328C",
+                    "name": "WETH_YB_EMPTY_STRAT",
+                    "meta": {
+                        "token": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+                        "ybAssetId": 2
                     }
                 },
                 {
@@ -2695,82 +2921,6 @@
                             "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C"
                         ],
                         "salt": "0xb5606623a298561818053da7fbcf6254d668c33185ad7eaf628ec2786c792438",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR_COLLATERAL_MODULE",
-                    "address": "0x52Cc9d66a6101A67602212B5D40Ccb8eC375EFb9",
-                    "meta": {
-                        "args": [
-                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
-                            "0x0000000000000000000000000000000000000000"
-                        ],
-                        "salt": "0xfdc6c26e99ed31f91d6ed005d05ed0ed45eed039d51ada1f2f9368caef194c4d",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR_MINT_MODULE",
-                    "address": "0xcdD8321249c810e9a64CD8ba64BC5893dA6D5877",
-                    "meta": {
-                        "args": [
-                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
-                            "0x0000000000000000000000000000000000000000"
-                        ],
-                        "salt": "0xdc0a42696a8ad4f1ccc35529d8d2395858be483ee748a9caea41553f1829c5e4",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR_OPTION_MODULE",
-                    "address": "0x9E87061b897e7B2345fe6d50ED31229e0000EdAb",
-                    "meta": {
-                        "args": [
-                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
-                            "0x0000000000000000000000000000000000000000"
-                        ],
-                        "salt": "0x4dd039a6fcf22d5e2ab70bd00a0cd11a02f434fe8ea7508d4820ac8de63ccc6e",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR_YIELDBOX_MODULE",
-                    "address": "0x03f11b898D8D9CBaf5D3d719c899D802b370a16B",
-                    "meta": {
-                        "args": [
-                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
-                            "0x0000000000000000000000000000000000000000"
-                        ],
-                        "salt": "0x60162394f30c3adf59561065a31634662a244fd9f4a2bd87a7d0a49c80751a0f",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR_HELPER",
-                    "address": "0xc76b4fDE940D28442aedc5e60b92Ec0b09Ad2510",
-                    "meta": {
-                        "args": [],
-                        "salt": "0x4c3cf128611dc096ebbcdee54a4fee76c3400c02e4e54d6bb96da9dc4c78e872",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "MAGNETAR",
-                    "address": "0x3a4c4168b25D5D6A1652f69b4E345310b635689f",
-                    "meta": {
-                        "args": [
-                            "0x5DB88DDd9BbB88d0df2109926044Ce0779eAD1dE",
-                            "0x60D00F668A883988611Dc3515e473A9a9D6C8f6C",
-                            "0x52Cc9d66a6101A67602212B5D40Ccb8eC375EFb9",
-                            "0xcdD8321249c810e9a64CD8ba64BC5893dA6D5877",
-                            "0x9E87061b897e7B2345fe6d50ED31229e0000EdAb",
-                            "0x03f11b898D8D9CBaf5D3d719c899D802b370a16B",
-                            "0xd1B04e34110e6a506DacDAb00639bad46079829d",
-                            "0xA1E0c14aB05109aB01e4aED9C8A72e4dFd27b3cB",
-                            "0xc76b4fDE940D28442aedc5e60b92Ec0b09Ad2510"
-                        ],
-                        "salt": "0xfbb2a83f0860bfc845d715e684251507c1b470d54a85c9cc0ec4def5fd28eaef",
                         "create2": true
                     }
                 },
