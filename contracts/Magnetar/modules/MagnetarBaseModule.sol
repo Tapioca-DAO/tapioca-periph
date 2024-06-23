@@ -174,7 +174,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
         returns (uint256 share)
     {
         _singularity.accrue();
-        uint256 fraction = helper.getFractionForAmount(_singularity, _amount);
+        uint256 fraction = helper.getFractionForAmount(_singularity, _amount, true);
         share = _singularity.removeAsset(_from, _to, fraction);
     }
 
