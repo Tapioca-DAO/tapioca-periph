@@ -11,23 +11,28 @@ import { deployUniV3Pool } from './deployUniV3Pool';
 
 export async function deployUniPoolAndAddLiquidity(
     params: TTapiocaDeployerVmPass<{
+        deploymentName: string;
         tokenA: string;
         tokenB: string;
         ratioTokenA: number;
         ratioTokenB: number;
         feeAmount: FeeAmount;
-        mintMock?: boolean;
+        options?: {
+            mintMock?: boolean;
+            arrakisDepositLiquidity?: boolean;
+        };
     }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet } = params;
     const {
         tag,
+        deploymentName,
         tokenA,
         tokenB,
         ratioTokenA,
         ratioTokenB,
         feeAmount,
-        mintMock,
+        options,
     } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
@@ -35,6 +40,7 @@ export async function deployUniPoolAndAddLiquidity(
         await deployUniV3Pool(
             hre,
             tag,
+            deploymentName,
             tokenA,
             tokenB,
             ratioTokenA,
@@ -86,7 +92,7 @@ export async function deployUniPoolAndAddLiquidity(
     );
 
     // Mint tokens for liquidity if one of them is missing
-    if (isTestnet && mintMock) {
+    if (isTestnet && options?.mintMock) {
         console.log('[+] TESTNET: Minting tokens for liquidity');
         // await token0.mintTo(owner, (1e18).toString());
         // await token1.mintTo(owner, (1e18).toString());
@@ -126,63 +132,70 @@ export async function deployUniPoolAndAddLiquidity(
         }
     }
 
-    // Mint Arrakis liquidity
-    {
-        const amountsForLiquidity = await arrakisResolve.getMintAmounts(
-            arrakisVault.address,
-            await token0Erc20.balanceOf(owner),
-            await token1Erc20.balanceOf(owner),
-        );
-
-        await arrakisMint({
-            amount0: amountsForLiquidity.amount0,
-            amount1: amountsForLiquidity.amount1,
-            mintAmount: amountsForLiquidity.mintAmount,
-            to: owner,
-            arrakisVault,
-            token0: token0Erc20,
-            token1: token1Erc20,
-            VM,
-        });
-
-        console.log('[+] Arrakis shares:', await arrakisVault.balanceOf(owner));
-        console.log('[+] Total supply:', await arrakisVault.totalSupply());
-        console.log(
-            '[+] Liquidity deposited in pool:',
-            amountsForLiquidity.mintAmount.toString(),
-        );
-    }
-    // Rebalance
     const uniPool = await hre.ethers.getContractAt(
         'IUniswapV3Pool',
         computedPoolAddress,
     );
-    {
-        const slot0 = await uniPool.slot0();
-        const tickSpacing = await uniPool.tickSpacing();
-        const lowerTick = slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
-        const upperTick =
-            slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
-        const rebalanceParams = await arrakisResolve.standardRebalance(
-            [
+
+    // Mint Arrakis liquidity
+    if (options?.arrakisDepositLiquidity) {
+        {
+            const amountsForLiquidity = await arrakisResolve.getMintAmounts(
+                arrakisVault.address,
+                await token0Erc20.balanceOf(owner),
+                await token1Erc20.balanceOf(owner),
+            );
+
+            await arrakisMint({
+                amount0: amountsForLiquidity.amount0,
+                amount1: amountsForLiquidity.amount1,
+                mintAmount: amountsForLiquidity.mintAmount,
+                to: owner,
+                arrakisVault,
+                token0: token0Erc20,
+                token1: token1Erc20,
+                VM,
+            });
+
+            console.log(
+                '[+] Arrakis shares:',
+                await arrakisVault.balanceOf(owner),
+            );
+            console.log('[+] Total supply:', await arrakisVault.totalSupply());
+            console.log(
+                '[+] Liquidity deposited in pool:',
+                amountsForLiquidity.mintAmount.toString(),
+            );
+        }
+
+        {
+            const slot0 = await uniPool.slot0();
+            const tickSpacing = await uniPool.tickSpacing();
+            const lowerTick =
+                slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
+            const upperTick =
+                slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
+            const rebalanceParams = await arrakisResolve.standardRebalance(
+                [
+                    {
+                        range: { lowerTick, upperTick, feeTier: feeAmount },
+                        weight: 10_000, // 100%
+                    },
+                ],
+                arrakisVault.address,
+            );
+            // await arrakisVault.rebalance(rebalanceParams);
+            await VM.executeMulticall([
                 {
-                    range: { lowerTick, upperTick, feeTier: feeAmount },
-                    weight: 10_000, // 100%
+                    target: arrakisVault.address,
+                    callData: arrakisVault.interface.encodeFunctionData(
+                        'rebalance',
+                        [rebalanceParams],
+                    ),
+                    allowFailure: false,
                 },
-            ],
-            arrakisVault.address,
-        );
-        // await arrakisVault.rebalance(rebalanceParams);
-        await VM.executeMulticall([
-            {
-                target: arrakisVault.address,
-                callData: arrakisVault.interface.encodeFunctionData(
-                    'rebalance',
-                    [rebalanceParams],
-                ),
-                allowFailure: false,
-            },
-        ]);
+            ]);
+        }
     }
 
     console.log('[+] UniV3 pool liquidity:', await uniPool.liquidity());

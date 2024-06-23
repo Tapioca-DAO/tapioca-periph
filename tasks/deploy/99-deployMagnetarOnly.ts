@@ -1,22 +1,20 @@
-import { IDeployerVMAdd } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { loadLocalContract } from 'tapioca-sdk';
 import { TTapiocaDeployTaskArgs } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
-import { buildCluster } from 'tasks/deployBuilds/cluster/buildCluster';
 import { buildMagnetar } from 'tasks/deployBuilds/magnetar/buildMagnetar';
-import { buildMagnetarAssetModule } from 'tasks/deployBuilds/magnetar/buildMagnetarAssetModule';
 import { buildMagnetarCollateralModule } from 'tasks/deployBuilds/magnetar/buildMagnetarCollateralModule';
+import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
 import { buildMagnetarMintModule } from 'tasks/deployBuilds/magnetar/buildMagnetarMintModule';
 import { buildMagnetarOptionModule } from 'tasks/deployBuilds/magnetar/buildMagnetarOptionModule';
 import { buildYieldboxModule } from 'tasks/deployBuilds/magnetar/buildYieldboxModule';
-import { buildPearlmit } from 'tasks/deployBuilds/pearlmit/buildPearlmit';
-import { buildTOEHelper } from 'tasks/deployBuilds/toe/buildTOEHelper';
 import { buildZeroXSwapper } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapper';
 import { buildZeroXSwapperMock } from 'tasks/deployBuilds/zeroXSwapper/buildZeroXSwapperMock';
-import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
-import { buildMagnetarHelper } from 'tasks/deployBuilds/magnetar/buildMagnetarHelper';
-import { buildYieldBox } from 'tasks/deployBuilds/yieldbox/buildYieldbox';
+import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 
-export const deployPreLbpStack__task = async (
+/**
+ * Used for deploying Magnetar only
+ */
+export const deployMagnetarOnly__task = async (
     _taskArgs: TTapiocaDeployTaskArgs,
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -30,37 +28,17 @@ export const deployPreLbpStack__task = async (
             taskArgs,
             isTestnet,
         }) => {
-            const [ybURI, yieldBox] = await buildYieldBox(
-                hre,
-                DEPLOY_CONFIG.MISC[hre.SDK.eChainId]!.WETH!,
-            );
-            VM.add(ybURI).add(yieldBox);
-
+            const { tag } = taskArgs;
             VM.add(
-                await buildPearlmit(hre, DEPLOYMENT_NAMES.PEARLMIT, [
-                    DEPLOYMENT_NAMES.PEARLMIT,
-                    '1',
-                    tapiocaMulticallAddr,
-                    0,
-                ]),
+                await buildMagnetarCollateralModule(
+                    hre,
+                    DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
+                    [
+                        hre.ethers.constants.AddressZero, // Pearlmit
+                        hre.ethers.constants.AddressZero, // ToeHelper
+                    ],
+                ),
             )
-                .add(
-                    await buildCluster(hre, DEPLOYMENT_NAMES.CLUSTER, [
-                        chainInfo.lzChainId,
-                        tapiocaMulticallAddr,
-                    ]),
-                )
-                .add(await buildTOEHelper(hre, DEPLOYMENT_NAMES.TOE_HELPER, []))
-                .add(
-                    await buildMagnetarCollateralModule(
-                        hre,
-                        DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
-                        [
-                            hre.ethers.constants.AddressZero, // Pearlmit
-                            hre.ethers.constants.AddressZero, // ToeHelper
-                        ],
-                    ),
-                )
                 .add(
                     await buildMagnetarMintModule(
                         hre,
@@ -91,44 +69,51 @@ export const deployPreLbpStack__task = async (
                         ],
                     ),
                 )
-                .add(await getMagnetar(hre, tapiocaMulticallAddr))
+                .add(await getMagnetar(hre, tapiocaMulticallAddr, tag))
                 .add(
                     await buildMagnetarHelper(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_HELPER,
                     ),
-                )
-                .add(
-                    (await getZeroXSwapper({
-                        hre,
-                        tag: taskArgs.tag,
-                        isTestnet,
-                        owner: tapiocaMulticallAddr,
-                    })) as IDeployerVMAdd<any>,
                 );
         },
     );
 };
 
-async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
+async function getMagnetar(
+    hre: HardhatRuntimeEnvironment,
+    owner: string,
+    tag: string,
+) {
     return await buildMagnetar(
         hre,
         DEPLOYMENT_NAMES.MAGNETAR,
         [
-            hre.ethers.constants.AddressZero, // Cluster
+            loadLocalContract(
+                hre,
+                hre.SDK.chainInfo.chainId,
+                DEPLOYMENT_NAMES.CLUSTER,
+                tag,
+            ).address, // Cluster
             owner, // Owner
             hre.ethers.constants.AddressZero, // CollateralModule
             hre.ethers.constants.AddressZero, // MintModule
             hre.ethers.constants.AddressZero, // optionModule
             hre.ethers.constants.AddressZero, // YieldBoxModule
-            hre.ethers.constants.AddressZero, // Pearlmit
-            hre.ethers.constants.AddressZero, // ToeHelper
+            loadLocalContract(
+                hre,
+                hre.SDK.chainInfo.chainId,
+                DEPLOYMENT_NAMES.PEARLMIT,
+                tag,
+            ).address, // Pearlmit
+            loadLocalContract(
+                hre,
+                hre.SDK.chainInfo.chainId,
+                DEPLOYMENT_NAMES.TOE_HELPER,
+                tag,
+            ).address, // ToeHelper
         ],
         [
-            {
-                argPosition: 0,
-                deploymentName: DEPLOYMENT_NAMES.CLUSTER,
-            },
             {
                 argPosition: 2,
                 deploymentName: DEPLOYMENT_NAMES.MAGNETAR_COLLATERAL_MODULE,
@@ -144,10 +129,6 @@ async function getMagnetar(hre: HardhatRuntimeEnvironment, owner: string) {
             {
                 argPosition: 5,
                 deploymentName: DEPLOYMENT_NAMES.MAGNETAR_YIELDBOX_MODULE,
-            },
-            {
-                argPosition: 6,
-                deploymentName: DEPLOYMENT_NAMES.PEARLMIT,
             },
             {
                 argPosition: 7,

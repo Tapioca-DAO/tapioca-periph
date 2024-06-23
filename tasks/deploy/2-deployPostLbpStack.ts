@@ -144,26 +144,6 @@ async function postDeployTask(
             }
             await VM.executeMulticall(calls);
         }
-
-        if (
-            chainInfo.name === 'sepolia' ||
-            chainInfo.name === 'optimism_sepolia'
-        ) {
-            const sdaiCL = findContract(DEPLOYMENT_NAMES.S_DAI_ORACLE);
-
-            const calls: TapiocaMulticall.CallStruct[] = [];
-            if (sdaiCL) {
-                calls.push({
-                    target: sdaiCL.address,
-                    callData: chainLinkUtils.interface.encodeFunctionData(
-                        'changeDefaultStalePeriod',
-                        [4294967295],
-                    ),
-                    allowFailure: false,
-                });
-            }
-            await VM.executeMulticall(calls);
-        }
     }
 }
 
@@ -184,12 +164,16 @@ async function tapiocaDeployTask(
             ...params,
             taskArgs: {
                 ...taskArgs,
+                deploymentName: DEPLOYMENT_NAMES.TAP_WETH_UNI_V3_POOL,
                 tokenA: tapToken.address,
                 tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
                 ratioTokenA: taskArgs.ratioTap,
                 ratioTokenB: taskArgs.ratioWeth,
                 feeAmount: FeeAmount.MEDIUM,
-                mintMock: true,
+                options: {
+                    mintMock: true,
+                    arrakisDepositLiquidity: true,
+                },
             },
         });
     }
