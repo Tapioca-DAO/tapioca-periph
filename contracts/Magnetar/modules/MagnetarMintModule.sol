@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
@@ -14,6 +15,7 @@ import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
@@ -219,7 +221,10 @@ contract MagnetarMintModule is MagnetarBaseModule {
         }
     }
 
-    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction, bool participate) private returns (uint256 tOLPTokenId) {
+    function _lock(MintFromBBAndLendOnSGLData memory data, uint256 fraction, bool participate)
+        private
+        returns (uint256 tOLPTokenId)
+    {
         IMarket _singularity = IMarket(data.externalContracts.singularity);
         IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
 
@@ -230,17 +235,30 @@ contract MagnetarMintModule is MagnetarBaseModule {
         if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
-        (uint256 tOLPSglAssetId,,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
-            data.externalContracts.singularity
-        );
+        (uint256 tOLPSglAssetId,,,) =
+            ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.lockData.tAsset);
 
+        // Extract SGL tokens
         fraction = _extractTokens(data.user, data.externalContracts.singularity, fraction);
-        (, uint256 obtainedShares) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, fraction);
+
+        // Wrap SGL tokens into tSgl
+        IERC20(address(_singularity)).approve(address(pearlmit), fraction);
+        pearlmit.approve(
+            20, address(_singularity), 0, data.lockData.tAsset, fraction.toUint200(), block.timestamp.toUint48()
+        );
+        uint256 wrapped = ITOFT(data.lockData.tAsset).wrap(address(this), address(this), fraction);
+
+        // deposit YB and revoke approval
+        (, uint256 obtainedShares) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, wrapped);
+        IERC20(address(_singularity)).approve(address(pearlmit), 0);
 
         data.lockData.amount = obtainedShares.toUint128();
         _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
-            participate ? address(this) : data.user, data.externalContracts.singularity, data.lockData.lockDuration, data.lockData.amount
+            participate ? address(this) : data.user,
+            data.lockData.tAsset,
+            data.lockData.lockDuration,
+            data.lockData.amount
         );
     }
 
