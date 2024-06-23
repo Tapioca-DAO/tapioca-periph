@@ -73,7 +73,7 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            address(0), _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
+            msg.sender, _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
         );
 
         // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
@@ -86,16 +86,20 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
     }
 
     /**
-     * @dev Same as `sendPacket`, with the addition of `_from`, the address of the sender. Use address(0) to use msg.sender.
-     * if an address is set, the caller needs to be Cluster approved to it.
+     * @dev Same as `sendPacket`, with the addition of `_from`, the address of the sender.
+     * The caller must have the TOE role in the Cluster contract.
      */
     function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
         payable
         returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
     {
-        // Verify caller is either address(this) or has Cluster TOE role
-        if (_from != address(0)) {
+        if (_from == address(0)) {
+            revert BaseTapiocaOmnichainEngine__ZeroAddress();
+        }
+
+        // Verify if caller has Cluster TOE role
+        {
             ICluster cluster = getCluster();
             if (!cluster.hasRole(msg.sender, keccak256("TOE"))) {
                 revert TapiocaOmnichainSender__ClusterRoleNotApproved();

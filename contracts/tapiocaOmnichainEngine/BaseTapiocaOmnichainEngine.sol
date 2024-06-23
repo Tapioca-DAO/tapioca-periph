@@ -44,6 +44,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
 
     error BaseTapiocaOmnichainEngine_PearlmitNotApproved();
     error BaseTapiocaOmnichainEngine_PearlmitFailed();
+    error BaseTapiocaOmnichainEngine__ZeroAddress();
 
     // keccak256("BaseToe.cluster.slot")
     bytes32 public constant CLUSTER_SLOT = 0x7cdf5007585d1c7d3dfb23c59fcda5f9f02da78637d692495255a57630b72162;
@@ -206,7 +207,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     {
         hasCompose = _composeMsg.length > 0;
         // @dev Remote chains will want to know the composed function caller ie. msg.sender on the src.
-        _from = _from == address(0) ? msg.sender : _from;
+
         _msg = hasCompose
             ? abi.encodePacked(_sendTo, _amountShared, OFTMsgCodec.addressToBytes32(_from), _composeMsg)
             : abi.encodePacked(_sendTo, _amountShared);
