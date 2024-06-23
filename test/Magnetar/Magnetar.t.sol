@@ -30,6 +30,7 @@ import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOpti
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
@@ -173,7 +174,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
             payable(optionModule),
             payable(yieldBoxModule),
             IPearlmit(address(pearlmit)),
-            address(toeHelper)
+            address(toeHelper),
+            IMagnetarHelper(address(new MagnetarHelper()))
         );
 
         utils = new MagnetarTestUtils();
