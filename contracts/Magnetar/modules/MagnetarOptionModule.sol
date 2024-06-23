@@ -192,7 +192,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
 
             uint256 _share =
-                _yieldBox.toShare(_singularity._assetId(), data.removeAndRepayData.assetWithdrawData.amount, false);
+                _yieldBox.toShare(_singularity._assetId(), data.removeAndRepayData.assetWithdrawData.amount, true);
             // remove asset from SGL
             _singularityRemoveAsset(_singularity, data.removeAndRepayData.removeAmount, data.user, data.user);
 
@@ -227,7 +227,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             _marketRemoveCollateral(
                 _bigBang,
                 data.externalData.marketHelper,
-                _yieldBox.toShare(_bigBang._collateralId(), data.removeAndRepayData.collateralAmount, false),
+                _yieldBox.toShare(_bigBang._collateralId(), data.removeAndRepayData.collateralAmount, true),
                 data.user,
                 data.removeAndRepayData.collateralWithdrawData.withdraw ? address(this) : data.user
             );

@@ -173,7 +173,7 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
          *       also withdraws if requested.
          */
         if (data.collateralAmount > 0) {
-            uint256 collateralShare = _yieldBox.toShare(_market._collateralId(), data.collateralAmount, false);
+            uint256 collateralShare = _yieldBox.toShare(_market._collateralId(), data.collateralAmount, true);
             _pearlmitApprove(address(_yieldBox), _market._collateralId(), address(_market), collateralShare);
             _marketRemoveCollateral(
                 _market,
