@@ -22,6 +22,7 @@ import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
+import {IWeth9} from "tapioca-periph/interfaces/external/weth/IWeth9.sol";
 import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
@@ -151,6 +152,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             if (_action.id == uint8(MagnetarAction.YieldBoxModule)) {
                 _executeModule(MagnetarModule.YieldBoxModule, _action.call);
                 continue; // skip the rest of the loop
+            }
+
+            if (_action.id == uint8(MagnetarAction.WethWrap)) {
+                _processWethWrap(_action.target, _action.call, _action.value);
+                continue;
             }
 
             // If no valid action was found, use the Magnetar module extender. Only if the action is valid.
@@ -600,6 +606,36 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         _checkWhitelisted(_target);
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         selectorValidated = funcSig == ITapiocaOptionBroker.exerciseOption.selector;
+    }
+
+    /**
+     * @dev Process a weth wrap, will only execute if the selector is allowed.
+     *
+     * @param _target The contract address to call.
+     * @param _actionCalldata The calldata to send to the target.
+     * @param _actionValue The value to send with the call.
+     */
+    function _processWethWrap(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
+        {
+            bool selectorValidated = _validateWethWrap(_target, _actionCalldata);
+            if (!selectorValidated) {
+                revert Magnetar_ActionNotValid(uint8(MagnetarAction.WethWrap), _actionCalldata);
+            }
+        }
+
+        // wrap and transfer to sender
+        IWeth9(_target).deposit{value: _actionValue}();
+        IERC20(_target).safeTransfer(msg.sender, _actionValue);
+    }
+
+    function _validateWethWrap(address _target, bytes calldata _actionCalldata)
+        private
+        view
+        returns (bool selectorValidated)
+    {
+        _checkWhitelisted(_target);
+        bytes4 funcSig = bytes4(_actionCalldata[:4]);
+        selectorValidated = funcSig == IWeth9.deposit.selector;
     }
 
     /**

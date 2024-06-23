@@ -102,6 +102,7 @@ import {ToeTestHelper} from "../LZSetup/ToeTestHelper.sol";
 import {TestHelper} from "../LZSetup/TestHelper.sol";
 import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
 import {TapOftMock} from "../mocks/TapOftMock.sol";
+import {Weth9Mock} from "../mocks/Weth9Mock.sol";
 
 contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelper {
     Cluster cluster;
@@ -304,6 +305,22 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         utils.setAssetOracle(penrose, bb, _oracle);
 
         return (bb, penrose, yb);
+    }
+
+    function test_weth_wrap_through_burst() public {
+        Weth9Mock weth9 = new Weth9Mock();
+
+        bytes memory wethDeposit = abi.encodeWithSelector(Weth9Mock.deposit.selector);
+        MagnetarCall[] memory calls = new MagnetarCall[](1);
+        calls[0] = MagnetarCall({
+            id: uint8(MagnetarAction.WethWrap),
+            target: address(weth9),
+            value: 1 ether,
+            call: wethDeposit
+        });
+        magnetar.burst{value: 1 ether}(calls);
+
+        assertEq(weth9.balanceOf(address(this)), 1 ether);
     }
 
     function test_receive_erc1155() public {

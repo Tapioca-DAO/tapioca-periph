@@ -119,7 +119,9 @@ enum MagnetarAction {
     CollateralModule, // 7 Collateral Singular related operations.
     MintModule, // 8 BigBang Singular related operations.
     OptionModule, // 9 Market Module related operations.
-    YieldBoxModule // 10 YieldBox module related operations.
+    YieldBoxModule, // 10 YieldBox module related operations.
+    // External operations
+    WethWrap // 11
 
 }
 
