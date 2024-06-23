@@ -52,7 +52,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
     using SafeApprove for address;
-    
+
     error Magnetar_ValueMismatch(uint256 expected, uint256 received); // Value mismatch in the total value asked and the msg.value in burst
     error Magnetar_ActionNotValid(uint8 action, bytes actionCalldata); // Burst did not find what to execute
     error Magnetar_PearlmitTransferFailed(); // Transfer failed in pearlmit
@@ -84,7 +84,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @notice Batch multiple calls together
      * @param calls The list of actions to perform
      */
-    function burst(MagnetarCall[] calldata calls) external whenNotPaused payable {
+    function burst(MagnetarCall[] calldata calls) external payable whenNotPaused {
         // @dev: make sure the current magnetar is whitelisted
         _checkWhitelisted(address(this));
 
@@ -227,7 +227,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         }
 
         if (funcSig == IERC721Permit.permit.selector) {
-            // check if `spender` is whitelisted 
+            // check if `spender` is whitelisted
             _checkWhitelisted(abi.decode(_actionCalldata[4:36], (address)));
 
             // check if sender is owner of `tokenId`
@@ -256,7 +256,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         if (selectorValidated) {
             bytes4 funcSig = bytes4(_actionCalldata[:4]);
             if (funcSig == ITOFT.unwrap.selector) {
-                (, uint256 _amount) = abi.decode(_actionCalldata[4:36], (address, uint256));
+                (, uint256 _amount) = abi.decode(_actionCalldata[4:], (address, uint256));
                 bool isErr = pearlmit.transferFromERC20(msg.sender, address(this), _target, _amount); //unwrap happens on `msg.sender`
                 if (isErr) revert Magnetar_PearlmitTransferFailed();
             }
@@ -406,8 +406,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
             // Token is sent to the owner after execute
             if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector) {
-                (, address sgl,, uint128 amount) =
-                    abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
+                (, address sgl,, uint128 amount) = abi.decode(_actionCalldata[4:], (address, address, uint128, uint128));
                 (uint256 assetId,,,) = ITapiocaOptionLiquidityProvision(_target).activeSingularities(sgl);
                 address yieldBox = ITapiocaOptionLiquidityProvision(_target).yieldBox();
 
@@ -518,7 +517,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             _executeCall(_target, _actionCalldata, _actionValue);
             return;
         }
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.TapUnlock), _actionCalldata);
     }
 
     function _validateTapUnlockOperation(address _target, bytes calldata _actionCalldata)
