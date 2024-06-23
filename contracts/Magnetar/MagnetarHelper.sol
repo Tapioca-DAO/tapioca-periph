@@ -152,28 +152,38 @@ contract MagnetarHelper {
      * @notice Return the equivalent of borrow part in asset amount.
      * @param market the Singularity or BigBang address.
      * @param borrowPart The amount of borrow part to convert.
+     * @param roundUp If true, the result is rounded up.
      * @return amount The equivalent of borrow part in asset amount.
      */
-    function getAmountForBorrowPart(IMarket market, uint256 borrowPart) external view returns (uint256 amount) {
+    function getAmountForBorrowPart(IMarket market, uint256 borrowPart, bool roundUp)
+        external
+        view
+        returns (uint256 amount)
+    {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
-        return _totalBorrowed.toElastic(borrowPart, false);
+        return _totalBorrowed.toElastic(borrowPart, roundUp);
     }
 
     /**
      * @notice Return the equivalent of amount in borrow part.
      * @param market the Singularity or BigBang address.
      * @param amount The amount to convert.
+     * @param roundUp If true, the result is rounded up.
      * @return part The equivalent of amount in borrow part.
      */
-    function getBorrowPartForAmount(IMarket market, uint256 amount) external view returns (uint256 part) {
+    function getBorrowPartForAmount(IMarket market, uint256 amount, bool roundUp)
+        external
+        view
+        returns (uint256 part)
+    {
         Rebase memory _totalBorrowed;
         (uint128 totalBorrowElastic, uint128 totalBorrowBase) = market._totalBorrow();
         _totalBorrowed = Rebase(totalBorrowElastic, totalBorrowBase);
 
-        return _totalBorrowed.toBase(amount, false);
+        return _totalBorrowed.toBase(amount, roundUp);
     }
 
     /**
