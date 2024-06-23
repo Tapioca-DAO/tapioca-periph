@@ -48,7 +48,8 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
             receiver: address(this),
             amount: amount,
             withdraw: true,
-            unwrap: false
+            unwrap: false,
+            extractFromSender: false
         });
     }
     // -----------------------
@@ -132,4 +133,78 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
         vm.expectRevert();
         magnetarA.burst{value: 0}(calls);
     }
+
+    function test_withdrawHere_with_sender_extraction() public {
+        uint256 tokenAmount_ = 1 ether;
+
+        {
+            deal(address(assetA), address(this), tokenAmount_);
+            assetA.approve(address(yieldBox), type(uint256).max);
+            _setYieldBoxApproval(yieldBox, address(magnetarA));
+        }
+
+        // test market
+        YieldBoxDepositData memory _params = _createYieldBoxDepositData(address(yieldBox), assetAId, tokenAmount_, 0);
+        bytes memory callParams = abi.encodeWithSelector(MagnetarYieldBoxModule.depositAsset.selector, _params);
+
+        MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
+        _withdrawParams.extractFromSender = true;
+        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+
+        MagnetarCall[] memory calls = new MagnetarCall[](2);
+        calls[0] = MagnetarCall({
+            id: uint8(MagnetarAction.YieldBoxModule),
+            target: address(magnetarA),
+            value: 0,
+            call: callParams
+        });
+        calls[1] = MagnetarCall({
+            id: uint8(MagnetarAction.YieldBoxModule),
+            target: address(magnetarA),
+            value: 0,
+            call: withdrawCallParams
+        });
+        magnetarA.burst{value: 0}(calls);
+
+        _setYieldBoxRevoke(yieldBox, address(magnetarA));
+    }
+
+    function test_should_fail_withdrawHere_with_sender_extraction_when_sender_is_whitelisted() public {
+        uint256 tokenAmount_ = 1 ether;
+
+        {
+            deal(address(assetA), address(this), tokenAmount_);
+            assetA.approve(address(yieldBox), type(uint256).max);
+            _setYieldBoxApproval(yieldBox, address(magnetarA));
+        }
+
+        // test market
+        YieldBoxDepositData memory _params = _createYieldBoxDepositData(address(yieldBox), assetAId, tokenAmount_, 0);
+        bytes memory callParams = abi.encodeWithSelector(MagnetarYieldBoxModule.depositAsset.selector, _params);
+
+        MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
+        _withdrawParams.extractFromSender = true;
+        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+
+        MagnetarCall[] memory calls = new MagnetarCall[](2);
+        calls[0] = MagnetarCall({
+            id: uint8(MagnetarAction.YieldBoxModule),
+            target: address(magnetarA),
+            value: 0,
+            call: callParams
+        });
+        calls[1] = MagnetarCall({
+            id: uint8(MagnetarAction.YieldBoxModule),
+            target: address(magnetarA),
+            value: 0,
+            call: withdrawCallParams
+        });
+
+        clusterA.updateContract(0, address(this), true);
+        vm.expectRevert();
+        magnetarA.burst{value: 0}(calls);
+
+        _setYieldBoxRevoke(yieldBox, address(magnetarA));
+    }
+
 }
