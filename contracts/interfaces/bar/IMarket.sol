@@ -77,4 +77,8 @@ interface IMarket {
     function execute(Module[] calldata modules, bytes[] calldata calls, bool revertOnFail)
         external
         returns (bool[] memory successes, bytes[] memory results);
+
+    function updatePause(uint256 _type, bool val) external;
+
+    function updatePauseAll(bool val) external; //Not available for Singularity
 }
