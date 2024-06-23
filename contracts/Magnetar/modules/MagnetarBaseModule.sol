@@ -40,6 +40,7 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
     error Magnetar_MarketCallFailed(bytes call);
     error Magnetar_ActionParamsMismatch();
     error Magnetar_tOLPTokenMismatch();
+    error Magnetar_TransferFailed();
 
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarStorage(pearlmit, _toeHelper) {}
 
@@ -58,7 +59,12 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
             if (cluster.isWhitelisted(0, msg.sender)) revert Magnetar_ExtractTokenFail();
 
             uint256 _share = _yb.toShare(data.assetId, data.amount, false);
-            _yb.transfer(msg.sender, address(this), data.assetId, _share);
+            
+            // _yb.transfer(msg.sender, address(this), data.assetId, _share);
+            bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), data.yieldBox, data.assetId, _share);
+            if (isErr) {
+                revert Magnetar_TransferFailed();
+            }
         }
 
         if (data.unwrap) {
