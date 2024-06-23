@@ -94,7 +94,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         if (_fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
-        (uint256 tOLPSglAssetId,,) =
+        (uint256 tOLPSglAssetId,,,) =
             ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.singularity);
 
         _fraction = _extractTokens(data.user, data.singularity, _fraction);

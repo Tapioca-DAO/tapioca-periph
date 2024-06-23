@@ -227,7 +227,7 @@ contract MagnetarMintModule is MagnetarBaseModule {
         if (fraction == 0) revert Magnetar_ActionParamsMismatch();
 
         // retrieve and deposit SGLAssetId registered in tOLP
-        (uint256 tOLPSglAssetId,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
+        (uint256 tOLPSglAssetId,,,) = ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(
             data.externalContracts.singularity
         );
 
