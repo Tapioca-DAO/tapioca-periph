@@ -1,21 +1,22 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract } from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
 import { buildAuthorizer } from 'tasks/deployBuilds/lbp/buildAuthorizer';
 import { buildLiquidityBootstrappingPool } from 'tasks/deployBuilds/lbp/buildLiquidityBootstrappingPool';
 import { buildVault } from 'tasks/deployBuilds/lbp/buildVault';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG, TLbp } from './DEPLOY_CONFIG';
-import { postDeploySetupLbp } from './postDeploy/0-postDeploySetupLbp';
-import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
-import { ethers } from 'ethers';
+import { postDeploySetupLbp1 } from './postDeploy/0-postDeploySetupLbp1';
+import { buildBalancerQueries } from 'tasks/deployBuilds/lbp/buildBalancerQueries';
 
 export const DEPLOY_LBP_CONFIG: TLbp = {
-    LBP_DURATION: 432000, // In seconds, 2 days 172800 on prod. 5 days 432000 on testnet
+    LBP_DURATION: 172800, // 2 days
     START_BALANCES: [
         ethers.BigNumber.from(170_000).mul(1e6), // 6 decimals
         fp(5_000_000), // 18 decimals
@@ -28,35 +29,57 @@ export const DEPLOY_LBP_CONFIG: TLbp = {
 };
 
 /**
- * @notice Deploy TAP-TOKEN PRE-LBP stack
+ * @notice Called after `deployPreLbpStack__task` & tap-token `deployPreLbpStack__task`
+ *
+ * Deploys:
+ * - LBP Authorizer
+ * - LBP Vault
+ * - LBP LiquidityBootstrappingPool
+ *
+ * Post Deploy Setup:
+ * - Set joining pool on vault
+ * - Set swap enabled on LBP
+ * - Set update weights gradually
  */
-export const deployLbp__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & { userTestnet: boolean },
+export const deployLbp__1__task = async (
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        ltapAmount: string;
+        usdcAmount: string;
+        startTimestamp: string;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
         { hre, staticSimulation: false },
         tapiocaDeployTask,
-        postDeploySetupLbp,
+        postDeploySetupLbp1,
     );
 };
 
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ userTestnet: boolean }>,
+    params: TTapiocaDeployerVmPass<{
+        ltapAmount: string;
+        usdcAmount: string;
+        startTimestamp: string;
+    }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
-        params;
-    const { tag, userTestnet } = taskArgs;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        chainInfo,
+        taskArgs,
+        isTestnet,
+        isHostChain,
+    } = params;
+    const { tag, ltapAmount, usdcAmount } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    // !!! USER TESTNET LBP !!!
-    // We overwrite USDC with this address
-    if (chainInfo.name === 'arbitrum_sepolia' && userTestnet) {
-        // Use a deployed mock contract called FormToken
-        const formTokenAddr = '0x02a7945d8E84e6aa0f03E30Be2421b62d1C3cb39';
-        DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC = formTokenAddr;
-    }
+    DEPLOY_LBP_CONFIG.START_BALANCES = [
+        ethers.BigNumber.from(usdcAmount).mul(1e6), // 6 decimals
+        fp(ltapAmount), // 18 decimals
+    ];
 
     const { lTap } = deployLbp__getDeployments({ hre, tag });
     const [tokenA_Data, tokenB_Data] = [
@@ -72,10 +95,11 @@ async function tapiocaDeployTask(
     const tokens = [tokenA_Data.token, tokenB_Data.token];
     const startWeights = [tokenA_Data.startWeight, tokenB_Data.startWeight];
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
+        console.log('[+] Deploying LBP with USDC and LTAP with values:');
+        console.log(`    - USDC: ${Number(usdcAmount).toLocaleString()}`);
+        console.log(`    - LTAP: ${Number(ltapAmount).toLocaleString()}`);
+
         VM.add(
             await buildAuthorizer(hre, DEPLOYMENT_NAMES.LBP_AUTHORIZER, {
                 admin: owner,
@@ -91,6 +115,7 @@ async function tapiocaDeployTask(
                     usdc: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC!,
                 }),
             )
+            .add(await buildBalancerQueries(hre))
             .add(
                 await buildLiquidityBootstrappingPool(
                     hre,

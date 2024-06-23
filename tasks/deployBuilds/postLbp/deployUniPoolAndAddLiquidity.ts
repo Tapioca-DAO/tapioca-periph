@@ -16,6 +16,8 @@ export async function deployUniPoolAndAddLiquidity(
         tokenB: string;
         ratioTokenA: number;
         ratioTokenB: number;
+        amountTokenA: BigNumberish;
+        amountTokenB: BigNumberish;
         feeAmount: FeeAmount;
         options?: {
             mintMock?: boolean;
@@ -31,22 +33,33 @@ export async function deployUniPoolAndAddLiquidity(
         tokenB,
         ratioTokenA,
         ratioTokenB,
+        amountTokenA,
+        amountTokenB,
         feeAmount,
         options,
     } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    const { computedPoolAddress, ratio0, ratio1, token0, token1 } =
-        await deployUniV3Pool(
-            hre,
-            tag,
-            deploymentName,
-            tokenA,
-            tokenB,
-            ratioTokenA,
-            ratioTokenB,
-            feeAmount,
-        );
+    const {
+        computedPoolAddress,
+        ratio0,
+        ratio1,
+        token0,
+        token1,
+        amount0,
+        amount1,
+    } = await deployUniV3Pool(
+        hre,
+        tag,
+        deploymentName,
+        tokenA,
+        tokenB,
+        ratioTokenA,
+        ratioTokenB,
+        amountTokenA,
+        amountTokenB,
+        feeAmount,
+    );
     const token0Erc20 = await hre.ethers.getContractAt('ERC20Mock', token0); // ERC20Mock is used just for the interface
     const token1Erc20 = await hre.ethers.getContractAt('ERC20Mock', token1);
 
@@ -107,7 +120,7 @@ export async function deployUniPoolAndAddLiquidity(
                 target: token0,
                 callData: token0Erc20.interface.encodeFunctionData('mintTo', [
                     owner,
-                    (1e18).toString(),
+                    amount0,
                 ]),
                 allowFailure: false,
             });
@@ -122,7 +135,7 @@ export async function deployUniPoolAndAddLiquidity(
                 target: token1,
                 callData: token1Erc20.interface.encodeFunctionData('mintTo', [
                     owner,
-                    (1e18).toString(),
+                    amount1,
                 ]),
                 allowFailure: false,
             });

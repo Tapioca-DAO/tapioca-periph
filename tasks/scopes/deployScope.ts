@@ -1,11 +1,11 @@
 import { scope, types } from 'hardhat/config';
 import { TAP_TASK } from 'tapioca-sdk';
-import { deployLbp__task } from 'tasks/deploy/0-deployLbp';
-import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
+import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
+import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
+import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
 import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
 import { deployFinal__task } from 'tasks/deploy/3-deployFinal';
 import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
-import { DEPLOY_CONFIG } from 'tasks/deploy/DEPLOY_CONFIG';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
 import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
@@ -18,13 +18,23 @@ TAP_TASK(
         .task(
             'lbp',
             'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
-            deployLbp__task,
+            deployLbp__1__task,
         )
-        .addFlag(
-            'userTestnet',
-            'Flag to deploy LBP on testnet. Overwrites USDC with FormToken on Arbitrum Sepolia. Meant for user testnet deployment',
+        .addParam(
+            'ltapAmount',
+            'The amount of LTAP to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'usdcAmount',
+            'The amount of USDC to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'startTimestamp',
+            'The timestamp when the LBP starts. Unix epoch timestamp.',
         ),
 );
+
+TAP_TASK(deployScope.task('lbpSetup', 'Enable swaps', deployLbp__2__task));
 
 TAP_TASK(
     deployScope.task(
@@ -41,17 +51,21 @@ TAP_TASK(
             'Deploy oracles. Deploy UniV3TapWeth pool and LP. Called only after tap-token repo `postLbp1` task',
             deployPostLbpStack__task,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioTap',
             'The ratio of TAP in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_TAP,
-            types.int,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_TAP.RATIO_WETH,
-            types.int,
+        )
+        .addParam(
+            'amountTap',
+            'The amount of TAP to be deposited in the pool. In ether.',
+        )
+        .addParam(
+            'amountWeth',
+            'The amount of WETH to be deposited in the pool. In ether.',
         ),
 );
 TAP_TASK(
@@ -61,17 +75,21 @@ TAP_TASK(
             'USDO/USDC pool deployment + Cluster whitelisting',
             deployFinal__task,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioUsdo',
             'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDO,
-            types.int,
         )
-        .addOptionalParam(
+        .addParam(
             'ratioUsdc',
             'The ratio of USDC in the pool. Used to compute the price by dividing by ratioUsdo. Default is 1.',
-            DEPLOY_CONFIG.CONSTANTS.UNISWAP_POOL_USDO.RATIO_USDC,
-            types.int,
+        )
+        .addParam(
+            'amountUsdo',
+            'The amount of USDO to be deposited in the pool. In ether.',
+        )
+        .addParam(
+            'amountUsdc',
+            'The amount of USDC to be deposited in the pool. In ether.',
         ),
 );
 

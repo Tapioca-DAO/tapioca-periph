@@ -1,21 +1,32 @@
 import { WeightedPoolEncoder } from '@balancer-labs/balancer-js';
-import { checkExists } from 'tapioca-sdk';
+import { checkExists, loadLocalContract } from 'tapioca-sdk';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import {
     DEPLOY_LBP_CONFIG,
     deployLbp__compareAddresses,
     deployLbp__getDeployments,
-} from '../0-deployLbp';
+} from '../1-1-deployLbp';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from '../DEPLOY_CONFIG';
 import { TapiocaMulticall } from '@typechain/index';
+import { ethers } from 'ethers';
+import { fp } from 'tasks/deployBuilds/lbp/LBPNumbersUtils';
 
-export async function postDeploySetupLbp(
-    params: TTapiocaDeployerVmPass<object>,
+export async function postDeploySetupLbp1(
+    params: TTapiocaDeployerVmPass<{
+        ltapAmount: string;
+        usdcAmount: string;
+        startTimestamp: string;
+    }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
         params;
-    const { tag } = taskArgs;
+    const { tag, ltapAmount, usdcAmount, startTimestamp } = taskArgs;
     const owner = tapiocaMulticallAddr;
+
+    DEPLOY_LBP_CONFIG.START_BALANCES = [
+        ethers.BigNumber.from(usdcAmount).mul(1e6), // 6 decimals
+        fp(ltapAmount), // 18 decimals
+    ];
 
     const { lTap } = deployLbp__getDeployments({ hre, tag });
 
@@ -37,20 +48,20 @@ export async function postDeploySetupLbp(
 
     const vault = await hre.ethers.getContractAt(
         'Vault',
-        checkExists(
+        loadLocalContract(
             hre,
-            VM.list().find((dep) => dep.name === DEPLOYMENT_NAMES.LBP_VAULT),
+            chainInfo.chainId,
             DEPLOYMENT_NAMES.LBP_VAULT,
-            'This',
+            tag,
         ).address,
     );
     const lbp = await hre.ethers.getContractAt(
         'LiquidityBootstrappingPool',
-        checkExists(
+        loadLocalContract(
             hre,
-            VM.list().find((dep) => dep.name === DEPLOYMENT_NAMES.TAP_USDC_LBP),
+            chainInfo.chainId,
             DEPLOYMENT_NAMES.TAP_USDC_LBP,
-            'This',
+            tag,
         ).address,
     );
 
@@ -65,6 +76,31 @@ export async function postDeploySetupLbp(
     console.log('[+] Initializing LBP');
 
     const calls: TapiocaMulticall.CallStruct[] = [];
+
+    if (isTestnet) {
+        console.log(
+            '[+] Minting Mock USDC for LBP',
+            hre.ethers.utils.formatUnits(
+                DEPLOY_LBP_CONFIG.START_BALANCES[0],
+                6,
+            ),
+        );
+
+        const mockToken = await hre.ethers.getContractAt(
+            'ERC20Mock',
+            DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
+        );
+
+        calls.push({
+            target: mockToken.address,
+            callData: mockToken.interface.encodeFunctionData('mintTo', [
+                tapiocaMulticallAddr,
+                DEPLOY_LBP_CONFIG.START_BALANCES[0],
+            ]),
+            allowFailure: false,
+        });
+    }
+
     console.log('\t[+] Add Approving token A');
     calls.push({
         target: tokenA.address,
@@ -100,20 +136,13 @@ export async function postDeploySetupLbp(
         ]),
         allowFailure: false,
     });
-    console.log('\t[+] Add set swap enabled on LBP');
-    calls.push({
-        target: lbp.address,
-        callData: lbp.interface.encodeFunctionData('setSwapEnabled', [true]),
-        allowFailure: false,
-    });
 
-    const now = Math.floor(Date.now() / 1000);
-    const endTime = now + DEPLOY_LBP_CONFIG.LBP_DURATION;
+    const endTime = Number(startTimestamp) + DEPLOY_LBP_CONFIG.LBP_DURATION;
     console.log('\t[+] Add update weights gradually');
     calls.push({
         target: lbp.address,
         callData: lbp.interface.encodeFunctionData('updateWeightsGradually', [
-            now,
+            startTimestamp,
             endTime,
             endWeights,
         ]),

@@ -14,16 +14,29 @@ import { FeeAmount } from '@uniswap/v3-sdk';
 import { buildUsdoUsdcOracle } from 'tasks/deployBuilds/oracle/buildUsdoUsdcOracle';
 
 /**
- * Arbitrum/Ethereum USDO/USDC pool
- * Cluster whitelist
- * Magnetar and Pearlmit whitelist
- * Bar contract whitelist
- * TOE role setting
+ * @notice Called after tapioca-bar postLbp2
+ *
+ * Deploys: Arb + Eth
+ * - Arbitrum + Ethereum USDO/USDC pool
+ * - USDO/USDC Oracle
+ *
+ * Post Deploy Setup: Arb + Eth
+ * !!! Requires USDO and USDC tokens to be in the TapiocaMulticall
+ * - Cluster Toe role setting (Magnetar)
+ * - Cluster whitelist
+ *      - Periph: (Magnetar, Pearlmit, Yieldbox)
+ *      - Bar: (BB_MT_ETH_MARKET, BB_T_RETH_MARKET, BB_T_WST_ETH_MARKET, SGL_S_GLP_MARKET, MARKET_HELPER, USDO)
+ *      - Bar: (SGL_S_DAI_MARKET)
+ *      - Z: (tsGLP, mtETH, tRETH, tWSTETH, T_SGL_SDAI_MARKET, tsDAI)
+ *      - Z Underlying: (WETH, rETH, wstETH, sGLP, sDAI)
+ *
  */
 export const deployFinal__task = async (
     _taskArgs: TTapiocaDeployTaskArgs & {
         ratioUsdo: number;
         ratioUsdc: number;
+        amountUsdo: string;
+        amountUsdc: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -40,15 +53,25 @@ async function postDeployTask(
     params: TTapiocaDeployerVmPass<{
         ratioUsdo: number;
         ratioUsdc: number;
+        amountUsdo: string;
+        amountUsdc: string;
     }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        taskArgs,
+        chainInfo,
+        isTestnet,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag } = taskArgs;
 
     console.log('[+] final task post deploy');
     const calls: TapiocaMulticall.CallStruct[] = [];
-    await clusterWhitelist({ hre, tag, calls });
+    await clusterWhitelist({ hre, tag, calls, isHostChain, isSideChain });
 
     if (isTestnet) {
         console.log(
@@ -81,6 +104,8 @@ async function deployTask(
     params: TTapiocaDeployerVmPass<{
         ratioUsdo: number;
         ratioUsdc: number;
+        amountUsdo: string;
+        amountUsdc: string;
     }>,
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
@@ -118,46 +143,46 @@ async function deployUsdoUniPoolAndAddLiquidity(
     params: TTapiocaDeployerVmPass<{
         ratioUsdo: number;
         ratioUsdc: number;
+        amountUsdo: string;
+        amountUsdc: string;
     }>,
 ) {
-    const { hre, taskArgs, chainInfo } = params;
+    const { hre, taskArgs, chainInfo, isTestnet, isHostChain, isSideChain } =
+        params;
     const { tag } = taskArgs;
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
-            hre,
-            tag,
-        );
-        console.log('[+] Deploying Arbitrum USDO/USDC pool');
-        await deployUniPoolAndAddLiquidity({
-            ...params,
-            taskArgs: {
-                ...taskArgs,
-                deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
-                tokenA: usdo,
-                tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
-                ratioTokenA: taskArgs.ratioUsdo,
-                ratioTokenB: taskArgs.ratioUsdc,
-                feeAmount: FeeAmount.LOWEST,
-                options: {
-                    arrakisDepositLiquidity: true,
-                },
+    const { usdo } = await deployPostLbpStack__loadContracts__arbitrum(
+        hre,
+        tag,
+    );
+    console.log('[+] Deploying Arbitrum USDO/USDC pool');
+    await deployUniPoolAndAddLiquidity({
+        ...params,
+        taskArgs: {
+            ...taskArgs,
+            deploymentName: DEPLOYMENT_NAMES.USDO_USDC_UNI_V3_POOL,
+            tokenA: usdo,
+            tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.USDC,
+            ratioTokenA: taskArgs.ratioUsdo,
+            ratioTokenB: taskArgs.ratioUsdc,
+            amountTokenA: taskArgs.amountUsdo,
+            amountTokenB: taskArgs.amountUsdc,
+            feeAmount: FeeAmount.LOWEST,
+            options: {
+                mintMock: isTestnet,
+                arrakisDepositLiquidity: true,
             },
-        });
-    }
+        },
+    });
 }
 
 async function clusterWhitelist(params: {
     hre: HardhatRuntimeEnvironment;
     tag: string;
     calls: TapiocaMulticall.CallStruct[];
+    isHostChain: boolean;
+    isSideChain: boolean;
 }) {
-    const { hre, tag, calls } = params;
+    const { hre, tag, calls, isHostChain, isSideChain } = params;
 
     const { cluster, magnetar, pearlmit, yieldbox } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
@@ -216,10 +241,7 @@ async function clusterWhitelist(params: {
         await addProjectContract(TAPIOCA_PROJECTS_NAME.TapiocaZ, name);
     };
 
-    if (
-        hre.SDK.chainInfo.name === 'arbitrum' ||
-        hre.SDK.chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_MT_ETH_MARKET,
@@ -241,6 +263,8 @@ async function clusterWhitelist(params: {
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
         // Z Underlying
         await addAddressWhitelist({
             name: 'WETH',
@@ -273,11 +297,7 @@ async function clusterWhitelist(params: {
         });
     }
 
-    if (
-        hre.SDK.chainInfo.name === 'ethereum' ||
-        hre.SDK.chainInfo.name === 'sepolia' ||
-        hre.SDK.chainInfo.name === 'optimism_sepolia'
-    ) {
+    if (isSideChain) {
         // Bar
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
@@ -377,9 +397,8 @@ async function deployPostLbpStack__loadContracts__generic(
         DEPLOYMENT_NAMES.PEARLMIT,
         tag,
     ).address;
-    const yieldbox = loadGlobalContract(
+    const yieldbox = loadLocalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.YieldBox,
         hre.SDK.eChainId,
         DEPLOYMENT_NAMES.YIELDBOX,
         tag,

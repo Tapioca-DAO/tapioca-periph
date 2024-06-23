@@ -69,13 +69,13 @@ export const deployMagnetarOnly__task = async (
                         ],
                     ),
                 )
-                .add(await getMagnetar(hre, tapiocaMulticallAddr, tag))
                 .add(
                     await buildMagnetarHelper(
                         hre,
                         DEPLOYMENT_NAMES.MAGNETAR_HELPER,
                     ),
-                );
+                )
+                .add(await getMagnetar(hre, tapiocaMulticallAddr, tag));
         },
     );
 };
@@ -112,6 +112,7 @@ async function getMagnetar(
                 DEPLOYMENT_NAMES.TOE_HELPER,
                 tag,
             ).address, // ToeHelper
+            '', // MagnetarHelper
         ],
         [
             {
@@ -134,21 +135,10 @@ async function getMagnetar(
                 argPosition: 7,
                 deploymentName: DEPLOYMENT_NAMES.TOE_HELPER,
             },
+            {
+                argPosition: 8,
+                deploymentName: DEPLOYMENT_NAMES.MAGNETAR_HELPER,
+            },
         ],
     );
-}
-
-async function getZeroXSwapper(data: {
-    hre: HardhatRuntimeEnvironment;
-    tag: string;
-    owner: string;
-    isTestnet: boolean;
-}) {
-    const { hre, tag, owner, isTestnet } = data;
-
-    if (isTestnet) {
-        return await buildZeroXSwapperMock(hre);
-    } else {
-        return await buildZeroXSwapper(hre, tag, owner);
-    }
 }

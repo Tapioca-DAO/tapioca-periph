@@ -30,14 +30,12 @@
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
         "@nomicfoundation/hardhat-foundry": "^1.1.1",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
-        "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-        "@nomiclabs/hardhat-ethers": "^2.1.1",
-        "@nomiclabs/hardhat-etherscan": "^3.1.0",
+        "@nomiclabs/hardhat-ethers": "^2.2.3",
         "@openzeppelin/contracts": "^4.9.3",
         "@rari-capital/solmate": "^6.4.0",
         "@swc/core": "^1.5.24",
         "@typechain/ethers-v5": "^10.1.0",
-        "@typechain/hardhat": "^6.1.2",
+        "@typechain/hardhat": "^9.1.0",
         "@types/chai": "^4.2.22",
         "@types/lodash": "^4.14.185",
         "@types/mocha": "^9.0.0",
@@ -76,8 +74,10 @@
     },
     "dependencies": {
         "@balancer-labs/balancer-js": "^2.0.0",
+        "@balancer-labs/sdk": "^1.1.5",
         "@balancer-labs/v2-vault": "^3.0.1",
         "@chainlink/contracts": "^0.6.1",
+        "@nomicfoundation/hardhat-verify": "^2.0.8",
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "@types/inquirer": "^9.0.3",
         "@types/uuid": "^9.0.1",
@@ -88,8 +88,11 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "solady": "^0.0.104",
-        "tapioca-sdk": "^1.8.5",
+        "tapioca-sdk": "^1.8.22",
         "tsconfig-paths": "^4.2.0",
         "uuid": "^9.0.0"
+    },
+    "resolutions": {
+        "@ethersproject/providers": "npm:ethersproject-providers-arbitrum-hotfix@5.7.10"
     }
 }

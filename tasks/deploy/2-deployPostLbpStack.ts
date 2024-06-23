@@ -1,13 +1,8 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import { TapiocaMulticall } from '@typechain/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-    createEmptyStratYbAsset__task,
-    loadGlobalContract,
-    loadLocalContract,
-} from 'tapioca-sdk';
+import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
 import {
     TTapiocaDeployTaskArgs,
     TTapiocaDeployerVmPass,
@@ -30,136 +25,71 @@ import { buildUsdoMarketOracle } from 'tasks/deployBuilds/oracle/buildUsdoMarket
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
+import { deployPostLbpStack__postDeploy } from './postDeploy/2-postDeploySetup';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
- * Deploy:
+ * Deploy: Arb,Eth
  *      - TAP/WETH Uniswap V3 pool
  *      - Oracles:
  *          - Arbitrum:
  *              - ETH CL, ETH Uni, Dual ETH, GLP, ETH/GLP, GMX, TAP, TapOption, USDC, rETH, wstETH
  *          - Ethereum:
  *              - sDAI
- * Post deploy:
- *     - Create empty strat for TAP and WETH
- *
+ * Post deploy: Arb,Eth
+ * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (UniV3 pool creation)
+ * !!! Requires TAP and WETH tokens to be in the TapiocaMulticall contract (YB deposit)
+ *     - Create empty YB strat for TAP and WETH and register them in YB
+ *     - Deposit YB assets in YB
+ *     - Set Seer staleness on testnet
  *
  */
 export const deployPostLbpStack__task = async (
-    _taskArgs: TTapiocaDeployTaskArgs & { ratioTap: number; ratioWeth: number },
+    _taskArgs: TTapiocaDeployTaskArgs & {
+        ratioTap: number;
+        ratioWeth: number;
+        amountTap: string;
+        amountWeth: string;
+    },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 80_000,
             staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
         },
         tapiocaDeployTask,
-        postDeployTask,
+        deployPostLbpStack__postDeploy,
     );
 };
 
-async function postDeployTask(
-    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
-) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, chainInfo, isTestnet } =
-        params;
-
-    const { tapToken } = loadContracts__generic(hre, taskArgs.tag);
-
-    // Used in Bar Penrose register
-    await createEmptyStratYbAsset__task(
-        {
-            ...taskArgs,
-            token: tapToken.address,
-            deploymentName: DEPLOYMENT_NAMES.TAP_TOKEN_YB_EMPTY_STRAT,
-        },
-        hre,
-    );
-
-    await createEmptyStratYbAsset__task(
-        {
-            ...taskArgs,
-            token: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
-            deploymentName: DEPLOYMENT_NAMES.WETH_YB_EMPTY_STRAT,
-        },
-        hre,
-    );
-
-    // Set staleness on testnet
-    // isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
-    if (isTestnet) {
-        const contracts = VM.list();
-        const findContract = (name: string) =>
-            contracts.find((e) => e.name === name);
-
-        const chainLinkUtils = await hre.ethers.getContractAt(
-            'ChainlinkUtils',
-            '',
-        );
-
-        if (
-            chainInfo.name === 'arbitrum' ||
-            chainInfo.name === 'arbitrum_sepolia'
-        ) {
-            const ethSeerCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_CL_ORACLE);
-            const ethUniCl = findContract(DEPLOYMENT_NAMES.ETH_SEER_UNI_ORACLE);
-            const tap = findContract(DEPLOYMENT_NAMES.TAP_ORACLE);
-            const adbTapOption = findContract(
-                DEPLOYMENT_NAMES.ADB_TAP_OPTION_ORACLE,
-            );
-            const tobTapOption = findContract(
-                DEPLOYMENT_NAMES.TOB_TAP_OPTION_ORACLE,
-            );
-            const reth = findContract(
-                DEPLOYMENT_NAMES.RETH_USD_SEER_CL_MULTI_ORACLE,
-            );
-            const wsteth = findContract(
-                DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
-            );
-
-            const stalenessToSet = [
-                ethSeerCl,
-                ethUniCl,
-                tap,
-                adbTapOption,
-                tobTapOption,
-                reth,
-                wsteth,
-            ];
-            const calls: TapiocaMulticall.CallStruct[] = [];
-            for (const contract of stalenessToSet) {
-                if (contract) {
-                    calls.push({
-                        target: contract.address,
-                        callData: chainLinkUtils.interface.encodeFunctionData(
-                            'changeDefaultStalePeriod',
-                            [4294967295],
-                        ),
-                        allowFailure: false,
-                    });
-                }
-            }
-            await VM.executeMulticall(calls);
-        }
-    }
-}
-
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ ratioTap: number; ratioWeth: number }>,
+    params: TTapiocaDeployerVmPass<{
+        ratioTap: number;
+        ratioWeth: number;
+        amountTap: string;
+        amountWeth: string;
+    }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, chainInfo, taskArgs, isTestnet } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        chainInfo,
+        taskArgs,
+        isTestnet,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
-        const { tapToken } = loadContracts__generic(hre, tag);
+    if (isHostChain) {
+        const { tapToken } = deployPostLbpStack__task__loadContracts__generic(
+            hre,
+            tag,
+        );
         await deployUniPoolAndAddLiquidity({
             ...params,
             taskArgs: {
@@ -169,22 +99,22 @@ async function tapiocaDeployTask(
                 tokenB: DEPLOY_CONFIG.MISC[chainInfo.chainId]!.WETH!,
                 ratioTokenA: taskArgs.ratioTap,
                 ratioTokenB: taskArgs.ratioWeth,
+                amountTokenA: hre.ethers.utils.parseEther(taskArgs.amountTap),
+                amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountWeth),
                 feeAmount: FeeAmount.MEDIUM,
                 options: {
-                    mintMock: true,
+                    mintMock: !!isTestnet,
                     arrakisDepositLiquidity: true,
                 },
             },
         });
     }
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         // TapWethLp is used in the oracles, so it must be deployed first
         // Deployment happens above in `deployUniPoolAndAddLiquidity`
-        const { tapToken, tapWethLp } = loadContracts__arb(hre, tag);
+        const { tapToken, tapWethLp } =
+            deployPostLbpStack__task__loadContracts__arb(hre, tag);
 
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
             .add(await buildETHUniOracle(hre, owner, isTestnet))
@@ -270,11 +200,7 @@ async function tapiocaDeployTask(
                     ],
                 }),
             );
-    } else if (
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
+    } else if (isSideChain) {
         VM.add(await buildSDaiOracle(hre)).add(
             await buildUsdoMarketOracle(hre, {
                 deploymentName: DEPLOYMENT_NAMES.MARKET_SDAI_ORACLE,
@@ -290,7 +216,10 @@ async function tapiocaDeployTask(
     }
 }
 
-function loadContracts__generic(hre: HardhatRuntimeEnvironment, tag: string) {
+export function deployPostLbpStack__task__loadContracts__generic(
+    hre: HardhatRuntimeEnvironment,
+    tag: string,
+) {
     const tapToken = loadGlobalContract(
         hre,
         TAPIOCA_PROJECTS_NAME.TapToken,
@@ -302,8 +231,14 @@ function loadContracts__generic(hre: HardhatRuntimeEnvironment, tag: string) {
     return { tapToken };
 }
 
-function loadContracts__arb(hre: HardhatRuntimeEnvironment, tag: string) {
-    const { tapToken } = loadContracts__generic(hre, tag);
+export function deployPostLbpStack__task__loadContracts__arb(
+    hre: HardhatRuntimeEnvironment,
+    tag: string,
+) {
+    const { tapToken } = deployPostLbpStack__task__loadContracts__generic(
+        hre,
+        tag,
+    );
 
     const tapWethLp = loadLocalContract(
         hre,
