@@ -391,6 +391,17 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     }
 
     /**
+     * @notice DO NOT USE
+     * @dev Used to generate ABI
+     */
+    function participate(address _participant, uint256 _amount, uint256 _duration, uint24 minMultiplierOut)
+        external
+        view
+    {
+        revert("DO NOT USE");
+    }
+
+    /**
      * @dev Process a TOB/TOLP/TWTAP lock operation, will only execute if the selector is allowed.
      * @dev !!! WARNING !!! Make sure to check the Owner param and check that function definition didn't change.
      *
@@ -403,7 +414,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
          * @dev Executes the following:
          *      lock(....)
          *      participate(....)
-         *      lock(....)
+         *      participate(....)
          */
         bool selectorValidated = _validateTapLockOperation(_target, _actionCalldata);
 
@@ -458,8 +469,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             // Token is sent to the owner after execute
-            if (funcSig == ITwTap.participate.selector) {
-                (address from, uint256 amount,) = abi.decode(_actionCalldata[4:], (address, uint256, uint256));
+            if (funcSig == Magnetar.participate.selector) {
+                (address from, uint256 amount, uint256 duration, uint24 minMultiplierOut) =
+                    abi.decode(_actionCalldata[4:], (address, uint256, uint256, uint24));
                 address tapOFT = ITwTap(_target).tapOFT();
 
                 {
@@ -472,13 +484,22 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
                 pearlmit.approve(20, tapOFT, 0, _target, amount.toUint200(), block.timestamp.toUint48());
 
                 tapOFT.safeApprove(address(pearlmit), type(uint256).max);
-                _executeCall(_target, _actionCalldata, _actionValue);
+                (bytes memory tokenIdData) = _executeCallMemory(
+                    _target, abi.encodeWithSelector(ITwTap.participate.selector, from, amount, duration), _actionValue
+                );
                 tapOFT.safeApprove(address(pearlmit), 0);
+
+                ITwTap.Participation memory participation =
+                    ITwTap(_target).getParticipation(abi.decode(tokenIdData, (uint256)));
+                if (participation.multiplier < minMultiplierOut) {
+                    revert("Magnetar: Invalid multiplier");
+                }
+
                 return;
             }
         }
 
-        revert Magnetar_ActionNotValid(uint8(MagnetarAction.Market), _actionCalldata);
+        revert Magnetar_ActionNotValid(uint8(MagnetarAction.TapLock), _actionCalldata);
     }
 
     function _validateTapLockOperation(address _target, bytes calldata _actionCalldata)
@@ -491,7 +512,10 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         _checkWhitelisted(_target);
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
-        if (funcSig == ITapiocaOptionLiquidityProvision.lock.selector || funcSig == ITwTap.participate.selector) {
+        if (
+            funcSig == ITapiocaOptionLiquidityProvision.lock.selector
+                || funcSig == ITapiocaOptionBroker.participate.selector || funcSig == Magnetar.participate.selector
+        ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
             selectorValidated = true;
@@ -642,6 +666,22 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
      */
     function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
+        private
+        returns (bytes memory returnData)
+    {
+        bool success;
+        (success, returnData) = _target.call{value: _actionValue}(_actionCalldata);
+
+        if (!success) {
+            revert(RevertMsgDecoder._getRevertMsg(returnData));
+        }
+    }
+
+    /**
+     * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
+     * @dev This uses memory
+     */
+    function _executeCallMemory(address _target, bytes memory _actionCalldata, uint256 _actionValue)
         private
         returns (bytes memory returnData)
     {

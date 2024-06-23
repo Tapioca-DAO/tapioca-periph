@@ -45,6 +45,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
+    error Magnetar__minDiscountOutMismatch(uint128 expected, uint128 received);
 
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
@@ -135,7 +136,13 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
         uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
 
+        // Check for the discount slippage
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
+        (, ITapiocaOption.TapOption memory oTapAttributes) = ITapiocaOption(oTapAddress).attributes(oTAPTokenId);
+        if (oTapAttributes.discount < data.lockData.minDiscountOut.toUint128()) {
+            revert Magnetar__minDiscountOutMismatch(uint128(data.lockData.minDiscountOut), oTapAttributes.discount);
+        }
+
         IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "");
     }
 
