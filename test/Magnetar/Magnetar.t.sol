@@ -69,7 +69,7 @@ import {
     ExitPositionAndRemoveCollateralData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IOptionsUnlockData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {MagnetarTestUtils, TestSingularityData, TestBigBangData} from "./MagnetarTestUtils.sol";
+import {MagnetarTestUtils, TestSingularityData, TestBigBangData} from "./MagnetarTestUtils.t.sol";
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {IOptionsExitData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.sol";
@@ -976,7 +976,15 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: true, amount: tokenAmount_})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({
+                        lock: false,
+                        amount: 0,
+                        lockDuration: 0,
+                        target: address(0),
+                        tAsset: address(0),
+                        minDiscountOut: 0,
+                        fraction: 0
+                    }),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(0),
@@ -1042,7 +1050,15 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: true, amount: tokenAmount_})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({
+                        lock: false,
+                        amount: 0,
+                        lockDuration: 0,
+                        target: address(0),
+                        tAsset: address(0),
+                        minDiscountOut: 0,
+                        fraction: 0
+                    }),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(0),
@@ -1192,7 +1208,15 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: false, amount: 0})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({
+                        lock: false,
+                        amount: 0,
+                        lockDuration: 0,
+                        target: address(0),
+                        tAsset: address(0),
+                        minDiscountOut: 0,
+                        fraction: 0
+                    }),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(sgl),
