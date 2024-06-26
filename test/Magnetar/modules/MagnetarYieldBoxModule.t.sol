@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {MagnetarTestHelper, MagnetarSetupData, TestBigBangData, TestSingularityData} from "./MagnetarTestHelper.sol";
+import {MagnetarTestHelper, MagnetarSetupData, TestBigBangData, TestSingularityData} from "./MagnetarTestHelper.t.sol";
 import {
     MagnetarAction,
     MagnetarModule,
@@ -149,9 +149,12 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
         _withdrawParams.extractFromSender = true;
-        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+        bytes memory withdrawCallParams =
+            abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
 
-        pearlmit.approve(1155, address(yieldBox), assetAId, address(magnetarA), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(
+            1155, address(yieldBox), assetAId, address(magnetarA), type(uint200).max, uint48(block.timestamp)
+        );
         yieldBox.setApprovalForAll(address(pearlmit), true);
         // assetA.approve(address(pearlmit), type(uint256).max);
 
@@ -188,7 +191,8 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
         _withdrawParams.extractFromSender = true;
-        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+        bytes memory withdrawCallParams =
+            abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
 
         MagnetarCall[] memory calls = new MagnetarCall[](2);
         calls[0] = MagnetarCall({
@@ -210,5 +214,4 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         _setYieldBoxRevoke(yieldBox, address(magnetarA));
     }
-
 }

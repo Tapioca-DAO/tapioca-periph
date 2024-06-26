@@ -91,6 +91,7 @@ import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 
 import "forge-std/Test.sol";
 
@@ -137,6 +138,7 @@ contract MagnetarTestHelper is TestHelper {
     Singularity sglMC;
     BigBang bbMC;
 
+    SGLInit sglInit;
     Singularity sgl;
     BigBang bb;
 
@@ -206,6 +208,7 @@ contract MagnetarTestHelper is TestHelper {
         wethId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
         tapId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
 
+        sglInit = new SGLInit();
         (penrose, sglMC, bbMC) = createPenrose(
             address(pearlmit),
             address(yieldBox),
@@ -514,7 +517,7 @@ contract MagnetarTestHelper is TestHelper {
             Singularity._InitMemoryData memory _data
         ) = _getSingularityInitData(_sgl);
         {
-            sgl.init(abi.encode(_modulesData, _tokensData, _data));
+            sgl.init(address(sglInit), abi.encode(_modulesData, _tokensData, _data));
         }
 
         {

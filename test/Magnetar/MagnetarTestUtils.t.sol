@@ -36,6 +36,7 @@ import {IStrategy} from "yieldbox/interfaces/IStrategy.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 import {SingularityMock} from "../mocks/SingularityMock.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 
 // External
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
@@ -132,13 +133,15 @@ contract MagnetarTestUtils {
 
     function createSingularity(TestSingularityData memory _sgl, address _mc) public returns (Singularity) {
         Singularity sgl = new Singularity();
+        SGLInit sglInit = new SGLInit();
+
         (
             Singularity._InitMemoryModulesData memory _modulesData,
             Singularity._InitMemoryTokensData memory _tokensData,
             Singularity._InitMemoryData memory _data
         ) = _getSingularityInitData(_sgl);
         {
-            sgl.init(abi.encode(_modulesData, _tokensData, _data));
+            sgl.init(address(sglInit), abi.encode(_modulesData, _tokensData, _data));
         }
 
         {
