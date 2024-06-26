@@ -2,12 +2,18 @@
 pragma solidity 0.8.22;
 
 // External
+import {
+    MessagingReceipt, OFTReceipt, SendParam
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ModuleManager} from "tapioca-periph/utils/ModuleManager.sol";
 
 /*
@@ -35,18 +41,44 @@ contract ToeTokenMock is BaseTapiocaOmnichainEngine, ModuleManager, ERC20Permit 
         address _extExec,
         address _senderModule,
         address _receiverModule,
-        IPearlmit _pearlmit
-    ) BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec, _pearlmit) ERC20Permit("TOEM") {
+        IPearlmit _pearlmit,
+        ICluster _cluster
+    )
+        BaseTapiocaOmnichainEngine("ToeTokenMock", "TOEM", _endpoint, _owner, _extExec, _pearlmit, _cluster)
+        ERC20Permit("TOEM")
+    {
         _setModule(uint8(Module.ToeTokenSender), _senderModule);
         _setModule(uint8(Module.ToeTokenReceiver), _receiverModule);
     }
 
-    function transferFrom(address from, address to, uint256 value)
+    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
+        payable
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
     {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(Module.ToeTokenSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
+    }
+
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(Module.ToeTokenSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
     }
 
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {

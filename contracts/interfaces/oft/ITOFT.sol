@@ -28,14 +28,18 @@ interface ITOFT is ITapiocaOmnichainEngine {
         TOFTGenericReceiver
     }
 
+    function pearlmit() external view returns (IPearlmit);
+    function decimalConversionRate() external view returns (uint256);
     function hostEid() external view returns (uint256);
     function wrap(address fromAddress, address toAddress, uint256 amount) external payable returns (uint256 minted);
-    function unwrap(address _toAddress, uint256 _amount) external;
+    function unwrap(address _toAddress, uint256 _amount) external returns (uint256 unwrapped);
     function erc20() external view returns (address);
     function vault() external view returns (address);
     function balanceOf(address _holder) external view returns (uint256);
     function approve(address _spender, uint256 _amount) external returns (bool);
     function extractUnderlying(uint256 _amount) external; //mTOFT
+    // available in BaseTapiocaOmnichainEngine
+    function removeDust(uint256 _amountLD) external view returns (uint256 amountLD);
 }
 
 interface IToftVault {
@@ -97,9 +101,9 @@ struct TOFTModulesInitStruct {
  * @notice Encodes the message for the PT_SEND_PARAMS operation.
  */
 struct SendParamsMsg {
-    address receiver; //TODO: decide if we should use `srcChainSender_`
+    address receiver;
     bool unwrap;
-    uint256 amount; //TODO: use the amount credited by lzReceive directly
+    uint256 amount;
 }
 
 /**
@@ -110,7 +114,6 @@ struct ExerciseOptionsMsg {
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;
-    bytes composeMsg;
 }
 
 /**
@@ -120,6 +123,7 @@ struct MarketRemoveCollateralMsg {
     address user;
     IRemoveParams removeParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 /**
@@ -129,6 +133,7 @@ struct MarketBorrowMsg {
     address user;
     IBorrowParams borrowParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 struct IRemoveParams {

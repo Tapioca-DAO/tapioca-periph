@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {IMarket} from "./IMarket.sol";
+
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -12,7 +14,7 @@ pragma solidity 0.8.22;
    
 */
 
-interface IBigBang {
+interface IBigBang is IMarket {
     struct AccrueInfo {
         uint64 debtRate;
         uint64 lastAccrued;
@@ -32,5 +34,7 @@ interface IBigBang {
 
     function getTotalDebt() external view returns (uint256);
 
-    function accrue() external;
+    function consumeMintableOpenInterestDebt() external returns (uint256);
+
+    function openInterestDebt() external view returns (uint256);
 }

@@ -1,26 +1,21 @@
 // Plugins
-import fs from 'fs';
+import '@nomiclabs/hardhat-ethers';
+import '@nomicfoundation/hardhat-verify';
+import '@typechain/hardhat';
+
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
-import '@nomicfoundation/hardhat-toolbox';
 import '@primitivefi/hardhat-dodoc';
-import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import { HardhatUserConfig } from 'hardhat/config';
-import {
-    HardhatNetworkUserConfig,
-    HttpNetworkConfig,
-    HttpNetworkUserConfig,
-    NetworksUserConfig,
-} from 'hardhat/types';
+import { HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types';
+import 'hardhat-ignore-warnings';
 
 // Utils
-import { TAPIOCA_PROJECTS_NAME } from './gitmodule/tapioca-sdk/src/api/config';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 import { SDK, loadEnv } from 'tapioca-sdk';
 import 'tapioca-sdk'; // Use directly the un-compiled code, no need to wait for the tarball to be published.
-
-import { TASK_COMPILE_GET_REMAPPINGS } from 'hardhat/builtin-tasks/task-names';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -58,25 +53,20 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
 
-const forkNetwork = process.env.NETWORK as TNetwork;
-const forkChainInfo = supportedChains[forkNetwork];
-const forkInfo: NetworksUserConfig['hardhat'] = forkNetwork
-    ? {
-          chainId: forkChainInfo.chainId,
-          forking: {
-              url: forkChainInfo.url,
-              ...(process.env.FROM_BLOCK
-                  ? { blockNumber: Number(process.env.FROM_BLOCK) }
-                  : {}),
-          },
-      }
-    : {};
-
 const config: HardhatUserConfig &
-    HardhatNetworkUserConfig & { dodoc?: any; typechain?: any } = {
+    HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: TAPIOCA_PROJECTS_NAME.TapiocaPeriph },
     solidity: {
         compilers: [
+            {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 9999,
+                    },
+                },
+            },
             {
                 version: '0.8.22',
                 settings: {
@@ -95,7 +85,7 @@ const config: HardhatUserConfig &
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 9999,
+                        runs: 2000,
                     },
                 },
             },
@@ -105,7 +95,7 @@ const config: HardhatUserConfig &
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 5000,
+                        runs: 2000,
                     },
                 },
             },
@@ -129,6 +119,51 @@ const config: HardhatUserConfig &
                     },
                 },
             },
+            '@balancer-labs/v2-vault/contracts/Vault.sol': {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 500,
+                    },
+                },
+            },
+            'contracts/LiquidityBootstrappingPoolFactory.sol': {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 500,
+                    },
+                },
+            },
+            'contracts/managed/ManagedPoolFactory.sol': {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200,
+                    },
+                },
+            },
+            'contracts/managed/ManagedPool.sol': {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200,
+                    },
+                },
+            },
+            'contracts/test/MockManagedPool.sol': {
+                version: '0.7.1',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200,
+                    },
+                },
+            },
         },
     },
     paths: {
@@ -148,22 +183,22 @@ const config: HardhatUserConfig &
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
-            mining: { auto: true },
-            hardfork: 'merge',
             allowUnlimitedContractSize: true,
             accounts: {
-                mnemonic:
-                    'test test test test test test test test test test test junk',
-                count: 10,
-                accountsBalance: '1000000000000000000000',
+                count: 5,
             },
-            tags: ['local'],
-            ...forkInfo,
         },
         ...supportedChains,
     },
+    warnings: {
+        '*': {
+            'code-size': 'warn',
+            'shadowing-opcode': 'off',
+        },
+    },
     etherscan: {
         apiKey: {
+            arbitrumOne: process.env.SCAN_API_KEY ?? '',
             sepolia: process.env.SCAN_API_KEY ?? '',
             arbitrumSepolia: process.env.SCAN_API_KEY ?? '',
             optimismSepolia: process.env.SCAN_API_KEY ?? '',

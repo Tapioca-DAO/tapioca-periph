@@ -6,3 +6,5 @@ pragma solidity 0.8.22;
 
 import {ChainlinkFeedMock} from "tapioca-mocks/ChainlinkFeedMock.sol";
 import {ZeroXSwapperMock} from "tapioca-mocks/ZeroXSwapperMock.sol";
+import {OracleMock} from "tapioca-mocks/OracleMock.sol";
+import {ERC20Mock} from "tapioca-mocks/ERC20Mock.sol";

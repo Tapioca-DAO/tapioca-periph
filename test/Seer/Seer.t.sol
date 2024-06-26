@@ -55,7 +55,6 @@ contract SeerTest is Test {
                 _uniFinalCurrency: 0,
                 _circuitChainlink: circuitChainlink,
                 _circuitChainIsMultiplied: circuitChainIsMultiplied,
-                _stalePeriod: 8640000,
                 guardians: guardians,
                 _description: bytes32(bytes("DAI/USDC")),
                 _sequencerUptimeFeed: address(0),
@@ -108,7 +107,6 @@ contract SeerTest is Test {
                 _uniFinalCurrency: 0,
                 _circuitChainlink: circuitChainlink,
                 _circuitChainIsMultiplied: circuitChainIsMultiplied,
-                _stalePeriod: 8640000,
                 guardians: guardians,
                 _description: bytes32(bytes("ETH/USDC")),
                 _sequencerUptimeFeed: address(0),
@@ -163,7 +161,6 @@ contract SeerTest is Test {
                 _uniFinalCurrency: 0,
                 _circuitChainlink: circuitChainlink,
                 _circuitChainIsMultiplied: circuitChainIsMultiplied,
-                _stalePeriod: 8640000,
                 guardians: guardians,
                 _description: bytes32(bytes("DAI/USDC")),
                 _sequencerUptimeFeed: address(sequencer),
@@ -270,12 +267,8 @@ contract SeerTest is Test {
             address(this)
         );
 
-        EthGlpOracle ethGlpOracle = new EthGlpOracle(
-            ITapiocaOracle(address(ethOracle)),
-            ITapiocaOracle(address(glpOracle)),
-            address(0xFdB631F5EE196F0ed6FAa767959853A9F217697D),
-            address(this)
-        );
+        EthGlpOracle ethGlpOracle =
+            new EthGlpOracle(ITapiocaOracle(address(ethOracle)), ITapiocaOracle(address(glpOracle)), address(this));
 
         {
             (bool success, uint256 rate) = ethGlpOracle.peek("");

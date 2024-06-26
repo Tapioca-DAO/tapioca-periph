@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import {TapiocaMulticall} from "tapioca-periph/TapiocaMulticall/TapiocaMulticall.sol";
+
 /// @author https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Create2.sol
-contract TapiocaDeployer {
+contract TapiocaDeployer is TapiocaMulticall {
     /**
      * @dev Deploys a contract using `CREATE2`. The address where the contract
      * will be deployed can be known in advance via {computeAddress}.
@@ -20,6 +22,7 @@ contract TapiocaDeployer {
     function deploy(uint256 amount, bytes32 salt, bytes memory bytecode, string memory contractName)
         external
         payable
+        onlyOwner
         returns (address addr)
     {
         require(msg.value == amount, "Create2: insufficient balance");

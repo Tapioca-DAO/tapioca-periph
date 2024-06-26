@@ -31,7 +31,7 @@ contract Cluster is Ownable, ICluster {
     mapping(uint32 lzChainId => mapping(address _contract => bool status)) private _whitelisted;
 
     /// @notice Centralized role assignment for Tapioca contract. Other contracts can use this mapping to check if an address has a role on them
-    mapping(address _contract => mapping(bytes32 role => mapping(address target => bool hasRole))) public hasRole;
+    mapping(address _contract => mapping(bytes32 role => bool hasRole)) public hasRole;
 
     /// @notice event emitted when LZ chain id is updated
     event LzChainUpdate(uint256 indexed _oldChain, uint256 indexed _newChain);
@@ -40,7 +40,7 @@ contract Cluster is Ownable, ICluster {
         address indexed _contract, uint32 indexed _lzChainId, bool indexed _oldStatus, bool _newStatus
     );
     /// @notice event emitted when a role is set
-    event RoleSet(address indexed _contract, bytes32 indexed _role, address indexed _target, bool _hasRole);
+    event RoleSet(address indexed _contract, bytes32 indexed _role, bool _hasRole);
 
     // ************** //
     // *** ERRORS *** //
@@ -48,6 +48,7 @@ contract Cluster is Ownable, ICluster {
     error NotAuthorized();
 
     constructor(uint32 _lzChainId, address _owner) {
+        emit LzChainUpdate(0, _lzChainId);
         lzChainId = _lzChainId;
         transferOwnership(_owner);
     }
@@ -116,15 +117,11 @@ contract Cluster is Ownable, ICluster {
      * @notice sets a role for a contract.
      * @param _contract the contract's address.
      * @param _role the role's name for the contract, in bytes32 format.
-     * @param _target the address to set the role for.
      * @param _hasRole the new role status.
      */
-    function setRoleForContract(address _contract, bytes32 _role, address _target, bool _hasRole)
-        external
-        isAuthorized
-    {
-        hasRole[_contract][_role][_target] = _hasRole;
-        emit RoleSet(_contract, _role, _target, _hasRole);
+    function setRoleForContract(address _contract, bytes32 _role, bool _hasRole) external isAuthorized {
+        hasRole[_contract][_role] = _hasRole;
+        emit RoleSet(_contract, _role, _hasRole);
     }
 
     // ********************* //

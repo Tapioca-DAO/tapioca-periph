@@ -9,8 +9,6 @@ export const buildChainlinkFeedMock = async (
         args: Parameters<ChainlinkFeedMock__factory['deploy']>;
     },
 ): Promise<IDeployerVMAdd<ChainlinkFeedMock__factory>> => {
-    console.log('[+] buildChainlinkFeedMock');
-
     return {
         contract: await hre.ethers.getContractFactory('ChainlinkFeedMock'),
         deploymentName: params.deploymentName,

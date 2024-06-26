@@ -1,27 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // Tapioca
-import {
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
-} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {TapiocaOmnichainEngineHelper} from
-    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
+import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
+import {Module, IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarStorage} from "../MagnetarStorage.sol";
 
 /*
@@ -35,51 +29,51 @@ import {MagnetarStorage} from "../MagnetarStorage.sol";
    
 */
 
-abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
+abstract contract MagnetarBaseModule is MagnetarStorage {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
+    using SafeApprove for address;
 
     error Magnetar_GasMismatch(uint256 expected, uint256 received);
-    error Magnetar_TargetNotWhitelisted(address target);
     error Magnetar_ExtractTokenFail();
+    error Magnetar_UserMismatch();
+    error Magnetar_MarketCallFailed(bytes call);
+    error Magnetar_ActionParamsMismatch();
+    error Magnetar_tOLPTokenMismatch();
+    error Magnetar_TransferFailed();
 
-    constructor() MagnetarStorage(IPearlmit(address(0))) {}
+    constructor(IPearlmit pearlmit, address _toeHelper) MagnetarStorage(pearlmit, _toeHelper) {}
 
     /// =====================
     /// Internal
     /// =====================
-    function _withdrawToChain(MagnetarWithdrawData memory data) internal {
-        if (!cluster.isWhitelisted(0, address(data.yieldBox))) {
-            revert Magnetar_TargetNotWhitelisted(address(data.yieldBox));
-        }
-        IYieldBox _yieldBox = IYieldBox(data.yieldBox);
+    function _withdrawHere(MagnetarWithdrawData memory data) internal {
+        _checkWhitelisted(data.yieldBox);
 
-        // perform a same chain withdrawal
-        if (data.lzSendParams.sendParam.dstEid == 0) {
-            _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
-            return;
+        IYieldBox _yb = IYieldBox(data.yieldBox);
+
+        if (data.extractFromSender) {
+            // do NOT allow `extractFromSender` for whitelisted addresses
+            //    because in this cases funds should be already here
+            //    since it comes from an internal flow
+            if (cluster.isWhitelisted(0, msg.sender)) revert Magnetar_ExtractTokenFail();
+
+            uint256 _share = _yb.toShare(data.assetId, data.amount, false);
+            
+            // _yb.transfer(msg.sender, address(this), data.assetId, _share);
+            bool isErr = pearlmit.transferFromERC1155(msg.sender, address(this), data.yieldBox, data.assetId, _share);
+            if (isErr) {
+                revert Magnetar_TransferFailed();
+            }
         }
 
-        // perform a cross chain withdrawal
-        (, address asset,,) = _yieldBox.assets(data.assetId);
-        if (!cluster.isWhitelisted(0, asset)) {
-            revert Magnetar_TargetNotWhitelisted(asset);
-        }
-
-        _yieldBox.withdraw(data.assetId, address(this), address(this), data.lzSendParams.sendParam.amountLD, 0);
-        // TODO: decide about try-catch here
         if (data.unwrap) {
-            _lzCustomWithdraw(
-                asset,
-                data.lzSendParams,
-                data.sendGas,
-                data.sendVal,
-                data.composeGas,
-                data.composeVal,
-                data.composeMsgType
-            );
+            _yb.withdraw(data.assetId, address(this), address(this), data.amount, 0);
+
+            (, address assetAddress,,) = _yb.assets(data.assetId);
+            ITOFT(assetAddress).unwrap(data.receiver, data.amount);
         } else {
-            _lzWithdraw(asset, data.lzSendParams, data.sendGas, data.sendVal);
+            _yb.withdraw(data.assetId, address(this), data.receiver, data.amount, 0);
         }
     }
 
@@ -97,6 +91,10 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         }
     }
 
+    function _pearlmitApprove(address _yieldBox, uint256 _tokenId, address _market, uint256 _amount) internal {
+        pearlmit.approve(1155, _yieldBox, _tokenId, _market, _amount.toUint200(), block.timestamp.toUint48());
+    }
+
     function _extractTokens(address _from, address _token, uint256 _amount) internal returns (uint256) {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         // IERC20(_token).safeTransferFrom(_from, address(this), _amount);
@@ -107,93 +105,87 @@ abstract contract MagnetarBaseModule is Ownable, MagnetarStorage {
         return balanceAfter - balanceBefore;
     }
 
-    /// =====================
-    /// Private
-    /// =====================
-    function _withdrawHere(IYieldBox _yieldBox, uint256 _assetId, bytes32 _to, uint256 _amount) private {
-        _yieldBox.withdraw(_assetId, address(this), OFTMsgCodec.bytes32ToAddress(_to), _amount, 0);
-    }
-
-    function _lzWithdraw(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
-        private
+    function _depositToYb(IYieldBox _yieldBox, address _user, uint256 _tokenId, uint256 _amount)
+        internal
+        returns (uint256 amountOut, uint256 shareOut)
     {
-        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
-
-        if (msg.value < prepareLzCallReturn.msgFee.nativeFee) {
-            revert Magnetar_GasMismatch(prepareLzCallReturn.msgFee.nativeFee, msg.value);
-        }
-
-        IOftSender(_asset).sendPacket{value: prepareLzCallReturn.msgFee.nativeFee}(
-            prepareLzCallReturn.lzSendParam, prepareLzCallReturn.composeMsg
-        );
+        (, address assetAddress,,) = _yieldBox.assets(_tokenId);
+        assetAddress.safeApprove(address(_yieldBox), _amount);
+        (amountOut, shareOut) = _yieldBox.depositAsset(_tokenId, address(this), _user, _amount, 0);
+        assetAddress.safeApprove(address(_yieldBox), 0);
     }
 
-    function _lzCustomWithdraw(
-        address _asset,
-        LZSendParam memory _lzSendParam,
-        uint128 _lzSendGas,
-        uint128 _lzSendVal,
-        uint128 _lzComposeGas,
-        uint128 _lzComposeVal,
-        uint16 _lzComposeMsgType
-    ) private {
-        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
-
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        PrepareLzCallReturn memory prepareLzCallReturn2 = _toeHelper.prepareLzCall(
-            ITapiocaOmnichainEngine(_asset),
-            PrepareLzCallData({
-                dstEid: _lzSendParam.sendParam.dstEid,
-                recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
-                msgType: _lzComposeMsgType,
-                composeMsgData: ComposeMsgData({
-                    index: 0,
-                    gas: _lzComposeGas,
-                    value: prepareLzCallReturn.msgFee.nativeFee.toUint128(),
-                    data: _lzSendParam.sendParam.composeMsg,
-                    prevData: bytes(""),
-                    prevOptionsData: bytes("")
-                }),
-                lzReceiveGas: _lzSendGas + _lzComposeGas,
-                lzReceiveValue: _lzComposeVal
-            })
-        );
-
-        if (msg.value < prepareLzCallReturn2.msgFee.nativeFee) {
-            revert Magnetar_GasMismatch(prepareLzCallReturn2.msgFee.nativeFee, msg.value);
-        }
-
-        IOftSender(_asset).sendPacket{value: prepareLzCallReturn2.msgFee.nativeFee}(
-            prepareLzCallReturn2.lzSendParam, prepareLzCallReturn2.composeMsg
-        );
-    }
-
-    function _prepareLzSend(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
-        private
-        returns (PrepareLzCallReturn memory prepareLzCallReturn)
+    function _marketRepay(IMarket _market, address _marketHelper, uint256 _amount, address _from, address _to)
+        internal
+        returns (uint256 repayed)
     {
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        prepareLzCallReturn = _toeHelper.prepareLzCall(
-            ITapiocaOmnichainEngine(_asset),
-            PrepareLzCallData({
-                dstEid: _lzSendParam.sendParam.dstEid,
-                recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: _lzSendParam.sendParam.amountLD,
-                minAmountToCreditLD: _lzSendParam.sendParam.minAmountLD,
-                msgType: 1, // SEND
-                composeMsgData: ComposeMsgData({
-                    index: 0,
-                    gas: 0,
-                    value: 0,
-                    data: bytes(""),
-                    prevData: bytes(""),
-                    prevOptionsData: bytes("")
-                }),
-                lzReceiveGas: _lzSendGas,
-                lzReceiveValue: _lzSendVal
-            })
-        );
+        _market.accrue();
+        uint256 repayPart = helper.getBorrowPartForAmount(address(_market), _amount, true); // RoundUp happen in market repay
+        (Module[] memory modules, bytes[] memory calls) =
+            IMarketHelper(_marketHelper).repay(_from, _to, false, repayPart);
+
+        (bool[] memory successes, bytes[] memory results) = _market.execute(modules, calls, true);
+        if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+
+        repayed = IMarketHelper(_marketHelper).repayView(results[0]);
+    }
+
+    function _marketBorrow(IMarket _market, address _marketHelper, uint256 _amount, address _from, address _to)
+        internal
+    {
+        (Module[] memory modules, bytes[] memory calls) = IMarketHelper(_marketHelper).borrow(_from, _to, _amount);
+
+        (bool[] memory successes,) = _market.execute(modules, calls, true);
+        if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+    }
+
+    function _marketAddCollateral(
+        IMarket _market,
+        address _marketHelper,
+        uint256 _collateralShare,
+        address _from,
+        address _to
+    ) internal {
+        (Module[] memory modules, bytes[] memory calls) =
+            IMarketHelper(_marketHelper).addCollateral(_from, _to, false, 0, _collateralShare);
+        (bool[] memory successes,) = _market.execute(modules, calls, true);
+        if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+    }
+
+    function _marketRemoveCollateral(
+        IMarket _market,
+        address _marketHelper,
+        uint256 _collateralShare,
+        address _from,
+        address _to
+    ) internal {
+        (Module[] memory modules, bytes[] memory calls) =
+            IMarketHelper(_marketHelper).removeCollateral(_from, _to, _collateralShare);
+        (bool[] memory successes,) = _market.execute(modules, calls, true);
+        if (!successes[0]) revert Magnetar_MarketCallFailed(calls[0]);
+    }
+
+    function _singularityAddAsset(ISingularity _singularity, uint256 _amount, address _from, address _to)
+        internal
+        returns (uint256 fraction)
+    {
+        IYieldBox _yieldBox = IYieldBox(_singularity._yieldBox());
+        uint256 lendShare = _yieldBox.toShare(_singularity._assetId(), _amount, false);
+
+        fraction = _singularity.addAsset(_from, _to, false, lendShare);
+    }
+
+    function _singularityRemoveAsset(ISingularity _singularity, uint256 _amount, address _from, address _to)
+        internal
+        returns (uint256 share)
+    {
+        _singularity.accrue();
+        uint256 fraction = helper.getFractionForAmount(_singularity, _amount, true);
+        share = _singularity.removeAsset(_from, _to, fraction);
+    }
+
+    function _tOBExit(address oTapAddress, address tOB, uint256 id) internal {
+        IERC721(oTapAddress).approve(tOB, id);
+        ITapiocaOptionBroker(tOB).exitPosition(id);
     }
 }

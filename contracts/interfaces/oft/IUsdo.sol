@@ -52,6 +52,9 @@ interface IUsdo is ITapiocaOmnichainEngine {
     function addFlashloanFee(uint256 _fee) external; //onlyOwner
 
     function paused() external view returns (bool);
+
+    // available in BaseTapiocaOmnichainEngine
+    function removeDust(uint256 _amountLD) external view returns (uint256 amountLD);
 }
 
 /// ============================
@@ -84,6 +87,7 @@ struct MarketLendOrRepayMsg {
     address user;
     ILendOrRepayParams lendParams;
     MagnetarWithdrawData withdrawParams;
+    uint256 value;
 }
 
 /**
@@ -93,6 +97,7 @@ struct MarketRemoveAssetMsg {
     address user;
     ICommonExternalContracts externalData;
     IRemoveAndRepay removeAndRepayData;
+    uint256 value;
 }
 
 /**
@@ -103,7 +108,6 @@ struct ExerciseOptionsMsg {
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;
-    bytes composeMsg;
 }
 
 struct IRemoveAndRepay {

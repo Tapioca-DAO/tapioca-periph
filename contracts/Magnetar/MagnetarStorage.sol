@@ -2,19 +2,15 @@
 pragma solidity 0.8.22;
 
 // External
-import {RebaseLibrary} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from
-    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {MagnetarAction, MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {TapiocaOmnichainEngineHelper} from
+    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
+import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 /*
@@ -35,27 +31,19 @@ import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
  */
 contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     ICluster internal cluster;
-    mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
+    IMagnetarHelper public helper;
+    TapiocaOmnichainEngineHelper public toeHelper;
 
-    // Helpers for external usage. Not used in the contract.
-    uint8 public constant MAGNETAR_ACTION_PERMIT = 0;
-    uint8 public constant MAGNETAR_ACTION_WRAP = 1;
-    uint8 public constant MAGNETAR_ACTION_MARKET = 2;
-    uint8 public constant MAGNETAR_ACTION_TAP_TOKEN = 3;
-    uint8 public constant MAGNETAR_ACTION_OFT = 4;
-    uint8 public constant MAGNETAR_ACTION_ASSET_MODULE = 5;
-    uint8 public constant MAGNETAR_ACTION_ASSET_XCHAIN_MODULE = 6;
-    uint8 public constant MAGNETAR_ACTION_COLLATERAL_MODULE = 7;
-    uint8 public constant MAGNETAR_ACTION_MINT_MODULE = 8;
-    uint8 public constant MAGNETAR_ACTION_MINT_XCHAIN_MODULE = 9;
-    uint8 public constant MAGNETAR_ACTION_OPTION_MODULE = 10;
-    uint8 public constant MAGNETAR_ACTION_YIELDBOX_MODULE = 11;
+    mapping(MagnetarModule moduleId => address moduleAddress) internal modules;
 
     error Magnetar_NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error Magnetar_ModuleNotFound(MagnetarModule module); // Module not found
     error Magnetar_UnknownReason(); // Revert reason not recognized
+    error Magnetar_TargetNotWhitelisted(address addy); // cluster.isWhitelisted(lzChainId, _addr) => false
 
-    constructor(IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {}
+    constructor(IPearlmit _pearlmit, address _toeHelper) PearlmitHandler(_pearlmit) {
+        toeHelper = TapiocaOmnichainEngineHelper(_toeHelper);
+    }
 
     receive() external payable virtual {}
 
@@ -80,7 +68,7 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
 
         (success, returnData) = module.delegatecall(_data);
         if (!success) {
-            _getRevertMsg(returnData);
+            revert(RevertMsgDecoder._getRevertMsg(returnData));
         }
     }
 
@@ -96,18 +84,11 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
         }
     }
 
-    /**
-     * @dev Decodes revert messages
-     */
-    function _getRevertMsg(bytes memory _returnData) internal pure {
-        // If the _res length is less than 68, then
-        // the transaction failed with custom error or silently (without a revert message)
-        if (_returnData.length < 68) revert Magnetar_UnknownReason();
-
-        assembly {
-            // Slice the sighash.
-            _returnData := add(_returnData, 0x04)
+    function _checkWhitelisted(address addy) internal view {
+        if (addy != address(0)) {
+            if (!cluster.isWhitelisted(0, addy)) {
+                revert Magnetar_TargetNotWhitelisted(addy);
+            }
         }
-        revert(abi.decode(_returnData, (string))); // All that remains is the revert string
     }
 }

@@ -65,14 +65,7 @@ contract TapOptionOracle is Seer {
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return success if no valid (recent) rate is available, return false else true.
     /// @return rate The rate of the requested asset / pair / pool.
-    function get(bytes calldata)
-        external
-        virtual
-        override
-        nonReentrant
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        returns (bool success, uint256 rate)
-    {
+    function get(bytes calldata) external virtual override nonReentrant returns (bool success, uint256 rate) {
         _sequencerBeatCheck();
         uint256 average = _computeAverage();
         return (true, average);

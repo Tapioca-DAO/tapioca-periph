@@ -10,12 +10,14 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {ITapiocaOmnichainReceiveExtender} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
 import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {BaseToeMsgType} from "./BaseToeMsgType.sol";
 
 /*
@@ -40,7 +42,12 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
     /// @dev For future use, to extend the receive() operation.
     ITapiocaOmnichainReceiveExtender public tapiocaOmnichainReceiveExtender;
 
-    error BaseTapiocaOmnichainEngine_NotValid();
+    error BaseTapiocaOmnichainEngine_PearlmitNotApproved();
+    error BaseTapiocaOmnichainEngine_PearlmitFailed();
+    error BaseTapiocaOmnichainEngine__ZeroAddress();
+
+    // keccak256("BaseToe.cluster.slot")
+    bytes32 public constant CLUSTER_SLOT = 0x7cdf5007585d1c7d3dfb23c59fcda5f9f02da78637d692495255a57630b72162;
 
     constructor(
         string memory _name,
@@ -48,29 +55,12 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         address _endpoint,
         address _delegate,
         address _extExec,
-        IPearlmit _pearlmit
+        IPearlmit _pearlmit,
+        ICluster _cluster
     ) OFT(_name, _symbol, _endpoint, _delegate) PearlmitHandler(_pearlmit) {
         toeExtExec = TapiocaOmnichainExtExec(_extExec);
-    }
 
-    /**
-     * @inheritdoc IERC20
-     * @dev Extended the capabilities to check allowance and transfer on Pearlmit.
-     */
-    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
-        address spender = _msgSender();
-        // If allowance on this contract is not met, try a transferFrom via Pearlmit.
-        if (allowance(from, spender) < value) {
-            // _transfer(from, to, value);
-            bool isErr = pearlmit.transferFromERC20(from, to, address(this), value);
-            if (isErr) revert BaseTapiocaOmnichainEngine_NotValid();
-        } else {
-            // If allowance on this contract is met, perform a normal transferFrom.
-            _spendAllowance(from, spender, value);
-            _transfer(from, to, value);
-        }
-
-        return true;
+        StorageSlot.getAddressSlot(CLUSTER_SLOT).value = address(_cluster);
     }
 
     /**
@@ -79,7 +69,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      */
     function _payNative(uint256 _nativeFee) internal override returns (uint256 nativeFee) {
         if (msg.value < _nativeFee) revert NotEnoughNative(msg.value);
-        return _nativeFee;
+        return msg.value;
     }
 
     /**
@@ -87,6 +77,27 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      */
     function setTapiocaOmnichainReceiveExtender(address _tapiocaOmnichainReceiveExtender) external onlyOwner {
         tapiocaOmnichainReceiveExtender = ITapiocaOmnichainReceiveExtender(_tapiocaOmnichainReceiveExtender);
+    }
+
+    /**
+     * @dev Sets the `toeExtExec` contract.
+     */
+    function setToeExtExec(address _extExec) external onlyOwner {
+        toeExtExec = TapiocaOmnichainExtExec(_extExec);
+    }
+
+    /**
+     * @dev Returns the current cluster.
+     */
+    function getCluster() public view returns (ICluster) {
+        return ICluster(StorageSlot.getAddressSlot(CLUSTER_SLOT).value);
+    }
+
+    /**
+     * @dev Sets the cluster.
+     */
+    function setCluster(ICluster _cluster) external onlyOwner {
+        StorageSlot.getAddressSlot(CLUSTER_SLOT).value = address(_cluster);
     }
 
     /**
@@ -129,7 +140,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) =
-            _buildOFTMsgAndOptions(_sendParam, _extraOptions, _composeMsg, amountToCreditLD);
+            _buildOFTMsgAndOptions(address(0), _sendParam, _extraOptions, _composeMsg, amountToCreditLD);
 
         // @dev Calculates the LayerZero fee for the send() operation.
         return _quote(_sendParam.dstEid, message, options, _payInLzToken);
@@ -140,6 +151,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      * It also contains the `_composeMsg`, which is 1 or more TAP specific messages. See `_buildTapMsgAndOptions()`.
      * The option is an aggregation of the OFT message as well as the TAP messages.
      *
+     * @param _from The sender address. If address(0), msg.sender is used.
      * @param _sendParam: The parameters for the send operation.
      *      - dstEid::uint32: Destination endpoint ID.
      *      - to::bytes32: Recipient address.
@@ -153,6 +165,7 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
      * @return options The combined LZ msgType + `_extraOptions` options.
      */
     function _buildOFTMsgAndOptions(
+        address _from,
         SendParam calldata _sendParam,
         bytes calldata _extraOptions,
         bytes calldata _composeMsg,
@@ -163,7 +176,8 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         // @dev This generated message has the msg.sender encoded into the payload so the remote knows who the caller is.
         // @dev NOTE the returned message will append `msg.sender` only if the message is composed.
         // If it's the case, it'll add the `address(msg.sender)` at the `amountToCredit` offset.
-        (message, hasCompose) = OFTMsgCodec.encode(
+        (message, hasCompose) = encode(
+            _from,
             _sendParam.to,
             _toSD(_amountToCreditLD),
             // @dev Must be include a non empty bytes if you want to compose, EVEN if you don't need it on the remote.
@@ -180,6 +194,49 @@ abstract contract BaseTapiocaOmnichainEngine is OFT, PearlmitHandler, BaseToeMsg
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
+    }
+
+    /**
+     * @dev copy paste of OFTMsgCodec::encode(). Difference is `_from` is passed as a parameter.
+     * and update the source chain sender.
+     */
+    function encode(address _from, bytes32 _sendTo, uint64 _amountShared, bytes memory _composeMsg)
+        internal
+        pure
+        returns (bytes memory _msg, bool hasCompose)
+    {
+        hasCompose = _composeMsg.length > 0;
+        // @dev Remote chains will want to know the composed function caller ie. msg.sender on the src.
+
+        _msg = hasCompose
+            ? abi.encodePacked(_sendTo, _amountShared, OFTMsgCodec.addressToBytes32(_from), _composeMsg)
+            : abi.encodePacked(_sendTo, _amountShared);
+    }
+
+    /**
+     * @dev Allowance check and consumption against the xChain msg sender.
+     *
+     * @param _owner The account to check the allowance against.
+     * @param _srcChainSender The address of the sender on the source chain.
+     * @param _amount The amount to check the allowance for.
+     */
+    function _validateAndSpendAllowance(address _owner, address _srcChainSender, uint256 _amount) internal {
+        if (_owner != _srcChainSender) {
+            _spendAllowance(_owner, _srcChainSender, _amount);
+        }
+    }
+
+    /**
+     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
+     * @dev Can only transfer to this address.
+     *
+     * @param _owner The account to transfer from.
+     * @param _srcChainSender The address of the sender on the source chain.
+     * @param _amount The amount to transfer
+     */
+    function _internalTransferWithAllowance(address _owner, address _srcChainSender, uint256 _amount) internal {
+        _validateAndSpendAllowance(_owner, _srcChainSender, _amount);
+        _transfer(_owner, address(this), _amount);
     }
 
     /**

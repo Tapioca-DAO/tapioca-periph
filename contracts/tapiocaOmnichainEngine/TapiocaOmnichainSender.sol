@@ -7,8 +7,9 @@ import {
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 
 /*
 
@@ -22,6 +23,8 @@ import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEng
 */
 
 abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
+    error TapiocaOmnichainSender__ClusterRoleNotApproved();
+
     /**
      * @notice Sends TapToken messages.
      *
@@ -53,21 +56,30 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
      *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
      *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
      */
-    // TODO parse and enforce composed options here.
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         external
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory message,
+            bytes memory options
+        )
     {
         // @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
-        (uint256 amountDebitedLD, uint256 amountToCreditLD) =
-            _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
+        );
 
         // @dev Builds the options and OFT message to quote in the endpoint.
-        (bytes memory message, bytes memory options) =
-            _buildOFTMsgAndOptions(_lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD);
+        (message, options) = _buildOFTMsgAndOptions(
+            msg.sender, _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
+        );
 
         // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
         msgReceipt =
@@ -75,6 +87,56 @@ abstract contract TapiocaOmnichainSender is BaseTapiocaOmnichainEngine {
         // @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD, amountToCreditLD);
+    }
+
+    /**
+     * @dev Same as `sendPacket`, with the addition of `_from`, the address of the sender.
+     * The caller must have the TOE role in the Cluster contract.
+     */
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        external
+        payable
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory message,
+            bytes memory options
+        )
+    {
+        if (_from == address(0)) {
+            revert BaseTapiocaOmnichainEngine__ZeroAddress();
+        }
+
+        // Verify if caller has Cluster TOE role
+        {
+            ICluster cluster = getCluster();
+            if (!cluster.hasRole(msg.sender, keccak256("TOE"))) {
+                revert TapiocaOmnichainSender__ClusterRoleNotApproved();
+            }
+        }
+
+        // @dev Applies the token transfers regarding this send() operation.
+        // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
+        // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
+        );
+
+        // @dev Builds the options and OFT message to quote in the endpoint.
+        (message, options) = _buildOFTMsgAndOptions(
+            _from, _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD
+        );
+
+        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt =
+            _lzSend(_lzSendParam.sendParam.dstEid, message, options, _lzSendParam.fee, _lzSendParam.refundAddress);
+        // @dev Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
+
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD, amountToCreditLD);
     }
 }

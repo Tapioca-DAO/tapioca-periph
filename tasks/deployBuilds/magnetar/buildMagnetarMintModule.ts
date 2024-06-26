@@ -7,7 +7,6 @@ export const buildMagnetarMintModule = async (
     hre: HardhatRuntimeEnvironment,
     deploymentName: string,
     args: Parameters<MagnetarMintModule__factory['deploy']>,
-    dependsOn: IDependentOn[],
 ): Promise<IDeployerVMAdd<MagnetarMintModule__factory>> => {
     return {
         contract: new MagnetarMintModule__factory(
@@ -15,6 +14,5 @@ export const buildMagnetarMintModule = async (
         ),
         deploymentName,
         args,
-        dependsOn,
     };
 };

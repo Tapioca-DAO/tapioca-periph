@@ -36,7 +36,7 @@ abstract contract ModuleChainlinkSingle is ChainlinkUtils {
         }
         _setRoleAdmin(GUARDIAN_ROLE_CHAINLINK, GUARDIAN_ROLE_CHAINLINK);
 
-        stalePeriod = _stalePeriod;
+        stalePeriods[AggregatorV3Interface(_poolChainlink)] = _stalePeriod;
         isChainlinkMultiplied = _isChainlinkMultiplied;
     }
 

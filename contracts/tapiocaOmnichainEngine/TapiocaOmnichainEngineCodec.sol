@@ -125,7 +125,6 @@ library TapiocaOmnichainEngineCodec {
             bytes memory nextMsg_
         )
     {
-        // TODO use bitwise operators?
         msgType_ = BytesLib.toUint16(BytesLib.slice(_msg, 0, 2), 0);
         msgLength_ = BytesLib.toUint16(BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2), 0);
 
@@ -584,7 +583,7 @@ library TapiocaOmnichainEngineCodec {
      * @return composeSender_ The address of the compose sender. (dst OApp).
      * @return oftComposeMsg_ The TapOFT composed message, which is the actual message.
      */
-    function decodeLzComposeMsg(bytes calldata _msg)
+    function decodeLzComposeMsg(bytes memory _msg)
         internal
         pure
         returns (address composeSender_, bytes memory oftComposeMsg_)

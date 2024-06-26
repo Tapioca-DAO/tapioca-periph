@@ -67,6 +67,7 @@ struct PrepareLzCallData {
     ComposeMsgData composeMsgData; // The compose msg data.
     uint128 lzReceiveGas; // The gasLimit used on the lzReceive() function in the OApp.
     uint128 lzReceiveValue; // The msg.value passed to the lzReceive() function in the OApp.
+    address refundAddress; // The refund address
 }
 
 /**
@@ -99,7 +100,7 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
 
     /**
      * @dev Helper to prepare an LZ call.
-     * @dev Refunds address is the caller. // TODO add refundAddress field.
+     * @dev Refunds address is the caller.
      * @dev `amountToSendLD` and `minAmountToCreditLD` are used for an OFT send operation. If set in composed calls, only the last message LZ data will be used.
      * @dev !!! IMPORTANT !!! If you want to send a message without sending amounts, set both `amountToSendLD` and `minAmountToCreditLD` to 0.
      *
@@ -187,7 +188,7 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
             sendParam: sendParam_,
             fee: msgFee_,
             extraOptions: oftMsgOptions_,
-            refundAddress: address(msg.sender)
+            refundAddress: _prepareLzCallData.refundAddress
         });
 
         prepareLzCallReturn_ = PrepareLzCallReturn({
@@ -325,7 +326,6 @@ contract TapiocaOmnichainEngineHelper is BaseToeMsgType {
         options = _toeToken.combineOptions(_dstEid, _msgType, _extraOptions);
     }
 
-    // TODO remove sanitization? If `_sendPacket()` is internal, then the msgType is what we expect it to be.
     /**
      * @dev Sanitizes the message type to match one of the Tapioca supported ones.
      * @param _msgType The message type, custom ones with `MSG_` as a prefix.

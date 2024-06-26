@@ -19,6 +19,7 @@ import {
     RemoteTransferMsg,
     LZSendParam
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainExtExec} from "./extension/TapiocaOmnichainExtExec.sol";
 import {TapiocaOmnichainEngineCodec} from "./TapiocaOmnichainEngineCodec.sol";
 import {BaseTapiocaOmnichainEngine} from "./BaseTapiocaOmnichainEngine.sol";
 
@@ -44,6 +45,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     error InvalidComposer(address composer);
     error InvalidCaller(address caller); // Should be the endpoint address
     error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
+    error ExtExecFailed(string signature);
 
     /// @dev Compose received.
     event ComposeReceived(uint16 indexed msgType, bytes32 indexed guid, bytes composeMsg);
@@ -67,8 +69,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * _executor The address of the executor.
      * _extraData Additional data.
      */
-    // TODO check if OApp sender is sanitized?
-    // TODO !!!!!!!!! Perform ld2sd conversion on the compose messages amounts.
     function _lzReceive(
         Origin calldata _origin,
         bytes32 _guid,
@@ -94,14 +94,13 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
                 address(this), // Updated from default `toAddress`
                 _guid,
                 0, /* the index of the composed message*/
-                _message.composeMsg()
+                _message
             );
         }
 
         emit OFTReceived(_guid, _origin.srcEid, toAddress, amountReceivedLD);
     }
 
-    // TODO - SANITIZE MSG TYPE
     /**
      * @dev !!! SECOND ENTRYPOINT, CALLER NEEDS TO BE VERIFIED !!!
      *
@@ -134,7 +133,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // Decode LZ compose message.
         (address srcChainSender_, bytes memory oftComposeMsg_) =
-            TapiocaOmnichainEngineCodec.decodeLzComposeMsg(_message);
+            TapiocaOmnichainEngineCodec.decodeLzComposeMsg(_message.composeMsg());
         // Execute the composed message.
         _lzCompose(srcChainSender_, _guid, oftComposeMsg_);
     }
@@ -152,7 +151,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // If the msg type is not a permit/approval, it will call the other receivers.
         if (msgType_ == MSG_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tapComposeMsg_);
-        } else if (!_extExec(msgType_, tapComposeMsg_)) {
+        } else if (!_extExec(msgType_, srcChainSender_, tapComposeMsg_)) {
             // Check if the TOE extender is set and the msg type is valid. If so, call the TOE extender to handle msg.
             if (
                 address(tapiocaOmnichainReceiveExtender) != address(0)
@@ -203,8 +202,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     {}
 
     /**
-     * // TODO Check if it's safe to send composed messages too.
-     * // TODO Write test for composed messages call. A->B->A-B/C?
      * @dev Transfers tokens AND composed messages from this contract to the recipient on the chain A. Flow of calls is: A->B->A.
      * @dev The user needs to have approved the TapToken contract to spend the TAP.
      *
@@ -221,7 +218,7 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
         _internalRemoteTransferSendPacket(
-            remoteTransferMsg_.owner, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg
+            _srcChainSender, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg, remoteTransferMsg_.owner
         );
 
         emit RemoteTransferReceived(
@@ -233,7 +230,6 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     }
 
     /**
-     * // TODO review this function.
      *
      * @dev Slightly modified version of the OFT _sendPacket() operation. To accommodate the `srcChainSender` parameter and potential dust.
      * @dev !!! IMPORTANT !!! made ONLY for the `_remoteTransferReceiver()` operation.
@@ -241,7 +237,8 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
     function _internalRemoteTransferSendPacket(
         address _srcChainSender,
         LZSendParam memory _lzSendParam,
-        bytes memory _composeMsg
+        bytes memory _composeMsg,
+        address _owner
     ) internal returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
         // Burn tokens from this contract
         (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitView(
@@ -254,13 +251,13 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
 
         // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
         if (_lzSendParam.sendParam.amountLD > amountDebitedLD_) {
+            // Send the difference back to the user
+            _transfer(address(this), _owner, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
+
             // Overwrite the amount to credit with the amount debited
             _lzSendParam.sendParam.amountLD = amountDebitedLD_;
-            _lzSendParam.sendParam.minAmountLD = amountDebitedLD_;
-            // Send the difference back to the user
-            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountLD - amountDebitedLD_);
+            _lzSendParam.sendParam.minAmountLD = _removeDust(amountDebitedLD_);
         }
-
         // Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptionsMemory(
             _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD_, _srcChainSender
@@ -272,23 +269,9 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
         // Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_);
-    }
-
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
-
-        _transfer(_owner, address(this), _amount);
+        emit OFTSent(
+            msgReceipt.guid, _lzSendParam.sendParam.dstEid, _srcChainSender, amountDebitedLD_, amountToCreditLD_
+        );
     }
 
     /**
@@ -297,22 +280,39 @@ abstract contract TapiocaOmnichainReceiver is BaseTapiocaOmnichainEngine, IOAppC
      * @param _data The call data containing info about the message.
      * @return success is the success of the composed message handler. If no handler is found, it should return false to trigger `InvalidMsgType()`.
      */
-    function _extExec(uint16 _msgType, bytes memory _data) internal returns (bool) {
+    function _extExec(uint16 _msgType, address _srcChainSender, bytes memory _data) internal returns (bool) {
+        string memory signature = "";
+        address sender = address(0);
         if (_msgType == MSG_APPROVALS) {
-            toeExtExec.erc20PermitApproval(_data);
+            // toeExtExec.erc20PermitApproval(_data);
+            signature = "erc20PermitApproval(bytes)";
         } else if (_msgType == MSG_NFT_APPROVALS) {
-            toeExtExec.erc721PermitApproval(_data);
+            // toeExtExec.erc721PermitApproval(_data);
+            signature = "erc721PermitApproval(bytes)";
         } else if (_msgType == MSG_PEARLMIT_APPROVAL) {
-            toeExtExec.pearlmitApproval(_data);
+            // toeExtExec.pearlmitApproval(_srcChainSender,_data);
+            signature = "pearlmitApproval(address,bytes)";
+            sender = _srcChainSender;
         } else if (_msgType == MSG_YB_APPROVE_ALL) {
-            toeExtExec.yieldBoxPermitAll(_data);
+            // toeExtExec.yieldBoxPermitAll(_data);
+            signature = "yieldBoxPermitAll(bytes)";
         } else if (_msgType == MSG_YB_APPROVE_ASSET) {
-            toeExtExec.yieldBoxPermitAsset(_data);
+            // toeExtExec.yieldBoxPermitAsset(_data);
+            signature = "yieldBoxPermitAsset(bytes)";
         } else if (_msgType == MSG_MARKET_PERMIT) {
-            toeExtExec.marketPermit(_data);
+            // toeExtExec.marketPermit(_data);
+            signature = "marketPermit(bytes)";
         } else {
             return false;
         }
+
+        bool success;
+        if (sender == address(0)) {
+            (success,) = address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, _data));
+        } else {
+            (success,) = address(toeExtExec).delegatecall(abi.encodeWithSignature(signature, sender, _data));
+        }
+        if (!success) revert ExtExecFailed(signature);
         return true;
     }
 

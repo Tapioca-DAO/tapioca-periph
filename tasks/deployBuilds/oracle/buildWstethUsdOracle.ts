@@ -8,7 +8,6 @@ export const buildWstethUsdOracle = async (
     owner: string,
     isTestnet: boolean,
 ): Promise<IDeployerVMAdd<SeerCLMulti__factory>> => {
-    console.log('[+] buildWstETH/UsdOracle');
     const chainID = hre.SDK.eChainId;
 
     const args: Parameters<SeerCLMulti__factory['deploy']> = [
@@ -24,7 +23,6 @@ export const buildWstethUsdOracle = async (
             ], // CL Pool
             _circuitChainIsMultiplied: [1, 1, 1], // Multiply/divide Uni
             _inBase: (1e18).toString(), // In base
-            stalePeriod: isTestnet ? 4294967295 : 86400, // CL stale period, 1 day on prod. max uint32 on testnet
             guardians: [owner], // Guardians
             _description: hre.ethers.utils.formatBytes32String(
                 'WSTETH -> STETH -> USD',

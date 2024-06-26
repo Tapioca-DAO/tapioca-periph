@@ -10,7 +10,6 @@ export async function buildTOBTapOptionOracle(
     tapWethLp: string,
     owner: string,
 ) {
-    console.log('[+] buildTOB_TAPOptionOracle');
     return await buildTapOptionOracle(
         hre,
         'TOB_TAP_OPTION_ORACLE',
@@ -27,7 +26,6 @@ export async function buildADBTapOptionOracle(
     tapWethLp: string,
     owner: string,
 ) {
-    console.log('[+] buildADB_TAPOptionOracle');
     return await buildTapOptionOracle(
         hre,
         'ADB_TAP_OPTION_ORACLE',

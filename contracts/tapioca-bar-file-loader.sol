@@ -28,9 +28,9 @@ import {Penrose} from "tapioca-bar/Penrose.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 
-// import {UsdoSender} from "tapioca-bar/usdo/modules/UsdoSender.sol";
-// import {UsdoReceiver} from "tapioca-bar/usdo/modules/UsdoReceiver.sol";
-// import {UsdoMarketReceiverModule} from "tapioca-bar/usdo/modules/UsdoMarketReceiverModule.sol";
-// import {UsdoOptionReceiverModule} from "tapioca-bar/usdo/modules/UsdoOptionReceiverModule.sol";
-// import {ModuleManager} from "tapioca-bar/usdo/modules/ModuleManager.sol";
-// import {Usdo, BaseUsdo} from "tapioca-bar/usdo/Usdo.sol";
+import {UsdoSender} from "tapioca-bar/usdo/modules/UsdoSender.sol";
+import {UsdoReceiver} from "tapioca-bar/usdo/modules/UsdoReceiver.sol";
+import {UsdoMarketReceiverModule} from "tapioca-bar/usdo/modules/UsdoMarketReceiverModule.sol";
+import {UsdoOptionReceiverModule} from "tapioca-bar/usdo/modules/UsdoOptionReceiverModule.sol";
+import {ModuleManager} from "tapioca-bar/usdo/modules/ModuleManager.sol";
+import {Usdo, BaseUsdo} from "tapioca-bar/usdo/Usdo.sol";

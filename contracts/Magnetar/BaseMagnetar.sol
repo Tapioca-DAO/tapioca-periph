@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
@@ -26,18 +27,20 @@ import {MagnetarStorage, IPearlmit} from "./MagnetarStorage.sol";
  * @author TapiocaDAO
  * @notice Base contract for Magnetar
  */
-contract BaseMagnetar is Ownable, MagnetarStorage {
-    IMagnetarHelper public helper;
+contract BaseMagnetar is Ownable, Pausable, MagnetarStorage {
     IMagnetarModuleExtender public magnetarModuleExtender; // For future implementations
-
+    
     error Magnetar_FailRescueEth();
     error Magnetar_EmptyAddress();
+    error Magnetar_PauserNotAuthorized();
 
     event HelperUpdate(address indexed old, address indexed newHelper);
     event ClusterUpdated(ICluster indexed oldCluster, ICluster indexed newCluster);
     event MagnetarModuleExtenderSet(address old, address newMagnetarModuleExtender);
 
-    constructor(ICluster _cluster, IPearlmit _pearlmit, address _owner) MagnetarStorage(_pearlmit) {
+    constructor(ICluster _cluster, IPearlmit _pearlmit, address _toeHelper, address _owner)
+        MagnetarStorage(_pearlmit, _toeHelper)
+    {
         cluster = _cluster;
         transferOwnership(_owner);
     }
@@ -45,6 +48,18 @@ contract BaseMagnetar is Ownable, MagnetarStorage {
     /// =====================
     /// Owner
     /// =====================
+    /**
+     * @notice Un/Pauses this contract.
+    */
+    function setPause(bool _pauseState) external {
+        if (!cluster.hasRole(msg.sender, keccak256("PAUSABLE")) && msg.sender != owner()) revert Magnetar_PauserNotAuthorized();
+        if (_pauseState) {
+            _pause();
+        } else {
+            _unpause();
+        }
+    }
+
     /**
      * @notice updates the Cluster address.
      * @dev can only be called by the owner.

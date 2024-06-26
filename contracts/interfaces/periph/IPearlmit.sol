@@ -13,15 +13,8 @@ pragma solidity 0.8.22;
 */
 
 interface IPearlmit {
-    enum TokenType {
-        ERC20, // 0
-        ERC721, // 1
-        ERC1155 // 2
-
-    }
-
     struct SignatureApproval {
-        uint8 tokenType; // 0 = ERC20, 1 = ERC721, 2 = ERC1155.
+        uint256 tokenType; // 20 = ERC20, 721 = ERC721, 1155 = ERC1155.
         address token; // Address of the token.
         uint256 id; // ID of the token (0 if ERC20).
         uint200 amount; // Amount of the token (0 if ERC721).
@@ -33,21 +26,28 @@ interface IPearlmit {
         address owner; // Address of the owner of the tokens.
         uint256 nonce; // Nonce of the owner.
         uint48 sigDeadline; // Deadline for the signature.
-        bytes signedPermit; // Signature of the permit.
+        uint256 masterNonce; // Master nonce of the owner.
+        bytes signedPermit; // Signature of the permit. (Not present in the TYPEHASH)
+        address executor; // Address of the allowed executor of the permit.
+        // In the case of Tapioca, it'll be the `msg.sender` from src chain, checked against `TOE` trusted `srcChainSender`.
+        bytes32 hashedData; // Hashed data that comes with the permit execution. See more in Pearlmit.sol.
     }
 
-    function approve(address token, uint256 id, address operator, uint200 amount, uint48 expiration) external;
+    function approve(uint256 tokenType, address token, uint256 id, address operator, uint200 amount, uint48 expiration)
+        external;
 
-    function allowance(address owner, address operator, address token, uint256 id)
+    function allowance(address owner, address operator, uint256 tokenType, address token, uint256 id)
         external
         view
         returns (uint256 allowedAmount, uint256 expiration);
 
-    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch)
+    function clearAllowance(address owner, uint256 tokenType, address token, uint256 id) external;
+
+    function permitBatchTransferFrom(PermitBatchTransferFrom calldata batch, bytes32 hashedData)
         external
         returns (bool[] memory errorStatus);
 
-    function permitBatchApprove(PermitBatchTransferFrom calldata batch) external;
+    function permitBatchApprove(PermitBatchTransferFrom calldata batch, bytes32 hashedData) external;
 
     function transferFromERC1155(address owner, address to, address token, uint256 id, uint256 amount)
         external

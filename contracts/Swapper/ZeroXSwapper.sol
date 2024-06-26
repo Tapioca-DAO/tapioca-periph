@@ -31,8 +31,6 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     address public zeroXProxy;
     ICluster public cluster;
 
-    bool public isOneInchEnabled;
-
     /// **************
     /// *** ERRORS ***
     /// **************
@@ -42,6 +40,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
     error SwapFailed();
     error MinSwapFailed(uint256 amountOut);
     error SenderNotValid(address sender);
+    error TargetNotValid(address target);
 
     constructor(address _zeroXProxy, ICluster _cluster, address _owner) {
         if (_zeroXProxy == address(0)) revert ZeroAddress();
@@ -56,7 +55,7 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
 
     /// @notice swaps a token for another, using 0x as a swap aggregator
     /// @dev All of the parameters below are provided by the API response.
-    /// @param swapData the swap data. Either 0x or 1inch
+    /// @param swapData the swap data. 0x
     /// @param amountIn the amount of sellToken to sell
     /// @param minAmountOut the minimum amount of buyToken bought
     /// @return amountOut the amount of buyToken bought
@@ -66,19 +65,26 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
         returns (uint256 amountOut)
     {
         if (!cluster.isWhitelisted(0, msg.sender)) revert SenderNotValid(msg.sender);
+        if (!cluster.isWhitelisted(0, swapData.swapTarget) && swapData.swapTarget != zeroXProxy) revert TargetNotValid(swapData.swapTarget);
 
         // Transfer tokens to this contract
         swapData.sellToken.safeTransferFrom(msg.sender, address(this), amountIn);
 
-        if (!isOneInchEnabled && swapData.swapTarget != zeroXProxy) {
-            revert InvalidProxy(swapData.swapTarget, zeroXProxy);
-        }
-
+        uint256 amountInBefore = swapData.sellToken.balanceOf(address(this));
         // Approve the 0x proxy to spend the sell token, and call the swap function
         swapData.sellToken.safeApprove(swapData.swapTarget, amountIn);
         (bool success,) = swapData.swapTarget.call(swapData.swapCallData);
         if (!success) revert SwapFailed();
         swapData.sellToken.safeApprove(swapData.swapTarget, 0);
+        uint256 amountInAfter = swapData.sellToken.balanceOf(address(this));
+
+        // @dev should never be the case otherwise
+        if (amountInBefore > amountInAfter) {
+            uint256 transferred = amountInBefore - amountInAfter;
+            if (transferred < amountIn) {
+                swapData.sellToken.safeTransfer(msg.sender, amountIn - transferred);
+            }
+        }
 
         // Check that the amountOut is at least as much as minAmountOut
         amountOut = swapData.buyToken.balanceOf(address(this));
@@ -86,11 +92,6 @@ contract ZeroXSwapper is IZeroXSwapper, Ownable {
 
         // Transfer the bought tokens to the sender
         swapData.buyToken.safeTransfer(msg.sender, amountOut);
-    }
-
-    /// @notice updates the swap function to use 1inch instead of 0x.
-    function setIsOneInchEnabled(bool _isOneInchEnabled) external onlyOwner {
-        isOneInchEnabled = _isOneInchEnabled;
     }
 
     /**

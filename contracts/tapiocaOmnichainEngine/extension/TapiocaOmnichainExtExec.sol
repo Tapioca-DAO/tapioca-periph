@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 // Tapioca
 import {
@@ -35,17 +35,13 @@ import {ERC721Permit} from "tapioca-periph/utils/ERC721Permit.sol";
 /**
  * @title TapiocaOmnichainExtExec
  * @author TapiocaDAO
- * @notice Used to execute external calls from a TapiocaOmnichainEngine contract. So to not use TapiocaOmnichainEngine in the call context.
+ * @notice Used to execute external DELEGATE calls from a TapiocaOmnichainEngine contract. So to not use TapiocaOmnichainEngine in the call context.
  */
-contract TapiocaOmnichainExtExec is Ownable {
-    ICluster public cluster;
+contract TapiocaOmnichainExtExec {
+    // keccak256("BaseToe.cluster.slot")
+    bytes32 public constant CLUSTER_SLOT = 0x7cdf5007585d1c7d3dfb23c59fcda5f9f02da78637d692495255a57630b72162;
 
     error InvalidApprovalTarget(address _target);
-
-    constructor(ICluster _cluster, address _owner) {
-        cluster = _cluster;
-        _transferOwnership(_owner);
-    }
 
     /**
      * @notice Executes an ERC20 permit approval.
@@ -56,7 +52,8 @@ contract TapiocaOmnichainExtExec is Ownable {
 
         uint256 approvalsLength = approvals.length;
         for (uint256 i = 0; i < approvalsLength;) {
-            IERC20Permit(approvals[i].token).permit(
+            _sanitizeTarget(approvals[i].token);
+            try IERC20Permit(approvals[i].token).permit(
                 approvals[i].owner,
                 approvals[i].spender,
                 approvals[i].value,
@@ -64,7 +61,7 @@ contract TapiocaOmnichainExtExec is Ownable {
                 approvals[i].v,
                 approvals[i].r,
                 approvals[i].s
-            );
+            ) {} catch {}
             unchecked {
                 ++i;
             }
@@ -76,19 +73,19 @@ contract TapiocaOmnichainExtExec is Ownable {
      */
 
     function erc721PermitApproval(bytes memory _data) public {
-        // TODO: encode and decode packed data to save gas
         ERC721PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC721PermitApprovalMsg(_data);
 
         uint256 approvalsLength = approvals.length;
         for (uint256 i = 0; i < approvalsLength;) {
-            ERC721Permit(approvals[i].token).permit(
+            _sanitizeTarget(approvals[i].token);
+            try ERC721Permit(approvals[i].token).permit(
                 approvals[i].spender,
                 approvals[i].tokenId,
                 approvals[i].deadline,
                 approvals[i].v,
                 approvals[i].r,
                 approvals[i].s
-            );
+            ) {} catch {}
             unchecked {
                 ++i;
             }
@@ -99,11 +96,15 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @notice Executes a permit approval for a batch transfer from a Pearlmit contract.
      * @param _data The call data containing info about the approval. Expect a tuple of `(address, IPearlmit.PermitBatchTransferFrom)`.
      */
-    function pearlmitApproval(bytes memory _data) public {
+    function pearlmitApproval(address _srcChainSender, bytes memory _data) public {
         (address pearlmit, IPearlmit.PermitBatchTransferFrom memory batchApprovals) =
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
 
-        IPearlmit(pearlmit).permitBatchApprove(batchApprovals);
+        _sanitizeTarget(pearlmit);
+
+        batchApprovals.owner = _srcChainSender; // overwrite the owner with the src chain sender
+        // Redundant security measure, just for the sake of it
+        try IPearlmit(pearlmit).permitBatchApprove(batchApprovals, keccak256(abi.encode(_srcChainSender))) {} catch {}
     }
 
     /**
@@ -192,7 +193,7 @@ contract TapiocaOmnichainExtExec is Ownable {
         for (uint256 i = 0; i < approvalsLength;) {
             // @dev token is YieldBox
             if (!_approvals[i].permit) {
-                IPermit(_approvals[i].target).revoke(
+                try IPermit(_approvals[i].target).revoke(
                     _approvals[i].owner,
                     _approvals[i].spender,
                     _approvals[i].assetId,
@@ -200,9 +201,9 @@ contract TapiocaOmnichainExtExec is Ownable {
                     _approvals[i].v,
                     _approvals[i].r,
                     _approvals[i].s
-                );
+                ) {} catch {}
             } else {
-                IPermit(_approvals[i].target).permit(
+                try IPermit(_approvals[i].target).permit(
                     _approvals[i].owner,
                     _approvals[i].spender,
                     _approvals[i].assetId,
@@ -210,7 +211,7 @@ contract TapiocaOmnichainExtExec is Ownable {
                     _approvals[i].v,
                     _approvals[i].r,
                     _approvals[i].s
-                );
+                ) {} catch {}
             }
             unchecked {
                 ++i;
@@ -223,9 +224,9 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @param _approval The approval message.
      */
     function _yieldBoxPermitApproveAll(YieldBoxApproveAllMsg memory _approval) internal {
-        IPermitAll(_approval.target).permitAll(
+        try IPermitAll(_approval.target).permitAll(
             _approval.owner, _approval.spender, _approval.deadline, _approval.v, _approval.r, _approval.s
-        );
+        ) {} catch {}
     }
 
     /**
@@ -233,9 +234,9 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @param _approval The approval message.
      */
     function _yieldBoxPermitRevokeAll(YieldBoxApproveAllMsg memory _approval) internal {
-        IPermitAll(_approval.target).revokeAll(
+        try IPermitAll(_approval.target).revokeAll(
             _approval.owner, _approval.spender, _approval.deadline, _approval.v, _approval.r, _approval.s
-        );
+        ) {} catch {}
     }
 
     /**
@@ -243,7 +244,7 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @param _approval The approval message.
      */
     function _marketPermitAssetApproval(MarketPermitActionMsg memory _approval) internal {
-        IPermit(_approval.target).permit(
+        try IPermit(_approval.target).permit(
             _approval.owner,
             _approval.spender,
             _approval.value,
@@ -251,7 +252,7 @@ contract TapiocaOmnichainExtExec is Ownable {
             _approval.v,
             _approval.r,
             _approval.s
-        );
+        ) {} catch {}
     }
 
     /**
@@ -259,7 +260,7 @@ contract TapiocaOmnichainExtExec is Ownable {
      * @param _approval The approval message.
      */
     function _marketPermitCollateralApproval(MarketPermitActionMsg memory _approval) internal {
-        IPermitBorrow(_approval.target).permitBorrow(
+        try IPermitBorrow(_approval.target).permitBorrow(
             _approval.owner,
             _approval.spender,
             _approval.value,
@@ -267,10 +268,11 @@ contract TapiocaOmnichainExtExec is Ownable {
             _approval.v,
             _approval.r,
             _approval.s
-        );
+        ) {} catch {}
     }
 
     function _sanitizeTarget(address target) private view {
+        ICluster cluster = ICluster(StorageSlot.getAddressSlot(CLUSTER_SLOT).value);
         if (!cluster.isWhitelisted(0, target)) {
             revert InvalidApprovalTarget(target);
         }

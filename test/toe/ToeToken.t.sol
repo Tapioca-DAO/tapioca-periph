@@ -35,7 +35,7 @@ import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/ext
 import {BaseToeMsgType} from "tapioca-periph/tapiocaOmnichainEngine/BaseToeMsgType.sol";
 
 // Tapioca Tests
-import {ToeTestHelper} from "./ToeTestHelper.sol";
+import {ToeTestHelper} from "../LZSetup/ToeTestHelper.sol";
 import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
 import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
@@ -92,10 +92,10 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
         cluster = ICluster(address(new Cluster(1, address(__owner))));
 
-        __extExec = address(new TapiocaOmnichainExtExec(cluster, __owner));
+        __extExec = address(new TapiocaOmnichainExtExec());
         aToeOFT = ToeTokenMock(
             payable(
                 _deployOApp(
@@ -111,7 +111,8 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(endpoints[aEid]),
                                 address(this),
                                 address(0),
-                                IPearlmit(address(pearlmit))
+                                IPearlmit(address(pearlmit)),
+                                cluster
                             )
                         ),
                         address(
@@ -121,10 +122,12 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(endpoints[aEid]),
                                 address(this),
                                 address(0),
-                                IPearlmit(address(pearlmit))
+                                IPearlmit(address(pearlmit)),
+                                cluster
                             )
                         ),
-                        IPearlmit(address(pearlmit))
+                        IPearlmit(address(pearlmit)),
+                        cluster
                     )
                 )
             )
@@ -145,7 +148,8 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(endpoints[bEid]),
                                 address(this),
                                 address(0),
-                                IPearlmit(address(pearlmit))
+                                IPearlmit(address(pearlmit)),
+                                cluster
                             )
                         ),
                         address(
@@ -155,10 +159,12 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
                                 address(endpoints[bEid]),
                                 address(this),
                                 address(0),
-                                IPearlmit(address(pearlmit))
+                                IPearlmit(address(pearlmit)),
+                                cluster
                             )
                         ),
-                        IPearlmit(address(pearlmit))
+                        IPearlmit(address(pearlmit)),
+                        cluster
                     )
                 )
             )
@@ -186,7 +192,7 @@ contract TapTokenTest is ToeTestHelper, BaseToeMsgType {
      * Airdrop: 2.5m
      * == 100M ==
      */
-    function test_constructor() public {
+    function test_constructor_toe_token() public {
         // A tests
         assertEq(aToeOFT.owner(), address(this));
         assertEq(aToeOFT.token(), address(aToeOFT));

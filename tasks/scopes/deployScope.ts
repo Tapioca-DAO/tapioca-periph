@@ -1,14 +1,50 @@
 import { scope, types } from 'hardhat/config';
-import { deployPreLbpStack__task } from 'tasks/deploy/1-deployPreLbpStack';
-import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
-import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
 import { TAP_TASK } from 'tapioca-sdk';
+import { deployAirdrop__task } from 'tasks/deploy/0-1-deployAirdrop';
+import { deployPreLbpStack__task } from 'tasks/deploy/0-deployPreLbpStack';
+import { deployLbp__1__task } from 'tasks/deploy/1-1-deployLbp';
+import { deployLbp__2__task } from 'tasks/deploy/1-2-setupLbp';
+import { deployPostLbpStack__task } from 'tasks/deploy/2-deployPostLbpStack';
+import { deployFinal1__task } from 'tasks/deploy/3-1-deployFinal';
+import { deployFinal2__task } from 'tasks/deploy/3-2-deployFinal';
+import { deployMagnetarOnly__task } from 'tasks/deploy/99-deployMagnetarOnly';
 import { deployUniV3pool__task } from 'tasks/deploy/misc/deployUniV3Pool';
 import { deployChainlinkFeedMock__task } from 'tasks/deploy/mock/deployChainlinkFeedMock';
+import { deployERC20Mock__task } from 'tasks/deploy/mock/deployERC20Mock';
 import { deployGLPManagerMock__task } from 'tasks/deploy/mock/deployGLPManagerMock';
-import { deploySwappers__task } from 'tasks/deploy/misc/deploySwapper';
 
 const deployScope = scope('deploys', 'Deployment tasks');
+
+TAP_TASK(
+    deployScope
+        .task(
+            'lbp',
+            'Deploy LBP contracts and initialize it. Called only after tap-token repo `deployLbp` task',
+            deployLbp__1__task,
+        )
+        .addParam(
+            'ltapAmount',
+            'The amount of LTAP to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'usdcAmount',
+            'The amount of USDC to be deposited in the LBP. In ether.',
+        )
+        .addParam(
+            'startTimestamp',
+            'The timestamp when the LBP starts. Unix epoch timestamp.',
+        ),
+);
+
+TAP_TASK(deployScope.task('lbpSetup', 'Enable swaps', deployLbp__2__task));
+
+TAP_TASK(
+    deployScope.task(
+        'airdrop',
+        'Deploys Yieldbox, Cluster, Pearlmit',
+        deployAirdrop__task,
+    ),
+);
 
 TAP_TASK(
     deployScope.task(
@@ -32,7 +68,34 @@ TAP_TASK(
         .addParam(
             'ratioWeth',
             'The ratio of Weth in the pool. Used to compute the price by dividing by ratioWeth. For example, Use 33 for `ratioTap` and `10` for `ratioWeth` to deploy a pool with 33 TAP = 10 WETH.',
+        )
+        .addParam(
+            'amountTap',
+            'The amount of TAP to be deposited in the pool. In ether.',
+        )
+        .addParam(
+            'amountWeth',
+            'The amount of WETH to be deposited in the pool. In ether.',
         ),
+);
+TAP_TASK(
+    deployScope
+        .task('final1', 'USDO/USDC pool deployment ', deployFinal1__task)
+        .addParam(
+            'usdoPoolAddr',
+            'The ratio of USDO in the pool. Used to compute the price by dividing by ratioUsdc. Default is 1.',
+        ),
+);
+TAP_TASK(
+    deployScope.task('final2', 'Cluster whitelisting', deployFinal2__task),
+);
+
+TAP_TASK(
+    deployScope.task(
+        'magnetar',
+        'Deploys Magnetar only, expects Cluster and Pearlmit to be already deployed',
+        deployMagnetarOnly__task,
+    ),
 );
 
 TAP_TASK(
@@ -63,13 +126,6 @@ TAP_TASK(
 );
 
 // Mocks
-TAP_TASK(
-    deployScope.task(
-        'deploySwapper',
-        'Deploys a swapper contract with a deterministic address, with MulticallV3.',
-        deploySwappers__task,
-    ),
-);
 
 TAP_TASK(
     deployScope

@@ -20,20 +20,18 @@ interface ILeverageExecutor {
     function yieldBox() external view returns (address);
 
     function getCollateral(
-        uint256 collateralId,
+        address refundDustAddress,
         address assetAddress,
         address collateralAddress,
         uint256 assetAmountIn,
-        address from,
         bytes calldata data
     ) external returns (uint256 collateralAmountOut); //used for buyCollateral
 
     function getAsset(
-        uint256 assetId,
-        address assetAddress,
+        address refundDustAddress,
         address collateralAddress,
+        address assetAddress,
         uint256 collateralAmountIn,
-        address from,
         bytes calldata data
     ) external returns (uint256 assetAmountOut); //used for sellCollateral
 }
