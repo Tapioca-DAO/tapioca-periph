@@ -13,6 +13,8 @@ pragma solidity 0.8.22;
 */
 
 interface IMarketLiquidatorReceiver {
+    function querySellToken(address marketToken) external view returns(address);
+    
     function onCollateralReceiver(
         address initiator,
         address tokenIn,
