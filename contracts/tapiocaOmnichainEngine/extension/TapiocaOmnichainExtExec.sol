@@ -47,7 +47,7 @@ contract TapiocaOmnichainExtExec {
      * @notice Executes an ERC20 permit approval.
      * @param _data The ERC20 permit approval messages. Expect an `ERC20PermitApprovalMsg[]`.
      */
-    function erc20PermitApproval(bytes memory _data) public {
+    function erc20PermitApproval(bytes memory _data) public payable {
         ERC20PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC20PermitApprovalMsg(_data);
 
         uint256 approvalsLength = approvals.length;
@@ -72,7 +72,7 @@ contract TapiocaOmnichainExtExec {
      * @param _data The ERC721 permit approval messages. Expect an `ERC721PermitApprovalMsg[]`.
      */
 
-    function erc721PermitApproval(bytes memory _data) public {
+    function erc721PermitApproval(bytes memory _data) public payable {
         ERC721PermitApprovalMsg[] memory approvals = TapiocaOmnichainEngineCodec.decodeERC721PermitApprovalMsg(_data);
 
         uint256 approvalsLength = approvals.length;
@@ -96,7 +96,7 @@ contract TapiocaOmnichainExtExec {
      * @notice Executes a permit approval for a batch transfer from a Pearlmit contract.
      * @param _data The call data containing info about the approval. Expect a tuple of `(address, IPearlmit.PermitBatchTransferFrom)`.
      */
-    function pearlmitApproval(address _srcChainSender, bytes memory _data) public {
+    function pearlmitApproval(address _srcChainSender, bytes memory _data) public payable {
         (address pearlmit, IPearlmit.PermitBatchTransferFrom memory batchApprovals) =
             TapiocaOmnichainEngineCodec.decodePearlmitBatchApprovalMsg(_data);
 
@@ -119,7 +119,7 @@ contract TapiocaOmnichainExtExec {
      *      - r::bytes32: r value of the signature.
      *      - s::bytes32: s value of the signature.
      */
-    function yieldBoxPermitAsset(bytes memory _data) public {
+    function yieldBoxPermitAsset(bytes memory _data) public payable {
         YieldBoxApproveAssetMsg[] memory approvals =
             TapiocaOmnichainEngineCodec.decodeArrayOfYieldBoxPermitAssetMsg(_data);
 
@@ -145,7 +145,7 @@ contract TapiocaOmnichainExtExec {
      *      - r::bytes32: r value of the signature.
      *      - s::bytes32: s value of the signature.
      */
-    function yieldBoxPermitAll(bytes memory _data) public {
+    function yieldBoxPermitAll(bytes memory _data) public payable {
         YieldBoxApproveAllMsg memory approval = TapiocaOmnichainEngineCodec.decodeYieldBoxApproveAllMsg(_data);
         _sanitizeTarget(approval.target);
 
@@ -168,7 +168,7 @@ contract TapiocaOmnichainExtExec {
      *      - r::bytes32: r value of the signature.
      *      - s::bytes32: s value of the signature.
      */
-    function marketPermit(bytes memory _data) public {
+    function marketPermit(bytes memory _data) public payable {
         MarketPermitActionMsg memory approval = TapiocaOmnichainEngineCodec.decodeMarketPermitApprovalMsg(_data);
         _sanitizeTarget(approval.target);
 
