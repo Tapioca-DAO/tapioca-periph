@@ -8,7 +8,6 @@ import {TestHelper} from "../../LZSetup/TestHelper.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {TapiocaOmnichainEngineHelper} from
     "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol";
@@ -16,8 +15,10 @@ import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
 import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 
+import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 import {BBLiquidation} from "tapioca-bar/markets/bigBang/BBLiquidation.sol";
 import {BBCollateral} from "tapioca-bar/markets/bigBang/BBCollateral.sol";
 import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
@@ -29,10 +30,10 @@ import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapioca
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
-import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 
@@ -47,23 +48,15 @@ import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/inter
 import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
-import {BaseTOFTReceiver} from "tapiocaz/tOFT/modules/BaseTOFTReceiver.sol";
 import {mTOFTReceiver} from "tapiocaz/tOFT/modules/mTOFTReceiver.sol";
-import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
 import {TOFTReceiver} from "tapiocaz/tOFT/modules/TOFTReceiver.sol";
 import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
-import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
-import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 import {TOFT} from "tapiocaz/tOFT/TOFT.sol";
 
 import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
-
-import {ZerroXSwapperMockTarget} from "../../ZeroXSwapper/ZerroXSwapperMockTarget.sol";
-import {ZeroXSwapper} from "tapioca-periph/Swapper/ZeroXSwapper.sol";
 
 import {OracleMock} from "../../mocks/OracleMock.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
@@ -85,8 +78,6 @@ import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
 
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
-
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
 import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 
@@ -279,6 +270,7 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
+        penrose.setBigBangEthMarket(address(bb));
 
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);
@@ -488,6 +480,7 @@ contract MagnetarTestHelper is TestHelper {
 
     function createBigBang(TestBigBangData memory _bb, address _mc) public returns (BigBang) {
         BigBang bb = new BigBang();
+        BBDebtRateHelper helper = new BBDebtRateHelper();
 
         (
             BigBang._InitMemoryModulesData memory initModulesData,
@@ -503,18 +496,26 @@ contract MagnetarTestHelper is TestHelper {
             Penrose(_bb.penrose).addBigBang(_mc, address(bb));
         }
 
+        address[] memory markets = new address[](1);
+        markets[0] = address(bb);
+        bytes[] memory marketsData = new bytes[](1);
+        BBDebtRateHelper bbRateHelper = new BBDebtRateHelper();
+        marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
+        penrose.executeMarketFn(markets, marketsData, true);
+
         return bb;
     }
 
     function createSingularity(TestSingularityData memory _sgl, address _mc) public returns (Singularity) {
         Singularity sgl = new Singularity();
+        SGLInit sglInit = new SGLInit();
         (
             Singularity._InitMemoryModulesData memory _modulesData,
             Singularity._InitMemoryTokensData memory _tokensData,
             Singularity._InitMemoryData memory _data
         ) = _getSingularityInitData(_sgl);
         {
-            sgl.init(abi.encode(_modulesData, _tokensData, _data));
+            sgl.init(address(sglInit), abi.encode(_modulesData, _tokensData, _data));
         }
 
         {
@@ -533,7 +534,8 @@ contract MagnetarTestHelper is TestHelper {
                 0,
                 0,
                 0,
-                address(sglInterestHelper)
+                address(sglInterestHelper),
+                0
             );
             address[] memory mc = new address[](1);
             mc[0] = address(sgl);

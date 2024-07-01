@@ -6,7 +6,7 @@ import "forge-std/StdAssertions.sol";
 import "forge-std/StdUtils.sol";
 import {TestBase} from "forge-std/Base.sol";
 
-import "forge-std/console2.sol";
+import "forge-std/console.sol";
 
 // Lz
 import {
@@ -22,13 +22,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {TapiocaOmnichainEngineHelper} from
     "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
-import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
-import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
 import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
 import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
@@ -36,8 +34,6 @@ import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol
 import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
@@ -69,16 +65,12 @@ import {
     ExitPositionAndRemoveCollateralData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {IOptionsUnlockData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {MagnetarTestUtils, TestSingularityData, TestBigBangData} from "./MagnetarTestUtils.sol";
+import {MagnetarTestUtils, TestSingularityData, TestBigBangData} from "./MagnetarTestUtils.t.sol";
 import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {IOptionsExitData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol";
-import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
-import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
 import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
-import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {BigBang} from "tapioca-bar/markets/bigBang/BigBang.sol";
@@ -98,11 +90,11 @@ import {ToeTokenReceiverMock} from "../mocks/ToeTokenMock/ToeTokenReceiverMock.s
 import {TapiocaOptionsBrokerMock} from "../mocks/TapiocaOptionsBrokerMock.sol";
 import {ToeTokenSenderMock} from "../mocks/ToeTokenMock/ToeTokenSenderMock.sol";
 import {ToeTokenMock} from "../mocks/ToeTokenMock/ToeTokenMock.sol";
-import {ToeTestHelper} from "../LZSetup/ToeTestHelper.sol";
 import {TestHelper} from "../LZSetup/TestHelper.sol";
 import {ERC1155Mock} from "../mocks/ERC1155Mock.sol";
 import {TapOftMock} from "../mocks/TapOftMock.sol";
 import {Weth9Mock} from "../mocks/Weth9Mock.sol";
+import {TOFTMock} from "../mocks/TOFTMock.sol";
 
 contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelper {
     Cluster cluster;
@@ -233,7 +225,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 aERC20Id
             );
         }
-
         Singularity sgl;
         {
             ERC20WithoutStrategy collateralStrategy =
@@ -309,6 +300,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     function test_weth_wrap_through_burst() public {
         Weth9Mock weth9 = new Weth9Mock();
+        cluster.updateContract(0, address(weth9), true);
 
         bytes memory wethDeposit = abi.encodeWithSelector(Weth9Mock.deposit.selector);
         MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -898,6 +890,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         {
             MagnetarCall[] memory magnetarCalls = new MagnetarCall[](2);
+            pearlmit.approve(1155, address(yieldBox), assetId, address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
 
             pearlmit.approve(
                 1155, address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)
@@ -953,6 +946,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 1e17;
 
+        pearlmit.approve(1155, address(yieldBox), assetId, address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
         pearlmit.approve(20, address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         pearlmit.approve(1155, address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         yieldBox.setApprovalForAll(address(magnetar), true);
@@ -976,7 +970,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: true, amount: tokenAmount_})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(0),
@@ -1019,7 +1013,11 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         uint256 mintAmount_ = 1e17;
 
         pearlmit.approve(20, address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
-        pearlmit.approve(1155, address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(20, address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        // pearlmit.approve(20, address(magnetar), 0, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(1155, address(yieldBox), bb._collateralId(), address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(1155, address(yieldBox), bb._assetId(), address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
+
         yieldBox.setApprovalForAll(address(magnetar), true);
         yieldBox.setApprovalForAll(address(pearlmit), true);
         bb.approveBorrow(address(magnetar), type(uint256).max);
@@ -1042,7 +1040,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: true, amount: tokenAmount_})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(0),
@@ -1063,6 +1061,14 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
             magnetar.burst(calls);
         }
+
+
+        pearlmit.approve(20, address(collateral), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(20, address(asset), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        // pearlmit.approve(20, address(magnetar), 0, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(1155, address(yieldBox), collateralId, address(bb), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+        pearlmit.approve(1155, address(yieldBox), bb._assetId(), address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
+
 
         uint256 colShare = bb._userCollateralShare(address(this));
         assertGt(colShare, 0);
@@ -1192,7 +1198,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                         collateralDepositData: IDepositData({deposit: false, amount: 0})
                     }),
                     depositData: IDepositData({deposit: false, amount: 0}),
-                    lockData: IOptionsLockData({lock: false, amount: 0, lockDuration: 0, target: address(0), fraction: 0}),
+                    lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
                     participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
                     externalContracts: ICommonExternalContracts({
                         singularity: address(sgl),
