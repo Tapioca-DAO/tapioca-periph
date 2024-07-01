@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {MagnetarTestHelper, MagnetarSetupData, TestBigBangData, TestSingularityData} from "./MagnetarTestHelper.sol";
+import {MagnetarTestHelper, MagnetarSetupData, TestBigBangData, TestSingularityData} from "./MagnetarTestHelper.t.sol";
 import {
     MagnetarAction,
     MagnetarModule,
@@ -13,7 +12,6 @@ import {
     ExitPositionAndRemoveCollateralData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 
-import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -23,7 +21,6 @@ import {ICommonExternalContracts, IDepositData} from "tapioca-periph/interfaces/
 import {IOptionsParticipateData, IOptionsExitData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {IRemoveAndRepay, IMintData} from "tapioca-periph/interfaces/oft/IUsdo.sol";
 import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 
 import {TapiocaOptionsLiquidityProvisionMock} from "../../mocks/TapiocaOptionsLiquidityProvisionMock.sol";
 import {TapiocaOptionsBrokerMock} from "../../mocks/TapiocaOptionsBrokerMock.sol";
@@ -63,6 +60,8 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         clusterA.updateContract(0, address(tOLPMock), true);
         clusterA.updateContract(0, address(tOB), true);
+
+        pearlmit.approve(1155, address(yieldBox), assetAId, address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
     }
 
     function createLockAndParticipateData(address user, address singularity, address magnetar, address yieldBox) private returns (LockAndParticipateData memory data) {
@@ -71,13 +70,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
             tSglToken: singularity,
             yieldBox: yieldBox,
             magnetar: magnetar,
-            lockData: IOptionsLockData({
-                lock: false,
-                target: address(0),
-                lockDuration: 0,
-                amount: 0,
-                fraction: 0
-            }),
+            lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
             participateData: IOptionsParticipateData({
                 participate: false,
                 target: address(0),
@@ -113,13 +106,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
                 deposit: false,
                 amount: depositAmount
             }),
-            lockData: IOptionsLockData({
-                lock: false,
-                target: address(0),
-                lockDuration: 0,
-                amount: 0,
-                fraction: 0
-            }),
+            lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
             participateData: IOptionsParticipateData({
                 participate: false,
                 target: address(0),

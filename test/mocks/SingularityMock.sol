@@ -25,6 +25,12 @@ contract SingularityMock is EIP712 {
     /// @notice collateral share per user
     mapping(address => uint256) public _userCollateralShare;
 
+    uint256 public _liquidationCollateralizationRate;
+    uint256 public _minLiquidatorReward;
+    uint256 public _maxLiquidatorReward;
+    uint256 public _liquidationBonusAmount;
+    uint256 public _minBorrowAmount;
+
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 private constant _PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     // keccak256("PermitBorrow(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
