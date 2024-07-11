@@ -738,6 +738,56 @@
             "lastBlockHeight": 220505928,
             "contracts": [
                 {
+                    "name": "ARB_USD_SEER_CL_ORACLE",
+                    "address": "0xd54A95CAc6Bd8DDF8d93B3B6362B9EEa29C17576",
+                    "meta": {
+                        "args": [
+                            "CL ARB/USD",
+                            "ARB/USD",
+                            18,
+                            {
+                                "_poolChainlink": "0xb2A824043730FE05F3DA2efaFa1CBbe83fa548D6",
+                                "_isChainlinkMultiplied": 1,
+                                "_inBase": "1000000000000000000",
+                                "stalePeriod": 86400,
+                                "guardians": [
+                                    "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                                ],
+                                "_description": "0x4152422f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
+                                "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                            }
+                        ],
+                        "salt": "0x48d6624d64fbca804a81944c7503f9f84ac4b0563b8baf619cba7308e90b30c3",
+                        "create2": true
+                    }
+                },
+                {
+                    "name": "STG_USD_SEER_CL_ORACLE",
+                    "address": "0xfd3887e6884232F34BE2560d12DBC8380d46B372",
+                    "meta": {
+                        "args": [
+                            "CL STG/USD",
+                            "STG/USD",
+                            18,
+                            {
+                                "_poolChainlink": "0xe74d69E233faB0d8F48921f2D93aDfDe44cEb3B7",
+                                "_isChainlinkMultiplied": 1,
+                                "_inBase": "1000000000000000000",
+                                "stalePeriod": 86400,
+                                "guardians": [
+                                    "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                                ],
+                                "_description": "0x5354472f55534400000000000000000000000000000000000000000000000000",
+                                "_sequencerUptimeFeed": "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
+                                "_admin": "0x302E912826211b72222cDbaa684426Dc61F7fDED"
+                            }
+                        ],
+                        "salt": "0xdfff99d5398235065bb92abc7aad40963aa54c7bbd0d77eec7ce855879778796",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "MAGNETAR_COLLATERAL_MODULE",
                     "address": "0x16CD5F586B0Fb05FBFaa5cE453Ee895d0a044B9F",
                     "meta": {
