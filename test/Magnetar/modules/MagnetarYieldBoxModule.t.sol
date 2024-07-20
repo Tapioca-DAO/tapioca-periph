@@ -8,7 +8,7 @@ import {
     MagnetarCall,
     MagnetarWithdrawData,
     YieldBoxDepositData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 
 import "forge-std/Test.sol";

@@ -6,12 +6,12 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 
 // Tapioca
 import {TapiocaOmnichainEngineHelper} from
-    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {MagnetarModule} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+    "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {MagnetarModule} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {PearlmitHandler, IPearlmit} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {IMagnetarHelper} from "tap-utils/interfaces/periph/IMagnetarHelper.sol";
+import {RevertMsgDecoder} from "tap-utils/libraries/RevertMsgDecoder.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 
 /*
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {LZSendParam} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarTestHelper, MagnetarSetupData, TestBigBangData, TestSingularityData} from "./MagnetarTestHelper.t.sol";
 import {
     MagnetarAction,
@@ -11,9 +11,9 @@ import {
     LockAndParticipateData,
     MintFromBBAndLendOnSGLData,
     ExitPositionAndRemoveCollateralData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
 
-import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ERC20PermitStruct} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -21,12 +21,12 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {
     IOptionsLockData,
     IOptionsUnlockData
-} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {ICommonExternalContracts, IDepositData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {IOptionsParticipateData, IOptionsExitData} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {IRemoveAndRepay, IMintData} from "tapioca-periph/interfaces/oft/IUsdo.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+} from "tap-utils/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ICommonExternalContracts, IDepositData} from "tap-utils/interfaces/common/ICommonData.sol";
+import {IOptionsParticipateData, IOptionsExitData} from "tap-utils/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IRemoveAndRepay, IMintData} from "tap-utils/interfaces/oft/IUsdo.sol";
+import {IPearlmit} from "tap-utils/interfaces/periph/IPearlmit.sol";
+import {IPermit} from "tap-utils/interfaces/common/IPermit.sol";
 
 import {TapiocaOptionsLiquidityProvisionMock} from "../../mocks/TapiocaOptionsLiquidityProvisionMock.sol";
 import {TapiocaOptionsBrokerMock} from "../../mocks/TapiocaOptionsBrokerMock.sol";

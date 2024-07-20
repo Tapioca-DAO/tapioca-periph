@@ -9,13 +9,13 @@ import {
     MagnetarWithdrawData,
     DepositRepayAndRemoveCollateralFromMarketData,
     DepositAddCollateralAndBorrowFromMarketData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
 
-import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ERC20PermitStruct} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+import {IPearlmit} from "tap-utils/interfaces/periph/IPearlmit.sol";
+import {IPermit} from "tap-utils/interfaces/common/IPermit.sol";
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";

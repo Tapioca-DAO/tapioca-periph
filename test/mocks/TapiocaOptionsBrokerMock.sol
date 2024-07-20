@@ -3,8 +3,8 @@ pragma solidity 0.8.22;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-import {ITap} from "tapioca-periph/interfaces/oft/ITap.sol";
-import {IPearlmit, PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {ITap} from "tap-utils/interfaces/oft/ITap.sol";
+import {IPearlmit, PearlmitHandler} from "tap-utils/pearlmit/PearlmitHandler.sol";
 
 import {ERC721Mock} from "./ERC721Mock.sol";
 

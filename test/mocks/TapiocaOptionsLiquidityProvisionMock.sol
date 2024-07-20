@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {IPearlmit, PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
+import {IPearlmit, PearlmitHandler} from "tap-utils/pearlmit/PearlmitHandler.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ITap} from "tapioca-periph/interfaces/oft/ITap.sol";
+import {ITap} from "tap-utils/interfaces/oft/ITap.sol";
 
 contract TapiocaOptionsLiquidityProvisionMock is PearlmitHandler, ERC721 {
     uint256 public sglAssetId;
