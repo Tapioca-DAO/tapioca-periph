@@ -4,6 +4,7 @@
 [submodule "gitmodule/Tapioca-bar"]
 	path = gitmodule/Tapioca-bar
 	url = https://github.com/Tapioca-DAO/Tapioca-bar
+	branch = master
 [submodule "gitmodule/tap-yieldbox"]
 	path = gitmodule/tap-yieldbox
 	url = https://github.com/Tapioca-DAO/tap-yieldbox
