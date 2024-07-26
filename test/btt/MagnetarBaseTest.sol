@@ -5,6 +5,7 @@ pragma solidity 0.8.22;
  * Core
  */
 import {TapiocaOmnichainEngineHelper} from "contracts/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {TapiocaOmnichainExtExec} from "contracts/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {MagnetarYieldBoxModule} from "contracts/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "contracts/Magnetar/modules/MagnetarOptionModule.sol";
@@ -20,9 +21,12 @@ import {Magnetar} from "contracts/Magnetar/Magnetar.sol";
  * Test
  */
 import {MagnetarExtenderMock} from "test/mocks/MagnetarExtenderMock.sol";
-import {Test} from "forge-std/Test.sol";
+import {ToeTokenReceiverMock} from "test/mocks/ToeTokenMock/ToeTokenReceiverMock.sol";
+import {ToeTokenSenderMock} from "test/mocks/ToeTokenMock/ToeTokenSenderMock.sol";
+import {ToeTokenMock} from "test/mocks/ToeTokenMock/ToeTokenMock.sol";
+import {TestHelper} from "test/LZSetup/TestHelper.sol";
 
-contract MagnetarBaseTest is Test {
+contract MagnetarBaseTest is TestHelper {
     // Address mapping
     uint256 internal adminPKey = 0x1;
     address public adminAddr = vm.addr(adminPKey);
@@ -39,15 +43,31 @@ contract MagnetarBaseTest is Test {
     // Peripheral contracts
     TapiocaOmnichainEngineHelper public toeHelper;
     MagnetarExtenderMock public magnetarExtender;
+    TapiocaOmnichainExtExec public toeExtExec;
     IMagnetarHelper public magnetarHelper;
     Pearlmit public pearlmit;
     Cluster public cluster;
 
-    function setUp() public {
+    // Tokens
+    ToeTokenMock aToeOFT;
+    ToeTokenMock bToeOFT;
+
+    // Constants
+    uint32 public EID_A = 1;
+    address public ENDPOINT_A;
+
+    uint32 public EID_B = 2;
+    address public ENDPOINT_B;
+
+    function setUp() public virtual override {
+        vm.label(adminAddr, "admin");
+        vm.label(aliceAddr, "alice");
+
         // Peripheral
         magnetarHelper = IMagnetarHelper(address(new MagnetarHelper()));
         pearlmit = new Pearlmit("Pearlmit", "1", adminAddr, 0);
         toeHelper = new TapiocaOmnichainEngineHelper();
+        toeExtExec = new TapiocaOmnichainExtExec();
         cluster = new Cluster(0, adminAddr);
 
         // Core
@@ -73,5 +93,29 @@ contract MagnetarBaseTest is Test {
         vm.startPrank(adminAddr);
         cluster.updateContract(0, address(magnetar), true);
         vm.stopPrank();
+
+        // Lz setup
+
+        setUpEndpoints(3, LibraryType.UltraLightNode);
+        ENDPOINT_A = address(endpoints[EID_A]);
+        ENDPOINT_B = address(endpoints[EID_B]);
+
+        aToeOFT = new ToeTokenMock(
+            address(endpoints[EID_A]),
+            adminAddr,
+            address(toeExtExec),
+            address(
+                new ToeTokenSenderMock(
+                    "", "", address(endpoints[EID_A]), address(this), address(0), IPearlmit(address(pearlmit)), cluster
+                )
+            ),
+            address(
+                new ToeTokenReceiverMock(
+                    "", "", address(endpoints[EID_A]), address(this), address(0), IPearlmit(address(pearlmit)), cluster
+                )
+            ),
+            IPearlmit(address(pearlmit)),
+            cluster
+        );
     }
 }

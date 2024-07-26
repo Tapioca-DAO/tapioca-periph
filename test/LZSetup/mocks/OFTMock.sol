@@ -45,11 +45,12 @@ contract OFTMock is OFT {
         return _credit(_to, _amountToCreditLD, _srcEid);
     }
 
-    function buildMsgAndOptions(SendParam calldata _sendParam, uint256 _amountToCreditLD)
-        public
-        view
-        returns (bytes memory message, bytes memory options)
-    {
+    function buildMsgAndOptions(
+        SendParam calldata _sendParam,
+        bytes calldata _extraOptions,
+        bytes calldata _composeMsg,
+        uint256 _amountToCreditLD
+    ) public view returns (bytes memory message, bytes memory options) {
         return _buildMsgAndOptions(_sendParam, _amountToCreditLD);
     }
 }

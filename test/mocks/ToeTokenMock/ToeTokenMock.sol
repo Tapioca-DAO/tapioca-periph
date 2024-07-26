@@ -5,7 +5,14 @@ pragma solidity 0.8.22;
 import {
     MessagingReceipt, OFTReceipt, SendParam
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    MessagingReceipt,
+    OFTReceipt,
+    SendParam,
+    MessagingFee
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
@@ -54,31 +61,71 @@ contract ToeTokenMock is BaseTapiocaOmnichainEngine, ModuleManager, ERC20Permit 
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         public
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(Module.ToeTokenSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
     }
 
+    /**
+     * @dev See `TapiocaOmnichainSender.sendPacket`
+     */
     function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         public
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(Module.ToeTokenSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
+    }
+
+    /**
+     * See `OFTCore::send()`
+     * @dev override default `send` behavior to add `whenNotPaused` modifier
+     */
+    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+        external
+        payable
+        override(OFTCore)
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        // @dev Applies the token transfers regarding this send() operation.
+        // - amountSentLD is the amount in local decimals that was ACTUALLY sent/debited from the sender.
+        // - amountReceivedLD is the amount in local decimals that will be received/credited to the recipient on the remote OFT instance.
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            _debit(msg.sender, _sendParam.amountLD, _sendParam.minAmountLD, _sendParam.dstEid);
+
+        // @dev Builds the options and OFT message to quote in the endpoint.
+        (bytes memory message, bytes memory options) = _buildMsgAndOptions(_sendParam, amountReceivedLD);
+
+        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt = _lzSend(_sendParam.dstEid, message, options, _fee, _refundAddress);
+        // @dev Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountSentLD, amountReceivedLD);
+
+        emit OFTSent(msgReceipt.guid, _sendParam.dstEid, msg.sender, amountSentLD, amountReceivedLD);
     }
 
     function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {
