@@ -12,6 +12,7 @@ optimizer_runs = 100
 ignored_error_codes = ["shadowing"] # For LBP
 
 remappings = [
+	"tap-utils/=gitmodule/tap-utils/contracts/",
     "tapioca-periph/=contracts/",
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/src/",

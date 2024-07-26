@@ -8,9 +8,9 @@ import {
 // Tapioca
 import {
     BaseTapiocaOmnichainEngine, IPearlmit
-} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+} from "tap-utils/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainSender} from "tap-utils/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 
 /*
 

@@ -11,27 +11,27 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {ITapiocaOptionLiquidityProvision} from
-    "tapioca-periph/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
-import {MagnetarAction, MagnetarModule, MagnetarCall} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {IERC721Permit} from "tapioca-periph/interfaces/common/IERC721Permit.sol";
-import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
-import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
-import {IWeth9} from "tapioca-periph/interfaces/external/weth/IWeth9.sol";
-import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {ITwTap} from "tapioca-periph/interfaces/tap-token/ITwTap.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
-import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+    "tap-utils/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {MagnetarAction, MagnetarModule, MagnetarCall} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {ITapiocaOmnichainEngine, LZSendParam} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ITapiocaOptionBroker} from "tap-utils/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {IMagnetarModuleExtender} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {IMagnetarHelper} from "tap-utils/interfaces/periph/IMagnetarHelper.sol";
+import {IERC721Permit} from "tap-utils/interfaces/common/IERC721Permit.sol";
+import {RevertMsgDecoder} from "tap-utils/libraries/RevertMsgDecoder.sol";
+import {ISingularity} from "tap-utils/interfaces/bar/ISingularity.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {IPermitAll} from "tap-utils/interfaces/common/IPermitAll.sol";
+import {IWeth9} from "tap-utils/interfaces/external/weth/IWeth9.sol";
+import {IMagnetar} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
+import {IPearlmit} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {ITwTap} from "tap-utils/interfaces/tap-token/ITwTap.sol";
+import {IPermit} from "tap-utils/interfaces/common/IPermit.sol";
+import {SafeApprove} from "tap-utils/libraries/SafeApprove.sol";
+import {IMarket} from "tap-utils/interfaces/bar/IMarket.sol";
+import {Module} from "tap-utils/interfaces/bar/IMarket.sol";
+import {ITOFT} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {BaseMagnetar} from "./BaseMagnetar.sol";
 /*
 

@@ -4,15 +4,13 @@
 [submodule "gitmodule/Tapioca-bar"]
 	path = gitmodule/Tapioca-bar
 	url = https://github.com/Tapioca-DAO/Tapioca-bar
+	branch = master
 [submodule "gitmodule/tap-yieldbox"]
 	path = gitmodule/tap-yieldbox
 	url = https://github.com/Tapioca-DAO/tap-yieldbox
 [submodule "gitmodule/tapioca-sdk"]
 	path = gitmodule/tapioca-sdk
 	url = https://github.com/Tapioca-DAO/tapioca-sdk
-[submodule "gitmodule/tap-token"]
-	path = gitmodule/tap-token
-	url = https://github.com/Tapioca-DAO/tap-token
 [submodule "gitmodule/tapioca-mocks"]
 	path = gitmodule/tapioca-mocks
 	url = https://github.com/Tapioca-DAO/tapioca-mocks
@@ -25,3 +23,6 @@
 [submodule "gitmodule/permitc"]
 	path = gitmodule/permitc
 	url = https://github.com/Tapioca-DAO/PermitC.git
+[submodule "gitmodule/tap-utils"]
+	path = gitmodule/tap-utils
+	url = https://github.com/Tapioca-DAO/tap-utils.git
