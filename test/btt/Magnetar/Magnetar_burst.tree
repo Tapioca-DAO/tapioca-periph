@@ -1,0 +1,12 @@
+Magnetar_burst
+├── when current address is not whitelisted
+│   └── it should revert
+├── when paused
+│   └── it should revert
+├── when calling using MagnetarExtender
+│   └── when success returns false
+│       └── it should revert
+├── when action not valid
+│   └── it should revert
+└── when msg value not matching accumulator
+    └── it should revert
