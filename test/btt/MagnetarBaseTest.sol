@@ -5,6 +5,7 @@ pragma solidity 0.8.22;
  * Core
  */
 import {TapiocaOmnichainEngineHelper} from "contracts/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {ERC20PermitApprovalMsg, ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainExtExec} from "contracts/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {MagnetarYieldBoxModule} from "contracts/Magnetar/modules/MagnetarYieldBoxModule.sol";
@@ -89,11 +90,6 @@ contract MagnetarBaseTest is TestHelper {
             magnetarHelper
         );
 
-        // Setup
-        vm.startPrank(adminAddr);
-        cluster.updateContract(0, address(magnetar), true);
-        vm.stopPrank();
-
         // Lz setup
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
@@ -117,5 +113,37 @@ contract MagnetarBaseTest is TestHelper {
             IPearlmit(address(pearlmit)),
             cluster
         );
+
+        // Setup
+        vm.startPrank(adminAddr);
+        cluster.updateContract(0, address(magnetar), true);
+        cluster.updateContract(0, address(aToeOFT), true);
+        vm.stopPrank();
+    }
+
+    /**
+     * @dev Helper to build an ERC20PermitApprovalMsg.
+     * @param _permit The permit data.
+     * @param _digest The typed data digest.
+     * @param _token The token contract to receive the permit.
+     * @param _pkSigner The private key signer.
+     */
+    function getERC20PermitData(ERC20PermitStruct memory _permit, bytes32 _digest, address _token, uint256 _pkSigner)
+        internal
+        pure
+        returns (ERC20PermitApprovalMsg memory permitApproval_)
+    {
+        (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
+
+        permitApproval_ = ERC20PermitApprovalMsg({
+            token: _token,
+            owner: _permit.owner,
+            spender: _permit.spender,
+            value: _permit.value,
+            deadline: _permit.deadline,
+            v: v_,
+            r: r_,
+            s: s_
+        });
     }
 }

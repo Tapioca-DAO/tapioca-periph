@@ -1,0 +1,13 @@
+Magnetar_permitOperation
+├── when target is not whitelisted
+│   └── it should revert
+├── when selector is not valid
+│   └── it should revert
+├── when selector is permit
+│   └── it should work
+├── when selector is revoke
+│   └── it should work
+├── when selector is permitAll
+│   └── it should work
+└── when selector is revokeAll
+    └── it should work
