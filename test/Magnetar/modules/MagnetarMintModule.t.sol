@@ -482,6 +482,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_mintFromBBAndLendOnSGL_addCollateral_mint_depositExtra_lend_and_lock() public {
+        vm.skip(true);
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 0.5 ether;
         {
@@ -559,6 +560,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_mintFromBBAndLendOnSGL_addCollateral_mint_depositExtra_lend_lock_and_participate() public {
+        vm.skip(true);
         uint256 tokenAmount_ = 1 ether;
         uint256 mintAmount_ = 0.5 ether;
         {

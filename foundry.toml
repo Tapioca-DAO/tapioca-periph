@@ -12,16 +12,16 @@ optimizer_runs = 100
 ignored_error_codes = ["shadowing"] # For LBP
 
 remappings = [
-	"tap-utils/=gitmodule/tap-utils/contracts/",
+	"tap-utils/=lib/tap-utils/contracts/",
     "tapioca-periph/=contracts/",
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/src/",
-	"tapioca-bar/=gitmodule/Tapioca-bar/contracts/",
-	"tapiocaz/=gitmodule/tapiocaz/contracts/",
-	"tapioca-mocks/=gitmodule/tapioca-mocks/contracts/",
-	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
-	"tapioca-lbp/=gitmodule/tapioca-lbp/contracts/",
-	"permitc/=gitmodule/permitc/src/",
+	"tapioca-bar/=lib/Tapioca-bar/contracts/",
+	"tapiocaz/=lib/tapiocaz/contracts/",
+	"tapioca-mocks/=lib/tapioca-mocks/contracts/",
+	"yieldbox/=lib/tap-yieldbox/contracts/",
+	"tapioca-lbp/=lib/tapioca-lbp/contracts/",
+	"permitc/=lib/tap-utils/lib/permitc/src/",
 ]
 
 
