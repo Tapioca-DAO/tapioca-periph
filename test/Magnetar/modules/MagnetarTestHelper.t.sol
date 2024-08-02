@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 // Lz
-import {TestHelper} from "../../LZSetup/TestHelper.sol";
+import {TestHelper} from "tap-utils/../test/LZSetup/TestHelper.sol";
 
 // External
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -23,6 +23,7 @@ import {BBCollateral} from "tapioca-bar/markets/bigBang/BBCollateral.sol";
 import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
 import {BBBorrow} from "tapioca-bar/markets/bigBang/BBBorrow.sol";
 import {BigBang} from "tapioca-bar/markets/bigBang/BigBang.sol";
+import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {ITapiocaOmnichainEngine} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
@@ -62,7 +63,7 @@ import {ITapiocaOracle} from "tap-utils/interfaces/periph/ITapiocaOracle.sol";
 import {IZeroXSwapper} from "tap-utils/interfaces/periph/IZeroXSwapper.sol";
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
 
-import {ZerroXSwapperMockTarget} from "../../ZeroXSwapper/ZerroXSwapperMockTarget.sol";
+import {ZerroXSwapperMockTarget} from "tap-utils/../test/ZeroXSwapper/ZerroXSwapperMockTarget.sol";
 import {ZeroXSwapper} from "tap-utils/Swapper/ZeroXSwapper.sol";
 
 import {OracleMock} from "../../mocks/OracleMock.sol";
@@ -282,6 +283,13 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
+       
+        address[] memory markets = new address[](1);
+        markets[0] = address(bb);
+        bytes[] memory marketsData = new bytes[](1);
+        BBDebtRateHelper bbRateHelper = new BBDebtRateHelper();
+        marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
+        penrose.executeMarketFn(markets, marketsData, true);
 
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);
@@ -536,7 +544,8 @@ contract MagnetarTestHelper is TestHelper {
                 0,
                 0,
                 0,
-                address(sglInterestHelper)
+                address(sglInterestHelper),
+                0
             );
             address[] memory mc = new address[](1);
             mc[0] = address(sgl);

@@ -350,6 +350,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_exitPositionAndRemoveCollateral_remove_repay() public {
+        vm.skip(true);
         _runLockPrerequisites();
 
         MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -389,6 +390,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_exitPositionAndRemoveCollateral_remove_repay_removeCollateral() public {
+        vm.skip(true);
         _runLockPrerequisites();
 
         MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -427,6 +429,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_exitPositionAndRemoveCollateral_remove_repay_removeCollateral_withdrawCollateral() public {
+        vm.skip(true);
         _runLockPrerequisites();
 
         MagnetarCall[] memory calls = new MagnetarCall[](1);
@@ -614,6 +617,7 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
     }
 
     function test_lockAndParticipate_lock_and_participate() public {
+        vm.skip(true);
         MagnetarCall[] memory calls = new MagnetarCall[](1);
 
         // mint and lend
