@@ -1,6 +1,5 @@
 import * as TAP_TOKEN_DEPLOY_CONFIG from '@tap-token/config';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
-import { FeeAmount } from '@uniswap/v3-sdk';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
 import {
@@ -15,6 +14,7 @@ import { buildGLPOracle } from 'tasks/deployBuilds/oracle/buildGLPOracle';
 import { buildGMXOracle } from 'tasks/deployBuilds/oracle/buildGMXOracle';
 import { buildRethUsdOracle } from 'tasks/deployBuilds/oracle/buildRethUsdOracle';
 import { buildSDaiOracle } from 'tasks/deployBuilds/oracle/buildSDaiOracle';
+import { buildStgCLOracle } from 'tasks/deployBuilds/oracle/buildStgCLOracle';
 import {
     buildADBTapOptionOracle,
     buildTOBTapOptionOracle,
@@ -23,9 +23,9 @@ import { buildTapOracle } from 'tasks/deployBuilds/oracle/buildTapOracle';
 import { buildUSDCOracle } from 'tasks/deployBuilds/oracle/buildUSDCOracle';
 import { buildUsdoMarketOracle } from 'tasks/deployBuilds/oracle/buildUsdoMarketOracle';
 import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOracle';
-import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
-import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
+import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { deployPostLbpStack__postDeploy } from './postDeploy/2-postDeploySetup';
+import { buildArbCLOracle } from 'tasks/deployBuilds/oracle/buildArbClOracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -135,6 +135,8 @@ async function tapiocaDeployTask(
             .add(await buildGLPOracle(hre, owner))
             .add(await buildEthGlpPOracle(hre, owner))
             .add(await buildGMXOracle(hre, owner, isTestnet))
+            .add(await buildArbCLOracle(hre, owner, isTestnet))
+            .add(await buildStgCLOracle(hre, owner, isTestnet))
             .add(
                 await buildTapOracle(
                     hre,
