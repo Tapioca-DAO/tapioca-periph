@@ -3381,6 +3381,19 @@
             "lastBlockHeight": 22113688,
             "contracts": [
                 {
+                    "name": "USDC_ORACLE_MOCK",
+                    "address": "0x0E84Db03734E1eC376ef1eF5Cc5C347E2ED5f21e",
+                    "meta": {
+                        "args": [
+                            "USDC_ORACLE_MOCK",
+                            "USDC_ORACLE_MOCK",
+                            "1010101"
+                        ],
+                        "salt": "0x9f7259da51c02e168677646cbdf85f8b12384d83626f3c5b3892737006f9f0f6",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "USDO_USDC_UNI_V3_ORACLE",
                     "address": "0x380a3381ed2a7206a8A4FFc30DA08AF71583a5b9",
                     "meta": {
