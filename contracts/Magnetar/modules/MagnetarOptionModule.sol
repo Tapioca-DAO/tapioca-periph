@@ -7,21 +7,20 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {ITapiocaOptionLiquidityProvision} from
-    "tap-utils/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
+import {ITapiocaOptionLiquidityProvision} from "tap-utils/interfaces/tap-token/ITapiocaOptionLiquidityProvision.sol";
 import {
     ExitPositionAndRemoveCollateralData,
     ICommonExternalContracts,
     IRemoveAndRepay,
     LockAndParticipateData
-} from "tap-utils/interfaces/periph/IMagnetar.sol";
-import {ITapiocaOptionBroker} from "tap-utils/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOption} from "tap-utils/interfaces/tap-token/ITapiocaOption.sol";
-import {ISingularity} from "tap-utils/interfaces/bar/ISingularity.sol";
-import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket, Module} from "tap-utils/interfaces/bar/IMarket.sol";
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOption} from "tapioca-periph/interfaces/tap-token/ITapiocaOption.sol";
+import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {IPearlmit} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*

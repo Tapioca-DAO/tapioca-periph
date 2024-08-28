@@ -5,9 +5,9 @@ pragma solidity 0.8.22;
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {YieldBoxDepositData, MagnetarWithdrawData} from "tap-utils/interfaces/periph/IMagnetar.sol";
-import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
-import {IPearlmit} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {YieldBoxDepositData, MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {MagnetarBaseModule} from "./MagnetarBaseModule.sol";
 
 /*
