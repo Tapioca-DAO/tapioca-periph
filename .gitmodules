@@ -19,3 +19,6 @@
 [submodule "lib/tapiocaz"]
 	path = lib/tapiocaz
 	url = https://github.com/Tapioca-DAO/tapiocaz
+[submodule "lib/tapioca-mocks"]
+	path = lib/tapioca-mocks
+	url = https://github.com/Tapioca-DAO/tapioca-mocks
