@@ -14,10 +14,11 @@ export const wrapToft__task = async (
 ) => {
     const { addr, amount, to, tag } = _taskArgs;
     const VM = hre.SDK.DeployerVM.loadVM({ hre, tag });
+    const signer = (await hre.ethers.getSigners())[0];
 
     const token = await hre.ethers.getContractAt('TOFT', addr);
     const pearlmit = await hre.ethers.getContractAt(
-        'Pearlmit',
+        'tap-utils/pearlmit/Pearlmit.sol:Pearlmit',
         loadLocalContract(
             hre,
             hre.SDK.chainInfo.chainId,
@@ -37,8 +38,20 @@ export const wrapToft__task = async (
         `[+]  $${await token.name()} wrapping ${amount}/${parsedAmount}`,
     );
 
+    const multicall = (await VM.getMulticall()).address;
+    await (await wrappedToken.approve(multicall, parsedAmount)).wait(3);
+
     const blockTime = await hre.ethers.provider.getBlock('latest');
     const calls: TapiocaMulticall.CallStruct[] = [
+        // pull
+        {
+            target: wrappedToken.address,
+            callData: wrappedToken.interface.encodeFunctionData(
+                'transferFrom',
+                [signer.address, multicall, parsedAmount],
+            ),
+            allowFailure: false,
+        },
         // approve
         {
             target: wrappedToken.address,
