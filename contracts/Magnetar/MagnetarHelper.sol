@@ -60,6 +60,12 @@ contract MagnetarHelper {
         address yieldBoxAssetStrategyAddress;
         uint256 yieldBoxAssetTokenId;
         uint256 collateralizationRate;
+        uint256 liquidationCollateralizationRate;
+        uint256 minLiquidatorReward;
+        uint256 maxLiquidatorReward;
+        uint256 liquidationBonusAmount;
+        uint256 minBorrowAmount;
+        uint256 minCollateralAmount;
     }
 
     struct SingularityInfo {
@@ -74,6 +80,7 @@ contract MagnetarHelper {
         uint256 maximumInterestPerSecond;
         uint256 interestElasticity;
         uint256 startingInterestPerSecond;
+        uint256 minLendAmount;
     }
 
     struct BigBangInfo {
@@ -272,6 +279,7 @@ contract MagnetarHelper {
             result[i].maximumInterestPerSecond = sgl.maximumInterestPerSecond();
             result[i].interestElasticity = sgl.interestElasticity();
             result[i].startingInterestPerSecond = sgl.startingInterestPerSecond();
+            result[i].minLendAmount = sgl.minLendAmount();
         }
 
         return result;
@@ -325,6 +333,12 @@ contract MagnetarHelper {
         info.assetId = market._assetId();
         info.collateralId = market._collateralId();
         info.collateralizationRate = market._collateralizationRate();
+        info.liquidationCollateralizationRate = market._liquidationCollateralizationRate();
+        info.minLiquidatorReward = market._minLiquidatorReward();
+        info.maxLiquidatorReward = market._maxLiquidatorReward();
+        info.liquidationBonusAmount = market._liquidationBonusAmount();
+        info.minBorrowAmount = market._minBorrowAmount();
+        info.minCollateralAmount = market._minCollateralAmount();
 
         IYieldBox yieldBox = IYieldBox(market._yieldBox());
 
