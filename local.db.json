@@ -2996,10 +2996,10 @@
             "contracts": [
                 {
                     "name": "MAGNETAR_HELPER",
-                    "address": "0x7885464E28B87D48DCc1e34B8e913B38Dcc07Ce1",
+                    "address": "0x239a68dD751C82fB5dd1f7081E911E2F38A65Bea",
                     "meta": {
                         "args": [],
-                        "salt": "0xa9557e693e222245f3d97b07a23cc5760823e43b3008ad582378efb098264756",
+                        "salt": "0xded53b3d78e15e5c6c67d113612b01304083e3b31b20e91b95dfdc7b23ef80eb",
                         "create2": true
                     }
                 },
@@ -3229,10 +3229,10 @@
             "contracts": [
                 {
                     "name": "MAGNETAR_HELPER",
-                    "address": "0xD42A639298F42f8CF9708D54DB29397EB2F9E746",
+                    "address": "0x23A2c8FC0BBFeBBe4F409C1e972C4a129c5228CD",
                     "meta": {
                         "args": [],
-                        "salt": "0xe631ffee64bcdbf28f1765c688efdc1e2c37f3b661eb8b263b7672a383d09c81",
+                        "salt": "0xa37da86bbaab59e8a369455f0529f1d9ac5d3bf634890b0da9c378370ac2aabf",
                         "create2": true
                     }
                 },
