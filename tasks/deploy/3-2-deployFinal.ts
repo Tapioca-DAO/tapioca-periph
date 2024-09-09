@@ -52,9 +52,16 @@ async function postDeployTask(params: TTapiocaDeployerVmPass<object>) {
 
     console.log('[+] final task post deploy');
     const calls: TapiocaMulticall.CallStruct[] = [];
-    await clusterWhitelist({ hre, tag, calls, isHostChain, isSideChain });
+    await clusterWhitelist({
+        hre,
+        tag,
+        calls,
+        isHostChain,
+        isSideChain,
+        isTestnet,
+    });
 
-    if (isTestnet) {
+    if (isTestnet && isHostChain) {
         console.log(
             '[+] [TESTNET] Setting USDO/USDC Oracle stale period to max ',
         );
@@ -87,8 +94,9 @@ async function clusterWhitelist(params: {
     calls: TapiocaMulticall.CallStruct[];
     isHostChain: boolean;
     isSideChain: boolean;
+    isTestnet: boolean;
 }) {
-    const { hre, tag, calls, isHostChain, isSideChain } = params;
+    const { hre, tag, calls, isHostChain, isSideChain, isTestnet } = params;
 
     const { cluster, magnetar, pearlmit, yieldbox, pauser } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
@@ -194,20 +202,35 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
         );
-        await addBarContract(
-            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_GLP_LEVERAGE_EXECUTOR,
-        );
+        if (isTestnet) {
+            await addBarContract(
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
+            );
+        }
+        if (!isTestnet) {
+            await addBarContract(
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_GLP_LEVERAGE_EXECUTOR,
+            );
+        }
+
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SIMPLE_LEVERAGE_EXECUTOR,
         );
 
         // Z
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
+        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
         // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
+
+        if (isTestnet) {
+            await addZContract(
+                TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+            );
+        }
 
         // Z Underlying
         await addAddressWhitelist({

@@ -28,8 +28,9 @@ export const deployFinal1__task = async (
         _taskArgs,
         {
             hre,
+            staticSimulation: false,
             overrideOptions: {
-                gasLimit: 8000000,
+                gasLimit: 85_000_000,
             },
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -107,7 +108,7 @@ async function deployUsdoUniPoolAndAddLiquidity(
             amountTokenB: hre.ethers.utils.parseEther(taskArgs.amountUsdc),
             feeAmount: FeeAmount.LOWEST,
             options: {
-                mintMock: !!isTestnet,
+                // mintMock: !!isTestnet,
                 arrakisDepositLiquidity: false,
             },
         },
