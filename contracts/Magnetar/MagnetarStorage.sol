@@ -39,7 +39,7 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
     error Magnetar_NotAuthorized(address caller, address expectedCaller); // msg.send is neither the owner nor whitelisted by Cluster
     error Magnetar_ModuleNotFound(MagnetarModule module); // Module not found
     error Magnetar_UnknownReason(); // Revert reason not recognized
-    error Magnetar_TargetNotWhitelisted(address addy); // cluster.isWhitelisted(lzChainId, _addr) => false
+    error Magnetar_TargetNotWhitelisted(address addy); // cluster.hasRole(...) => false
 
     constructor(IPearlmit _pearlmit, address _toeHelper) PearlmitHandler(_pearlmit) {
         toeHelper = TapiocaOmnichainEngineHelper(_toeHelper);
@@ -79,14 +79,15 @@ contract MagnetarStorage is IERC721Receiver, PearlmitHandler {
      *      - is whitelisted by the cluster
      */
     function _checkSender(address _from) internal view {
-        if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender)) {
+        if (_from != msg.sender && !cluster.hasRole(msg.sender, keccak256(abi.encodePacked("CALLER_ALLOWED_FOR_", _from)))) {
             revert Magnetar_NotAuthorized(msg.sender, _from);
         }
     }
 
-    function _checkWhitelisted(address addy) internal view {
+    function _checkWhitelisted(address addy, bytes memory role) internal view {
         if (addy != address(0)) {
-            if (!cluster.isWhitelisted(0, addy)) {
+            // if (!cluster.isWhitelisted(0, addy)) {
+            if (!cluster.hasRole(addy, keccak256(role))) {
                 revert Magnetar_TargetNotWhitelisted(addy);
             }
         }

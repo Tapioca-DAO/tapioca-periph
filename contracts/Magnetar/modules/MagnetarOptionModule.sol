@@ -274,15 +274,15 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         _checkSender(data.user);
 
         // Check provided addresses
-        _checkWhitelisted(data.yieldBox);
-        _checkWhitelisted(data.tSglToken);
-        _checkWhitelisted(data.magnetar);
+        _checkWhitelisted(data.yieldBox, "MAGNETAR_YIELDBOX_CALLEE");
+        _checkWhitelisted(data.tSglToken, "MAGNETAR_MARKET_CALLEE");
+        _checkWhitelisted(data.magnetar, "MAGNETAR_CALLEE");
         if (data.lockData.lock) {
-            _checkWhitelisted(data.lockData.target);
-            _checkWhitelisted(data.lockData.tAsset);
+            _checkWhitelisted(data.lockData.target, "MAGNETAR_TAP_CALLEE");
+            _checkWhitelisted(data.lockData.tAsset, "MAGNETAR_TAP_CALLEE");
         }
         if (data.participateData.participate) {
-            _checkWhitelisted(data.participateData.target);
+            _checkWhitelisted(data.participateData.target, "MAGNETAR_TAP_CALLEE");
         }
     }
 
@@ -296,15 +296,15 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     }
 
     function _checkExternalData(ICommonExternalContracts memory data) private view {
-        _checkWhitelisted(data.marketHelper);
-        _checkWhitelisted(data.magnetar);
-        _checkWhitelisted(data.bigBang);
-        _checkWhitelisted(data.singularity);
+        _checkWhitelisted(data.marketHelper, "MAGNETAR_HELPER_CALLEE");
+        _checkWhitelisted(data.magnetar, "MAGNETAR_CALLEE");
+        _checkWhitelisted(data.bigBang, "MAGNETAR_MARKET_CALLEE");
+        _checkWhitelisted(data.singularity, "MAGNETAR_MARKET_CALLEE");
     }
 
     function _checkRemoveAndRepayData(IRemoveAndRepay memory data) private view {
-        _checkWhitelisted(data.exitData.target);
-        _checkWhitelisted(data.unlockData.target);
+        _checkWhitelisted(data.exitData.target, "MAGNETAR_TAP_CALLEE");
+        _checkWhitelisted(data.unlockData.target, "MAGNETAR_TAP_CALLEE");
 
         if (data.exitData.exit) {
             if (data.exitData.oTAPTokenID == 0) revert Magnetar_ActionParamsMismatch();

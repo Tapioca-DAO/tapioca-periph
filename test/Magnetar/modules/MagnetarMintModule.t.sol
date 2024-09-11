@@ -58,8 +58,11 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
         tOB = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
         tOB.setTOLP(address(tOLPMock));
 
-        clusterA.updateContract(0, address(tOLPMock), true);
-        clusterA.updateContract(0, address(tOB), true);
+        clusterA.setRoleForContract(address(tOLPMock), keccak256("MAGNETAR_TAP_CALLEE"), true);
+        clusterA.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
+
+        clusterB.setRoleForContract(address(tOLPMock), keccak256("MAGNETAR_TAP_CALLEE"), true);
+        clusterB.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
     }
 
     function _createMintFromBBAndLendOnSGLData(

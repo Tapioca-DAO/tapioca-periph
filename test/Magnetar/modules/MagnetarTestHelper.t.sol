@@ -294,6 +294,29 @@ contract MagnetarTestHelper is TestHelper {
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);
 
+        clusterA.setRoleForContract(address(magnetarA), keccak256("MAGNETAR_CALLEE"), true);
+        clusterA.setRoleForContract(address(magnetarA), keccak256("MAGNETAR_CONTRACT"), true);
+        clusterA.setRoleForContract(address(magnetarHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        clusterA.setRoleForContract(address(yieldBox), keccak256("MAGNETAR_YIELDBOX_CALLEE"), true);
+        clusterA.setRoleForContract(address(yieldBox), keccak256("YIELDBOX_WITHDRAW"), true);
+        clusterA.setRoleForContract(address(sgl), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        clusterA.setRoleForContract(address(bb), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        clusterA.setRoleForContract(address(marketHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        clusterA.setRoleForContract(address(assetA), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
+        clusterA.setRoleForContract(address(collateralA), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
+
+        clusterB.setRoleForContract(address(magnetarB), keccak256("MAGNETAR_CALLEE"), true);
+        clusterB.setRoleForContract(address(magnetarB), keccak256("MAGNETAR_CONTRACT"), true);
+        clusterB.setRoleForContract(address(magnetarHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        clusterB.setRoleForContract(address(yieldBox), keccak256("MAGNETAR_YIELDBOX_CALLEE"), true);
+        clusterB.setRoleForContract(address(yieldBox), keccak256("YIELDBOX_WITHDRAW"), true);
+        clusterB.setRoleForContract(address(sgl), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        clusterB.setRoleForContract(address(bb), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        clusterB.setRoleForContract(address(marketHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        clusterB.setRoleForContract(address(assetB), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
+        clusterB.setRoleForContract(address(collateralB), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
+
+        // TODO: refactor after `bar` updates
         clusterA.updateContract(0, address(magnetarA), true);
         clusterA.updateContract(0, address(magnetarHelper), true);
         clusterA.updateContract(0, address(oracle), true);
