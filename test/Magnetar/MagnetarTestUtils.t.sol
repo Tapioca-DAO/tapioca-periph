@@ -142,7 +142,6 @@ contract MagnetarTestUtils {
     }
 
     function createSingularity(TestSingularityData memory _sgl, address _mc) public returns (Singularity) {
-        SGLInit sglInit = new SGLInit();
         Singularity sgl = new Singularity();
         SGLInit sglInit = new SGLInit();
 
