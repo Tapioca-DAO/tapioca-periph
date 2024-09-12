@@ -294,6 +294,7 @@ contract MagnetarTestHelper is TestHelper {
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);
 
+        clusterA.setRoleForContract(address(magnetarA), keccak256("MARKET_ALLOWANCE_CHECKER"), true);
         clusterA.setRoleForContract(address(magnetarA), keccak256("MAGNETAR_CALLEE"), true);
         clusterA.setRoleForContract(address(magnetarA), keccak256("MAGNETAR_CONTRACT"), true);
         clusterA.setRoleForContract(address(magnetarHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
@@ -305,6 +306,7 @@ contract MagnetarTestHelper is TestHelper {
         clusterA.setRoleForContract(address(assetA), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
         clusterA.setRoleForContract(address(collateralA), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
 
+        clusterB.setRoleForContract(address(magnetarB), keccak256("MARKET_ALLOWANCE_CHECKER"), true);
         clusterB.setRoleForContract(address(magnetarB), keccak256("MAGNETAR_CALLEE"), true);
         clusterB.setRoleForContract(address(magnetarB), keccak256("MAGNETAR_CONTRACT"), true);
         clusterB.setRoleForContract(address(magnetarHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
@@ -315,35 +317,6 @@ contract MagnetarTestHelper is TestHelper {
         clusterB.setRoleForContract(address(marketHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
         clusterB.setRoleForContract(address(assetB), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
         clusterB.setRoleForContract(address(collateralB), keccak256("MAGNETAR_PERMIT_CALLEE"), true);
-
-        // TODO: refactor after `bar` updates
-        clusterA.updateContract(0, address(magnetarA), true);
-        clusterA.updateContract(0, address(magnetarHelper), true);
-        clusterA.updateContract(0, address(oracle), true);
-        clusterA.updateContract(0, address(pearlmit), true);
-        clusterA.updateContract(0, address(assetA), true);
-        clusterA.updateContract(0, address(collateralA), true);
-        clusterA.updateContract(0, address(marketHelper), true);
-        clusterA.updateContract(bEid, address(assetB), true);
-        clusterA.updateContract(bEid, address(collateralB), true);
-        clusterA.updateContract(0, address(penrose), true);
-        clusterA.updateContract(0, address(yieldBox), true);
-        clusterA.updateContract(0, address(sgl), true);
-        clusterA.updateContract(0, address(bb), true);
-
-        clusterB.updateContract(0, address(magnetarB), true);
-        clusterB.updateContract(0, address(magnetarHelper), true);
-        clusterB.updateContract(0, address(oracle), true);
-        clusterB.updateContract(0, address(pearlmit), true);
-        clusterB.updateContract(0, address(assetB), true);
-        clusterB.updateContract(0, address(collateralB), true);
-        clusterB.updateContract(0, address(marketHelper), true);
-        clusterB.updateContract(aEid, address(assetA), true);
-        clusterB.updateContract(aEid, address(collateralA), true);
-        clusterB.updateContract(0, address(penrose), true);
-        clusterB.updateContract(0, address(yieldBox), true);
-        clusterB.updateContract(0, address(sgl), true);
-        clusterB.updateContract(0, address(bb), true);
 
         vm.label(address(magnetarA), "Magnetar A");
         vm.label(address(magnetarB), "Magnetar B");
