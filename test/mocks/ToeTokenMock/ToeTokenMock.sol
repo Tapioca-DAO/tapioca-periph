@@ -8,13 +8,13 @@ import {
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 // Tapioca
-import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
-import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {ModuleManager} from "tapioca-periph/utils/ModuleManager.sol";
+import {BaseTapiocaOmnichainEngine} from "tap-utils/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainSender} from "tap-utils/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
+import {ERC20PermitStruct} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {LZSendParam} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {IPearlmit} from "tap-utils/interfaces/periph/IPearlmit.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
+import {ModuleManager} from "tap-utils/utils/ModuleManager.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

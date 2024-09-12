@@ -2,12 +2,12 @@
 pragma solidity 0.8.22;
 
 // External
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {Module} from "tap-utils/interfaces/bar/IMarket.sol";
 
 contract SingularityMock is EIP712 {
     using SafeERC20 for IERC20;

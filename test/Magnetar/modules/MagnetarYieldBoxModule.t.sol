@@ -8,7 +8,7 @@ import {
     MagnetarCall,
     MagnetarWithdrawData,
     YieldBoxDepositData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 
 import "forge-std/Test.sol";
@@ -149,9 +149,12 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
         _withdrawParams.extractFromSender = true;
-        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+        bytes memory withdrawCallParams =
+            abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
 
-        pearlmit.approve(1155, address(yieldBox), assetAId, address(magnetarA), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(
+            1155, address(yieldBox), assetAId, address(magnetarA), type(uint200).max, uint48(block.timestamp)
+        );
         yieldBox.setApprovalForAll(address(pearlmit), true);
         // assetA.approve(address(pearlmit), type(uint256).max);
 
@@ -188,7 +191,8 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         MagnetarWithdrawData memory _withdrawParams = _createWithdrawData(address(yieldBox), assetAId, tokenAmount_);
         _withdrawParams.extractFromSender = true;
-        bytes memory withdrawCallParams = abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
+        bytes memory withdrawCallParams =
+            abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, _withdrawParams);
 
         MagnetarCall[] memory calls = new MagnetarCall[](2);
         calls[0] = MagnetarCall({
@@ -210,5 +214,4 @@ contract MagnetarYieldBoxModuleTest is MagnetarTestHelper {
 
         _setYieldBoxRevoke(yieldBox, address(magnetarA));
     }
-
 }

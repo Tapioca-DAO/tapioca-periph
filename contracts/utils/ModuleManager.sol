@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {RevertMsgDecoder} from "tapioca-periph/libraries/RevertMsgDecoder.sol";
+import {RevertMsgDecoder} from "tap-utils/libraries/RevertMsgDecoder.sol";
 
 /*
 

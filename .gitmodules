@@ -1,27 +1,21 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "gitmodule/Tapioca-bar"]
-	path = gitmodule/Tapioca-bar
-	url = https://github.com/Tapioca-DAO/Tapioca-bar
-[submodule "gitmodule/tap-yieldbox"]
-	path = gitmodule/tap-yieldbox
-	url = https://github.com/Tapioca-DAO/tap-yieldbox
 [submodule "gitmodule/tapioca-sdk"]
 	path = gitmodule/tapioca-sdk
 	url = https://github.com/Tapioca-DAO/tapioca-sdk
-[submodule "gitmodule/tap-token"]
-	path = gitmodule/tap-token
-	url = https://github.com/Tapioca-DAO/tap-token
-[submodule "gitmodule/tapioca-mocks"]
-	path = gitmodule/tapioca-mocks
-	url = https://github.com/Tapioca-DAO/tapioca-mocks
-[submodule "gitmodule/tapioca-lbp"]
-	path = gitmodule/tapioca-lbp
+[submodule "lib/tap-utils"]
+	path = lib/tap-utils
+	url = https://github.com/Tapioca-DAO/tap-utils
+[submodule "lib/tap-yieldbox"]
+	path = lib/tap-yieldbox
+	url = https://github.com/Tapioca-DAO/tap-yieldbox
+[submodule "lib/Tapioca-bar"]
+	path = lib/Tapioca-bar
+	url = https://github.com/Tapioca-DAO/Tapioca-bar
+[submodule "lib/tapioca-lbp"]
+	path = lib/tapioca-lbp
 	url = https://github.com/Tapioca-DAO/tapioca-lbp
-[submodule "gitmodule/tapiocaz"]
-	path = gitmodule/tapiocaz
-	url = https://github.com/Tapioca-DAO/TapiocaZ
-[submodule "gitmodule/permitc"]
-	path = gitmodule/permitc
-	url = https://github.com/Tapioca-DAO/PermitC.git
+[submodule "lib/tapiocaz"]
+	path = lib/tapiocaz
+	url = https://github.com/Tapioca-DAO/tapiocaz

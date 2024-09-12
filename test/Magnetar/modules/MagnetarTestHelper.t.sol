@@ -2,12 +2,13 @@
 pragma solidity 0.8.22;
 
 // Lz
-import {TestHelper} from "../../LZSetup/TestHelper.sol";
+import {TestHelper} from "tap-utils/../test/LZSetup/TestHelper.sol";
 
 // External
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {TapiocaOmnichainEngineHelper} from
-    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+    "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+import {SimpleLeverageExecutor} from "tapioca-bar/markets/leverage/SimpleLeverageExecutor.sol";
 import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 import {SGLLiquidation} from "tapioca-bar/markets/singularity/SGLLiquidation.sol";
@@ -15,57 +16,64 @@ import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
 import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
-import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
+import {Cluster} from "tap-utils/Cluster/Cluster.sol";
 
-import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 import {BBLiquidation} from "tapioca-bar/markets/bigBang/BBLiquidation.sol";
 import {BBCollateral} from "tapioca-bar/markets/bigBang/BBCollateral.sol";
 import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
 import {BBBorrow} from "tapioca-bar/markets/bigBang/BBBorrow.sol";
 import {BigBang} from "tapioca-bar/markets/bigBang/BigBang.sol";
+import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
-import {ITapiocaOmnichainEngine} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ITapiocaOmnichainEngine} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
 import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
+import {MagnetarBaseModule} from "tapioca-periph/Magnetar/modules/MagnetarBaseModule.sol";
 import {Magnetar} from "tapioca-periph/Magnetar/Magnetar.sol";
 
-import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {IMagnetarHelper} from "tap-utils/interfaces/periph/IMagnetarHelper.sol";
 import {MagnetarHelper} from "tapioca-periph/Magnetar/MagnetarHelper.sol";
 import {MarketHelper} from "tapioca-bar/markets/MarketHelper.sol";
 
-import {UsdoInitStruct, UsdoModulesInitStruct, IUsdo} from "tapioca-periph/interfaces/oft/IUsdo.sol";
+import {UsdoInitStruct, UsdoModulesInitStruct, IUsdo} from "tap-utils/interfaces/oft/IUsdo.sol";
 import {UsdoMarketReceiverModule} from "tapioca-bar/usdo/modules/UsdoMarketReceiverModule.sol";
 import {UsdoOptionReceiverModule} from "tapioca-bar/usdo/modules/UsdoOptionReceiverModule.sol";
 import {UsdoReceiver} from "tapioca-bar/usdo/modules/UsdoReceiver.sol";
 import {UsdoSender} from "tapioca-bar/usdo/modules/UsdoSender.sol";
 import {Usdo, BaseUsdo} from "tapioca-bar/usdo/Usdo.sol";
 
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {BaseTOFTReceiver} from "tapiocaz/tOFT/modules/BaseTOFTReceiver.sol";
 import {mTOFTReceiver} from "tapiocaz/tOFT/modules/mTOFTReceiver.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
 import {TOFTReceiver} from "tapiocaz/tOFT/modules/TOFTReceiver.sol";
 import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
+import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
+import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 import {TOFT} from "tapiocaz/tOFT/TOFT.sol";
 
-import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
+import {ILeverageExecutor} from "tap-utils/interfaces/bar/ILeverageExecutor.sol";
+import {ITapiocaOracle} from "tap-utils/interfaces/periph/ITapiocaOracle.sol";
+import {IZeroXSwapper} from "tap-utils/interfaces/periph/IZeroXSwapper.sol";
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
+
+import {ZerroXSwapperMockTarget} from "tap-utils/../test/ZeroXSwapper/ZerroXSwapperMockTarget.sol";
+import {ZeroXSwapper} from "tap-utils/Swapper/ZeroXSwapper.sol";
 
 import {OracleMock} from "../../mocks/OracleMock.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
 
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
+import {Cluster} from "tap-utils/Cluster/Cluster.sol";
 
-import {Pearlmit, IPearlmit, PearlmitHash} from "tapioca-periph/pearlmit/Pearlmit.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
+import {Pearlmit, IPearlmit, PearlmitHash} from "tap-utils/pearlmit/Pearlmit.sol";
+import {IPearlmit} from "tap-utils/interfaces/periph/IPearlmit.sol";
 
 import {IWrappedNative} from "yieldbox/interfaces/IWrappedNative.sol";
 import {YieldBoxURIBuilder} from "yieldbox/YieldBoxURIBuilder.sol";
@@ -74,14 +82,17 @@ import {IStrategy} from "yieldbox/interfaces/IStrategy.sol";
 import {IYieldBox} from "yieldbox/interfaces/IYieldBox.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
-import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
+import {IPenrose} from "tap-utils/interfaces/bar/IPenrose.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
 
-import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
+import {TapiocaOmnichainExtExec} from "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 
-import {ERC20PermitStruct} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {IMarket, Module} from "tap-utils/interfaces/bar/IMarket.sol";
 
-import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ERC20PermitStruct} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+
+import {MagnetarWithdrawData} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 
 import "forge-std/Test.sol";
 
@@ -128,6 +139,7 @@ contract MagnetarTestHelper is TestHelper {
     Singularity sglMC;
     BigBang bbMC;
 
+    SGLInit sglInit;
     Singularity sgl;
     BigBang bb;
 
@@ -197,6 +209,7 @@ contract MagnetarTestHelper is TestHelper {
         wethId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
         tapId = registerYieldBoxAsset(address(yieldBox), address(weth), address(wethStrategy));
 
+        sglInit = new SGLInit();
         (penrose, sglMC, bbMC) = createPenrose(
             address(pearlmit),
             address(yieldBox),
@@ -271,6 +284,13 @@ contract MagnetarTestHelper is TestHelper {
         );
         setAssetOracle(penrose, bb, address(oracle));
         penrose.setBigBangEthMarket(address(bb));
+       
+        address[] memory markets = new address[](1);
+        markets[0] = address(bb);
+        bytes[] memory marketsData = new bytes[](1);
+        BBDebtRateHelper bbRateHelper = new BBDebtRateHelper();
+        marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
+        penrose.executeMarketFn(markets, marketsData, true);
 
         assetA.setMinterStatus(address(bb), true);
         assetA.setBurnerStatus(address(bb), true);

@@ -6,9 +6,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {IMagnetarModuleExtender} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {IMagnetarHelper} from "tapioca-periph/interfaces/periph/IMagnetarHelper.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IMagnetarModuleExtender} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {IMagnetarHelper} from "tap-utils/interfaces/periph/IMagnetarHelper.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 import {MagnetarStorage, IPearlmit} from "./MagnetarStorage.sol";
 
 /*

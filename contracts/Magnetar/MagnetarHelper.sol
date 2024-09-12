@@ -6,11 +6,11 @@ import {RebaseLibrary, Rebase} from "@boringcrypto/boring-solidity/contracts/lib
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {IYieldBox, IYieldBoxTokenType} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {ISingularity, IMarket} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
-import {IBigBang} from "tapioca-periph/interfaces/bar/IBigBang.sol";
+import {IYieldBox, IYieldBoxTokenType} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {ITapiocaOracle} from "tap-utils/interfaces/periph/ITapiocaOracle.sol";
+import {ISingularity, IMarket} from "tap-utils/interfaces/bar/ISingularity.sol";
+import {IPenrose} from "tap-utils/interfaces/bar/IPenrose.sol";
+import {IBigBang} from "tap-utils/interfaces/bar/IBigBang.sol";
 
 /*
 

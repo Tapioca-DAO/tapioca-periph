@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 import {IYieldBox} from "yieldbox/interfaces/IYieldBox.sol";
 import {Penrose} from "tapioca-bar/Penrose.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
@@ -15,7 +15,7 @@ import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
 import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
 import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
+import {Cluster} from "tap-utils/Cluster/Cluster.sol";
 
 import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 import {BBLiquidation} from "tapioca-bar/markets/bigBang/BBLiquidation.sol";
@@ -24,20 +24,21 @@ import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
 import {BBBorrow} from "tapioca-bar/markets/bigBang/BBBorrow.sol";
 import {BigBang} from "tapioca-bar/markets/bigBang/BigBang.sol";
 
-import {ILeverageExecutor} from "tapioca-periph/interfaces/bar/ILeverageExecutor.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {IZeroXSwapper} from "tapioca-periph/interfaces/periph/IZeroXSwapper.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
-import {IPenrose} from "tapioca-periph/interfaces/bar/IPenrose.sol";
+import {ILeverageExecutor} from "tap-utils/interfaces/bar/ILeverageExecutor.sol";
+import {ITapiocaOracle} from "tap-utils/interfaces/periph/ITapiocaOracle.sol";
+import {IZeroXSwapper} from "tap-utils/interfaces/periph/IZeroXSwapper.sol";
+import {IPearlmit} from "tap-utils/interfaces/periph/IPearlmit.sol";
+import {IPenrose} from "tap-utils/interfaces/bar/IPenrose.sol";
 
-import {ZerroXSwapperMockTarget} from "../ZeroXSwapper/ZerroXSwapperMockTarget.sol";
-import {ZeroXSwapper} from "tapioca-periph/Swapper/ZeroXSwapper.sol";
+import {ZerroXSwapperMockTarget} from "tap-utils/../test/ZeroXSwapper/ZerroXSwapperMockTarget.sol";
+import {ZeroXSwapper} from "tap-utils/Swapper/ZeroXSwapper.sol";
 
 import {TokenType} from "yieldbox/enums/YieldBoxTokenType.sol";
 import {IStrategy} from "yieldbox/interfaces/IStrategy.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 import {SingularityMock} from "../mocks/SingularityMock.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 
 // External
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
@@ -143,6 +144,8 @@ contract MagnetarTestUtils {
     function createSingularity(TestSingularityData memory _sgl, address _mc) public returns (Singularity) {
         SGLInit sglInit = new SGLInit();
         Singularity sgl = new Singularity();
+        SGLInit sglInit = new SGLInit();
+
         (
             Singularity._InitMemoryModulesData memory _modulesData,
             Singularity._InitMemoryTokensData memory _tokensData,
