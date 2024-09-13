@@ -65,6 +65,8 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         clusterA.updateContract(0, address(tOLPMock), true);
         clusterA.updateContract(0, address(tOB), true);
+
+        pearlmit.approve(1155, address(yieldBox), assetAId, address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
     }
 
     function createLockAndParticipateData(address user, address singularity, address magnetar, address yieldBox)
@@ -76,16 +78,13 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
             tSglToken: singularity,
             yieldBox: yieldBox,
             magnetar: magnetar,
-            lockData: IOptionsLockData({
-                lock: false,
+            lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
+            participateData: IOptionsParticipateData({
+                participate: false,
                 target: address(0),
-                tAsset: address(0),
-                lockDuration: 0,
-                amount: 0,
-                fraction: 0,
-                minDiscountOut: 0
+                tOLPTokenId: 0
+
             }),
-            participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
             value: 0
         });
     }
@@ -110,16 +109,13 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
                 collateralDepositData: IDepositData({deposit: false, amount: depositAmount})
             }),
             depositData: IDepositData({deposit: false, amount: depositAmount}),
-            lockData: IOptionsLockData({
-                lock: false,
+            lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
+            participateData: IOptionsParticipateData({
+                participate: false,
                 target: address(0),
-                tAsset: address(0),
-                lockDuration: 0,
-                amount: 0,
-                fraction: 0,
-                minDiscountOut: 0
+                tOLPTokenId: 0
+
             }),
-            participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
             externalContracts: ICommonExternalContracts({
                 magnetar: _magnetar,
                 singularity: _singularity,

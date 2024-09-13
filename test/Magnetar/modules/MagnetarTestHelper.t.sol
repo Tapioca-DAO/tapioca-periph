@@ -283,6 +283,7 @@ contract MagnetarTestHelper is TestHelper {
             address(bbMC)
         );
         setAssetOracle(penrose, bb, address(oracle));
+        penrose.setBigBangEthMarket(address(bb));
        
         address[] memory markets = new address[](1);
         markets[0] = address(bb);
@@ -499,6 +500,7 @@ contract MagnetarTestHelper is TestHelper {
 
     function createBigBang(TestBigBangData memory _bb, address _mc) public returns (BigBang) {
         BigBang bb = new BigBang();
+        BBDebtRateHelper helper = new BBDebtRateHelper();
 
         (
             BigBang._InitMemoryModulesData memory initModulesData,
@@ -514,11 +516,19 @@ contract MagnetarTestHelper is TestHelper {
             Penrose(_bb.penrose).addBigBang(_mc, address(bb));
         }
 
+        address[] memory markets = new address[](1);
+        markets[0] = address(bb);
+        bytes[] memory marketsData = new bytes[](1);
+        BBDebtRateHelper bbRateHelper = new BBDebtRateHelper();
+        marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
+        penrose.executeMarketFn(markets, marketsData, true);
+
         return bb;
     }
 
     function createSingularity(TestSingularityData memory _sgl, address _mc) public returns (Singularity) {
         Singularity sgl = new Singularity();
+        SGLInit sglInit = new SGLInit();
         (
             Singularity._InitMemoryModulesData memory _modulesData,
             Singularity._InitMemoryTokensData memory _tokensData,
