@@ -17,4 +17,8 @@ contract TapOftMock is ERC20 {
     function mint(address to, uint256 tokenId) external {
         _mint(to, tokenId);
     }
+
+    function wrap(address, address, uint256 am) external returns (uint256) {
+        return am;
+    }
 }

@@ -13,9 +13,11 @@ import {SGLCollateral} from "tapioca-bar/markets/singularity/SGLCollateral.sol";
 import {SGLLeverage} from "tapioca-bar/markets/singularity/SGLLeverage.sol";
 import {Singularity} from "tapioca-bar/markets/singularity/Singularity.sol";
 import {SGLInterestHelper} from "tapioca-bar/markets/singularity/SGLInterestHelper.sol";
+import {SGLInit} from "tapioca-bar/markets/singularity/SGLInit.sol";
 import {SGLBorrow} from "tapioca-bar/markets/singularity/SGLBorrow.sol";
 import {Cluster} from "tap-utils/Cluster/Cluster.sol";
 
+import {BBDebtRateHelper} from "tapioca-bar/markets/bigBang/BBDebtRateHelper.sol";
 import {BBLiquidation} from "tapioca-bar/markets/bigBang/BBLiquidation.sol";
 import {BBCollateral} from "tapioca-bar/markets/bigBang/BBCollateral.sol";
 import {BBLeverage} from "tapioca-bar/markets/bigBang/BBLeverage.sol";
@@ -128,6 +130,14 @@ contract MagnetarTestUtils {
             Penrose(_bb.penrose).addBigBang(_mc, address(bb));
         }
 
+        BBDebtRateHelper helper = new BBDebtRateHelper();
+        address[] memory markets = new address[](1);
+        markets[0] = address(bb);
+        bytes[] memory marketsData = new bytes[](1);
+        BBDebtRateHelper bbRateHelper = new BBDebtRateHelper();
+        marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
+        Penrose(_bb.penrose).executeMarketFn(markets, marketsData, true);
+
         return bb;
     }
 
@@ -160,7 +170,8 @@ contract MagnetarTestUtils {
                 0,
                 0,
                 0,
-                address(sglInterestHelper)
+                address(sglInterestHelper),
+                0
             );
             address[] memory mc = new address[](1);
             mc[0] = address(sgl);

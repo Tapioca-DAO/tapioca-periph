@@ -28,6 +28,7 @@ import {TapiocaOptionsLiquidityProvisionMock} from "../../mocks/TapiocaOptionsLi
 import {TapiocaOptionsBrokerMock} from "../../mocks/TapiocaOptionsBrokerMock.sol";
 import {TapOftMock} from "../../mocks/TapOftMock.sol";
 import {ERC721Mock} from "../../mocks/ERC721Mock.sol";
+import {TOFTMock} from "../../mocks/TOFTMock.sol";
 
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
 
@@ -37,6 +38,8 @@ import "forge-std/console.sol";
 contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
     TapiocaOptionsLiquidityProvisionMock public tOLPMock;
     TapiocaOptionsBrokerMock public tOB;
+    TapOftMock tapOft;
+    TOFTMock tSgl;
 
     uint256 public sglAssetId;
 
@@ -53,7 +56,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         tOLPMock = new TapiocaOptionsLiquidityProvisionMock(sglAssetId, address(yieldBox), IPearlmit(address(pearlmit)));
 
-        TapOftMock tapOft = new TapOftMock();
+        tapOft = new TapOftMock();
         ERC721Mock oTAP = new ERC721Mock();
         tOB = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
         tOB.setTOLP(address(tOLPMock));
@@ -63,6 +66,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
 
         clusterB.setRoleForContract(address(tOLPMock), keccak256("MAGNETAR_TAP_CALLEE"), true);
         clusterB.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
+
     }
 
     function _createMintFromBBAndLendOnSGLData(
@@ -85,16 +89,13 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
                 collateralDepositData: IDepositData({deposit: false, amount: depositAmount})
             }),
             depositData: IDepositData({deposit: false, amount: depositAmount}),
-            lockData: IOptionsLockData({
-                lock: false,
+            lockData: IOptionsLockData({lock: false, target: address(0), tAsset:address(0), lockDuration: 0, amount: 0, fraction: 0, minDiscountOut: 0}),
+            participateData: IOptionsParticipateData({
+                participate: false,
                 target: address(0),
-                tAsset: address(0),
-                lockDuration: 0,
-                amount: 0,
-                fraction: 0,
-                minDiscountOut: 0
+                tOLPTokenId: 0
+
             }),
-            participateData: IOptionsParticipateData({participate: false, target: address(0), tOLPTokenId: 0}),
             externalContracts: ICommonExternalContracts({
                 magnetar: _magnetar,
                 singularity: _singularity,
@@ -506,6 +507,11 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
             address(bb),
             address(marketHelper)
         );
+
+        tSgl = new TOFTMock(address(sgl), IPearlmit(address(pearlmit)));
+        clusterA.updateContract(0, address(tSgl), true);
+        
+
         _params.mintData.mint = true;
         _params.mintData.mintAmount = mintAmount_;
         _params.mintData.collateralDepositData.deposit = true;
@@ -513,6 +519,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
         _params.depositData.deposit = true;
         _params.depositData.amount = tokenAmount_;
         _params.lockData.lock = true;
+        _params.lockData.tAsset = address(tSgl);
         _params.lockData.target = address(tOLPMock);
 
         bytes memory mintFromBBAndLendOnSGLData =
@@ -547,6 +554,8 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
         pearlmit.approve(
             1155, address(yieldBox), sglAssetId, address(magnetarA), type(uint200).max, uint48(block.timestamp)
         ); // lend approval
+
+        deal(address(sgl), address(magnetarA), 99999999999999 ether);
 
         magnetarA.burst{value: 0}(calls);
 
@@ -584,6 +593,11 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
             address(bb),
             address(marketHelper)
         );
+
+        tSgl = new TOFTMock(address(sgl), IPearlmit(address(pearlmit)));
+        clusterA.updateContract(0, address(tSgl), true);
+        
+
         _params.mintData.mint = true;
         _params.mintData.mintAmount = mintAmount_;
         _params.mintData.collateralDepositData.deposit = true;
@@ -592,6 +606,7 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
         _params.depositData.amount = tokenAmount_;
         _params.lockData.lock = true;
         _params.lockData.target = address(tOLPMock);
+        _params.lockData.tAsset = address(tSgl);
         _params.participateData.participate = true;
         _params.participateData.target = address(tOB);
 
@@ -629,6 +644,8 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
         pearlmit.approve(721, address(tOLPMock), 1, address(magnetarA), type(uint200).max, uint48(block.timestamp)); // lend approval
         tOLPMock.setApprovalForAll(address(pearlmit), true);
 
+        deal(address(sgl), address(magnetarA), 99999999999999 ether);
+        
         magnetarA.burst{value: 0}(calls);
 
         sgl.approve(address(pearlmit), 0);
