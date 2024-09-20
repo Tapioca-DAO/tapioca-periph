@@ -176,13 +176,13 @@ contract MagnetarMintModule is MagnetarBaseModule {
         _checkSender(data.user);
 
         // Check provided addresses
-        _checkWhitelisted(data.externalContracts.magnetar);
-        _checkWhitelisted(data.externalContracts.singularity);
-        _checkWhitelisted(data.externalContracts.bigBang);
-        _checkWhitelisted(data.externalContracts.marketHelper);
-        _checkWhitelisted(data.lockData.target);
-        _checkWhitelisted(data.lockData.tAsset);
-        _checkWhitelisted(data.participateData.target);
+        _checkWhitelisted(data.externalContracts.magnetar, "MAGNETAR_CALLEE");
+        _checkWhitelisted(data.externalContracts.singularity, "MAGNETAR_MARKET_CALLEE");
+        _checkWhitelisted(data.externalContracts.bigBang, "MAGNETAR_MARKET_CALLEE");
+        _checkWhitelisted(data.externalContracts.marketHelper, "MAGNETAR_HELPER_CALLEE");
+        _checkWhitelisted(data.lockData.target, "MAGNETAR_TAP_CALLEE");
+        _checkWhitelisted(data.lockData.tAsset, "MAGNETAR_TAP_CALLEE");
+        _checkWhitelisted(data.participateData.target, "MAGNETAR_TAP_CALLEE");
     }
 
     function _depositAddCollateralAndMintFromBigBang(MintFromBBAndLendOnSGLData memory data) private {

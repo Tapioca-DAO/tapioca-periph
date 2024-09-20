@@ -48,16 +48,11 @@ abstract contract MagnetarBaseModule is MagnetarStorage {
     /// Internal
     /// =====================
     function _withdrawHere(MagnetarWithdrawData memory data) internal {
-        _checkWhitelisted(data.yieldBox);
+        _checkWhitelisted(data.yieldBox, "YIELDBOX_WITHDRAW");
 
         IYieldBox _yb = IYieldBox(data.yieldBox);
 
         if (data.extractFromSender) {
-            // do NOT allow `extractFromSender` for whitelisted addresses
-            //    because in this cases funds should be already here
-            //    since it comes from an internal flow
-            if (cluster.isWhitelisted(0, msg.sender)) revert Magnetar_ExtractTokenFail();
-
             uint256 _share = _yb.toShare(data.assetId, data.amount, false);
             
             // _yb.transfer(msg.sender, address(this), data.assetId, _share);

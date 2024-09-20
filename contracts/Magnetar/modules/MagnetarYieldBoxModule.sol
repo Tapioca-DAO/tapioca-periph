@@ -79,11 +79,11 @@ contract MagnetarYieldBoxModule is MagnetarBaseModule {
     /// =====================
     function validateDepositAsset(YieldBoxDepositData memory data) private view {
         _checkSender(data.from);
-        _checkWhitelisted(data.yieldBox);
+        _checkWhitelisted(data.yieldBox, "MAGNETAR_YIELDBOX_CALLEE");
     }
 
     function validateWithdraw(MagnetarWithdrawData memory data) private view {
-        _checkWhitelisted(data.yieldBox);
+        _checkWhitelisted(data.yieldBox, "MAGNETAR_YIELDBOX_CALLEE");
 
         if (data.amount == 0) revert Magnetar_ActionParamsMismatch();
         if (!data.withdraw) revert Magnetar_ActionParamsMismatch();

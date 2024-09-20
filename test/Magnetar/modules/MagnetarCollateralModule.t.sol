@@ -532,7 +532,7 @@ contract MagnetarCollateralModuleTest is MagnetarTestHelper {
         vm.stopPrank();
 
         //authorize user
-        clusterA.updateContract(0, address(this), true);
+        clusterA.setRoleForContract(address(this),  keccak256(abi.encodePacked("CALLER_ALLOWED_FOR_", userA)), true);
 
         magnetarA.burst{value: 0}(calls);
         assetA.approve(address(pearlmit), 0);

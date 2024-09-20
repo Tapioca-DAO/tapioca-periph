@@ -87,7 +87,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
      */
     function burst(MagnetarCall[] calldata calls) external payable whenNotPaused {
         // @dev: make sure the current magnetar is whitelisted
-        _checkWhitelisted(address(this));
+        _checkWhitelisted(address(this), "MAGNETAR_CONTRACT");
 
         uint256 valAccumulator;
 
@@ -210,7 +210,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     {
         selectorValidated = false;
 
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_PERMIT_CALLEE");
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
@@ -234,7 +234,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
         if (funcSig == IERC721Permit.permit.selector) {
             // check if `spender` is whitelisted
-            _checkWhitelisted(abi.decode(_actionCalldata[4:36], (address)));
+            _checkWhitelisted(abi.decode(_actionCalldata[4:36], (address)), "MAGNETAR_CALLEE");
 
             // check if sender is owner of `tokenId`
             uint256 tokenId = abi.decode(_actionCalldata[36:68], (uint256));
@@ -287,7 +287,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     {
         selectorValidated = false;
 
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_OFT_CALLEE");
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (funcSig == ITOFT.wrap.selector) {
@@ -348,7 +348,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     {
         selectorValidated = false;
 
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_MARKET_CALLEE");
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         // function addCollateral(address from, address to, bool skim, uint256 amount, uint256 share)
@@ -509,7 +509,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
     {
         selectorValidated = false;
 
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_TAP_CALLEE");
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
@@ -555,7 +555,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         view
         returns (bool selectorValidated)
     {
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_TAP_CALLEE");
 
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         selectorValidated = funcSig == ITwTap.exitPosition.selector
@@ -627,7 +627,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         view
         returns (bool selectorValidated)
     {
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "MAGNETAR_TAP_CALLEE");
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         selectorValidated = funcSig == ITapiocaOptionBroker.exerciseOption.selector;
     }
@@ -657,7 +657,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         view
         returns (bool selectorValidated)
     {
-        _checkWhitelisted(_target);
+        _checkWhitelisted(_target, "WETH");
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         selectorValidated = funcSig == IWeth9.deposit.selector;
     }
