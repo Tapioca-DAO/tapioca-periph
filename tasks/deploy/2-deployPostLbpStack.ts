@@ -26,6 +26,8 @@ import { buildWstethUsdOracle } from 'tasks/deployBuilds/oracle/buildWstethUsdOr
 import { deployUniPoolAndAddLiquidity } from 'tasks/deployBuilds/postLbp/deployUniPoolAndAddLiquidity';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { deployPostLbpStack__postDeploy } from './postDeploy/2-postDeploySetup';
+import { buildZroOracle } from 'tasks/deployBuilds/oracle/buildZroOracle';
+import { buildStgUsdcV2Oracle } from 'tasks/deployBuilds/oracle/buildStgUsdcV2Oracle';
 
 /**
  * @notice Called only after tap-token repo `postLbp1` task
@@ -134,6 +136,7 @@ async function tapiocaDeployTask(
             .add(await buildETHUniOracle(hre, owner, isTestnet))
             .add(await buildDualETHOracle(hre, owner))
             .add(await buildGLPOracle(hre, owner))
+            .add(await buildStgUsdcV2Oracle(hre))
             .add(await buildEthGlpPOracle(hre, owner))
             .add(await buildGMXOracle(hre, owner, isTestnet))
             .add(
@@ -163,6 +166,7 @@ async function tapiocaDeployTask(
             .add(await buildUSDCOracle(hre, owner, isTestnet))
             .add(await buildRethUsdOracle(hre, owner, isTestnet))
             .add(await buildWstethUsdOracle(hre, owner, isTestnet))
+            .add(await buildZroOracle(hre))
             .add(
                 await buildUsdoMarketOracle(hre, {
                     deploymentName: DEPLOYMENT_NAMES.MARKET_RETH_ORACLE,
@@ -204,12 +208,12 @@ async function tapiocaDeployTask(
             )
             .add(
                 await buildUsdoMarketOracle(hre, {
-                    deploymentName: DEPLOYMENT_NAMES.MARKET_GLP_ORACLE,
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_STG_USDC_V2_ORACLE,
                     args: ['', owner],
                     dependsOn: [
                         {
                             argPosition: 0,
-                            deploymentName: DEPLOYMENT_NAMES.GLP_ORACLE,
+                            deploymentName: DEPLOYMENT_NAMES.STG_USDC_V2_ORACLE,
                         },
                     ],
                 }),
