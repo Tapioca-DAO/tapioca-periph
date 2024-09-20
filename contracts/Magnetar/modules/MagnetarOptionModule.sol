@@ -106,7 +106,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             data.participateData.participate ? address(this) : data.user,
             data.tSglToken,
             data.lockData.lockDuration,
-            data.lockData.amount
+            _fraction
         );
 
         _yieldBox.setApprovalForAll(address(pearlmit), false);
