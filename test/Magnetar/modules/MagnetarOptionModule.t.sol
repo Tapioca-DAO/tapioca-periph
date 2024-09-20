@@ -176,6 +176,9 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
         pearlmit.approve(
             1155, address(yieldBox), collateralAId, address(bb), type(uint200).max, uint48(block.timestamp)
         ); // Atomic approval
+        pearlmit.approve(
+            1155, address(yieldBox), 6, address(tOLPMock), type(uint200).max, uint48(block.timestamp)
+        ); // Atomic approval
         _setYieldBoxApproval(yieldBox, address(pearlmit));
         pearlmit.approve(20, address(assetA), 0, address(magnetarA), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         assetA.approve(address(pearlmit), type(uint256).max);

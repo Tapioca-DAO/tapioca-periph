@@ -94,7 +94,6 @@ contract MagnetarMintModuleTest is MagnetarTestHelper, IERC721Receiver {
                 participate: false,
                 target: address(0),
                 tOLPTokenId: 0
-
             }),
             externalContracts: ICommonExternalContracts({
                 magnetar: _magnetar,
