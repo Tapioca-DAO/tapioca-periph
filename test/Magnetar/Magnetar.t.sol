@@ -185,13 +185,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         oracle = new OracleMock("Test", "TT", 1 ether);
         marketHelper = new MarketHelper();
 
-        cluster.updateContract(0, address(magnetar), true);
-        cluster.updateContract(0, address(magnetarHelper), true);
-        cluster.updateContract(0, address(oracle), true);
-        cluster.updateContract(0, address(pearlmit), true);
-        cluster.updateContract(0, address(asset), true);
-        cluster.updateContract(0, address(collateral), true);
-        cluster.updateContract(0, address(marketHelper), true);
 
         vm.label(address(magnetar), "Magnetar");
         vm.label(address(magnetarHelper), "MagnetarHelper");
@@ -208,6 +201,13 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         collateral.approve(address(magnetar), type(uint256).max);
 
         magnetar.setHelper(address(magnetarHelper));
+
+        cluster.setRoleForContract(address(magnetar), keccak256("MAGNETAR_CONTRACT"), true);
+        cluster.setRoleForContract(address(marketHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        cluster.setRoleForContract(address(magnetarHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        cluster.setRoleForContract(address(asset), keccak256("MAGNETAR_CALLEE"), true);
+        cluster.setRoleForContract(address(collateral), keccak256("MAGNETAR_CALLEE"), true);
+
     }
 
     function _setupSgl(address _oracle) private returns (Singularity, Penrose, YieldBox) {
@@ -256,6 +256,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
                 address(mc)
             );
         }
+        cluster.setRoleForContract(address(sgl), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        cluster.setRoleForContract(address(yb), keccak256("MAGNETAR_YIELDBOX_CALLEE"), true);
 
         return (sgl, penrose, yb);
     }
@@ -311,6 +313,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         marketsData[0] = abi.encodeWithSelector(BigBang.setDebtRateHelper.selector, address(bbRateHelper));
         penrose.executeMarketFn(markets, marketsData, true);
 
+        cluster.setRoleForContract(address(bb), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        cluster.setRoleForContract(address(yb), keccak256("MAGNETAR_YIELDBOX_CALLEE"), true);
         return (bb, penrose, yb);
     }
 
@@ -355,8 +359,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
     function test_yieldBox_deposit() public {
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
+        
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -397,8 +400,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
     function test_lend() public {
         vm.skip(true);
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
+
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -452,8 +454,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         vm.skip(true);
 
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
+
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -607,8 +608,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         vm.skip(true);
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
 
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -752,8 +751,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         vm.skip(true);
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
 
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -901,8 +898,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
         utils.setBBEthMarket(penrose, address(bb));
 
-        cluster.updateContract(0, address(bb), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(bb), "BigBang");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -965,8 +960,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         (BigBang bb, Penrose penrose, YieldBox yieldBox) = _setupBb(address(oracle));
         utils.setBBEthMarket(penrose, address(bb));
 
-        cluster.updateContract(0, address(bb), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(bb), "BigBang");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -1032,8 +1025,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         bb.approve(address(magnetar), type(uint256).max);
         utils.setBBEthMarket(penrose, address(bb));
 
-        cluster.updateContract(0, address(bb), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(bb), "BigBang");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -1184,8 +1175,6 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
 
         (Singularity sgl,, YieldBox yieldBox) = _setupSgl(address(oracle));
 
-        cluster.updateContract(0, address(sgl), true);
-        cluster.updateContract(0, address(yieldBox), true);
         vm.label(address(sgl), "Singularity");
         vm.label(address(yieldBox), "YieldBox");
 
@@ -1270,9 +1259,7 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         TapiocaOptionsBrokerMock tOb =
             new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
 
-        cluster.updateContract(0, address(tOb), true);
-        cluster.updateContract(0, address(tapOft), true);
-        cluster.updateContract(0, address(paymentToken), true);
+        cluster.setRoleForContract(address(tOb), keccak256("MAGNETAR_TAP_CALLEE"), true);
 
         deal(address(paymentToken), address(this), 1 ether);
 
@@ -1302,8 +1289,8 @@ contract MagnetarTest is TestBase, StdAssertions, StdCheats, StdUtils, TestHelpe
         {
             deal(address(aToeOFT), address(this), tokenAmount_);
         }
-        cluster.updateContract(0, address(aToeOFT), true);
         cluster.setRoleForContract(address(magnetar), keccak256("TOE"), true);
+        cluster.setRoleForContract(address(aToeOFT), keccak256("MAGNETAR_OFT_CALLEE"), true);
 
         PrepareLzCallReturn memory prepareLzCallReturn_ = toeHelper.prepareLzCall(
             ITapiocaOmnichainEngine(address(aToeOFT)),

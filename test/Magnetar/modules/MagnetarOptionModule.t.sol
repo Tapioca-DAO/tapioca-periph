@@ -63,8 +63,11 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
         tOB = new TapiocaOptionsBrokerMock(address(oTAP), address(tapOft), IPearlmit(address(pearlmit)));
         tOB.setTOLP(address(tOLPMock));
 
-        clusterA.updateContract(0, address(tOLPMock), true);
-        clusterA.updateContract(0, address(tOB), true);
+        clusterA.setRoleForContract(address(tOLPMock), keccak256("MAGNETAR_TAP_CALLEE"), true);
+        clusterA.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
+
+        clusterB.setRoleForContract(address(tOLPMock), keccak256("MAGNETAR_TAP_CALLEE"), true);
+        clusterB.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
 
         pearlmit.approve(1155, address(yieldBox), assetAId, address(bb), type(uint200).max, uint48(block.timestamp)); // this is needed for Pearlmit.allowance check on market
     }
@@ -172,6 +175,9 @@ contract MagnetarOptionModuleTest is MagnetarTestHelper, IERC721Receiver {
         ); // this is needed for Pearlmit.allowance check on market
         pearlmit.approve(
             1155, address(yieldBox), collateralAId, address(bb), type(uint200).max, uint48(block.timestamp)
+        ); // Atomic approval
+        pearlmit.approve(
+            1155, address(yieldBox), 6, address(tOLPMock), type(uint200).max, uint48(block.timestamp)
         ); // Atomic approval
         _setYieldBoxApproval(yieldBox, address(pearlmit));
         pearlmit.approve(20, address(assetA), 0, address(magnetarA), type(uint200).max, uint48(block.timestamp)); // Atomic approval

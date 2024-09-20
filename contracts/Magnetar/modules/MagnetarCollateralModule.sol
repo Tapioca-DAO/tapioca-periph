@@ -254,8 +254,8 @@ contract MagnetarCollateralModule is MagnetarBaseModule {
     }
 
     function _checkExternalData(address market, address marketHelper) private view {
-        _checkWhitelisted(market);
-        _checkWhitelisted(marketHelper);
+        _checkWhitelisted(market, "MAGNETAR_MARKET_CALLEE");
+        _checkWhitelisted(marketHelper, "MAGNETAR_HELPER_CALLEE");
     }
 
     function _checkDepositRepayAndRemoveCollateralFromMarketDataWithdrawData(
