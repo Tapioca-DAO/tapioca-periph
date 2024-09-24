@@ -45,7 +45,6 @@ contract MagnetarOptionModule is MagnetarBaseModule {
     using SafeCast for uint256;
 
     error Magnetar_ComposeMsgNotAllowed();
-    error Magnetar__minDiscountOutMismatch(uint128 expected, uint128 received);
 
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
 
@@ -97,16 +96,17 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.tSglToken);
 
         _fraction = _extractTokens(data.user, data.tSglToken, _fraction);
-        _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
+        (, uint256 _shareOut) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
 
-        _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
+        _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, _shareOut);
         _yieldBox.setApprovalForAll(address(pearlmit), true);
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
             data.participateData.participate ? address(this) : data.user,
             data.tSglToken,
             data.lockData.lockDuration,
-            data.lockData.amount
+            _shareOut.toUint128(),
+            msg.sender
         );
 
         _yieldBox.setApprovalForAll(address(pearlmit), false);
@@ -134,15 +134,9 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             721, data.lockData.target, tOLPTokenId, data.participateData.target, 1, block.timestamp.toUint48()
         );
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
-        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
+        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId, 0);
 
-        // Check for the discount slippage
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
-        (, ITapiocaOption.TapOption memory oTapAttributes) = ITapiocaOption(oTapAddress).attributes(oTAPTokenId);
-        if (oTapAttributes.discount < data.lockData.minDiscountOut.toUint128()) {
-            revert Magnetar__minDiscountOutMismatch(uint128(data.lockData.minDiscountOut), oTapAttributes.discount);
-        }
-
         IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId, "");
     }
 

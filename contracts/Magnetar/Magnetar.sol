@@ -469,9 +469,9 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
             }
 
             // Token is sent to the owner after execute
-            if (funcSig == Magnetar.participate.selector) {
-                (address from, uint256 amount, uint256 duration, uint24 minMultiplierOut) =
-                    abi.decode(_actionCalldata[4:], (address, uint256, uint256, uint24));
+            if (funcSig == ITwTap.participate.selector) {
+                (address from, uint256 amount, uint256 duration, uint256 minReward) =
+                    abi.decode(_actionCalldata[4:], (address, uint256, uint256, uint256));
                 address tapOFT = ITwTap(_target).tapOFT();
 
                 {
@@ -485,15 +485,11 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
 
                 tapOFT.safeApprove(address(pearlmit), type(uint256).max);
                 (bytes memory tokenIdData) = _executeCallMemory(
-                    _target, abi.encodeWithSelector(ITwTap.participate.selector, from, amount, duration), _actionValue
+                    _target,
+                    abi.encodeWithSelector(ITwTap.participate.selector, from, amount, duration, minReward),
+                    _actionValue
                 );
                 tapOFT.safeApprove(address(pearlmit), 0);
-
-                ITwTap.Participation memory participation =
-                    ITwTap(_target).getParticipation(abi.decode(tokenIdData, (uint256)));
-                if (participation.multiplier < minMultiplierOut) {
-                    revert("Magnetar: Invalid multiplier");
-                }
 
                 return;
             }
@@ -514,7 +510,7 @@ contract Magnetar is BaseMagnetar, ERC1155Holder {
         bytes4 funcSig = bytes4(_actionCalldata[:4]);
         if (
             funcSig == ITapiocaOptionLiquidityProvision.lock.selector
-                || funcSig == ITapiocaOptionBroker.participate.selector || funcSig == Magnetar.participate.selector
+                || funcSig == ITapiocaOptionBroker.participate.selector || funcSig == ITwTap.participate.selector
         ) {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));

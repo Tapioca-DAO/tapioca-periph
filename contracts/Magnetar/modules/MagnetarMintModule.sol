@@ -40,7 +40,6 @@ contract MagnetarMintModule is MagnetarBaseModule {
 
     error MagnetarMintModule_LockTransferFailed();
     error MagnetarMintModule_ParticipateTransferFailed();
-    error Magnetar__minDiscountOutMismatch(uint128 expected, uint128 received);
 
     constructor(IPearlmit pearlmit, address _toeHelper) MagnetarBaseModule(pearlmit, _toeHelper) {}
     /// =====================
@@ -261,7 +260,8 @@ contract MagnetarMintModule is MagnetarBaseModule {
             participate ? address(this) : data.user,
             data.lockData.tAsset,
             data.lockData.lockDuration,
-            data.lockData.amount
+            data.lockData.amount,
+            msg.sender
         );
     }
 
@@ -286,15 +286,9 @@ contract MagnetarMintModule is MagnetarBaseModule {
             721, data.lockData.target, tOLPTokenId, data.participateData.target, 1, block.timestamp.toUint48()
         );
         IERC721(data.lockData.target).approve(address(pearlmit), tOLPTokenId);
-        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId);
+        uint256 oTAPTokenId = ITapiocaOptionBroker(data.participateData.target).participate(tOLPTokenId, 0);
 
-        // Check for the discount slippage
         address oTapAddress = ITapiocaOptionBroker(data.participateData.target).oTAP();
-        (, ITapiocaOption.TapOption memory oTapAttributes) = ITapiocaOption(oTapAddress).attributes(oTAPTokenId);
-        if (oTapAttributes.discount < data.lockData.minDiscountOut.toUint128()) {
-            revert Magnetar__minDiscountOutMismatch(uint128(data.lockData.minDiscountOut), oTapAttributes.discount);
-        }
-
         IERC721(oTapAddress).safeTransferFrom(address(this), data.user, oTAPTokenId);
     }
 }
