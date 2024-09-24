@@ -97,16 +97,16 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             ITapiocaOptionLiquidityProvision(data.lockData.target).activeSingularities(data.tSglToken);
 
         _fraction = _extractTokens(data.user, data.tSglToken, _fraction);
-        _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
+        (, uint256 _shareOut) = _depositToYb(_yieldBox, address(this), tOLPSglAssetId, _fraction);
 
-        _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, data.lockData.amount);
+        _pearlmitApprove(address(_yieldBox), tOLPSglAssetId, data.lockData.target, _shareOut);
         _yieldBox.setApprovalForAll(address(pearlmit), true);
 
         tOLPTokenId = ITapiocaOptionLiquidityProvision(data.lockData.target).lock(
             data.participateData.participate ? address(this) : data.user,
             data.tSglToken,
             data.lockData.lockDuration,
-            data.lockData.amount
+            _shareOut.toUint128()
         );
 
         _yieldBox.setApprovalForAll(address(pearlmit), false);
