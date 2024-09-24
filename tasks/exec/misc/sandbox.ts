@@ -12,62 +12,19 @@ export const sandbox__task = async (
     const tapiocaMulticallAddr = await VM.getMulticall();
     const signer = (await hre.ethers.getSigners())[0];
 
-    const cluster = await hre.ethers.getContractAt(
-        'Seer',
-        '0x346383F0cfb28CDB9de798cf76D50D59F1AffaeF',
+    const mock = await hre.ethers.getContractAt(
+        'ERC20Mock',
+        '0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E',
     );
-    console.log(await cluster.peek('0x'));
 
-    // const ROLE = hre.ethers.utils.keccak256(
-    //     hre.ethers.utils.solidityPack(['string'], ['TOE']),
-    // );
-
-    // await VM.executeMulticall([
-    //     {
-    //         target: cluster.address,
-    //         callData: cluster.interface.encodeFunctionData('updateContract', [
-    //             0,
-    //             '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1',
-    //             false,
-    //         ]),
-    //         allowFailure: false,
-    //     },
-    //     {
-    //         target: cluster.address,
-    //         callData: cluster.interface.encodeFunctionData(
-    //             'setRoleForContract',
-    //             ['0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1', ROLE, false],
-    //         ),
-    //         allowFailure: false,
-    //     },
-    // ]);
-
-    // await VM.executeMulticall([
-    //     {
-    //         target: cluster.address,
-    //         allowFailure: false,
-    //         callData: cluster.interface.encodeFunctionData('changeTwapPeriod', [
-    //             30,
-    //         ]),
-    //     },
-    // ]);
-    // console.log(await usdo.get('0x', { gasLimit: 1_000_000 }));
-    // console.log(await usdo.peek('0x', { gasLimit: 1_000_000 }));
-    // const usdo = await hre.ethers.getContractAt(
-    //     'Usdo',
-    //     '0x5E0684fE3b584848096221A18B6Ee5280B654719',
-    //     signer,
-    // );
-    // await VM.executeMulticall([
-    //     {
-    //         target: usdo.address,
-    //         allowFailure: false,
-    //         callData: usdo.interface.encodeFunctionData('setMinterStatus', [
-    //             '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1',
-    //             true,
-    //         ]),
-    //     },
-    // ]);
-
-    // for loop to constantly send messages
+    await VM.executeMulticall([
+        {
+            allowFailure: false,
+            callData: mock.interface.encodeFunctionData('setWhitelist', [
+                '0x3D61dbA293184b8D6a4a365DeCf09cA77D0CBDB3',
+                true,
+            ]),
+            target: mock.address,
+        },
+    ]);
 };

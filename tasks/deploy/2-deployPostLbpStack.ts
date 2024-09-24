@@ -132,8 +132,9 @@ async function tapiocaDeployTask(
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
             .add(await buildETHUniOracle(hre, owner, isTestnet))
             .add(await buildDualETHOracle(hre, owner))
-            .add(await buildGLPOracle(hre, owner))
-            .add(await buildEthGlpPOracle(hre, owner))
+            // .add(await buildGLPOracle(hre, owner))
+            .add(await buildStgUsdcV2Oracle(hre))
+            // .add(await buildEthGlpPOracle(hre, owner))
             .add(await buildGMXOracle(hre, owner, isTestnet))
             .add(await buildArbCLOracle(hre, owner, isTestnet))
             .add(await buildStgCLOracle(hre, owner, isTestnet))
@@ -205,7 +206,19 @@ async function tapiocaDeployTask(
             )
             .add(
                 await buildUsdoMarketOracle(hre, {
-                    deploymentName: DEPLOYMENT_NAMES.MARKET_GLP_ORACLE,
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_ZRO_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName: DEPLOYMENT_NAMES.ZRO_ORACLE,
+                        },
+                    ],
+                }),
+            )
+            .add(
+                await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_STG_USDC_V2_ORACLE,
                     args: ['', owner],
                     dependsOn: [
                         {
