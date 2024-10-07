@@ -59,6 +59,7 @@ async function postDeployTask(params: TTapiocaDeployerVmPass<object>) {
         isHostChain,
         isSideChain,
         isTestnet,
+        tapiocaMulticallAddr,
     });
 
     if (isTestnet && isHostChain) {
@@ -95,8 +96,17 @@ async function clusterWhitelist(params: {
     isHostChain: boolean;
     isSideChain: boolean;
     isTestnet: boolean;
+    tapiocaMulticallAddr: string;
 }) {
-    const { hre, tag, calls, isHostChain, isSideChain, isTestnet } = params;
+    const {
+        hre,
+        tag,
+        calls,
+        isHostChain,
+        isSideChain,
+        isTestnet,
+        tapiocaMulticallAddr,
+    } = params;
 
     const { cluster, magnetar, pearlmit, yieldbox, pauser } =
         await deployPostLbpStack__loadContracts__generic(hre, tag);
@@ -117,6 +127,34 @@ async function clusterWhitelist(params: {
         target: pauser,
         role: 'PAUSER',
         calls,
+    });
+    await addRoleForContract({
+        hre,
+        cluster,
+        target: magnetar.address,
+        role: 'MAGNETAR',
+        calls,
+    });
+    await addRoleForContract({
+        hre,
+        cluster,
+        target: tapiocaMulticallAddr,
+        role: 'NEW_EPOCH',
+        calls,
+    });
+    await addRoleForContract({
+        hre,
+        cluster,
+        target: '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1', // Peter address
+        role: 'NEW_EPOCH',
+        calls,
+    });
+
+    await addAddressWhitelist({
+        name: 'Peters address',
+        address: '0x6918175a68E3A6aD653AdF8Dab6322De1B5a72c1',
+        calls,
+        cluster,
     });
 
     await addAddressWhitelist({
@@ -139,6 +177,13 @@ async function clusterWhitelist(params: {
         calls,
         cluster,
     });
+
+    // await addAddressWhitelist({
+    //     name: 'SwapperMock',
+    //     address: '0xEfDf194d1Fa592a0c0c7E9E5Af681cd6Cc30D421', // Swapper mock
+    //     calls,
+    //     cluster,
+    // });
 
     /**
      * Chain specific
@@ -168,6 +213,42 @@ async function clusterWhitelist(params: {
 
     await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.MARKET_HELPER);
     await addBarContract(TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.USDO);
+
+    if (isTestnet) {
+        await _addLocalContract({
+            hre,
+            name: DEPLOYMENT_NAMES.ZERO_X_SWAPPER_MOCK,
+            tag,
+            calls,
+            cluster,
+        });
+        // const zeroXSwapperMock = loadLocalContract(
+        //     hre,
+        //     hre.SDK.eChainId,
+        //     DEPLOYMENT_NAMES.ZERO_X_SWAPPER_MOCK,
+        //     tag,
+        // ).address;
+
+        // // const addSwapperMockWhitelist = async (name: string) => {
+        // //     await addMockWhitelist({
+        // //         hre,
+        // //         tag,
+        // //         address: zeroXSwapperMock,
+        // //         calls,
+        // //         name,
+        // //     });
+        // // };
+        // // await addSwapperMockWhitelist(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tETH);
+        // // await addSwapperMockWhitelist(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
+        // // await addSwapperMockWhitelist(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
+        // // await addSwapperMockWhitelist(
+        // //     TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH,
+        // // );
+        // // await addSwapperMockWhitelist(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tZRO);
+        // // await addSwapperMockWhitelist(
+        // //     TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tStgUsdcV2,
+        // // );
+    }
 
     if (isHostChain) {
         await addAddressWhitelist({
@@ -199,12 +280,24 @@ async function clusterWhitelist(params: {
         await addBarContract(
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_T_WST_ETH_MARKET,
         );
-        await addBarContract(
-            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
-        );
+
+        // await addBarContract(
+        //     TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
+        // );
+
         if (isTestnet) {
             await addBarContract(
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.BB_T_ZRO_MARKET,
+            );
+            await addBarContract(
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_STG_USDC_V2_MARKET,
+            );
+            await addBarContract(
                 TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
+            );
+
+            await addBarContract(
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SIMPLE_LEVERAGE_EXECUTOR,
             );
         }
         if (!isTestnet) {
@@ -213,23 +306,24 @@ async function clusterWhitelist(params: {
             );
         }
 
-        await addBarContract(
-            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SIMPLE_LEVERAGE_EXECUTOR,
-        );
-
         // Z
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
+        // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsGLP);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.mtETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tRETH);
         await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tWSTETH);
+
         // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET);
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
+        // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_GLP_MARKET);
 
         if (isTestnet) {
+            await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tZRO);
+            await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tStgUsdcV2);
             await addZContract(
-                TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+                TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_STG_USDC_V2_MARKET,
             );
+            // await addZContract(
+            //     TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+            // );
         }
 
         // Z Underlying
@@ -255,13 +349,39 @@ async function clusterWhitelist(params: {
             calls,
             cluster,
         });
-        await addAddressWhitelist({
-            name: 'sGLP',
-            address:
-                TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sGLP,
-            calls,
-            cluster,
-        });
+
+        // await addAddressWhitelist({
+        //     name: 'sGLP',
+        //     address:
+        //         TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!.sGLP,
+        //     calls,
+        //     cluster,
+        // });
+
+        if (isTestnet) {
+            await addAddressWhitelist({
+                name: 'Zro',
+                address:
+                    TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!
+                        .zro,
+                calls,
+                cluster,
+            });
+            await addAddressWhitelist({
+                name: 'stgUsdcV2',
+                address: '0x94c6f996e3423C8e32cc61Fa5244AD110E02CD2D',
+                calls,
+                cluster,
+            });
+            await addAddressWhitelist({
+                name: 'StgUsdcV2',
+                address:
+                    TAPIOCA_Z_CONFIG.DEPLOY_CONFIG.POST_LBP[hre.SDK.eChainId]!
+                        .stgUsdcV2,
+                calls,
+                cluster,
+            });
+        }
     }
 
     if (isSideChain) {
@@ -273,7 +393,7 @@ async function clusterWhitelist(params: {
             TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
         );
         // Z
-        await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
+        // await addZContract(TAPIOCA_Z_CONFIG.DEPLOYMENT_NAMES.tsDAI);
 
         await addAddressWhitelist({
             name: 'sDAI',
@@ -331,6 +451,35 @@ async function addAddressWhitelist(params: {
     });
 }
 
+async function addMockWhitelist(params: {
+    hre: HardhatRuntimeEnvironment;
+    tag: string;
+    name: string;
+    address: string;
+    calls: TapiocaMulticall.CallStruct[];
+}) {
+    const { hre, name, tag, address, calls } = params;
+    console.log(`[+] Whitelisting ${address} with ${name} `);
+    const mock = await hre.ethers.getContractAt(
+        'ERC20Mock',
+        loadGlobalContract(
+            hre,
+            TAPIOCA_PROJECTS_NAME.TapiocaZ,
+            hre.SDK.eChainId,
+            name,
+            tag,
+        ).address,
+    );
+    calls.push({
+        allowFailure: false,
+        callData: mock.interface.encodeFunctionData('setWhitelist', [
+            address,
+            true,
+        ]),
+        target: mock.address,
+    });
+}
+
 async function _addProjectContract(params: {
     hre: HardhatRuntimeEnvironment;
     project: TAPIOCA_PROJECTS_NAME;
@@ -346,6 +495,37 @@ async function _addProjectContract(params: {
         name,
         address: loadGlobalContract(hre, project, hre.SDK.eChainId, name, tag)
             .address,
+    });
+}
+async function _addLocalContract(params: {
+    hre: HardhatRuntimeEnvironment;
+    name: string;
+    tag: string;
+    calls: TapiocaMulticall.CallStruct[];
+    cluster: Cluster;
+}) {
+    const { hre, name, tag, calls, cluster } = params;
+    await addAddressWhitelist({
+        calls,
+        cluster,
+        name,
+        address: loadLocalContract(hre, hre.SDK.eChainId, name, tag).address,
+    });
+}
+
+async function _setMockWhitelist(params: {
+    hre: HardhatRuntimeEnvironment;
+    name: string;
+    tag: string;
+    calls: TapiocaMulticall.CallStruct[];
+    cluster: Cluster;
+}) {
+    const { hre, name, tag, calls, cluster } = params;
+    await addAddressWhitelist({
+        calls,
+        cluster,
+        name,
+        address: loadLocalContract(hre, hre.SDK.eChainId, name, tag).address,
     });
 }
 

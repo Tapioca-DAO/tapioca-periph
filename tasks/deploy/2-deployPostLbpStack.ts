@@ -60,9 +60,6 @@ export const deployPostLbpStack__task = async (
         {
             hre,
             staticSimulation: false, // Can't runs static simulation because constructor will try to call inexistent contract/function
-            overrideOptions: {
-                gasLimit: 10_000_000,
-            },
         },
         tapiocaDeployTask,
         deployPostLbpStack__postDeploy,
@@ -135,9 +132,9 @@ async function tapiocaDeployTask(
         VM.add(await buildETHCLOracle(hre, owner, isTestnet))
             .add(await buildETHUniOracle(hre, owner, isTestnet))
             .add(await buildDualETHOracle(hre, owner))
-            .add(await buildGLPOracle(hre, owner))
+            // .add(await buildGLPOracle(hre, owner))
             .add(await buildStgUsdcV2Oracle(hre))
-            .add(await buildEthGlpPOracle(hre, owner))
+            // .add(await buildEthGlpPOracle(hre, owner))
             .add(await buildGMXOracle(hre, owner, isTestnet))
             .add(
                 await buildTapOracle(
@@ -202,6 +199,18 @@ async function tapiocaDeployTask(
                             argPosition: 0,
                             deploymentName:
                                 DEPLOYMENT_NAMES.WSTETH_USD_SEER_CL_MULTI_ORACLE,
+                        },
+                    ],
+                }),
+            )
+            .add(
+                await buildUsdoMarketOracle(hre, {
+                    deploymentName: DEPLOYMENT_NAMES.MARKET_ZRO_ORACLE,
+                    args: ['', owner],
+                    dependsOn: [
+                        {
+                            argPosition: 0,
+                            deploymentName: DEPLOYMENT_NAMES.ZRO_ORACLE,
                         },
                     ],
                 }),
