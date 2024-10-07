@@ -104,7 +104,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
             data.participateData.participate ? address(this) : data.user,
             data.tSglToken,
             data.lockData.lockDuration,
-            _shareOut.toUint128(),
+            _shareOut,
             msg.sender
         );
 
@@ -357,7 +357,7 @@ contract MagnetarOptionModule is MagnetarBaseModule {
         address ownerOfTOLP = IERC721(data.removeAndRepayData.unlockData.target).ownerOf(tOLPId);
         if (ownerOfTOLP != data.user && ownerOfTOLP != address(this)) revert Magnetar_ActionParamsMismatch();
 
-        (uint128 sglAssetId, uint128 ybShares,,) =
+        (uint128 sglAssetId, uint256 ybShares,,) =
             ITapiocaOptionLiquidityProvision(data.removeAndRepayData.unlockData.target).lockPositions(tOLPId);
 
         // will be sent to `data.user` or `address(this)`
